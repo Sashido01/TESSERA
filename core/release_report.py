@@ -20,6 +20,7 @@ try:
     from .release_state import evidence_stage
     from .release_publication import verify_github_publication, verify_github_remote_identity
     from .release_certificate import make_certificate
+    from .release_assets import verify_release_assets, DEFAULT_MAX_ASSET_BYTES
 except ImportError:
     from release_inspect import InspectionError, canonical_repo, inspect, resolve_commit
     from release_preflight import preflight
@@ -28,6 +29,7 @@ except ImportError:
     from release_state import evidence_stage
     from release_publication import verify_github_publication, verify_github_remote_identity
     from release_certificate import make_certificate
+    from release_assets import verify_release_assets, DEFAULT_MAX_ASSET_BYTES
 
 
 def build_report(
@@ -44,11 +46,15 @@ def build_report(
     github_repo: str | None = None,
     run_id: int | None = None,
     verify_publication: bool = False,
+    verify_assets: bool = False,
+    max_asset_bytes: int = DEFAULT_MAX_ASSET_BYTES,
 ) -> dict[str, Any]:
     if verify_ci and (not github_repo or run_id is None):
         raise InspectionError("CI_REQUIRES_GITHUB_REPO_AND_RUN_ID")
     if verify_publication and not github_repo:
         raise InspectionError("PUBLICATION_REQUIRES_GITHUB_REPO")
+    if verify_assets and not verify_publication:
+        raise InspectionError("ASSETS_REQUIRE_PUBLICATION_VERIFICATION")
     root = canonical_repo(repo)
     local = inspect(root, version, prefix=prefix, commit=commit)
     target_sha = local["expected_commit_sha"]
@@ -114,6 +120,22 @@ def build_report(
             publication_status = publication_info["publication_status"]
             problems.extend(publication_info["problems"])
 
+    asset_info: dict[str, Any] | None = None
+    asset_status = "NOT_PERFORMED"
+    if verify_assets:
+        if publication_status == "SOURCE_RELEASE_PUBLISHED" and publication_info is not None:
+            assert github_repo is not None
+            asset_info = verify_release_assets(
+                github_repo, local["requested_tag"],
+                publication_info["asset_metadata"],
+                maximum_bytes=max_asset_bytes,
+            )
+            asset_status = asset_info["asset_content_verification"]
+            problems.extend(asset_info["problems"])
+        else:
+            asset_status = "BLOCKED"
+            problems.append("ASSETS_REQUIRE_PUBLISHED_RELEASE")
+
     problems = list(dict.fromkeys(problems))
     stage = evidence_stage(
         problems=problems,
@@ -131,6 +153,12 @@ def build_report(
                 if ci_status == "PASS" and remote_status == "PASS"
                 else "SOURCE_RELEASE_METADATA_VERIFIED"
             )
+    if verify_assets and asset_status == "PASS" and stage != "BLOCKED":
+        stage = (
+            "SOURCE_RELEASE_ASSETS_AND_CI_VERIFIED"
+            if ci_status == "PASS" and remote_status == "PASS"
+            else "SOURCE_RELEASE_ASSETS_VERIFIED"
+        )
     return {
         "schema_version": 1,
         "requested_version": version,
@@ -158,7 +186,10 @@ def build_report(
         "publication_release_id": publication_info.get("release_id") if publication_info else None,
         "publication_url": publication_info.get("release_url") if publication_info else None,
         "publication_asset_metadata": publication_info.get("asset_metadata", []) if publication_info else [],
-        "publication_asset_content_verification": "NOT_PERFORMED",
+        "publication_asset_content_verification": asset_status,
+        "verified_assets": asset_info["verified_assets"] if asset_info else [],
+        "asset_digest_origin": "github_release_metadata" if asset_status == "PASS" else "NOT_CHECKED",
+        "artifact_provenance": "NOT_VERIFIED",
         "stage": stage,
         "evidence_status": "PASS" if stage != "BLOCKED" else "BLOCKED",
         "release_readiness": "NOT_VERIFIED",
@@ -184,6 +215,7 @@ def markdown(result: dict[str, Any]) -> str:
         f"- Удалённый тег: {result['remote_tag_status']}",
         f"- Завершённый CI: {result['ci_status']}",
         f"- GitHub Release: {result['publication_status']}",
+        f"- Байты release assets: {result['publication_asset_content_verification']}",
         f"- Проверка Git remote: {result['publication_remote_binding']}",
         f"- CI run ID: {result['ci_run_id']}",
         f"- Доказательства: {result['evidence_status']}",
@@ -217,6 +249,9 @@ def main() -> int:
     parser.add_argument("--execute-checks", action="store_true", help="Явно запустить проверенные команды проекта")
     parser.add_argument("--verify-ci", action="store_true", help="Явно разрешить запрос к GitHub Actions API")
     parser.add_argument("--verify-publication", action="store_true", help="Явно проверить опубликованный GitHub Release")
+    parser.add_argument("--verify-assets", action="store_true", help="Явно скачать и проверить байты GitHub Release assets")
+    parser.add_argument("--max-asset-bytes", type=int, default=DEFAULT_MAX_ASSET_BYTES,
+                        help="Максимальный размер одного asset в байтах (по умолчанию 64 MiB)")
     parser.add_argument("--github-repo", help="Доверенный владелец/репозиторий GitHub, например owner/repository")
     parser.add_argument("--run-id", type=int, help="Идентификатор уже завершённого запуска GitHub Actions")
     parser.add_argument("--format", choices=("json", "markdown", "certificate"), default="json")
@@ -228,6 +263,7 @@ def main() -> int:
             verify_remote=args.verify_remote, execute_checks=args.execute_checks,
             verify_ci=args.verify_ci, github_repo=args.github_repo, run_id=args.run_id,
             verify_publication=args.verify_publication,
+            verify_assets=args.verify_assets, max_asset_bytes=args.max_asset_bytes,
         )
     except (InspectionError, OSError) as exc:
         print(f"BLOCKED: {exc}", file=sys.stderr)

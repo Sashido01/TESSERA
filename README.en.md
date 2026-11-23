@@ -100,6 +100,10 @@ A [Release Preflight](docs/RELEASE_PREFLIGHT.en.md) and a `release-checks.json` 
 
 [T09.05](docs/RELEASE_PUBLICATION.en.md) introduces independent verification of published GitHub Release metadata and a reproducible unsigned evidence certificate. Git tags plus passing CI do not amount to a GitHub Release. `--verify-publication` and `--format certificate` do not publish a release or verify downloaded file contents. **No TESSERA GitHub Releases were present at the time of inspection**; automatic publication is not included.
 
+## Actual release asset byte verification
+
+[T09.06](docs/RELEASE_ASSETS.en.md) adds streaming size/SHA-256 verification of real attached GitHub Release assets, enabled **only explicitly** with `--verify-publication --verify-assets`. The verifier writes no files. Independent build provenance and application readiness remain `NOT_VERIFIED`. TESSERA has no GitHub Releases at the time of the check, so live end-to-end acceptance remains open.
+
 ## Contributing
 
 See [contribution guidelines](CONTRIBUTING.en.md), [security policy](SECURITY.en.md), [changelog](CHANGELOG.en.md), [community rules](CODE_OF_CONDUCT.en.md), and the [MIT license](LICENSE).

@@ -4,6 +4,17 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.12 — Stream-verified actual release asset bytes
+
+- Added independent `core/release_assets.py`: streaming byte count and SHA-256 verification of attached GitHub Release assets against official API metadata.
+- Added bounded-memory streaming, explicit per-file limits, untrusted URL/redirect rejection, and strict matching of repository/tag/filename.
+- Extended `core/release_report.py`: `--verify-assets` requires explicit `--verify-publication`; no byte verification is performed by default.
+- Preserved the distinction between downloaded byte integrity, build provenance, and application readiness in `core/release_certificate.py`; the certificate SHA-256 remains unsigned.
+- Added 32 test scenarios, including corrupted/truncated/oversized bytes, untrusted URLs, missing digests, and unverified publication.
+- Added canonical Russian `docs/RELEASE_ASSETS.md` and complete English translation; updated roadmap, architecture, README, AGENTS, reports, and changelogs.
+
+**Limits:** no published TESSERA GitHub Releases existed at inspection time, so a live end-to-end download remains NOT_VERIFIED. Independent build provenance, digital signatures, and executable application readiness are also NOT_VERIFIED; T09 stays PARTIAL.
+
 ## 0.0.11 — Verified GitHub Release publication metadata and an evidence certificate
 
 - Added `core/release_publication.py`: read-only verification of published GitHub Release metadata, including exact tag, draft/prerelease flags, publish date, GitHub URL, and asset states.

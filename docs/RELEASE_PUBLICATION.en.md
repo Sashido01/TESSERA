@@ -63,6 +63,10 @@ If the Release is missing or inaccessible, the API fails or returns incomplete d
 
 **Always:** `application_release_readiness=NOT_VERIFIED`. Even a published source release does not establish a validated executable application release.
 
+## Actual asset bytes — T09.06
+
+See [RELEASE_ASSETS](RELEASE_ASSETS.en.md). An additional explicit `--verify-assets` option downloads attached files of a published Release and independently computes downloaded byte counts and SHA-256 against GitHub metadata. It is **disabled by default**, requires `--verify-publication`, and enforces size limits and trusted HTTPS hosts. `asset_content_verification=PASS` does not establish build provenance. No attached files produce `NO_RELEASE_ASSETS`, not PASS.
+
 ## Safety, limitations and future work
 
 - No Git writes, tag creation, GitHub Release publication, artifact uploads, or automatic API requests.

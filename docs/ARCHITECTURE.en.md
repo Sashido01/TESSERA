@@ -37,6 +37,10 @@ T09.01 introduces the [read-only Git evidence inspector](RELEASE_CORE.en.md). It
 
 [RELEASE_PUBLICATION](RELEASE_PUBLICATION.en.md) documents separate verification of published GitHub Release metadata and a deterministic unsigned certificate. A Git tag plus passing CI do not establish a GitHub Release, and a GitHub Release does not prove downloaded artifact bytes. API calls remain explicit; Git access is read-only. The module never publishes a release by itself.
 
+## Independent asset byte verification T09.06
+
+[RELEASE_ASSETS](RELEASE_ASSETS.en.md) documents streaming real public GitHub Release assets and checking byte size/SHA-256 against REST API metadata. Download requires explicit `--verify-assets` and `--verify-publication`. Redirects are limited to known GitHub CDN hosts; no local file writes or application installation occur. Matching bytes does not establish build provenance or application readiness.
+
 ## Installation
 
 Identify the actual active skills directory in each agent system. Copy the complete skill directory. Use symlinks or junctions only after confirming that the agent supports them and that the path is safe. A file existing on disk does not prove the skill is automatically activated.

@@ -66,6 +66,10 @@ See [Release CI](RELEASE_CI.en.md). After an entire workflow finishes, add expli
 
 See [Release Publication](RELEASE_PUBLICATION.en.md). `--verify-publication` requires a trusted `--github-repo`, checks the Git remote identity, and queries a genuinely **published** GitHub Release. `--format certificate` produces an unsigned evidence certificate with a reproducible SHA-256 of its own fields. `SOURCE_RELEASE_PUBLISHED` requires independently verified remote tag, completed CI, and GitHub Release metadata. Application `release_readiness` nevertheless remains `NOT_VERIFIED`.
 
+## Actual asset bytes — T09.06
+
+[RELEASE_ASSETS](RELEASE_ASSETS.en.md) introduces explicit `--verify-assets` after successful `--verify-publication`. Reports include `publication_asset_content_verification`, `verified_assets`, and `artifact_provenance=NOT_VERIFIED`. Certificate status `SOURCE_ASSETS_BYTES_VERIFIED` additionally requires a completed CI, matching remote tag, published Release, and actual matching downloaded bytes. The certificate's own checksum is not a signature.
+
 ## Security and acceptance
 
 - No Git fetch, push, tag creation, or tag updates.
