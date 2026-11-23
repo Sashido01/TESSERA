@@ -16,7 +16,7 @@
 - `NOT_STARTED`: implementation has not begun; this roadmap is not evidence of completion.
 - `BLOCKED`: a specific blocker and its cause have been recorded.
 
-The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.4`. They do **not** prove execution in installed agent clients or local Windows environments.
+The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.5`. They do **not** prove execution in installed agent clients or local Windows environments.
 
 ## Foundation stages T00–T07
 
@@ -24,7 +24,7 @@ The current statuses below are based on GitHub source and a successful Linux Git
 | --- | --- | --- |
 | T00 | Public catalog, documentation, MIT license, contribution rules | COMPLETE — published |
 | T01 | Microversion Release, version calculator, annotated tagging | COMPLETE for code and unit tests; host integration unverified |
-| T02 | Structural checks, unit tests, GitHub Actions | COMPLETE for present CI; branch protection still missing |
+| T02 | Structural checks, unit tests, GitHub Actions | COMPLETE for current CI; server-side Rulesets enabled separately in T08 |
 | T03 | Install and discover the skill in actual DeepSeek Harness | NOT_VERIFIED |
 | T04 | Event-driven mandatory workflow in Harness | NOT_STARTED |
 | T05 | Installation guides and helper for Codex, Claude Code, Hermes, Harness | PARTIAL — prepared; real hosts NOT_VERIFIED |
@@ -39,7 +39,7 @@ Complete work as small verifiable changes, assigning a new microversion only to 
 
 ### T08 — Git permissions and publication safety
 
-**Priority P0 · Status PARTIAL/BLOCKED.** CI has been hardened and the [GitHub protection guide](GITHUB_SECURITY.en.md) prepared, but server-side Rulesets have not been enabled. Prepare validated GitHub Rulesets requiring CI checks before changes to a protected branch, preventing forced pushes and history deletion, protecting published tags against modification/deletion, and minimizing GitHub Actions permissions. Test ordinary PRs, administrator behavior, CI-based tagging, and concurrent updates. Changing repository settings requires separately authorized access; if permissions are unavailable, report BLOCKED rather than claiming protection.
+**Priority P0 · Status PARTIAL (positive acceptance pending).** `Protect main` and `release tags` Rulesets are active. Negative test of Pull Request #1 is confirmed. [Instructions and evidence](GITHUB_SECURITY.en.md). Prepare validated GitHub Rulesets requiring CI checks before changes to a protected branch, preventing forced pushes and history deletion, protecting published tags against modification/deletion, and minimizing GitHub Actions permissions. Test ordinary PRs, administrator behavior, CI-based tagging, and concurrent updates. Changing repository settings requires separately authorized access; if permissions are unavailable, report BLOCKED rather than claiming protection.
 
 **Acceptance:** controls are actually enforced by GitHub; bypassing mandatory checks or moving an existing tag is refused. Record settings and test evidence.
 

@@ -2,11 +2,15 @@
 
 [Русский — оригинал](GITHUB_SECURITY.md) | **English — translation**
 
-## Verified state
+## Verified state on 23 November 2026
 
-On 23 November 2026, `main.protected=false` and repository Rulesets were empty. **Server-side protection was not enabled.** A passing CI run alone does not prohibit direct writes to the main branch.
+Two active GitHub Rulesets have been confirmed via the GitHub API: `Protect main` (ID `27932550`) for the default branch and `release tags` (ID `27932769`) for `v*` tags.
 
-The connected GitHub actions here can read settings and write repository files but cannot create Rulesets. The settings below must be applied separately by a repository administrator. T08 cannot be considered complete until those rules are active and tested.
+Main requires a Pull Request with zero mandatory approvals, the GitHub Actions `validate` check, an up-to-date branch, linear history, and protections against deletion and force-push. For `v*`, updates, deletion, and force-push are restricted while creation of new tags is allowed. Both bypass lists are empty.
+
+**Negative acceptance verified:** test Pull Request #1 with an invalid `VERSION=0.0.99` versus the existing `0.0.5` failed `validate`, and tagging did not run. [CI run](https://github.com/Sashido01/TESSERA/actions/runs/45255895372).
+
+**Still unverified when this record was prepared:** successful merge of the corrected PR under Rulesets, post-merge creation of annotated `v0.0.6`, and negative tests for administrative bypass and direct pushes. Do not mark T08 COMPLETE before confirming the release cycle.
 
 ## Implemented workflow controls
 
@@ -19,6 +23,10 @@ The connected GitHub actions here can read settings and write repository files b
 - `tools/check_workflow_security.py` statically checks these rules.
 
 **Limitation:** this reduces mistakes but does not fully serialize concurrent releases. A race window remains between SHA checking and Git push; independent coordination belongs to T15.
+
+## Active settings and verification guide
+
+The setup procedure below is preserved for recovery and auditing. The owner has activated the Rulesets; changes are unnecessary unless specifically justified.
 
 ## Enabling branch protection
 
