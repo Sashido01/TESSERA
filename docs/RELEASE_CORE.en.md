@@ -37,6 +37,10 @@ Exit 0 means `inspection_status=PASS`; exit 1 means `BLOCKED` or an inaccessible
 - `VERSION_MISSING_IN_COMMIT` / `VERSION_MISMATCH`: missing or differing recorded version.
 - `TAG_TARGET_NOT_COMMIT`: tag does not resolve to a commit.
 
+## Next Release Core component — T09.02
+
+The separate [Release Preflight](RELEASE_PREFLIGHT.en.md) checks the version, CHANGELOG entries, and a trusted plan of required builds/tests. `--plan` executes nothing, while `--execute` runs the declared commands only with explicit authorization. This is a **separate component**; this tag inspector stays fully read-only. Passing preflight does not mean a tag exists or an application was published.
+
 ## What is not implemented
 
 - No build/test execution or validation of test evidence.

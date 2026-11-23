@@ -16,7 +16,7 @@
 - `NOT_STARTED`: implementation has not begun; this roadmap is not evidence of completion.
 - `BLOCKED`: a specific blocker and its cause have been recorded.
 
-The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.6`. They do **not** prove execution in installed agent clients or local Windows environments.
+The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.7`. They do **not** prove execution in installed agent clients or local Windows environments.
 
 ## Foundation stages T00–T07
 
@@ -45,7 +45,7 @@ Complete work as small verifiable changes, assigning a new microversion only to 
 
 ### T09 — Independent Release Core
 
-**Priority P0 · Status PARTIAL (T09.01: read-only Git evidence).** Added a [read-only inspector](RELEASE_CORE.en.md) of version and annotated tag, including historical commit SHAs; build, tests, remote and publication remain NOT_VERIFIED. Continue by separating `inspect`, `next`, `preflight`, `verify-build`, `tag`, `verify-tag`, `verify-remote`, and `report`. Read actual build/test commands only from target-project configuration. Check version/changelog consistency, exact release commit SHA, unexpected changes, Git permissions, and annotated tagging. Model WORKING, PREPARED, VALIDATED, TAGGED, RELEASED, and BLOCKED as distinct states. A tag is not evidence of a passing build or a published release.
+**Priority P0 · Status PARTIAL (T09.01 + T09.02).** Implemented a [Git-tag inspector](RELEASE_CORE.en.md) and [Release Preflight](RELEASE_PREFLIGHT.en.md): version/release-note validation and **explicitly authorized** build/test commands. CI checks the plan without executing PR-supplied commands; release completion, remote and publication remain NOT_VERIFIED. Continue by separating `inspect`, `next`, `preflight`, `verify-build`, `tag`, `verify-tag`, `verify-remote`, and `report`. Read actual build/test commands only from target-project configuration. Check version/changelog consistency, exact release commit SHA, unexpected changes, Git permissions, and annotated tagging. Model WORKING, PREPARED, VALIDATED, TAGGED, RELEASED, and BLOCKED as distinct states. A tag is not evidence of a passing build or a published release.
 
 **Acceptance:** negative tests for missing, lightweight, wrongly targeted, and reused tags; historical release verification without assuming current HEAD; reproducible recovery from failures. Any mandatory check failure blocks the release.
 

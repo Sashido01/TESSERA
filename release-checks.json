@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "version_file": "VERSION",
+  "release_notes": [
+    "CHANGELOG.md",
+    "CHANGELOG.en.md"
+  ],
+  "build": {
+    "not_applicable_reason": "Каталог распространяет Agent Skills и Python-исходники; отдельного сборочного артефакта пока нет"
+  },
+  "tests": [
+    {
+      "id": "catalog-tests",
+      "argv": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "cwd": ".",
+      "timeout_seconds": 300
+    },
+    {
+      "id": "skill-tests",
+      "argv": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "skills/microversion-release/tests",
+        "-v"
+      ],
+      "cwd": ".",
+      "timeout_seconds": 300
+    }
+  ]
+}
