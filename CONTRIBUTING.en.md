@@ -28,7 +28,7 @@ If a test environment is unavailable, explicitly list the checks you could not p
 
 ## Dependency restrictions
 
-Before proposing an installer, validator, or scanner, follow the [approved policy](docs/DEPENDENCIES.en.md). Do not add Vercel Skills CLI, NVIDIA SkillEvaluator Tier 2/3, or mandatory paid AI APIs. Prefer official GitHub tooling and free validation tools; evaluate new dependencies in isolation before adoption.
+Before proposing an installer, validator, or scanner, follow the [approved policy](docs/DEPENDENCIES.en.md). Do not add third-party skill package managers, NVIDIA SkillEvaluator Tier 2/3, or mandatory paid AI APIs. Prefer official GitHub tooling and free validation tools; evaluate new dependencies in isolation before adoption.
 
 ## Commits and pull requests
 

@@ -74,7 +74,7 @@ An application release **is not complete without a verified annotated Git tag**.
 
 The [complete T00–T17 roadmap](docs/ROADMAP.en.md) sets out verifiable steps for Git protection, one shared Release Core, skill distribution, and agent integration. The [dependency policy](docs/DEPENDENCIES.en.md) defines the approved stack: official GitHub CLI as the **planned preferred distribution mechanism after real-world verification**, plus a minimal Python installer for offline use and custom profiles.
 
-Vercel Skills CLI is excluded entirely. NVIDIA SkillEvaluator is permitted **only at Tier 1**, after compatibility and resource evaluation without paid AI APIs. Tier 2 and Tier 3 must not be used. The reference `skills-ref` validator is planned for standard-format checks; TESSERA's own microversion and tagging tests remain mandatory.
+NVIDIA SkillEvaluator is permitted **only at Tier 1**, after compatibility and resource evaluation without paid AI APIs. Tier 2 and Tier 3 must not be used. The reference `skills-ref` validator is planned for standard-format checks; TESSERA's own microversion and tagging tests remain mandatory.
 
 ## Contributing
 

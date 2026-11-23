@@ -6,7 +6,7 @@
 
 **TESSERA's own versioning:** mandatory microversions under the [version policy](VERSIONING.en.md). Roadmap stages do not reserve version numbers or justify dummy commits. The `.99` milestone permits a release only after completion and verification; unfinished work continues as `.100+`.
 
-**Owner-approved constraints (23 November 2026):** exclude Vercel Skills CLI entirely; never use NVIDIA SkillEvaluator Tier 2 or Tier 3; never require paid AI APIs. Official GitHub CLI is the preferred distribution mechanism once validated; a minimal Python installer remains an offline fallback. Russian is canonical; complete English translations must be updated in the same change. See [dependencies and boundaries](DEPENDENCIES.en.md).
+**Owner-approved constraints (23 November 2026):** do not add third-party skill package managers; never use NVIDIA SkillEvaluator Tier 2 or Tier 3; never require paid AI APIs. Official GitHub CLI is the preferred distribution mechanism once validated; a minimal Python installer remains an offline fallback. Russian is canonical; complete English translations must be updated in the same change. See [dependencies and boundaries](DEPENDENCIES.en.md).
 
 ## Status definitions
 
@@ -53,7 +53,7 @@ Complete work as small verifiable changes, assigning a new microversion only to 
 
 **Priority P1 · Requires T08 for safe publication · Status NOT_STARTED.** In a sandbox, verify the available `gh skill` version against TESSERA: discovery, preview, installation, `--pin` by tag/SHA, `--dir`, updates, dry-run, and multi-skill repositories with namespaced tags. Pin the verified GitHub CLI version and account for preview API changes.
 
-**Acceptance:** reproducible installation from GitHub without Vercel CLI, preservation of local changes on updates, and verifiable source revision. Keep the custom Python installer minimal for offline and unusual skill directories.
+**Acceptance:** reproducible installation from GitHub using official GitHub CLI, preservation of local changes on updates, and verifiable source revision. Keep the custom Python installer minimal for offline and unusual skill directories.
 
 ### T11 — Reference Agent Skills standard
 
@@ -110,7 +110,7 @@ Complete work as small verifiable changes, assigning a new microversion only to 
 ## Non-negotiable architecture rules
 
 - Do not reimplement an existing GitHub CLI package manager if the native mechanism meets the requirement.
-- Do not include Vercel Skills CLI as a dependency, fallback installer, supported stack component, or CI tool.
+- Do not add third-party skill package managers to dependencies, fallback installation, or CI. Public docs should describe approved tools only.
 - Never use NVIDIA SkillEvaluator Tier 2/3, paid modes, or mandatory paid AI APIs.
 - A SKILL.md file being present is not proof of automatic activation.
 - One microversioning core, not four independent implementations; keep host adapters thin.

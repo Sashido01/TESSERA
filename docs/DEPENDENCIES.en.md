@@ -22,7 +22,7 @@ The description of Tier 1 as free refers to not requiring paid AI APIs. CI infra
 
 ## Explicit exclusions
 
-- **Vercel Skills CLI (`npx skills`) is entirely excluded** — not a primary or fallback installer, dependency, update mechanism, or CI tool. Do not reintroduce it without a new explicit owner decision.
+- **No third-party skill package managers are part of the stack.** Official GitHub CLI is the preferred distribution tool once tested; the minimal Python installer supports offline use. Do not name excluded products in public documentation.
 - **NVIDIA SkillEvaluator Tier 2 and Tier 3 are excluded.** Do not run, configure, or list them as future mandatory stages.
 - Paid AI APIs, external embeddings, and cloud LLM services **must not be mandatory** for installation, validation, release, or use of skills.
 - Do not automatically install third-party agent plugins. Audit origin, license, version, permissions, and necessity first.

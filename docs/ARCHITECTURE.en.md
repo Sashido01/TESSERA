@@ -21,7 +21,7 @@ Each skill uses the common Agent Skills format without requiring one particular 
 
 Keep the existing `skills/<slug>/` layout. The [roadmap](ROADMAP.en.md) defines **one independent Release Core** (versioning, real checks, Git/tags, evidence) with **thin host adapters** for Codex, DeepSeek Harness, Claude Code, and Hermes. Create new directories only when implementing real functionality, not as empty placeholders.
 
-The **planned** preferred distribution channel is official GitHub CLI `gh skill`, after practical testing and version pinning. The current Python installer remains a minimal offline/custom-profile fallback. **Vercel Skills CLI is entirely excluded.**
+The **planned** preferred distribution channel is official GitHub CLI `gh skill`, after practical testing and version pinning. The current Python installer remains a minimal offline/custom-profile fallback.
 
 The official `skills-ref` validator is planned for standard Agent Skills format checks, while TESSERA's own tools retain its microversioning and release invariants. NVIDIA SkillEvaluator is permitted **at Tier 1 only**, after isolated evaluation without paid API requirements and with measured resource usage. Tier 2/3 and mandatory paid AI APIs are excluded. See [DEPENDENCIES.en.md](DEPENDENCIES.en.md). These are target architecture decisions, not claims of finished integration.
 

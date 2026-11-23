@@ -25,7 +25,7 @@ Available choices: `--platform codex|harness|claude|hermes|shared`. The `shared`
 
 After verifying a specific **official GitHub CLI** version, `gh skill` will become the preferred installation and update mechanism. Until then, the existing Python installer is only confirmed as a local copying helper. It will remain as a minimal offline and custom-profile fallback.
 
-TESSERA **does not use Vercel Skills CLI** or require a third-party skill package manager. See the [TESSERA dependency policy](../../../docs/DEPENDENCIES.en.md). Planned `skills-ref` and NVIDIA SkillEvaluator Tier 1 checks are development-quality tools, not required skill runtime dependencies. Paid Tier 2/3 are excluded.
+TESSERA does not require a third-party skill package manager. See the [TESSERA dependency policy](../../../docs/DEPENDENCIES.en.md). Planned `skills-ref` and NVIDIA SkillEvaluator Tier 1 checks are development-quality tools, not required skill runtime dependencies. Paid Tier 2/3 are excluded.
 
 ## Codex (OpenAI)
 
