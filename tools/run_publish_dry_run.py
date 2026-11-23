@@ -53,6 +53,27 @@ def digest(file: pathlib.Path) -> str:
     return h.hexdigest()
 
 
+def tree_digest(directory: pathlib.Path) -> str:
+    """Fingerprint file names and bytes without following symlinks."""
+    h = hashlib.sha256()
+    paths = sorted(directory.rglob("*"), key=lambda p: str(p.relative_to(directory)))
+    if len(paths) > 2048:
+        raise DryRunError("DRY_RUN_SKILL_TREE_TOO_LARGE")
+    total = 0
+    for path in paths:
+        if path.is_symlink():
+            raise DryRunError("DRY_RUN_SYMLINK_FORBIDDEN")
+        if path.is_file():
+            relative = path.relative_to(directory).as_posix()
+            h.update(relative.encode("utf-8") + b"\0")
+            size = path.stat().st_size
+            total += size
+            if total > 64 * 1024 * 1024:
+                raise DryRunError("DRY_RUN_SKILL_TREE_TOO_LARGE")
+            h.update(bytes.fromhex(digest(path)))
+    return h.hexdigest()
+
+
 def checked_cli_version(cli: pathlib.Path,
                         runner: Callable[..., subprocess.CompletedProcess[str]],
                         env: dict[str, str]) -> None:
@@ -87,11 +108,14 @@ def run(root: pathlib.Path, cli: pathlib.Path, *,
     if not cli.is_file() or not os.access(cli, os.X_OK):
         raise DryRunError("DRY_RUN_CLI_UNAVAILABLE")
     safe_skills(root / "skills")
+    source_digest = tree_digest(root / "skills")
     with tempfile.TemporaryDirectory(prefix="tessera-publish-") as temp:
         base = pathlib.Path(temp)
         isolated = base / "source"
         isolated.mkdir()
         shutil.copytree(root / "skills", isolated / "skills", symlinks=True)
+        if tree_digest(isolated / "skills") != source_digest:
+            raise DryRunError("DRY_RUN_SNAPSHOT_MISMATCH")
         # No global git config, credentials, current-user home or remote.
         (base / "home").mkdir()
         (base / "config").mkdir()
@@ -121,6 +145,8 @@ def run(root: pathlib.Path, cli: pathlib.Path, *,
                             isolated, env, runner)
         if good.returncode != 0 or "Dry run complete." not in good.stderr:
             raise DryRunError("DRY_RUN_POSITIVE_FAILED")
+        if tree_digest(isolated / "skills") != source_digest:
+            raise DryRunError("DRY_RUN_POSITIVE_MODIFIED_FILES")
         # Inject one harmless malformed field in a temporary copy only.
         first = isolated / "skills" / sorted(p.name for p in (isolated / "skills").iterdir())[0] / "SKILL.md"
         original = first.read_text(encoding="utf-8")
@@ -133,6 +159,8 @@ def run(root: pathlib.Path, cli: pathlib.Path, *,
                            isolated, env, runner)
         if bad.returncode == 0 or digest(first) != negative_hash:
             raise DryRunError("DRY_RUN_NEGATIVE_NOT_REJECTED")
+        if tree_digest(root / "skills") != source_digest:
+            raise DryRunError("DRY_RUN_ORIGINAL_CHANGED")
         remotes_again = checked_call(["git", "remote"], isolated, env, runner)
         if remotes_again.returncode or remotes_again.stdout.strip():
             raise DryRunError("DRY_RUN_REMOTE_ADDED")
