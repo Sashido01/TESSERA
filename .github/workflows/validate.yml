@@ -84,6 +84,11 @@ jobs:
         run: |
           set -euo pipefail
           python tools/run_publish_dry_run.py --repo . --cli "$RUNNER_TEMP/gh_2.105.0_linux_amd64/bin/gh"
+      - name: Проверить локальную установку gh skill в изолированном каталоге
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/check_official_local_install.py --repo . --cli "$RUNNER_TEMP/gh_2.105.0_linux_amd64/bin/gh"
 
   tag_microversion:
     name: Создать аннотированный тег проверенной версии
