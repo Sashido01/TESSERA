@@ -25,6 +25,14 @@ class PublicPathsTests(unittest.TestCase):
             (root / "README.md").write_text("Папка: /home/someone/projects/\n", encoding="utf-8")
             self.assertEqual(len(module.scan(root)), 1)
 
+    def test_ignores_external_pinned_validator_checkout(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            external = root / ".external" / "agentskills"
+            external.mkdir(parents=True)
+            (external / "README.md").write_text("External test-only path: X:\\\\private\\\\project", encoding="utf-8")
+            self.assertEqual(module.scan(root), [])
+
     def test_allows_placeholders(self):
         with tempfile.TemporaryDirectory() as directory:
             root = pathlib.Path(directory)
