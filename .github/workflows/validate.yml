@@ -15,11 +15,12 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Получить исходники и историю Git
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Настроить Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.13'
       - name: Проверить каталог навыков
@@ -30,6 +31,8 @@ jobs:
         run: python tools/check_translations.py
       - name: Проверить микроверсию TESSERA
         run: python tools/check_repository_version.py
+      - name: Проверить безопасность конфигурации CI
+        run: python tools/check_workflow_security.py
       - name: Запустить тесты каталога
         run: python -m unittest discover -s tests -v
       - name: Запустить тесты Microversion Release
@@ -45,7 +48,7 @@ jobs:
       contents: write
     steps:
       - name: Получить подтверждённый коммит
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
           persist-credentials: true
@@ -56,7 +59,14 @@ jobs:
           version="$(cat VERSION)"
           tag="v${version}"
           sha="$(git rev-parse HEAD)"
-          if git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null 2>&1; then
+          # Устаревшая сборка не может пометить новый main старым тегом.
+          remote_head="$(git ls-remote --heads origin refs/heads/main | awk '{print $1}')"
+          if [[ -z "${remote_head}" || "${remote_head}" != "${sha}" ]]; then
+            echo "ОШИБКА: удалённый main изменился или недоступен" >&2
+            exit 1
+          fi
+          existing="$(git ls-remote --tags --refs origin "refs/tags/${tag}")"
+          if [[ -n "${existing}" ]]; then
             git fetch origin "refs/tags/${tag}:refs/tags/${tag}"
             actual="$(git rev-list -n 1 "${tag}")"
             kind="$(git cat-file -t "refs/tags/${tag}")"
@@ -72,6 +82,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag -a "${tag}" -m "Версия ${version} — ${subject}"
+          remote_head="$(git ls-remote --heads origin refs/heads/main | awk '{print $1}')"
+          if [[ "${remote_head}" != "${sha}" ]]; then
+            echo "ОШИБКА: main изменился до публикации тега" >&2
+            exit 1
+          fi
           git push origin "refs/tags/${tag}"
           kind="$(git cat-file -t "refs/tags/${tag}")"
           actual="$(git rev-list -n 1 "${tag}")"

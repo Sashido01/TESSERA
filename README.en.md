@@ -76,6 +76,10 @@ The [complete T00–T17 roadmap](docs/ROADMAP.en.md) sets out verifiable steps f
 
 NVIDIA SkillEvaluator is permitted **only at Tier 1**, after compatibility and resource evaluation without paid AI APIs. Tier 2 and Tier 3 must not be used. The reference `skills-ref` validator is planned for standard-format checks; TESSERA's own microversion and tagging tests remain mandatory.
 
+## GitHub protection
+
+The [Rulesets setup guide](docs/GITHUB_SECURITY.en.md) documents branch and tag protection. **Server-side protection is not yet enabled**: a passing GitHub Actions run alone does not prohibit direct pushes. CI has been hardened, while Ruleset activation and verification remain open under T08.
+
 ## Contributing
 
 See [contribution guidelines](CONTRIBUTING.en.md), [security policy](SECURITY.en.md), [changelog](CHANGELOG.en.md), [community rules](CODE_OF_CONDUCT.en.md), and the [MIT license](LICENSE).

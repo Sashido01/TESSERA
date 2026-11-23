@@ -4,6 +4,14 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.5 — Hardened GitHub Actions and documented Git protection
+
+- Pinned official GitHub Actions to full commit SHAs; the validation job no longer persists Git credentials.
+- Annotated tag creation now stops if remote `main` changed or existing tags cannot be checked.
+- Added a static workflow-security validator and six positive/negative unit tests.
+- Documented branch and tag GitHub Rulesets in canonical Russian and complete English translation.
+- T08 is PARTIAL/BLOCKED: Rulesets are neither applied nor verified, and concurrent releases are not fully serialized.
+
 ## 0.0.4 — Clarified public dependency documentation
 
 - Removed names of excluded third-party products from the current public documentation and the changelog as shown on the main branch.

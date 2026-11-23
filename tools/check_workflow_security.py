@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+"""Проверяет защитные требования к workflow TESSERA без сетевых запросов."""
+from __future__ import annotations
+
+import pathlib
+import re
+import sys
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+
+
+def validate_workflow(workflow: str) -> list[str]:
+    errors: list[str] = []
+    for action in ("actions/checkout", "actions/setup-python"):
+        versions = re.findall(r"(?m)^\s*uses:\s*" + re.escape(action) + r"@([^\s#]+)", workflow)
+        if not versions:
+            errors.append(f"Не найдено действие {action}")
+        for version in versions:
+            if not re.fullmatch(r"[0-9a-f]{40}", version):
+                errors.append(f"{action} не привязан к 40-символьному SHA")
+    for bad in ("pull_request_target:", "workflow_run:", "git push --force", "git tag -f"):
+        if bad in workflow:
+            errors.append(f"Запрещённый элемент workflow: {bad}")
+    if "permissions:\n  contents: read" not in workflow:
+        errors.append("Не задано общее право contents: read")
+    if "\n  tag_microversion:" not in workflow:
+        errors.append("Отсутствует отдельная задача публикации тега")
+        return errors
+    validate, tagging = workflow.split("\n  tag_microversion:", 1)
+    if "persist-credentials: false" not in validate:
+        errors.append("Проверка не отключает сохранение Git credentials")
+    if "contents: write" in validate:
+        errors.append("Право записи обнаружено в проверяющей задаче")
+    if "needs: validate" not in tagging:
+        errors.append("Публикация тега не зависит от успешного validate")
+    if "permissions:\n      contents: write" not in tagging:
+        errors.append("Отсутствует ограниченное право записи для тегирования")
+    if "github.event_name == 'push' && github.ref == 'refs/heads/main'" not in tagging:
+        errors.append("Не ограничен запуск публикации push в main")
+    if 'remote_head="$(git ls-remote --heads origin refs/heads/main' not in tagging:
+        errors.append("Нет проверки актуального удалённого main")
+    if 'existing="$(git ls-remote --tags --refs origin ' not in tagging:
+        errors.append("Нет безопасной проверки существования удалённого тега")
+    if 'git push origin "refs/tags/' not in tagging:
+        errors.append("Нет публикации строго одного нового тега")
+    if "git ls-remote --exit-code --tags" in tagging:
+        errors.append("Сетевая ошибка не должна интерпретироваться как отсутствие тега")
+    return errors
+
+
+def main() -> int:
+    workflow = (ROOT / ".github" / "workflows" / "validate.yml").read_text(encoding="utf-8")
+    errors = validate_workflow(workflow)
+    if errors:
+        for error in errors:
+            print(f"ОШИБКА: {error}", file=sys.stderr)
+        return 1
+    print("Проверка безопасности CI: PASS (только статический анализ файла)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -76,6 +76,10 @@ python skills/microversion-release/scripts/next_version.py 0.0.100 --mode releas
 
 NVIDIA SkillEvaluator допускается **только на Tier 1**, после проверки совместимости, затрат и работы без платных AI API. Tier 2 и Tier 3 не используются. Эталонный `skills-ref` планируется для проверки общего формата; собственные тесты TESSERA остаются обязательными для микроверсионности и тегов.
 
+## Защита GitHub
+
+[Инструкция настройки Rulesets](docs/GITHUB_SECURITY.md) описывает проверяемые ограничения основной ветки и тегов. **Серверная защита пока не включена**: наличие успешных GitHub Actions не означает запрет прямого push. Код CI усилен, а включение Rulesets и их приёмка остаются открытой частью T08.
+
 ## Участие в разработке
 
 Правила: [CONTRIBUTING.md](CONTRIBUTING.md). Уязвимости: [SECURITY.md](SECURITY.md). История: [CHANGELOG.md](CHANGELOG.md). Лицензия: [MIT](LICENSE).
