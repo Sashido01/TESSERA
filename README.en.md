@@ -52,6 +52,10 @@ python skills/microversion-release/scripts/next_version.py 0.0.100 --mode releas
 
 These commands print `0.0.100` and `0.1.0`, respectively. **The second command only calculates a number**; it does not confirm task completion or a successful build.
 
+## Agent Skills reference validation
+
+CI additionally runs the [pinned upstream `skills-ref` validator](docs/AGENT_SKILLS_STANDARD.en.md) with SHA-256-locked dependencies. This checks format only; it does not establish actual skill activation in agent hosts. Independent `gh skill publish --dry-run` is still NOT_VERIFIED.
+
 ## Versioning
 
 **Current catalog version:** see [`VERSION`](VERSION). From this point forward, every independently verified change to TESSERA must increment the catalog microversion, update both changelogs, and use a clear, human-readable Russian commit title. After successful GitHub Actions checks, an annotated `vX.Y.Z` Git tag is created. GitHub Releases are not published automatically.
