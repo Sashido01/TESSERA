@@ -1,47 +1,58 @@
 # Microversion Release
 
-[Русский — основной язык](README.md) | **English — translation**
+[Русский — оригинал](README.md) | **English — translation**
 
-A portable Agent Skill for incremental versioning, release verification, and clear Russian-language Git history. This is the first skill in [TESSERA](../../README.en.md).
+**Portable Agent Skill for Codex, DeepSeek Harness, Claude Code, Hermes, and other compatible agents.** It guides microversioning, human-readable commits, and mandatory verification of annotated release tags. The canonical entry point is the Russian [SKILL.md](SKILL.md); its full English reference is [SKILL.en.md](references/SKILL.en.md).
 
-## Rules
+## Microversions and releases
 
-- A new project starts at `0.0.0`.
-- Every independently verified change increments PATCH by one.
-- `.99` is a planned release milestone, not a cap on work commits.
-- When work is finished and checks have passed: `0.0.99 → 0.1.0`, `0.1.99 → 0.2.0`, `0.99.99 → 1.0.0`.
-- If work is unfinished at `.99`: `0.0.99 → 0.0.100 → 0.0.101 → …`. After the first verified three-digit PATCH at which the task is really complete, prepare the next `.0` release.
-- Never create fictitious commits or unverified releases.
-- Commits, annotated tags, CHANGELOG entries, and release descriptions use clear, natural **Russian**.
+- New projects start at `0.0.0`. Each independently verified change increments PATCH.
+- When a task is unfinished at `.99`, work may continue with `.100`, `.101`, etc., without an artificial cap.
+- After genuine completion and required checks, the next release is `0.0.99 → 0.1.0`, `0.1.99 → 0.2.0`, or `0.99.99 → 1.0.0`. Completion at `0.0.107` can lead to `0.1.0`.
+- **Every release must have an annotated Git tag pointing to the exact release commit.** Missing or incorrect tags mean `BLOCKED / RELEASE_NOT_TAGGED`, never COMPLETE. Release descriptions use clear, natural Russian.
 
-## Installation
+## Integration with agent hosts
 
-1. Copy the **entire** `microversion-release` directory, including `SKILL.md`, `references/`, and `scripts/`.
-2. For DeepSeek Harness, use a verified active `<DSH_HOME>/skills/microversion-release/` directory or the project directory `<project>/.dsh/skills/microversion-release/`. Do not guess the actual DSH_HOME value.
-3. Verify skill discovery in the active profile. Manual invocation as `/microversion-release` may be available only when the Agent Skills loader is enabled.
-4. For Codex and other agents, verify their current skill locations separately. Installation and automatic activation in those environments have not been tested.
-5. To enforce checks for every commit, add project-level rules to AGENTS.md or a separate event-based integration. A SKILL.md file alone cannot enforce anything.
+| Host | Project skill directory |
+| --- | --- |
+| Codex | `<project-root>/.agents/skills/` |
+| DeepSeek Harness | `<project-root>/.dsh/skills/` |
+| Claude Code | `<project-root>/.claude/skills/` |
+| Hermes | `<project-root>/.hermes/skills/` or `<project-root>/.agents/skills/` |
+| Other compatible agent | Explicitly specified `<skills-dir>` |
 
-## Verification
+Example from a cloned TESSERA repository:
 
-From the skill directory:
+```bash
+python skills/microversion-release/scripts/install.py --platform codex --project-root <project-root>
+python skills/microversion-release/scripts/install.py --platform codex --project-root <project-root> --apply
+```
+
+The default is `DRY-RUN`; no files are modified until `--apply`. Existing skill directories are **never overwritten**. For custom profiles use `--platform generic --target-root <skills-dir> --apply`, after verifying the actual destination.
+
+Hermes also supports installation via the GitHub skills catalog:
+
+```bash
+hermes skills tap add Sashido01/TESSERA
+hermes skills install Sashido01/TESSERA/skills/microversion-release
+```
+
+Project-level Hermes trust may be required. See the complete [integration guide](references/INTEGRATION.en.md) / [Russian original](references/INTEGRATION.md).
+
+## Calculator and release-tag validation
+
+From the installed skill directory:
 
 ```bash
 python scripts/next_version.py 0.0.99 --mode work
-python scripts/next_version.py 0.0.100 --mode release
+python scripts/next_version.py 0.0.107 --mode release
+python scripts/release_tag.py verify 0.1.0 --repo <project-root>
+python scripts/release_tag.py create 0.1.0 --repo <project-root> --message "Релиз 0.1.0 — исправлен запуск приложения"
 python -m unittest discover -s tests -v
 ```
 
-Expected calculated values: `0.0.100` and `0.1.0`. The calculator only reads its input and **does not modify Git or files**. It does not validate that the task is ready.
+`release_tag.py create` creates **only a local annotated tag**, after successful checks and authorization to write Git data. It does not push, build an application, or replace other release requirements. See [mandatory release tags](references/RELEASE_TAGS.en.md).
 
-## Existing projects
+## Compatibility and limitations
 
-If a project already has tags and a different versioning policy, never rewrite its history. Adopt the new policy for future changes only after checking the existing configuration.
-
-## Limitations
-
-This skill provides instructions and a version-number calculator, **not** an installed plugin hook, a complete Git transaction manager, or an automated build pipeline. The actual target Harness environment still needs verification.
-
-## Skill instructions
-
-The canonical agent entry point is [SKILL.md](SKILL.md) in Russian. For reference, a [full English translation](references/SKILL.en.md) is provided; agent loaders should continue to use the canonical file.
+The portable structure and CLI can be validated in TESSERA CI. **Installation, automatic activation, and enforcement in actual installed Codex, Harness, Claude, and Hermes clients remain NOT_VERIFIED.** A SKILL.md file does not replace audited lifecycle hooks, Git/CI verification, or concurrency locking. Never rewrite the published history of an existing project.

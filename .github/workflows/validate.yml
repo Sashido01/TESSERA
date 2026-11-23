@@ -59,11 +59,13 @@ jobs:
           if git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null 2>&1; then
             git fetch origin "refs/tags/${tag}:refs/tags/${tag}"
             actual="$(git rev-list -n 1 "${tag}")"
-            if [[ "${actual}" == "${sha}" ]]; then
-              echo "Тег ${tag} уже правильно указывает на проверенный коммит"
+            kind="$(git cat-file -t "refs/tags/${tag}")"
+            message="$(git cat-file -p "refs/tags/${tag}" | sed -n '/^$/,$p' | sed '1d')"
+            if [[ "${actual}" == "${sha}" && "${kind}" == "tag" && -n "${message//[[:space:]]/}" ]]; then
+              echo "Аннотированный тег ${tag} уже указывает на проверенный коммит"
               exit 0
             fi
-            echo "ОШИБКА: тег ${tag} уже указывает на другой коммит" >&2
+            echo "ОШИБКА: существующий тег ${tag} некорректен; перезапись запрещена" >&2
             exit 1
           fi
           subject="$(git log -1 --format=%s)"
@@ -71,4 +73,12 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag -a "${tag}" -m "Версия ${version} — ${subject}"
           git push origin "refs/tags/${tag}"
-          echo "Создан аннотированный тег ${tag} для ${sha}"
+          kind="$(git cat-file -t "refs/tags/${tag}")"
+          actual="$(git rev-list -n 1 "${tag}")"
+          local_tag_sha="$(git rev-parse "refs/tags/${tag}")"
+          remote_tag_sha="$(git ls-remote --tags --refs origin "refs/tags/${tag}" | awk '{print $1}')"
+          if [[ "${kind}" != "tag" || "${actual}" != "${sha}" || "${remote_tag_sha}" != "${local_tag_sha}" ]]; then
+            echo "ОШИБКА: опубликованный тег ${tag} не прошёл проверку" >&2
+            exit 1
+          fi
+          echo "Проверен аннотированный тег ${tag} для коммита ${sha}"

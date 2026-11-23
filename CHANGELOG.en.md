@@ -4,6 +4,14 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.2 — Skill made portable across agent hosts
+
+- Removed the Harness-only scope of Microversion Release and documented Codex, Claude Code, Hermes, and other compatible hosts.
+- Added a safe local installer with preview-first behavior and refusal to overwrite existing skills.
+- Made annotated Git tags mandatory for every release, with verification of tag type, message, and target commit.
+- Added a release-tag creation/verification helper and tests for missing, lightweight, and incorrect tags.
+- Updated canonical Russian documentation and complete English translations. Integration with specific installed agent clients remains NOT_VERIFIED.
+
 ## 0.0.1 — Mandatory catalog microversioning introduced
 
 - Applied the same rules to TESSERA itself as to Microversion Release: PATCH+1 for verified changes, planned `.99` release milestones, and continued `.100+` microversions for unfinished tasks.

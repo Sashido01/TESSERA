@@ -10,7 +10,7 @@ TESSERA is not a fork of Harness or Codex. It stores portable [Agent Skills](htt
 
 | Skill | Purpose | Status |
 | --- | --- | --- |
-| [Microversion Release](skills/microversion-release/README.en.md) | Incremental versioning, release milestones, Git, and clear human-readable messages in Russian | First skill; integration with an installed Harness instance remains unverified |
+| [Microversion Release](skills/microversion-release/README.en.md) | Microversions, mandatory annotated release tags, portable use across agents | Standard skill and local helpers prepared; individual agent clients are not yet verified |
 
 ## Repository layout
 
@@ -63,6 +63,12 @@ These commands print `0.0.100` and `0.1.0`, respectively. **The second command o
 - Individual skill tags may use namespaces such as `microversion-release/v0.1.0` to avoid collisions with catalog-wide tags.
 
 See the [version policy](docs/VERSIONING.en.md). The historical `0.0.0` baseline is preserved. Mandatory versioning begins at `0.0.1` without rewriting previous commits. No separate build artifacts or GitHub Releases have been published.
+
+## Support for different agent hosts
+
+The first skill uses the common Agent Skills format and can be installed into **Codex, DeepSeek Harness, Claude Code, Hermes**, and other compatible environments. See the [integration guide](skills/microversion-release/references/INTEGRATION.en.md) and the safe installer with a default preview mode. Hermes can also use TESSERA as a skills tap.
+
+An application release **is not complete without a verified annotated Git tag**. Check it with `python skills/microversion-release/scripts/release_tag.py verify 0.1.0 --repo <project-root>`. The script does not replace build and test verification. Actual auto-activation in all agent clients has not been confirmed.
 
 ## Contributing
 
