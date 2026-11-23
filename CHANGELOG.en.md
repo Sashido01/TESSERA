@@ -4,6 +4,16 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.20 — Safe local Agent Skill installation via official GitHub CLI (T10.01)
+
+- Added real `gh skill install --from-local --dir` and `gh skill list --dir` CI scenarios for `microversion-release`, confined to temporary directories with no access to user profiles.
+- Reused SHA-256-verified official `gh 2.105.0`. New `tools/check_official_local_install.py` verifies original source integrity, Markdown body, references and injected source-tracking metadata.
+- Checks that `--from-local` cannot combine with `--pin`, refuses preexisting targets before calling the CLI and never publishes a release. Added negative tests.
+- Official CLI source review reveals a local `InstallLocal` overwrite risk even without `--force`. Direct repeat local install into a user's existing directory must not be treated as safe; TESSERA's offline fallback remains no-overwrite.
+- Updated bilingual roadmap and policies. Actual **remote** pinned installation by tag/SHA and client integration remain NOT_VERIFIED.
+
+**Acceptance:** T10.01 COMPLETE only after a successful live CI run with the real `gh`. Overall T10 PARTIAL, signed ZIP T09.10 remains OPEN.
+
 ## 0.0.19 — Actual isolated gh skill publish --dry-run
 
 - Added an official `gh skill publish --dry-run` CI check on a temporary copy of all skills with no GitHub remote or inherited tokens. The exact `gh 2.105.0` release binary is downloaded and SHA-256 verified before execution.

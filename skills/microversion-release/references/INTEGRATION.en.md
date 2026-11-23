@@ -23,7 +23,7 @@ Available choices: `--platform codex|harness|claude|hermes|shared`. The `shared`
 
 ## Planned native distribution
 
-After verifying a specific **official GitHub CLI** version, `gh skill` will become the preferred installation and update mechanism. Until then, the existing Python installer is only confirmed as a local copying helper. It will remain as a minimal offline and custom-profile fallback.
+The official **GitHub CLI 2.105.0** is now covered in CI for actual `gh skill publish --dry-run` and a separate isolated `gh skill install --from-local --dir`; see [GH_SKILL_INSTALL](../../../docs/GH_SKILL_INSTALL.en.md). Real installation from the public GitHub repository pinned to a tag or commit SHA is **NOT_VERIFIED**, so the CLI is not yet the fully accepted remote distribution method. Direct local `gh skill install` may overwrite existing files even without `--force`; use the minimal Python installer with explicit DRY-RUN and a no-overwrite guard for existing projects. It will remain as a minimal offline and custom-profile fallback.
 
 TESSERA does not require a third-party skill package manager. See the [TESSERA dependency policy](../../../docs/DEPENDENCIES.en.md). Planned `skills-ref` and NVIDIA SkillEvaluator Tier 1 checks are development-quality tools, not required skill runtime dependencies. Paid Tier 2/3 are excluded.
 
