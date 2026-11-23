@@ -4,6 +4,13 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.16 — Reject vulnerable GitHub CLI versions during attestation verification
+
+- Added a mandatory installed `gh` version preflight before `gh attestation verify`. Minimum `2.102.0` includes fixes for GHSA-wjmr-j3rp-mh2g and GHSA-4mq3-hpgx-9cx8 (30 September 2026).
+- Unknown, outdated, malformed, or unavailable CLI versions produce `BLOCKED`, never a false `PASS`. The probe has a bounded timeout, and stderr/user paths are not included in reports.
+- Added positive/negative regression tests; updated bilingual provenance, trusted-build, and roadmap documentation.
+- No claim of an actual signing run or verified publication: T09.10 remains PARTIAL and attestation NOT_VERIFIED.
+
 ## 0.0.15 — Offline verification of actual catalog ZIP bytes
 
 - Added `tools/verify_catalog_package.py` to validate archive structure, required files, manifest, every member SHA-256, exact version, and externally supplied full source commit SHA.

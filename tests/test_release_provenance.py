@@ -47,12 +47,24 @@ class ProvenanceTests(unittest.TestCase):
         self.path = pathlib.Path(self.temp.name) / "package.bin"
         self.path.write_bytes(CONTENT)
         self.commands = []
+        self.version_commands = []
 
     def good_runner(self, argv, **kwargs):
         self.commands.append((argv, kwargs))
         return subprocess.CompletedProcess(argv, 0, gh_payload(), "")
 
-    def verify(self, runner=None, **kwargs):
+    def verify(self, runner=None, version_text="gh version 2.105.0 (2026-11-18)",
+               version_rc=0, version_error=None, **kwargs):
+        actual_runner = runner or self.good_runner
+
+        def verified_runner(argv, **call_kwargs):
+            if argv == ["gh", "--version"]:
+                self.version_commands.append((argv, call_kwargs))
+                if version_error is not None:
+                    raise version_error
+                return subprocess.CompletedProcess(argv, version_rc, version_text, "secret-error")
+            return actual_runner(argv, **call_kwargs)
+
         params = {
             "repository": REPO,
             "tag": TAG,
@@ -61,7 +73,7 @@ class ProvenanceTests(unittest.TestCase):
             "artifact_file": self.path,
             "asset_metadata": metadata(),
             "max_bytes": 1024,
-            "runner": runner or self.good_runner,
+            "runner": verified_runner,
         }
         params.update(kwargs)
         return provenance.verify_release_provenance(**params)
@@ -70,6 +82,9 @@ class ProvenanceTests(unittest.TestCase):
         result = self.verify()
         self.assertEqual(result["provenance_status"], "PASS")
         self.assertTrue(result["signed_attestation"])
+        self.assertEqual(result["gh_version"], "2.105.0")
+        self.assertEqual(self.version_commands[0][0], ["gh", "--version"])
+        self.assertEqual(self.version_commands[0][1]["timeout"], 10)
         self.assertEqual(result["artifact_provenance"], "GITHUB_ATTESTATION_VERIFIED")
         self.assertEqual(result["asset_sha256"], DIGEST)
         self.assertEqual(result["application_release_readiness"], "NOT_VERIFIED")
@@ -81,6 +96,64 @@ class ProvenanceTests(unittest.TestCase):
         self.assertEqual(command[command.index("--signer-workflow") + 1], WORKFLOW)
         self.assertIn("--deny-self-hosted-runners", command)
         self.assertFalse(self.commands[0][1]["check"])
+
+
+    def test_exact_minimum_gh_version_is_allowed(self):
+        result = self.verify(version_text="gh version 2.102.0 (2026-09-30)")
+        self.assertEqual(result["provenance_status"], "PASS")
+        self.assertEqual(result["gh_version"], "2.102.0")
+
+    def test_old_gh_versions_fail_closed_before_attestation(self):
+        for version in ("2.50.0", "2.101.0", "1.999.999"):
+            with self.subTest(version=version):
+                self.commands.clear()
+                self.version_commands.clear()
+                result = self.verify(version_text="gh version " + version)
+                self.assertEqual(result["provenance_status"], "BLOCKED")
+                self.assertIn("PROVENANCE_VERIFIER_VERSION_UNSAFE", result["problems"])
+                self.assertFalse(result["signed_attestation"])
+                self.assertFalse(self.commands)
+
+    def test_unknown_gh_version_fails_closed(self):
+        for banner in ("unexpected", "gh version 2.105.0-rc.1", "gh version 2.105",
+                       "gh version 2.105.0 malicious", "gh version 2.105.0" + "x" * 5000):
+            with self.subTest(banner=banner[:35]):
+                self.commands.clear()
+                result = self.verify(version_text=banner)
+                self.assertIn("PROVENANCE_VERIFIER_VERSION_UNKNOWN", result["problems"])
+                self.assertFalse(self.commands)
+
+    def test_gh_version_command_error_fails_closed_and_hides_stderr(self):
+        result = self.verify(version_rc=1)
+        self.assertEqual(result["provenance_status"], "BLOCKED")
+        self.assertIn("PROVENANCE_VERIFIER_VERSION_UNKNOWN", result["problems"])
+        self.assertNotIn("secret-error", json.dumps(result))
+        self.assertFalse(self.commands)
+
+    def test_gh_version_command_unavailable_fails_closed(self):
+        result = self.verify(version_error=FileNotFoundError("untrusted absolute path"))
+        self.assertIn("PROVENANCE_VERIFIER_UNAVAILABLE", result["problems"])
+        self.assertNotIn("untrusted absolute path", json.dumps(result))
+        self.assertFalse(self.commands)
+
+    def test_gh_version_probe_timeout_fails_closed(self):
+        result = self.verify(version_error=subprocess.TimeoutExpired(["gh", "--version"], 10))
+        self.assertIn("PROVENANCE_VERIFIER_TIMEOUT", result["problems"])
+        self.assertFalse(self.commands)
+
+    def test_missing_file_does_not_run_even_gh_version_probe(self):
+        self.path.unlink()
+        with self.assertRaisesRegex(provenance.ProvenanceError, "PROVENANCE_FILE_MISMATCH"):
+            self.verify()
+        self.assertFalse(self.version_commands)
+
+    def test_gh_version_parser_is_strict(self):
+        self.assertEqual(provenance.parse_gh_version("gh version 2.105.0 (2026-11-18)\\nref\\n".replace("\\n", "\n")),
+                         (2, 105, 0))
+        self.assertEqual(provenance.parse_gh_version("gh version 3.0.0"), (3, 0, 0))
+        self.assertIsNone(provenance.parse_gh_version("fake gh version 2.105.0"))
+        self.assertIsNone(provenance.parse_gh_version("gh version 2.102.0-dev"))
+        self.assertIsNone(provenance.parse_gh_version("gh version " + "0" * 1000))
 
     def test_only_specific_workflow_allowed(self):
         with self.assertRaisesRegex(provenance.ProvenanceError, "PROVENANCE_SIGNER_MISMATCH"):

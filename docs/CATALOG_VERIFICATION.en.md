@@ -32,6 +32,8 @@ Authenticity requires independent validation of the annotated `vX.Y.Z` tag, exac
 
 **Never** infer SIGNED, PUBLISHED, RELEASED, or downstream application readiness from `status=PASS` alone. Live Codex/Harness/Claude/Hermes integration is outside the scope of this verifier.
 
+**CLI security:** use `gh 2.102.0+` for actual `gh attestation verify` and `gh run download`. Older versions had published signer/ref verification flaws and symlink download issues. See [RELEASE_PROVENANCE](RELEASE_PROVENANCE.en.md).
+
 ## Acceptance boundaries
 
 A positive fixture uses the actual packager. Negative cases include byte tampering, wrong SHA/version, corrupted ZIP, missing manifest, duplicates, traversal, absolute paths, symlinks, and compression. T09 remains PARTIAL pending a live signed build, independent verification, and the remaining Release Core requirements.
