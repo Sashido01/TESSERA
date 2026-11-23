@@ -25,6 +25,10 @@ The **planned** preferred distribution channel is official GitHub CLI `gh skill`
 
 The official `skills-ref` validator is planned for standard Agent Skills format checks, while TESSERA's own tools retain its microversioning and release invariants. NVIDIA SkillEvaluator is permitted **at Tier 1 only**, after isolated evaluation without paid API requirements and with measured resource usage. Tier 2/3 and mandatory paid AI APIs are excluded. See [DEPENDENCIES.en.md](DEPENDENCIES.en.md). These are target architecture decisions, not claims of finished integration.
 
+## Initial independent Release Core
+
+T09.01 introduces the [read-only Git evidence inspector](RELEASE_CORE.en.md). It reads the version and validates an annotated tag against an exact, possibly historical, commit. It does **not** run builds or execute `git push`, and it does not claim RELEASED status. Its JSON output is agent-independent and intended for future adapters.
+
 ## Installation
 
 Identify the actual active skills directory in each agent system. Copy the complete skill directory. Use symlinks or junctions only after confirming that the agent supports them and that the path is safe. A file existing on disk does not prove the skill is automatically activated.

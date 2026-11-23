@@ -10,7 +10,9 @@ Main requires a Pull Request with zero mandatory approvals, the GitHub Actions `
 
 **Negative acceptance verified:** test Pull Request #1 with an invalid `VERSION=0.0.99` versus the existing `0.0.5` failed `validate`, and tagging did not run. [CI run](https://github.com/Sashido01/TESSERA/actions/runs/45255895372).
 
-**Still unverified when this record was prepared:** successful merge of the corrected PR under Rulesets, post-merge creation of annotated `v0.0.6`, and negative tests for administrative bypass and direct pushes. Do not mark T08 COMPLETE before confirming the release cycle.
+**Positive acceptance verified:** the corrected Pull Request #1 passed [validate](https://github.com/Sashido01/TESSERA/actions/runs/45256267316) and was squash-merged as commit `f2d961bdb0a0e768c9663a374e299d3e42ee409b`. Post-merge [GitHub Actions](https://github.com/Sashido01/TESSERA/actions/runs/45256377248) created annotated tag `v0.0.6` (tag object `1eeff57da476ef7a8930664ef6a494f586c00e79`) pointing to that exact commit.
+
+**Still NOT_VERIFIED:** negative tests for modifying/deleting an existing published tag, administrator bypass, and unauthorized direct pushes. These risky operations were not performed on production Git history; T08 remains PARTIAL until safe acceptance can be completed.
 
 ## Implemented workflow controls
 
