@@ -22,6 +22,8 @@ jobs:
           python-version: '3.13'
       - name: Проверить каталог навыков
         run: python tools/validate_skills.py
+      - name: Проверить отсутствие локальных путей
+        run: python tools/check_public_paths.py
       - name: Запустить тесты каталога
         run: python -m unittest discover -s tests -v
       - name: Запустить тесты Microversion Release
