@@ -33,6 +33,10 @@ T09.01 introduces the [read-only Git evidence inspector](RELEASE_CORE.en.md). It
 
 [Release CI](RELEASE_CI.en.md) documents independent GitHub Actions API verification of a fully completed workflow run, with no automatic network access. The pure stage reducer considers only requested and actually verified evidence and **never** claims RELEASED. Self-verification of a still-running workflow is prohibited to avoid circular dependencies.
 
+## Source publication and T09.05 certificate
+
+[RELEASE_PUBLICATION](RELEASE_PUBLICATION.en.md) documents separate verification of published GitHub Release metadata and a deterministic unsigned certificate. A Git tag plus passing CI do not establish a GitHub Release, and a GitHub Release does not prove downloaded artifact bytes. API calls remain explicit; Git access is read-only. The module never publishes a release by itself.
+
 ## Installation
 
 Identify the actual active skills directory in each agent system. Copy the complete skill directory. Use symlinks or junctions only after confirming that the agent supports them and that the path is safe. A file existing on disk does not prove the skill is automatically activated.

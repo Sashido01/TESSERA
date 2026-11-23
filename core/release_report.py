@@ -18,12 +18,16 @@ try:
     from .release_remote import verify_remote_tag
     from .release_ci import verify_github_ci
     from .release_state import evidence_stage
+    from .release_publication import verify_github_publication, verify_github_remote_identity
+    from .release_certificate import make_certificate
 except ImportError:
     from release_inspect import InspectionError, canonical_repo, inspect, resolve_commit
     from release_preflight import preflight
     from release_remote import verify_remote_tag
     from release_ci import verify_github_ci
     from release_state import evidence_stage
+    from release_publication import verify_github_publication, verify_github_remote_identity
+    from release_certificate import make_certificate
 
 
 def build_report(
@@ -39,9 +43,12 @@ def build_report(
     verify_ci: bool = False,
     github_repo: str | None = None,
     run_id: int | None = None,
+    verify_publication: bool = False,
 ) -> dict[str, Any]:
     if verify_ci and (not github_repo or run_id is None):
         raise InspectionError("CI_REQUIRES_GITHUB_REPO_AND_RUN_ID")
+    if verify_publication and not github_repo:
+        raise InspectionError("PUBLICATION_REQUIRES_GITHUB_REPO")
     root = canonical_repo(repo)
     local = inspect(root, version, prefix=prefix, commit=commit)
     target_sha = local["expected_commit_sha"]
@@ -90,6 +97,23 @@ def build_report(
         ci_status = ci_info["ci_status"]
         problems.extend(ci_info["problems"])
 
+    publication_info: dict[str, Any] | None = None
+    publication_status = "NOT_CHECKED"
+    remote_binding_status = "NOT_CHECKED"
+    if verify_publication:
+        assert github_repo is not None
+        remote_binding_status = verify_github_remote_identity(root, remote, github_repo)
+        if remote_binding_status != "PASS":
+            problems.append("PUBLICATION_REMOTE_IDENTITY_MISMATCH")
+            publication_status = "BLOCKED"
+        elif local["inspection_status"] != "PASS":
+            problems.append("PUBLICATION_LOCAL_TAG_INVALID")
+            publication_status = "BLOCKED"
+        else:
+            publication_info = verify_github_publication(github_repo, local["requested_tag"])
+            publication_status = publication_info["publication_status"]
+            problems.extend(publication_info["problems"])
+
     problems = list(dict.fromkeys(problems))
     stage = evidence_stage(
         problems=problems,
@@ -98,6 +122,15 @@ def build_report(
         checks_status=checks_status,
         ci_status=ci_status,
     )
+    if verify_publication:
+        if publication_status != "SOURCE_RELEASE_PUBLISHED":
+            stage = "BLOCKED"
+        elif stage != "BLOCKED":
+            stage = (
+                "SOURCE_RELEASE_METADATA_AND_CI_VERIFIED"
+                if ci_status == "PASS" and remote_status == "PASS"
+                else "SOURCE_RELEASE_METADATA_VERIFIED"
+            )
     return {
         "schema_version": 1,
         "requested_version": version,
@@ -118,7 +151,14 @@ def build_report(
         "ci_run_attempt": ci_info.get("run_attempt") if ci_info else None,
         "remote_tag_object_sha": remote_info["remote_tag_object_sha"] if remote_info else None,
         "remote_publication": remote_info["remote_publication"] if remote_info else "NOT_CHECKED",
-        "github_release": "NOT_CHECKED",
+        "github_release": publication_status,
+        "publication_status": publication_status,
+        "publication_remote_binding": remote_binding_status,
+        "publication_repository": github_repo if verify_publication else None,
+        "publication_release_id": publication_info.get("release_id") if publication_info else None,
+        "publication_url": publication_info.get("release_url") if publication_info else None,
+        "publication_asset_metadata": publication_info.get("asset_metadata", []) if publication_info else [],
+        "publication_asset_content_verification": "NOT_PERFORMED",
         "stage": stage,
         "evidence_status": "PASS" if stage != "BLOCKED" else "BLOCKED",
         "release_readiness": "NOT_VERIFIED",
@@ -143,6 +183,8 @@ def markdown(result: dict[str, Any]) -> str:
         f"- Реальные проверки: {result['checks_status']}",
         f"- Удалённый тег: {result['remote_tag_status']}",
         f"- Завершённый CI: {result['ci_status']}",
+        f"- GitHub Release: {result['publication_status']}",
+        f"- Проверка Git remote: {result['publication_remote_binding']}",
         f"- CI run ID: {result['ci_run_id']}",
         f"- Доказательства: {result['evidence_status']}",
         f"- Этап: {result['stage']}",
@@ -174,9 +216,10 @@ def main() -> int:
     parser.add_argument("--verify-remote", action="store_true", help="Явно разрешить сетевую проверку тега")
     parser.add_argument("--execute-checks", action="store_true", help="Явно запустить проверенные команды проекта")
     parser.add_argument("--verify-ci", action="store_true", help="Явно разрешить запрос к GitHub Actions API")
+    parser.add_argument("--verify-publication", action="store_true", help="Явно проверить опубликованный GitHub Release")
     parser.add_argument("--github-repo", help="Доверенный владелец/репозиторий GitHub, например owner/repository")
     parser.add_argument("--run-id", type=int, help="Идентификатор уже завершённого запуска GitHub Actions")
-    parser.add_argument("--format", choices=("json", "markdown"), default="json")
+    parser.add_argument("--format", choices=("json", "markdown", "certificate"), default="json")
     args = parser.parse_args()
     try:
         result = build_report(
@@ -184,11 +227,18 @@ def main() -> int:
             config=args.config, remote=args.remote,
             verify_remote=args.verify_remote, execute_checks=args.execute_checks,
             verify_ci=args.verify_ci, github_repo=args.github_repo, run_id=args.run_id,
+            verify_publication=args.verify_publication,
         )
     except (InspectionError, OSError) as exc:
         print(f"BLOCKED: {exc}", file=sys.stderr)
         return 1
-    print(markdown(result) if args.format == "markdown" else json.dumps(result, ensure_ascii=False, sort_keys=True, indent=2))
+    if args.format == "markdown":
+        output = markdown(result)
+    elif args.format == "certificate":
+        output = json.dumps(make_certificate(result), ensure_ascii=False, sort_keys=True, indent=2)
+    else:
+        output = json.dumps(result, ensure_ascii=False, sort_keys=True, indent=2)
+    print(output)
     return 0 if result["evidence_status"] == "PASS" else 1
 
 
