@@ -14,6 +14,23 @@
 
 **Остаётся NOT_VERIFIED:** практический отрицательный тест попытки изменения/удаления уже опубликованного тега, проверка административного обхода и прямого push. Эти опасные действия не проводились над рабочей историей; T08 сохраняет статус PARTIAL до безопасной полной приёмки.
 
+## T08.01 — переход на Node.js 24, 24.11.2026
+
+Прежний GitHub Actions CI завершался успешно, но GitHub отмечал принудительный запуск устаревших Node.js 20 Actions на Node.js 24. Проверены официальные релизы, Git refs и манифесты `action.yml` обновлённых Actions. Выбраны следующие **неизменяемые SHA**:
+
+| Action | Официальная версия | Полный SHA |
+| --- | --- | --- |
+| `actions/checkout` | `v7.0.1` | `3d3c42e5aac5ba805825da76410c181273ba90b1` |
+| `actions/setup-python` | `v7.1.0` | `6d4fd22b20465ccc0f7354476588e8df7c9ca0e0` |
+| `actions/attest` | `v4.2.2` (сохранён существующий SHA) | `1e69f48acb82d1966a394da916b4c1698aa569d6` |
+| `actions/upload-artifact` | `v7.0.2` | `cf430e030ddbb5b0abf93d22962f4752f3646cd9` |
+
+Все четыре заявляют `runs.using=node24`. Источники для проверки: [checkout](https://github.com/actions/checkout/releases/tag/v7.0.1), [setup-python](https://github.com/actions/setup-python/releases/tag/v7.1.0), [attest](https://github.com/actions/attest/releases/tag/v4.2.2), [upload-artifact](https://github.com/actions/upload-artifact/releases/tag/v7.0.2).
+
+`tools/check_actions_runtime.py` теперь обязателен в CI: сверяет точные SHA и количество разрешённых Actions в `validate.yml` и `build-attested-catalog.yml`. Негативные тесты блокируют возврат старых SHA, плавающие теги и добавление незнакомого Action. Права `contents: read` и отдельный ограниченный `contents: write` для тегирования не менялись; signing workflow по-прежнему только `workflow_dispatch` на аннотированном теге и без `contents: write`.
+
+**Статус:** это исходники и план приёмки, а не доказательство исполнения signing workflow; фактическое отсутствие Node.js 20 warning устанавливается по CI. T08 в целом PARTIAL: отрицательная проверка реальных серверных запретов тегов/администратора не проводилась.
+
 ## Реализованные ограничения workflow
 
 - У `validate` минимальное право `contents: read`, без сохранения Git-учётных данных после checkout.

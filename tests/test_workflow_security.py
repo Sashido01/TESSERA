@@ -15,7 +15,7 @@ class WorkflowSecurityTests(unittest.TestCase):
         self.assertEqual(module.validate_workflow(WORKFLOW), [])
 
     def test_unpinned_action_is_rejected(self):
-        modified = WORKFLOW.replace("actions/checkout@11d5960a326750d5838078e36cf38b85af677262", "actions/checkout@v4")
+        modified = WORKFLOW.replace("actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1", "actions/checkout@v4")
         self.assertTrue(any("SHA" in e for e in module.validate_workflow(modified)))
 
     def test_unsafe_pr_trigger_is_rejected(self):

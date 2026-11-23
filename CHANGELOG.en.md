@@ -4,6 +4,15 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.18 — Upgraded GitHub Actions to Node.js 24
+
+- Pinned official `actions/checkout` v7.0.1, `actions/setup-python` v7.1.0 and `actions/upload-artifact` v7.0.2 by full SHA in the validation and signing workflows. Independently confirmed that the existing pinned `actions/attest` SHA is v4.2.2 and already uses Node.js 24; no needless change was made.
+- Added the mandatory `tools/check_actions_runtime.py` check for exact approved SHAs, counts and action inventory in both workflows, plus negative regression tests rejecting rollbacks, floating tags and unknown actions.
+- Preserved main protection, annotated tags, separate signing workflow, least privilege, credential removal and ancestry checking.
+- Updated bilingual documentation and roadmap. Live signing and independent GitHub attestation remain NOT_VERIFIED.
+
+**Acceptance:** T08.01 needs verified PR/main CI success, a matching annotated tag, and no legacy Node.js 20 warnings from the updated actions. T08 overall remains PARTIAL.
+
 ## 0.0.17 — Reference Agent Skills format verification in CI
 
 - Integrated upstream `skills-ref validate` from official `agentskills/agentskills`, pinned to exact SHA `83021e2be457a9b6679148719c1f6074f0ad975e`. The extra checkout runs after TESSERA's own tests and source packaging.

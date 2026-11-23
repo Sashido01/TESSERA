@@ -17,6 +17,10 @@ TESSERA — публичный каталог Agent Skills, **не исполн�
 
 Все Actions закреплены полными SHA. Право `contents: write` в подписывающем workflow **отсутствует**. Только его job получает ограниченные `id-token: write`, `attestations: write`, `contents: read`. Сборка из Pull Request никогда не получает права подписи; нет токена PAT и платного API.
 
+## Обновлённые закреплённые Actions
+
+Оба workflow используют `actions/checkout` v7.0.1 и `actions/setup-python` v7.1.0 с зафиксированными SHA; только signing workflow использует `actions/attest` v4.2.2 и `actions/upload-artifact` v7.0.2. Все манифесты используют Node.js 24. Точные SHA перечислены в [GITHUB_SECURITY](GITHUB_SECURITY.md) и контролируются `tools/check_actions_runtime.py`. Миграция рантайма не создаёт attestation: подписывающий workflow по-прежнему требуется запустить на аннотированном теге.
+
 ## Почему запуск ручной
 
 Существующий `validate.yml` после успешного push в `main` создаёт тег с помощью стандартного `GITHUB_TOKEN`. По правилам GitHub такой push **не вызывает второй workflow по событию push**. Автоматическое создание подписи внутри job для `main` также привязало бы источник attestation к `refs/heads/main`, а не к требуемому `refs/tags/vX.Y.Z`.
