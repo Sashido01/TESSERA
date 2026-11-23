@@ -78,7 +78,7 @@ NVIDIA SkillEvaluator is permitted **only at Tier 1**, after compatibility and r
 
 ## GitHub protection
 
-The [Rulesets setup guide](docs/GITHUB_SECURITY.en.md) documents branch and tag protection. **Server-side protection is not yet enabled**: a passing GitHub Actions run alone does not prohibit direct pushes. CI has been hardened, while Ruleset activation and verification remain open under T08.
+The [Rulesets setup guide](docs/GITHUB_SECURITY.en.md) documents branch and tag protection. **Rulesets are active:** Pull Requests, `validate`, and an up-to-date branch are required, and published tags are protected. The negative CI acceptance test behaved as expected. Positive merge and next annotated tag acceptance remain pending.
 
 ## Contributing
 

@@ -4,6 +4,16 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.6 — Verified rejection of invalid changes through Pull Requests
+
+- Confirmed two active GitHub Rulesets through the API, protecting the main branch and existing tags.
+- Created Pull Request #1 with an intentionally incorrect `0.0.99` version rather than `0.0.6`; `validate` failed due to a broken version transition and missing changelog entries.
+- Confirmed that tagging was skipped after FAIL and the Pull Request was blocked.
+- Prepared the corrected `0.0.6` and bilingual documentation for repeat validation and squash merge.
+- Updated public documentation to reflect actual server-side controls without claiming unperformed tests.
+
+**Outstanding validation:** successfully merge the corrected Pull Request and create the annotated `v0.0.6` tag; T08 remains PARTIAL until verified.
+
 ## 0.0.5 — Hardened GitHub Actions and documented Git protection
 
 - Pinned official GitHub Actions to full commit SHAs; the validation job no longer persists Git credentials.
