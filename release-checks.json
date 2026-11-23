@@ -5,9 +5,22 @@
     "CHANGELOG.md",
     "CHANGELOG.en.md"
   ],
-  "build": {
-    "not_applicable_reason": "Каталог распространяет Agent Skills и Python-исходники; отдельного сборочного артефакта пока нет"
-  },
+  "build": [
+    {
+      "id": "catalog-source-build",
+      "argv": [
+        "python",
+        "tools/build_catalog_package.py",
+        "--repo",
+        ".",
+        "--output-dir",
+        "dist",
+        "--check-reproducible"
+      ],
+      "cwd": ".",
+      "timeout_seconds": 180
+    }
+  ],
   "tests": [
     {
       "id": "catalog-tests",

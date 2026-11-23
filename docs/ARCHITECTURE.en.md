@@ -45,6 +45,10 @@ T09.01 introduces the [read-only Git evidence inspector](RELEASE_CORE.en.md). It
 
 [RELEASE_PROVENANCE](RELEASE_PROVENANCE.en.md) uses the **official GitHub CLI** to verify a Sigstore/SLSA attestation for an exact local artifact tied to the expected source SHA, release tag and trusted signing workflow. Network verification requires explicit `--verify-provenance`. The Release Core JSON certificate itself remains unsigned and does not establish software safety or functionality.
 
+## Deterministic catalog package and trusted build — T09.08
+
+[TRUSTED_BUILD](TRUSTED_BUILD.en.md) defines a genuine catalog source ZIP with a SHA-256 manifest and exact source commit. Its GitHub Actions signing workflow is dispatched manually **after** an annotated tag exists and never runs on PR code. TESSERA distributes Agent Skills source, not an executable application. The new [branch policy](BRANCHING.en.md) does not require a new branch for intermediate commits.
+
 ## Installation
 
 Identify the actual active skills directory in each agent system. Copy the complete skill directory. Use symlinks or junctions only after confirming that the agent supports them and that the path is safe. A file existing on disk does not prove the skill is automatically activated.

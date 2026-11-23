@@ -35,6 +35,10 @@ jobs:
         run: python core/release_preflight.py --repo . --version "$(cat VERSION)" --plan
       - name: Проверить безопасность конфигурации CI
         run: python tools/check_workflow_security.py
+      - name: Проверить ограничения сборки и подписывающего workflow
+        run: python tools/check_build_workflow_security.py
+      - name: Проверить воспроизводимый пакет каталога
+        run: python tools/build_catalog_package.py --repo . --output-dir dist --check-reproducible
       - name: Запустить тесты каталога
         run: python -m unittest discover -s tests -v
       - name: Запустить тесты Microversion Release

@@ -108,6 +108,10 @@ NVIDIA SkillEvaluator допускается **только на Tier 1**, по�
 
 В [T09.07](docs/RELEASE_PROVENANCE.md) добавлена независимая проверка GitHub Sigstore/SLSA attestation через **официальный GitHub CLI**. Она требует реальный локальный файл release asset, подтверждённые метаданные публикации, точный SHA исходного коммита и выбранный подписывающий workflow. По умолчанию выключена. **Текущая TESSERA не имеет опубликованных и аттестованных файлов; live-проверка NOT_VERIFIED.**
 
+## Реальный пакет каталога и доверенная сборка
+
+[T09.08](docs/TRUSTED_BUILD.md) добавляет детерминированный ZIP исходников Agent Skills, проверяемый `MANIFEST.json` и отдельную возможность подписанной GitHub attestation. Подписывающий workflow запускается **только вручную на аннотированном теге** и не создаёт GitHub Release. Пока живое подписание не выполнено, его статус `NOT_VERIFIED`. [Правила работы с ветками](docs/BRANCHING.md) теперь отдельно закрепляют: одна ветка на цель/PR, а не на каждое промежуточное изменение.
+
 ## Участие в разработке
 
 Правила: [CONTRIBUTING.md](CONTRIBUTING.md). Уязвимости: [SECURITY.md](SECURITY.md). История: [CHANGELOG.md](CHANGELOG.md). Лицензия: [MIT](LICENSE).
