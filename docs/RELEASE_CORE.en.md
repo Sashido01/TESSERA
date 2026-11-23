@@ -41,6 +41,10 @@ Exit 0 means `inspection_status=PASS`; exit 1 means `BLOCKED` or an inaccessible
 
 The separate [Release Preflight](RELEASE_PREFLIGHT.en.md) checks the version, CHANGELOG entries, and a trusted plan of required builds/tests. `--plan` executes nothing, while `--execute` runs the declared commands only with explicit authorization. This is a **separate component**; this tag inspector stays fully read-only. Passing preflight does not mean a tag exists or an application was published.
 
+## Remote tag verification
+
+A separate [T09.03](RELEASE_REPORT.en.md) stage checks whether the **same annotated tag object** exists on a trusted Git remote and emits an evidence-based report. The T09.01 local inspector remains intentionally offline and read-only.
+
 ## What is not implemented
 
 - No build/test execution or validation of test evidence.

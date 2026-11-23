@@ -61,6 +61,10 @@ This illustrates the schema, not a claim that `python -m build` is installed or 
 - Execution stops on the first failed, timed-out, or unlaunchable check. Git HEAD and cleanliness are rechecked afterward.
 - No Git writes, tagging, or remote access are performed by the inspector. **Commands executed through `--execute` may themselves change files**; automatic rollback is not implemented.
 
+## Collecting evidence after tagging
+
+A separate [T09.03](RELEASE_REPORT.en.md) stage combines actual preflight results with local and remote tag inspection, without presenting a successful test command as a published application release. Remote checks and test execution use separate explicit flags.
+
 ## What PASS actually proves
 
 `preflight_status=PASS` means version/release-note/Git-state prerequisites passed. `checks_status=PASS` means the **actually executed** declared commands returned zero and the checked invariants were preserved. When a build is explicitly inapplicable, `build_status=NOT_APPLICABLE`, not PASS.

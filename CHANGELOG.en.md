@@ -4,6 +4,17 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.9 — Remote annotated-tag verification and evidence-based reporting
+
+- Added `core/release_remote.py` to check the exact remote `refs/tags/<version>` and compare the **annotated tag object SHA**, rejecting missing refs, mismatches, and network errors.
+- Added `core/release_report.py` for structured JSON/Markdown evidence reports combining local Git, Release Preflight, and explicitly requested remote verification.
+- By default, reporting performs no publication, build/test execution, or network access. Remote queries and executing project commands require separate explicit flags.
+- Added 20 unit tests using temporary local Git repositories, including same-commit/different-tag-object, historical release, and incomplete-evidence cases.
+- Added independent remote verification to the automated tagging job after annotated-tag creation.
+- Updated canonical Russian docs and full English translations of ROADMAP, README, AGENTS, and the dedicated reporting guide.
+
+**Limits:** `evidence_status=PASS` verifies only requested checks; `release_readiness` remains `NOT_VERIFIED`. External CI/artifact attestation, test adequacy, final RELEASED state and concurrency are not implemented. T09 remains PARTIAL.
+
 ## 0.0.8 — Added release preflight and explicitly authorized build/test checks
 
 - Implemented `core/release_preflight.py`: checks VERSION and release notes in the exact commit, worktree cleanliness, and declared build/test configuration.
