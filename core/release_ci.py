@@ -12,7 +12,7 @@ import urllib.error
 import urllib.request
 from typing import Any, Callable
 
-REPOSITORY = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\Z")
+REPOSITORY = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,99}/[A-Za-z0-9][A-Za-z0-9_.-]{0,99}\Z")
 SHA = re.compile(r"[0-9a-f]{40}\Z")
 MAX_RESPONSE_BYTES = 2 * 1024 * 1024
 EXPECTED_WORKFLOW = ".github/workflows/validate.yml"

@@ -146,7 +146,7 @@ class CIEvidenceTests(unittest.TestCase):
         self.assert_problem("CI_ATTEMPT_INVALID")
 
     def test_bad_repository_argument_rejected(self):
-        for name in ("--evil/repo", "owner/../repo", "owner", "owner/repo/sub"):
+        for name in ("--evil/repo", "owner/../repo", "owner", "owner/repo/sub", ".hidden/repo", "owner/-repo", "owner/.hidden"):
             with self.subTest(name=name), self.assertRaises(release_ci.CIEvidenceError):
                 release_ci.parameters(name, RUN_ID, SHA)
 
