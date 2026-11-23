@@ -112,6 +112,10 @@ A [Release Preflight](docs/RELEASE_PREFLIGHT.en.md) and a `release-checks.json` 
 
 [T09.08](docs/TRUSTED_BUILD.en.md) introduces a deterministic Agent Skills source ZIP with a checkable `MANIFEST.json` and a separate opt-in GitHub attestation workflow. Signing requires **manual dispatch at an annotated release tag** and does not create a GitHub Release. Until a live signing run succeeds, status remains `NOT_VERIFIED`. The [branch policy](docs/BRANCHING.en.md) states: one branch per coherent goal/PR, not per intermediate change.
 
+## Independent offline catalog ZIP verification
+
+The [T09.09 verifier](docs/CATALOG_VERIFICATION.en.md) checks a downloaded source ZIP without extraction: archive members, MANIFEST.json, actual SHA-256 bytes, and an externally supplied commit SHA. This **does not** establish a GitHub signature or publication. Live attestation and end-to-end delivery remain NOT_VERIFIED.
+
 ## Contributing
 
 See [contribution guidelines](CONTRIBUTING.en.md), [security policy](SECURITY.en.md), [changelog](CHANGELOG.en.md), [community rules](CODE_OF_CONDUCT.en.md), and the [MIT license](LICENSE).
