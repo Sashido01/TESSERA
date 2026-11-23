@@ -4,6 +4,15 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.17 — Reference Agent Skills format verification in CI
+
+- Integrated upstream `skills-ref validate` from official `agentskills/agentskills`, pinned to exact SHA `83021e2be457a9b6679148719c1f6074f0ad975e`. The extra checkout runs after TESSERA's own tests and source packaging.
+- Pinned `skills-ref` runtime dependencies to versions and wheel SHA-256 hashes; no installation of an unrelated same-named PyPI distribution.
+- Added a defensive all-skills wrapper that rejects invalid names, symlinks, missing tooling, timeouts, and unexpected results, with new unit tests.
+- Added the bilingual [AGENT_SKILLS_STANDARD](docs/AGENT_SKILLS_STANDARD.en.md) guide and updated the project roadmap and agent rules.
+
+**Limits:** the upstream reference library is expressly for demonstration, not production. Live `gh skill publish --dry-run` and actual client integration remain NOT_VERIFIED. T11 PARTIAL; T11.01 requires a successful CI run.
+
 ## 0.0.16 — Reject vulnerable GitHub CLI versions during attestation verification
 
 - Added a mandatory installed `gh` version preflight before `gh attestation verify`. Minimum `2.102.0` includes fixes for GHSA-wjmr-j3rp-mh2g and GHSA-4mq3-hpgx-9cx8 (30 September 2026).

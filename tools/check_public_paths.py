@@ -10,7 +10,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 TEXT_EXTENSIONS = {".md", ".yml", ".yaml", ".json", ".toml", ".txt"}
 WINDOWS_ABSOLUTE = re.compile(r"(?<![\w])[A-Za-z]:[\\/]")
 HOME_ABSOLUTE = re.compile(r"(?<![\w])/(?:home|Users)/[A-Za-z0-9_.-]+/")
-IGNORE_DIRS = {".git", ".venv", "venv", "__pycache__", ".mypy_cache"}
+IGNORE_DIRS = {".git", ".venv", "venv", "__pycache__", ".mypy_cache", ".external"}
 
 
 def scan(root: pathlib.Path) -> list[str]:

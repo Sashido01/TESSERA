@@ -16,7 +16,7 @@
 - `NOT_STARTED`: implementation has not begun; this roadmap is not evidence of completion.
 - `BLOCKED`: a specific blocker and its cause have been recorded.
 
-The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.15`. They do **not** prove execution in installed agent clients or local Windows environments.
+The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.16`. They do **not** prove execution in installed agent clients or local Windows environments.
 
 ## Foundation stages T00–T07
 
@@ -61,7 +61,7 @@ Complete work as small verifiable changes, assigning a new microversion only to 
 
 ### T11 — Reference Agent Skills standard
 
-**Priority P1 · Status NOT_STARTED.** Integrate the official `skills-ref` format validation and verify repository publication readiness using `gh skill publish --dry-run`. Pin tested tool versions. Keep TESSERA's custom validator focused on project-specific invariants: independent versions, Russian originals, English translations, privacy, tags, and safety.
+**Priority P1 · Status PARTIAL (T11.01).** Added a separate upstream `skills-ref` format check pinned to an immutable source SHA with hashed dependencies in CI; a real successful run is required before T11.01 is COMPLETE. Upstream explicitly calls the reference library demonstration-only, so the custom TESSERA checks remain mandatory. Live `gh skill publish --dry-run` stays NOT_VERIFIED (T11.02). Original plan: integrate the official `skills-ref` format validation and verify repository publication readiness using `gh skill publish --dry-run`. Pin tested tool versions. Keep TESSERA's custom validator focused on project-specific invariants: independent versions, Russian originals, English translations, privacy, tags, and safety.
 
 **Acceptance:** invalid YAML/frontmatter, incorrect names, and damaged skills fail CI; dry-run never publishes a release.
 
