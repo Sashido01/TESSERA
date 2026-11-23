@@ -58,6 +58,10 @@ The existing `tag_microversion` job therefore continues to verify its local/remo
 - Evidence relies on the GitHub REST API and HTTPS, not cryptographic artifact attestation.
 - Network scenarios use controlled HTTP mocks in unit tests; a real completed GitHub workflow must be independently tested.
 
+## Follow-up T09.05
+
+[Release Publication](RELEASE_PUBLICATION.en.md) treats completed CI as one independent fact. It does not attempt to check GitHub Release publication in an ongoing workflow, avoiding circular dependencies. Source publication verification is a separate explicit operation after CI has finished.
+
 ## Checks and status
 
 ```bash

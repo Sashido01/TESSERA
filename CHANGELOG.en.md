@@ -4,6 +4,17 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.11 — Verified GitHub Release publication metadata and an evidence certificate
+
+- Added `core/release_publication.py`: read-only verification of published GitHub Release metadata, including exact tag, draft/prerelease flags, publish date, GitHub URL, and asset states.
+- Bound the named trusted Git remote to `github.com/owner/repository` so an unrelated URL, local bare Git, or hostname lookalike is not mistaken for GitHub publication.
+- Added `core/release_certificate.py`: structured unsigned evidence with reproducible SHA-256 of its own fields and distinct source-publication vs application-readiness statuses.
+- Extended `core/release_report.py` with `--verify-publication` and `--format certificate`; publication is neither queried nor created automatically.
+- Added 39 positive/negative cases covering metadata, unrelated remotes, missing evidence, unsigned checksums, and report integration.
+- Updated roadmap, architecture, README, AGENTS, and bilingual T09.01–T09.05 documentation.
+
+**Limits:** TESSERA had no GitHub Releases at the time of inspection. The implementation does not create one. Live source-publication acceptance is NOT_VERIFIED; asset bytes, signatures, and executable application readiness are not checked. Overall T09 remains PARTIAL.
+
 ## 0.0.10 — Independent completed GitHub Actions and evidence-state verification
 
 - Added `core/release_ci.py`: validates a completed GitHub Actions run using the official REST API and exact commit SHA, expected workflow, push to main, and both required jobs.

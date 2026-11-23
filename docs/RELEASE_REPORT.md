@@ -62,6 +62,10 @@ JSON содержит `local_tag_status`, `preflight_status`, `checks_status`, `
 
 См. [Release CI](RELEASE_CI.md). После полного завершения workflow можно добавить явные параметры `--verify-ci --github-repo owner/repository --run-id 123456789`. Будут проверены SHA коммита, имя репозитория, событие push в main, правильный workflow и обе обязательные jobs. В отчёт добавляются `ci_status` и реквизиты проверенного run. **Без `--verify-ci` API не вызывается.** Даже `CI_VERIFIED` и `CI_AND_REMOTE_TAG_VERIFIED` не означают готовый или опубликованный продукт: `release_readiness=NOT_VERIFIED`.
 
+## Отдельная проверка публикации — T09.05
+
+См. [Release Publication](RELEASE_PUBLICATION.md). Флаг `--verify-publication` требует доверенный `--github-repo`, проверяет соответствие Git remote и запрашивает **опубликованный** GitHub Release. `--format certificate` выдаёт неподписанное свидетельство с воспроизводимым SHA-256 его полей. Полный статус `SOURCE_RELEASE_PUBLISHED` возможен только при подтверждённых удалённом теге, завершённом CI и опубликованных metadata Release. Даже тогда `release_readiness=NOT_VERIFIED` для исполняемого приложения.
+
 ## Безопасность и приёмка
 
 - Git fetch/push, создание или обновление тегов не выполняются.

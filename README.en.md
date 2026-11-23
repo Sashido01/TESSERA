@@ -96,6 +96,10 @@ A [Release Preflight](docs/RELEASE_PREFLIGHT.en.md) and a `release-checks.json` 
 
 [T09.04](docs/RELEASE_CI.en.md) adds independent verification of a completed GitHub Actions run by exact commit SHA and required jobs. Explicit `--verify-ci`, a trusted repository and run ID are required. No paid AI APIs are involved; network queries are disabled by default. `CI_VERIFIED` is not RELEASED.
 
+## GitHub Release publication and evidence certificates
+
+[T09.05](docs/RELEASE_PUBLICATION.en.md) introduces independent verification of published GitHub Release metadata and a reproducible unsigned evidence certificate. Git tags plus passing CI do not amount to a GitHub Release. `--verify-publication` and `--format certificate` do not publish a release or verify downloaded file contents. **No TESSERA GitHub Releases were present at the time of inspection**; automatic publication is not included.
+
 ## Contributing
 
 See [contribution guidelines](CONTRIBUTING.en.md), [security policy](SECURITY.en.md), [changelog](CHANGELOG.en.md), [community rules](CODE_OF_CONDUCT.en.md), and the [MIT license](LICENSE).

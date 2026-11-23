@@ -96,6 +96,10 @@ NVIDIA SkillEvaluator допускается **только на Tier 1**, по�
 
 В [T09.04](docs/RELEASE_CI.md) добавлена независимая проверка завершённого CI по GitHub REST API с сопоставлением SHA коммита и обязательных jobs. Вызов требует явного `--verify-ci`, доверенного репозитория и ID запуска. Работает без платных AI API; по умолчанию сеть недоступна. Статус `CI_VERIFIED` не означает RELEASED.
 
+## Публикация GitHub Release и свидетельство
+
+В [T09.05](docs/RELEASE_PUBLICATION.md) реализованы независимая проверка metadata опубликованного GitHub Release и воспроизводимое неподписанное свидетельство проверки. Git-тег и CI не равны опубликованному GitHub Release. Режимы `--verify-publication` и `--format certificate` не создают релиз и не подтверждают скачанные файлы. **На момент проверки GitHub Releases TESSERA отсутствовали**; автоматическое создание не предусмотрено.
+
 ## Участие в разработке
 
 Правила: [CONTRIBUTING.md](CONTRIBUTING.md). Уязвимости: [SECURITY.md](SECURITY.md). История: [CHANGELOG.md](CHANGELOG.md). Лицензия: [MIT](LICENSE).
