@@ -14,6 +14,21 @@ Main requires a Pull Request with zero mandatory approvals, the GitHub Actions `
 
 **Still NOT_VERIFIED:** negative tests for modifying/deleting an existing published tag, administrator bypass, and unauthorized direct pushes. These risky operations were not performed on production Git history; T08 remains PARTIAL until safe acceptance can be completed.
 
+## T08.01 — Node.js 24 upgrade, 24 November 2026
+
+The previously successful CI still warned that legacy Node.js 20 actions were being forced to run on Node.js 24. Official releases, Git refs and `action.yml` manifests of the updated actions were inspected. The approved **immutable commit SHA** pins are:
+
+| Action | Official release | Full SHA |
+| --- | --- | --- |
+| `actions/checkout` | `v7.0.1` | `3d3c42e5aac5ba805825da76410c181273ba90b1` |
+| `actions/setup-python` | `v7.1.0` | `6d4fd22b20465ccc0f7354476588e8df7c9ca0e0` |
+| `actions/attest` | `v4.2.2` (previous pin retained) | `1e69f48acb82d1966a394da916b4c1698aa569d6` |
+| `actions/upload-artifact` | `v7.0.2` | `cf430e030ddbb5b0abf93d22962f4752f3646cd9` |
+
+All four declare `runs.using=node24`. Sources: [checkout](https://github.com/actions/checkout/releases/tag/v7.0.1), [setup-python](https://github.com/actions/setup-python/releases/tag/v7.1.0), [attest](https://github.com/actions/attest/releases/tag/v4.2.2), [upload-artifact](https://github.com/actions/upload-artifact/releases/tag/v7.0.2).
+
+The now-mandatory `tools/check_actions_runtime.py` checks exact SHAs and action counts in both workflows. Negative tests reject legacy SHAs, moving version tags and unknown actions. The read-only validation job, narrowly scoped tag creation, and tag-only manual signing guards remain unchanged. Actual absence of the warning must be verified from CI logs. Signing remains NOT_VERIFIED, and overall T08 remains PARTIAL until the separate server protection negative checks are completed.
+
 ## Implemented workflow controls
 
 - `validate` runs with minimal `contents: read` permissions and does not persist Git credentials after checkout.
