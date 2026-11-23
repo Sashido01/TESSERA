@@ -70,6 +70,10 @@ See [Release Publication](RELEASE_PUBLICATION.en.md). `--verify-publication` req
 
 [RELEASE_ASSETS](RELEASE_ASSETS.en.md) introduces explicit `--verify-assets` after successful `--verify-publication`. Reports include `publication_asset_content_verification`, `verified_assets`, and `artifact_provenance=NOT_VERIFIED`. Certificate status `SOURCE_ASSETS_BYTES_VERIFIED` additionally requires a completed CI, matching remote tag, published Release, and actual matching downloaded bytes. The certificate's own checksum is not a signature.
 
+## Artifact provenance attestation — T09.07
+
+See [RELEASE_PROVENANCE](RELEASE_PROVENANCE.en.md). Explicit `--verify-provenance` requires `--verify-publication`, a real local `--artifact-file`, and a trusted `--signer-workflow`. The module first verifies file bytes against GitHub Release metadata, then invokes official `gh attestation verify` constrained by exact source commit SHA, `refs/tags/<version>`, and signer identity. No local path is included in the report. `provenance_status=PASS` proves the verified signed claim, not application readiness.
+
 ## Security and acceptance
 
 - No Git fetch, push, tag creation, or tag updates.

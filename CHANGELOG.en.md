@@ -4,6 +4,17 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.13 — Signed release artifact provenance verification
+
+- Added `core/release_provenance.py` to independently hash a local file against GitHub Release metadata and cryptographically verify a Sigstore/SLSA attestation via official `gh attestation verify`.
+- Enforced exact repository, source commit SHA, Git tag, specific signing workflow, and SLSA provenance v1 predicate; an arbitrary workflow's claim is not trusted.
+- Added fail-closed handling for tampered file bytes, missing publication, unavailable CLI, failed signatures, malformed JSON, and file changes during verification.
+- Extended `core/release_report.py` with `--verify-provenance --artifact-file --signer-workflow`; this is disabled by default and excludes local file paths from reports.
+- `core/release_certificate.py` separates a verified signed GitHub attestation from **TESSERA's unsigned evidence certificate**; application readiness stays NOT_VERIFIED.
+- Added 33 test scenarios, canonical Russian `docs/RELEASE_PROVENANCE.md` and complete English translation, and updated architecture, roadmap, README, AGENTS and technical documentation.
+
+**Limits:** TESSERA does not have a real published and signed artifact. Tests mock the official CLI's outputs; they do not prove live artifact attestation. Trusted build workflow, actual publication, and concurrency controls are future work. T09 remains PARTIAL.
+
 ## 0.0.12 — Stream-verified actual release asset bytes
 
 - Added independent `core/release_assets.py`: streaming byte count and SHA-256 verification of attached GitHub Release assets against official API metadata.

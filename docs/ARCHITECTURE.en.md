@@ -41,6 +41,10 @@ T09.01 introduces the [read-only Git evidence inspector](RELEASE_CORE.en.md). It
 
 [RELEASE_ASSETS](RELEASE_ASSETS.en.md) documents streaming real public GitHub Release assets and checking byte size/SHA-256 against REST API metadata. Download requires explicit `--verify-assets` and `--verify-publication`. Redirects are limited to known GitHub CDN hosts; no local file writes or application installation occur. Matching bytes does not establish build provenance or application readiness.
 
+## Cryptographic artifact provenance — T09.07
+
+[RELEASE_PROVENANCE](RELEASE_PROVENANCE.en.md) uses the **official GitHub CLI** to verify a Sigstore/SLSA attestation for an exact local artifact tied to the expected source SHA, release tag and trusted signing workflow. Network verification requires explicit `--verify-provenance`. The Release Core JSON certificate itself remains unsigned and does not establish software safety or functionality.
+
 ## Installation
 
 Identify the actual active skills directory in each agent system. Copy the complete skill directory. Use symlinks or junctions only after confirming that the agent supports them and that the path is safe. A file existing on disk does not prove the skill is automatically activated.

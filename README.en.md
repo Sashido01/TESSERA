@@ -104,6 +104,10 @@ A [Release Preflight](docs/RELEASE_PREFLIGHT.en.md) and a `release-checks.json` 
 
 [T09.06](docs/RELEASE_ASSETS.en.md) adds streaming size/SHA-256 verification of real attached GitHub Release assets, enabled **only explicitly** with `--verify-publication --verify-assets`. The verifier writes no files. Independent build provenance and application readiness remain `NOT_VERIFIED`. TESSERA has no GitHub Releases at the time of the check, so live end-to-end acceptance remains open.
 
+## Signed artifact provenance verification
+
+[T09.07](docs/RELEASE_PROVENANCE.en.md) adds independent GitHub Sigstore/SLSA attestation verification through the **official GitHub CLI**. It requires a real local release asset, verified publication metadata, exact source commit SHA, and an explicitly trusted signing workflow. Disabled by default. **TESSERA has no published and attested assets yet, so live verification remains NOT_VERIFIED.**
+
 ## Contributing
 
 See [contribution guidelines](CONTRIBUTING.en.md), [security policy](SECURITY.en.md), [changelog](CHANGELOG.en.md), [community rules](CODE_OF_CONDUCT.en.md), and the [MIT license](LICENSE).

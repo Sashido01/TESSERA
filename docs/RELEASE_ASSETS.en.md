@@ -50,6 +50,10 @@ Only after at least one asset passes byte verification, the corresponding public
 
 `evidence_sha256` is a checksum of the **JSON certificate itself**, unsigned and not tamperproof.
 
+## Cryptographic attestation follow-up — T09.07
+
+Matching downloaded bytes to GitHub digest metadata does not establish provenance. [RELEASE_PROVENANCE](RELEASE_PROVENANCE.en.md) adds an opt-in GitHub Sigstore/SLSA attestation verification **for an existing user-provided local file**. T09.06's streaming verifier still writes no files; T09.07 independently hashes an existing local asset and binds it to a signed workflow claim. Never treat matching a digest as a cryptographic signature.
+
 ## Tests and remaining limits
 
 Tests cover matching and corrupted bytes, truncated/oversized responses, missing digests, unsafe URLs/redirects, size caps, duplicate names, missing assets, and unverified publication. Tests use local byte streams; they need **no paid infrastructure, external downloads, or modifications to published tags**.

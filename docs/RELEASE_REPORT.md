@@ -70,6 +70,10 @@ JSON содержит `local_tag_status`, `preflight_status`, `checks_status`, `
 
 Раздел [RELEASE_ASSETS](RELEASE_ASSETS.md) добавляет явную `--verify-assets` при уже подтверждённом `--verify-publication`. В отчёт включены `publication_asset_content_verification`, `verified_assets` и `artifact_provenance=NOT_VERIFIED`; в свидетельстве `SOURCE_ASSETS_BYTES_VERIFIED` возможен только при подтверждённых CI, удалённом теге, опубликованном Release и реально скачанных совпадающих байтах. Контрольная сумма самого свидетельства не является его подписью.
 
+## Аттестация происхождения артефакта — T09.07
+
+Подробнее в [RELEASE_PROVENANCE](RELEASE_PROVENANCE.md). Новый `--verify-provenance` требует `--verify-publication`, реальный локальный `--artifact-file` и доверенный `--signer-workflow`. Модуль сначала проверяет байты файла по метаданным GitHub Release, затем вызывает официальный `gh attestation verify` с exact source commit SHA, `refs/tags/<version>` и конкретной signing identity. Вывод не содержит локального пути. Поле `provenance_status=PASS` подтверждает только проверенную подпись и заявленное происхождение, а не готовность приложения.
+
 ## Безопасность и приёмка
 
 - Git fetch/push, создание или обновление тегов не выполняются.

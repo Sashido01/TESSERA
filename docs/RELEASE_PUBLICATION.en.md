@@ -67,6 +67,10 @@ If the Release is missing or inaccessible, the API fails or returns incomplete d
 
 See [RELEASE_ASSETS](RELEASE_ASSETS.en.md). An additional explicit `--verify-assets` option downloads attached files of a published Release and independently computes downloaded byte counts and SHA-256 against GitHub metadata. It is **disabled by default**, requires `--verify-publication`, and enforces size limits and trusted HTTPS hosts. `asset_content_verification=PASS` does not establish build provenance. No attached files produce `NO_RELEASE_ASSETS`, not PASS.
 
+## Build attestation — T09.07
+
+[RELEASE_PROVENANCE](RELEASE_PROVENANCE.en.md) requires a real published GitHub Release asset and separately verifies its GitHub attestation using the official CLI. It creates no Releases, assets, attestations, or signatures. Real-world acceptance remains NOT_VERIFIED until such a published artifact exists.
+
 ## Safety, limitations and future work
 
 - No Git writes, tag creation, GitHub Release publication, artifact uploads, or automatic API requests.
