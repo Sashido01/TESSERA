@@ -24,10 +24,21 @@ SHA = re.compile(r"(?:[0-9a-f]{40}|[0-9a-f]{64})\Z")
 WORKFLOW = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}\.ya?ml\Z")
 PREDICATE = "https://slsa.dev/provenance/v1"
 MAX_CLI_OUTPUT = 2 * 1024 * 1024
+MIN_GH_ATTESTATION_VERSION = (2, 102, 0)
+GH_VERSION_LINE = re.compile(r"gh version ([0-9]{1,5})\.([0-9]{1,5})\.([0-9]{1,5})(?: \([^\r\n]{1,80}\))?\Z")
 
 
 class ProvenanceError(ValueError):
     """Safe, machine-readable reason for failed provenance verification."""
+
+
+def parse_gh_version(output: str) -> tuple[int, int, int] | None:
+    """Only accept a stable, unambiguous GitHub CLI version banner."""
+    if not isinstance(output, str) or len(output) > 4096:
+        return None
+    first = output.splitlines()[0] if output.splitlines() else ""
+    match = GH_VERSION_LINE.fullmatch(first.strip())
+    return tuple(map(int, match.groups())) if match else None
 
 
 def safe_signer_workflow(repo: str, signer: str) -> None:
@@ -175,6 +186,27 @@ def verify_release_provenance(
     env = os.environ.copy()
     env["GH_PROMPT_DISABLED"] = "1"
     env["GH_HOST"] = "github.com"
+    # GitHub CLI <= 2.101.0 accepted ambiguous source refs and workflow prefixes.
+    # Refuse to use a vulnerable or unidentifiable binary for release authorization.
+    try:
+        version_check = runner(
+            ["gh", "--version"], text=True, encoding="utf-8", capture_output=True,
+            stdin=subprocess.DEVNULL, timeout=min(timeout_seconds, 10), check=False, env=env,
+        )
+    except subprocess.TimeoutExpired:
+        result["problems"].append("PROVENANCE_VERIFIER_TIMEOUT")
+        return result
+    except (OSError, UnicodeError):
+        result["problems"].append("PROVENANCE_VERIFIER_UNAVAILABLE")
+        return result
+    version = parse_gh_version(version_check.stdout) if version_check.returncode == 0 else None
+    if version is None:
+        result["problems"].append("PROVENANCE_VERIFIER_VERSION_UNKNOWN")
+        return result
+    if version < MIN_GH_ATTESTATION_VERSION:
+        result["problems"].append("PROVENANCE_VERIFIER_VERSION_UNSAFE")
+        return result
+    result["gh_version"] = ".".join(str(component) for component in version)
     try:
         completed = runner(
             argv, text=True, encoding="utf-8", capture_output=True,
