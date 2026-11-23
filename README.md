@@ -63,4 +63,4 @@ python skills/microversion-release/scripts/next_version.py 0.0.100 --mode releas
 **Важно:** ни SKILL.md, ни скрипт расчёта версии сами по себе не гарантируют запуск после каждого действия агента. Для обязательного контроля нужны отдельные правила среды или интеграция с её событиями.
 
 ---
-Оригинальный проект: [Sashido01/TESSERA](https://github.com/Sashido01/TESSERA). Локальная рабочая папка владельца: `D:\GitHub\TESSERA`.
+Оригинальный проект: [Sashido01/TESSERA](https://github.com/Sashido01/TESSERA).
