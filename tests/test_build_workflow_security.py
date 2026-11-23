@@ -26,7 +26,7 @@ class BuildWorkflowSecurityTests(unittest.TestCase):
 
     def test_unpinned_artifact_action(self):
         bad = self.original.replace(
-            "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+            "actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9",
             "actions/upload-artifact@v4"
         )
         self.assertIn("ATTEST_UNPINNED_OR_DUPLICATE_ACTION", sec.validate(bad))
