@@ -52,6 +52,10 @@ python skills/microversion-release/scripts/next_version.py 0.0.100 --mode releas
 
 These commands print `0.0.100` and `0.1.0`, respectively. **The second command only calculates a number**; it does not confirm task completion or a successful build.
 
+## Official GitHub CLI validation without publication
+
+CI additionally runs SHA-256-pinned official `gh 2.105.0` with `gh skill publish --dry-run` on a temporary, tokenless `skills/` snapshot without a GitHub remote. It verifies valid and invalid formats without creating a GitHub Release. It does not validate remote publication readiness. See [GH_SKILL_PUBLISH_DRY_RUN](docs/GH_SKILL_PUBLISH_DRY_RUN.en.md).
+
 ## Agent Skills reference validation
 
 CI additionally runs the [pinned upstream `skills-ref` validator](docs/AGENT_SKILLS_STANDARD.en.md) with SHA-256-locked dependencies. This checks format only; it does not establish actual skill activation in agent hosts. Independent `gh skill publish --dry-run` is still NOT_VERIFIED.

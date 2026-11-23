@@ -4,6 +4,15 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.19 — Actual isolated gh skill publish --dry-run
+
+- Added an official `gh skill publish --dry-run` CI check on a temporary copy of all skills with no GitHub remote or inherited tokens. The exact `gh 2.105.0` release binary is downloaded and SHA-256 verified before execution.
+- `tools/run_publish_dry_run.py` verifies CLI identity, positive and negative validation, no remote, and unchanged source files with a SHA-256 tree fingerprint. Errors fail closed without exposing secrets or private paths.
+- Added regression tests and bilingual documentation, and updated ROADMAP, README and AGENTS.
+- Live GitHub topic/release checks and authenticated remotes are explicitly **out of scope**. T09.10 and agent-client integration remain separate.
+
+**Acceptance:** T11.02 local format validation requires an actually successful CI run; an unsigned package or mocked CLI cannot establish publication readiness.
+
 ## 0.0.18 — Upgraded GitHub Actions to Node.js 24
 
 - Pinned official `actions/checkout` v7.0.1, `actions/setup-python` v7.1.0 and `actions/upload-artifact` v7.0.2 by full SHA in the validation and signing workflows. Independently confirmed that the existing pinned `actions/attest` SHA is v4.2.2 and already uses Node.js 24; no needless change was made.

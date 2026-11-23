@@ -67,6 +67,24 @@ jobs:
       - name: Проверить все навыки через официальный skills-ref
         run: python tools/check_reference_skills.py --repo . --reference-src .external/agentskills/skills-ref/src
 
+      # Official gh 2.105.0 asset from cli/cli release; never execute without SHA-256.
+      - name: Скачать и проверить официальный GitHub CLI 2.105.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/gh_2.105.0_linux_amd64.tar.gz"
+          curl --fail --location --silent --show-error --retry 2 --connect-timeout 10 --max-time 120 \
+            --proto '=https' --tlsv1.2 --output "$archive" \
+            https://github.com/cli/cli/releases/download/v2.105.0/gh_2.105.0_linux_amd64.tar.gz
+          echo "79e7ab5db738c48777b696e374f8b428f0647debfb424f44d2f426370407fe2f  $archive" | sha256sum --check --
+          tar --extract --gzip --file "$archive" --directory "$RUNNER_TEMP"
+          "$RUNNER_TEMP/gh_2.105.0_linux_amd64/bin/gh" version
+      - name: Проверить gh skill publish --dry-run без сети и публикации
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/run_publish_dry_run.py --repo . --cli "$RUNNER_TEMP/gh_2.105.0_linux_amd64/bin/gh"
+
   tag_microversion:
     name: Создать аннотированный тег проверенной версии
     needs: validate
