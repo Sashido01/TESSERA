@@ -38,6 +38,14 @@ python core/release_report.py --repo . --version 0.0.13 \
 
 Пример — **синтаксический**, не свидетельство наличия такого `build.yml` или подписанного файла в TESSERA. Имя конкретного файла должно совпадать с прикреплённым GitHub Release asset. Чтобы дополнительно подтвердить удалённый Git-тег и завершённый CI, используются отдельные флаги `--verify-remote --verify-ci --run-id <completed-run-id>`.
 
+## Минимальная безопасная версия GitHub CLI — T09.10
+
+Официальные [GHSA-wjmr-j3rp-mh2g](https://github.com/cli/cli/security/advisories/GHSA-wjmr-j3rp-mh2g) и [GHSA-4mq3-hpgx-9cx8](https://github.com/cli/cli/security/advisories/GHSA-4mq3-hpgx-9cx8) описывают уязвимости старого `gh attestation verify` при проверке signer workflow и регистра source ref. Исправления выпущены в `gh 2.102.0` (30.09.2026).
+
+Перед криптографической проверкой TESSERA вызывает **`gh --version`** с ограничением времени и разбирает строго ожидаемый баннер. Версии ниже `2.102.0`, непонятная версия или ошибка запуска блокируют результат. Принятие версии не доказывает правильность источника файла, а локальный SHA-256 не заменяет подпись. Новые отказы: `PROVENANCE_VERIFIER_VERSION_UNSAFE` и `PROVENANCE_VERIFIER_VERSION_UNKNOWN`. В итоговом PASS присутствует строка `gh_version`.
+
+Для ручного скачивания GitHub Actions Artifacts также применяйте современный `gh`: [GHSA-39wj-f2f4-978v](https://github.com/cli/cli/security/advisories/GHSA-39wj-f2f4-978v) описывает прежнюю ошибку работы с symlink при загрузке файлов. Подлинное подписание TESSERA остаётся NOT_VERIFIED до завершённого реального запуска и независимой проверки.
+
 ## Отказы и отсутствие ложного успеха
 
 - `PROVENANCE_REQUIRES_PUBLICATION_VERIFICATION` — недопустимо проверять происхождение релизного файла без установленной публикации.
