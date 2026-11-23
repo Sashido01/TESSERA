@@ -21,6 +21,7 @@ try:
     from .release_publication import verify_github_publication, verify_github_remote_identity
     from .release_certificate import make_certificate
     from .release_assets import verify_release_assets, DEFAULT_MAX_ASSET_BYTES
+    from .release_provenance import verify_release_provenance, ProvenanceError
 except ImportError:
     from release_inspect import InspectionError, canonical_repo, inspect, resolve_commit
     from release_preflight import preflight
@@ -30,6 +31,7 @@ except ImportError:
     from release_publication import verify_github_publication, verify_github_remote_identity
     from release_certificate import make_certificate
     from release_assets import verify_release_assets, DEFAULT_MAX_ASSET_BYTES
+    from release_provenance import verify_release_provenance, ProvenanceError
 
 
 def build_report(
@@ -48,6 +50,9 @@ def build_report(
     verify_publication: bool = False,
     verify_assets: bool = False,
     max_asset_bytes: int = DEFAULT_MAX_ASSET_BYTES,
+    verify_provenance: bool = False,
+    artifact_file: pathlib.Path | None = None,
+    signer_workflow: str | None = None,
 ) -> dict[str, Any]:
     if verify_ci and (not github_repo or run_id is None):
         raise InspectionError("CI_REQUIRES_GITHUB_REPO_AND_RUN_ID")
@@ -55,6 +60,10 @@ def build_report(
         raise InspectionError("PUBLICATION_REQUIRES_GITHUB_REPO")
     if verify_assets and not verify_publication:
         raise InspectionError("ASSETS_REQUIRE_PUBLICATION_VERIFICATION")
+    if verify_provenance and (not verify_publication or not github_repo):
+        raise InspectionError("PROVENANCE_REQUIRES_PUBLICATION_VERIFICATION")
+    if verify_provenance and (artifact_file is None or not signer_workflow):
+        raise InspectionError("PROVENANCE_REQUIRES_FILE_AND_SIGNER")
     root = canonical_repo(repo)
     local = inspect(root, version, prefix=prefix, commit=commit)
     target_sha = local["expected_commit_sha"]
@@ -136,6 +145,36 @@ def build_report(
             asset_status = "BLOCKED"
             problems.append("ASSETS_REQUIRE_PUBLISHED_RELEASE")
 
+    provenance_info: dict[str, Any] | None = None
+    provenance_status = "NOT_CHECKED"
+    if verify_provenance:
+        if publication_status != "SOURCE_RELEASE_PUBLISHED" or publication_info is None:
+            provenance_status = "BLOCKED"
+            problems.append("PROVENANCE_REQUIRES_PUBLISHED_RELEASE")
+        else:
+            assert artifact_file is not None and signer_workflow is not None
+            assert github_repo is not None
+            matching = [
+                asset for asset in publication_info["asset_metadata"]
+                if isinstance(asset, dict) and asset.get("name") == artifact_file.name
+            ]
+            if len(matching) != 1:
+                provenance_status = "BLOCKED"
+                problems.append("PROVENANCE_RELEASE_ASSET_MISSING")
+            else:
+                try:
+                    provenance_info = verify_release_provenance(
+                        repository=github_repo, tag=local["requested_tag"],
+                        source_commit=target_sha, signer_workflow=signer_workflow,
+                        artifact_file=artifact_file, asset_metadata=matching[0],
+                        max_bytes=max_asset_bytes,
+                    )
+                    provenance_status = provenance_info["provenance_status"]
+                    problems.extend(provenance_info["problems"])
+                except (ProvenanceError, OSError) as exc:
+                    provenance_status = "BLOCKED"
+                    problems.append(str(exc) if isinstance(exc, ProvenanceError) else "PROVENANCE_UNAVAILABLE")
+
     problems = list(dict.fromkeys(problems))
     stage = evidence_stage(
         problems=problems,
@@ -159,6 +198,14 @@ def build_report(
             if ci_status == "PASS" and remote_status == "PASS"
             else "SOURCE_RELEASE_ASSETS_VERIFIED"
         )
+    if verify_provenance:
+        if provenance_status != "PASS" or stage == "BLOCKED":
+            stage = "BLOCKED"
+        elif ci_status == "PASS" and remote_status == "PASS":
+            stage = "SOURCE_ASSET_ATTESTATION_VERIFIED"
+        else:
+            stage = "PROVENANCE_VERIFIED_PARTIAL"
+
     return {
         "schema_version": 1,
         "requested_version": version,
@@ -189,7 +236,26 @@ def build_report(
         "publication_asset_content_verification": asset_status,
         "verified_assets": asset_info["verified_assets"] if asset_info else [],
         "asset_digest_origin": "github_release_metadata" if asset_status == "PASS" else "NOT_CHECKED",
-        "artifact_provenance": "NOT_VERIFIED",
+        "artifact_provenance": (
+            "GITHUB_ATTESTATION_VERIFIED" if provenance_status == "PASS"
+            else "NOT_VERIFIED"
+        ),
+        "provenance_status": provenance_status,
+        "provenance_signer_workflow": (
+            provenance_info.get("signer_workflow") if provenance_info else None
+        ),
+        "provenance_source_commit": (
+            provenance_info.get("source_commit_sha") if provenance_info else None
+        ),
+        "provenance_source_ref": provenance_info.get("source_ref") if provenance_info else None,
+        "provenance_verified_asset": (
+            {"name": provenance_info["asset_name"], "sha256": provenance_info["asset_sha256"],
+             "bytes_verified": provenance_info["bytes_verified"]}
+            if provenance_info and provenance_status == "PASS" else None
+        ),
+        "local_artifact_integrity": (
+            provenance_info.get("local_artifact_integrity", "NOT_CHECKED") if provenance_info else "NOT_CHECKED"
+        ),
         "stage": stage,
         "evidence_status": "PASS" if stage != "BLOCKED" else "BLOCKED",
         "release_readiness": "NOT_VERIFIED",
@@ -216,6 +282,8 @@ def markdown(result: dict[str, Any]) -> str:
         f"- Завершённый CI: {result['ci_status']}",
         f"- GitHub Release: {result['publication_status']}",
         f"- Байты release assets: {result['publication_asset_content_verification']}",
+        f"- Происхождение артефакта: {result['provenance_status']}",
+        f"- Локальный файл: {result['local_artifact_integrity']}",
         f"- Проверка Git remote: {result['publication_remote_binding']}",
         f"- CI run ID: {result['ci_run_id']}",
         f"- Доказательства: {result['evidence_status']}",
@@ -250,6 +318,9 @@ def main() -> int:
     parser.add_argument("--verify-ci", action="store_true", help="Явно разрешить запрос к GitHub Actions API")
     parser.add_argument("--verify-publication", action="store_true", help="Явно проверить опубликованный GitHub Release")
     parser.add_argument("--verify-assets", action="store_true", help="Явно скачать и проверить байты GitHub Release assets")
+    parser.add_argument("--verify-provenance", action="store_true", help="Явно проверить Sigstore/SLSA аттестацию локального файла")
+    parser.add_argument("--artifact-file", type=pathlib.Path, help="Локальный скачанный файл release asset")
+    parser.add_argument("--signer-workflow", help="Доверенный workflow: owner/repo/.github/workflows/build.yml")
     parser.add_argument("--max-asset-bytes", type=int, default=DEFAULT_MAX_ASSET_BYTES,
                         help="Максимальный размер одного asset в байтах (по умолчанию 64 MiB)")
     parser.add_argument("--github-repo", help="Доверенный владелец/репозиторий GitHub, например owner/repository")
@@ -264,6 +335,8 @@ def main() -> int:
             verify_ci=args.verify_ci, github_repo=args.github_repo, run_id=args.run_id,
             verify_publication=args.verify_publication,
             verify_assets=args.verify_assets, max_asset_bytes=args.max_asset_bytes,
+            verify_provenance=args.verify_provenance, artifact_file=args.artifact_file,
+            signer_workflow=args.signer_workflow,
         )
     except (InspectionError, OSError) as exc:
         print(f"BLOCKED: {exc}", file=sys.stderr)
