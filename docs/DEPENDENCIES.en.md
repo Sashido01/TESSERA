@@ -12,7 +12,7 @@ This document records the owner's decision of 23 November 2026. The Russian docu
 | --- | --- | --- |
 | Git | Required for Git operations | Commits, history, annotated tags |
 | Python 3 standard library | Core custom tooling | Version calculation, checks, minimal offline installer |
-| Official GitHub CLI (`gh skill`) | Preferred planned distribution after testing | Discovery, installation, SHA/tag pinning, updates |
+| Official GitHub CLI (`gh skill`) | T11.02 actual offline dry-run passed; T10.01 isolated local install in CI; remote tag/SHA pin NOT_VERIFIED | Discovery, installation, SHA/tag pinning, updates |
 | Agent Skills | Skill publishing standard | Portable SKILL.md and directory layout |
 | Official `skills-ref` | Planned reference validator | Standard-format verification |
 | NVIDIA SkillEvaluator **Tier 1** | Only after isolated evaluation | Free baseline static checks; not a runtime dependency |
@@ -41,7 +41,7 @@ The description of Tier 1 as free refers to not requiring paid AI APIs. CI infra
 
 ## Offline installer
 
-The existing Python `install.py` remains a minimal offline and custom-profile option. It must not compete with `gh skill` as a universal package manager. Copying into a project requires explicit authorization and must not silently overwrite an installed skill.
+The existing Python `install.py` remains a minimal offline and custom-profile option. Official `gh 2.105.0` in `--from-local` mode may overwrite preexisting files even without `--force`; check target absence before using the CLI. See [T10.01](GH_SKILL_INSTALL.en.md). It must not compete with `gh skill` as a universal package manager. Copying into a project requires explicit authorization and must not silently overwrite an installed skill.
 
 ## Related documentation
 
