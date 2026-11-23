@@ -38,6 +38,14 @@ python core/release_report.py --repo . --version 0.0.13 \
 
 This is **syntax guidance**, not a claim that TESSERA currently has such a `build.yml` or signed artifact. The file basename must match exactly one attached GitHub Release asset. To verify the remote tag and completed CI as well, explicitly add `--verify-remote --verify-ci --run-id <completed-run-id>`.
 
+## Minimum safe GitHub CLI version — T09.10
+
+Official advisories [GHSA-wjmr-j3rp-mh2g](https://github.com/cli/cli/security/advisories/GHSA-wjmr-j3rp-mh2g) and [GHSA-4mq3-hpgx-9cx8](https://github.com/cli/cli/security/advisories/GHSA-4mq3-hpgx-9cx8) describe older `gh attestation verify` bugs affecting signer workflow identity matching and source-ref case sensitivity. Both were fixed in `gh 2.102.0` (30 September 2026).
+
+Before cryptographic verification, TESSERA runs **`gh --version`** with a strict banner parser and timeout. Versions older than `2.102.0`, unknown banners, or execution failures block verification. A supported version does not establish the source of a downloaded file; SHA-256 alone is not a signature. Added error codes: `PROVENANCE_VERIFIER_VERSION_UNSAFE` and `PROVENANCE_VERIFIER_VERSION_UNKNOWN`. Passing reports include `gh_version`.
+
+For manual GitHub Actions Artifact downloads, use a patched `gh` as well: [GHSA-39wj-f2f4-978v](https://github.com/cli/cli/security/advisories/GHSA-39wj-f2f4-978v) documents historical symlink handling issues in download commands. Live signing and independent verification remain NOT_VERIFIED.
+
 ## Explicit failure cases
 
 - `PROVENANCE_REQUIRES_PUBLICATION_VERIFICATION`: no verified source publication requested.
