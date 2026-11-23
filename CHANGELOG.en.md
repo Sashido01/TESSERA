@@ -4,6 +4,17 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.7 — Introduced independent release evidence inspection
+
+- Added `core/release_inspect.py`: read-only inspection of Git history, the `VERSION` file in a specific commit, and annotated tags.
+- Added verification of **historical** releases using full commit SHA, without incorrectly requiring the tag to match current HEAD.
+- Explicitly reports missing, lightweight, wrongly targeted tags and version mismatches.
+- Added 13 unit scenarios, including checks that inspection does not modify Git state.
+- Recorded the complete T08 acceptance cycle: invalid PR — FAIL, corrected PR — PASS, squash merge, verified annotated `v0.0.6`.
+- Updated canonical Russian documentation, complete English translations, roadmap, and limitations.
+
+**Limits:** the inspector does not run builds/tests or check remotes. PASS proves only tag/recorded-version consistency, not release readiness. T09 remains PARTIAL; T08 remains PARTIAL pending risky administrator and tag-protection negative tests.
+
 ## 0.0.6 — Verified rejection of invalid changes through Pull Requests
 
 - Confirmed two active GitHub Rulesets through the API, protecting the main branch and existing tags.

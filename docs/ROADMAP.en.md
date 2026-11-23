@@ -16,7 +16,7 @@
 - `NOT_STARTED`: implementation has not begun; this roadmap is not evidence of completion.
 - `BLOCKED`: a specific blocker and its cause have been recorded.
 
-The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.5`. They do **not** prove execution in installed agent clients or local Windows environments.
+The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.6`. They do **not** prove execution in installed agent clients or local Windows environments.
 
 ## Foundation stages T00–T07
 
@@ -39,13 +39,13 @@ Complete work as small verifiable changes, assigning a new microversion only to 
 
 ### T08 — Git permissions and publication safety
 
-**Priority P0 · Status PARTIAL (positive acceptance pending).** `Protect main` and `release tags` Rulesets are active. Negative test of Pull Request #1 is confirmed. [Instructions and evidence](GITHUB_SECURITY.en.md). Prepare validated GitHub Rulesets requiring CI checks before changes to a protected branch, preventing forced pushes and history deletion, protecting published tags against modification/deletion, and minimizing GitHub Actions permissions. Test ordinary PRs, administrator behavior, CI-based tagging, and concurrent updates. Changing repository settings requires separately authorized access; if permissions are unavailable, report BLOCKED rather than claiming protection.
+**Priority P0 · Status PARTIAL (server protections active; some negative scenarios NOT_VERIFIED).** `Protect main` and `release tags` Rulesets are active. Pull Request #1 verified blocking of an invalid version, successful merge of the corrected version, and creation of annotated `v0.0.6`. [Instructions and evidence](GITHUB_SECURITY.en.md). Prepare validated GitHub Rulesets requiring CI checks before changes to a protected branch, preventing forced pushes and history deletion, protecting published tags against modification/deletion, and minimizing GitHub Actions permissions. Test ordinary PRs, administrator behavior, CI-based tagging, and concurrent updates. Changing repository settings requires separately authorized access; if permissions are unavailable, report BLOCKED rather than claiming protection.
 
 **Acceptance:** controls are actually enforced by GitHub; bypassing mandatory checks or moving an existing tag is refused. Record settings and test evidence.
 
 ### T09 — Independent Release Core
 
-**Priority P0 · Status NOT_STARTED.** Separate `inspect`, `next`, `preflight`, `verify-build`, `tag`, `verify-tag`, `verify-remote`, and `report`. Read actual build/test commands only from target-project configuration. Check version/changelog consistency, exact release commit SHA, unexpected changes, Git permissions, and annotated tagging. Model WORKING, PREPARED, VALIDATED, TAGGED, RELEASED, and BLOCKED as distinct states. A tag is not evidence of a passing build or a published release.
+**Priority P0 · Status PARTIAL (T09.01: read-only Git evidence).** Added a [read-only inspector](RELEASE_CORE.en.md) of version and annotated tag, including historical commit SHAs; build, tests, remote and publication remain NOT_VERIFIED. Continue by separating `inspect`, `next`, `preflight`, `verify-build`, `tag`, `verify-tag`, `verify-remote`, and `report`. Read actual build/test commands only from target-project configuration. Check version/changelog consistency, exact release commit SHA, unexpected changes, Git permissions, and annotated tagging. Model WORKING, PREPARED, VALIDATED, TAGGED, RELEASED, and BLOCKED as distinct states. A tag is not evidence of a passing build or a published release.
 
 **Acceptance:** negative tests for missing, lightweight, wrongly targeted, and reused tags; historical release verification without assuming current HEAD; reproducible recovery from failures. Any mandatory check failure blocks the release.
 

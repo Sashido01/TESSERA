@@ -80,6 +80,10 @@ NVIDIA SkillEvaluator is permitted **only at Tier 1**, after compatibility and r
 
 The [Rulesets setup guide](docs/GITHUB_SECURITY.en.md) documents branch and tag protection. **Rulesets are active:** Pull Requests, `validate`, and an up-to-date branch are required, and published tags are protected. The negative CI acceptance test behaved as expected. Positive merge and next annotated tag acceptance remain pending.
 
+## Independent release verification
+
+T09 begins with a [read-only Git evidence inspector](docs/RELEASE_CORE.en.md). It validates a version and annotated tag against an exact commit without modifying the repository. **It does not establish build success or release readiness**; those checks are future work.
+
 ## Contributing
 
 See [contribution guidelines](CONTRIBUTING.en.md), [security policy](SECURITY.en.md), [changelog](CHANGELOG.en.md), [community rules](CODE_OF_CONDUCT.en.md), and the [MIT license](LICENSE).
