@@ -80,6 +80,8 @@ The [complete T00–T17 roadmap](docs/ROADMAP.en.md) sets out verifiable steps f
 
 NVIDIA SkillEvaluator is permitted **only at Tier 1**, after compatibility and resource evaluation without paid AI APIs. Tier 2 and Tier 3 must not be used. The reference `skills-ref` validator is planned for standard-format checks; TESSERA's own microversion and tagging tests remain mandatory.
 
+**CI security:** all external GitHub Actions are pinned to reviewed full SHAs and use Node.js 24. `tools/check_actions_runtime.py` checks exact pins and action inventory. See [GITHUB_SECURITY](docs/GITHUB_SECURITY.en.md). Live signed ZIP remains NOT_VERIFIED.
+
 ## GitHub protection
 
 The [Rulesets setup guide](docs/GITHUB_SECURITY.en.md) documents branch and tag protection. **Rulesets are active:** Pull Requests, `validate`, and an up-to-date branch are required, and published tags are protected. The negative CI acceptance test behaved as expected. Both negative and positive Pull Request cases and creation of a new annotated tag are verified. Destructive tag-rewrite tests have not been performed.
