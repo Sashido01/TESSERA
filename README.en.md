@@ -108,6 +108,8 @@ A [Release Preflight](docs/RELEASE_PREFLIGHT.en.md) and a `release-checks.json` 
 
 [T09.07](docs/RELEASE_PROVENANCE.en.md) adds independent GitHub Sigstore/SLSA attestation verification through the **official GitHub CLI**. It requires a real local release asset, verified publication metadata, exact source commit SHA, and an explicitly trusted signing workflow. Disabled by default. **TESSERA has no published and attested assets yet, so live verification remains NOT_VERIFIED.**
 
+**Security:** attestation verification requires GitHub CLI `2.102.0+`; vulnerable or unrecognized versions fail closed. A genuine signed catalog ZIP is still NOT_VERIFIED. See [RELEASE_PROVENANCE](docs/RELEASE_PROVENANCE.en.md).
+
 ## Genuine catalog source package and trusted build
 
 [T09.08](docs/TRUSTED_BUILD.en.md) introduces a deterministic Agent Skills source ZIP with a checkable `MANIFEST.json` and a separate opt-in GitHub attestation workflow. Signing requires **manual dispatch at an annotated release tag** and does not create a GitHub Release. Until a live signing run succeeds, status remains `NOT_VERIFIED`. The [branch policy](docs/BRANCHING.en.md) states: one branch per coherent goal/PR, not per intermediate change.
