@@ -84,6 +84,10 @@ The [Rulesets setup guide](docs/GITHUB_SECURITY.en.md) documents branch and tag 
 
 T09 begins with a [read-only Git evidence inspector](docs/RELEASE_CORE.en.md). It validates a version and annotated tag against an exact commit without modifying the repository. **It does not establish build success or release readiness**; those checks are future work.
 
+## Release preflight
+
+A [Release Preflight](docs/RELEASE_PREFLIGHT.en.md) and a `release-checks.json` plan are available. By default it only validates configuration, version, and release notes: `python core/release_preflight.py --repo . --version 0.0.8 --plan`. Running build/test commands requires explicit `--execute` with a trusted configuration. The result **does not prove publication of a release**.
+
 ## Contributing
 
 See [contribution guidelines](CONTRIBUTING.en.md), [security policy](SECURITY.en.md), [changelog](CHANGELOG.en.md), [community rules](CODE_OF_CONDUCT.en.md), and the [MIT license](LICENSE).

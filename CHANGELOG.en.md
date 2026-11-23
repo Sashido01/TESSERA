@@ -4,6 +4,17 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.8 — Added release preflight and explicitly authorized build/test checks
+
+- Implemented `core/release_preflight.py`: checks VERSION and release notes in the exact commit, worktree cleanliness, and declared build/test configuration.
+- Added safe default `--plan` mode, which executes no commands, and explicit `--execute` mode running only approved project-configured argv with `shell=False`.
+- Added TESSERA's `release-checks.json`; the missing build artifact is explicitly NOT_APPLICABLE with an explanation, while two test suites are required.
+- Added 22 test scenarios for wrong versions, missing release notes, dirty worktrees, invalid configurations, failed checks, and timeouts.
+- CI performs `--plan` only, never executing arbitrary PR-supplied commands; `--execute` tests use isolated temporary Git repositories.
+- Added canonical Russian documentation, complete English translations, and updated the roadmap.
+
+**Limits:** passing checks only proves locally executed steps returned success; external CI, signatures, remote tags, and GitHub Releases are not verified. T09 remains PARTIAL and `release_readiness=NOT_VERIFIED`. T08 remains PARTIAL pending risky negative-protection tests.
+
 ## 0.0.7 — Introduced independent release evidence inspection
 
 - Added `core/release_inspect.py`: read-only inspection of Git history, the `VERSION` file in a specific commit, and annotated tags.

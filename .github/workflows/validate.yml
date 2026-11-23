@@ -31,6 +31,8 @@ jobs:
         run: python tools/check_translations.py
       - name: Проверить микроверсию TESSERA
         run: python tools/check_repository_version.py
+      - name: Проверить план предварительных релизных проверок (без выполнения команд)
+        run: python core/release_preflight.py --repo . --version "$(cat VERSION)" --plan
       - name: Проверить безопасность конфигурации CI
         run: python tools/check_workflow_security.py
       - name: Запустить тесты каталога
