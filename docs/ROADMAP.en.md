@@ -16,7 +16,7 @@
 - `NOT_STARTED`: implementation has not begun; this roadmap is not evidence of completion.
 - `BLOCKED`: a specific blocker and its cause have been recorded.
 
-The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.18`. They do **not** prove execution in installed agent clients or local Windows environments.
+The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.19`. They do **not** prove execution in installed agent clients or local Windows environments.
 
 ## Foundation stages T00–T07
 
@@ -57,7 +57,7 @@ Complete work as small verifiable changes, assigning a new microversion only to 
 
 ### T10 — Official GitHub CLI distribution
 
-**Priority P1 · Requires T08 for safe publication · Status NOT_STARTED.** In a sandbox, verify the available `gh skill` version against TESSERA: discovery, preview, installation, `--pin` by tag/SHA, `--dir`, updates, dry-run, and multi-skill repositories with namespaced tags. Pin the verified GitHub CLI version and account for preview API changes.
+**Priority P1 · Requires T08 for safe publication · Status PARTIAL (T10.01 pending live CI).** Implemented [isolated official `gh` local installation validation](GH_SKILL_INSTALL.en.md) with a SHA-256-pinned binary, discovery via `gh skill list`, source integrity checks and a no-overwrite guard. `--from-local` and `--pin` are mutually exclusive, and local installation may overwrite files without `--force`: TESSERA refuses existing targets. T10.02 will separately cover remote tag/SHA pinning, update safety and monorepo behavior. Original plan: In a sandbox, verify the available `gh skill` version against TESSERA: discovery, preview, installation, `--pin` by tag/SHA, `--dir`, updates, dry-run, and multi-skill repositories with namespaced tags. Pin the verified GitHub CLI version and account for preview API changes.
 
 **Acceptance:** reproducible installation from GitHub using official GitHub CLI, preservation of local changes on updates, and verifiable source revision. Keep the custom Python installer minimal for offline and unusual skill directories.
 
