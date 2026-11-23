@@ -1,0 +1,24 @@
+name: Новый навык
+description: Предложить полезный самостоятельный навык для TESSERA
+title: "Предложение навыка: "
+labels: ["enhancement"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Рабочее название навыка
+      placeholder: example-skill
+    validations:
+      required: true
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Какую задачу решает
+      description: Опиши конкретный сценарий использования.
+    validations:
+      required: true
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Совместимость и ограничения
+      description: Для каких AI-агентов и окружений он предназначен.

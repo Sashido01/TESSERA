@@ -1,0 +1,30 @@
+name: Ошибка
+description: Сообщить о воспроизводимой проблеме в каталоге или навыке
+title: "Ошибка: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: observed
+    attributes:
+      label: Что произошло
+      description: Опиши фактическое поведение.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Как повторить
+      description: Шаги, версии навыка и агентной среды.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Что ожидалось
+    validations:
+      required: true
+  - type: textarea
+    id: checks
+    attributes:
+      label: Результаты проверок
+      description: Не прикладывайте токены, пароли и личные данные.
