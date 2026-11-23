@@ -242,19 +242,19 @@ def build_report(
         ),
         "provenance_status": provenance_status,
         "provenance_signer_workflow": (
-            provenance_info["signer_workflow"] if provenance_info else None
+            provenance_info.get("signer_workflow") if provenance_info else None
         ),
         "provenance_source_commit": (
-            provenance_info["source_commit_sha"] if provenance_info else None
+            provenance_info.get("source_commit_sha") if provenance_info else None
         ),
-        "provenance_source_ref": provenance_info["source_ref"] if provenance_info else None,
+        "provenance_source_ref": provenance_info.get("source_ref") if provenance_info else None,
         "provenance_verified_asset": (
             {"name": provenance_info["asset_name"], "sha256": provenance_info["asset_sha256"],
              "bytes_verified": provenance_info["bytes_verified"]}
-            if provenance_info else None
+            if provenance_info and provenance_status == "PASS" else None
         ),
         "local_artifact_integrity": (
-            provenance_info["local_artifact_integrity"] if provenance_info else "NOT_CHECKED"
+            provenance_info.get("local_artifact_integrity", "NOT_CHECKED") if provenance_info else "NOT_CHECKED"
         ),
         "stage": stage,
         "evidence_status": "PASS" if stage != "BLOCKED" else "BLOCKED",
