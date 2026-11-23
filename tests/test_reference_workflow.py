@@ -26,7 +26,7 @@ def controls(workflow: str, lock: str) -> list[str]:
     # Step titles and comments may mention the safe command. Only executable
     # direct invocation is forbidden: CI must use the isolated wrapper.
     direct_publish = re.search(
-        r"(?m)^[ \\t]*(?:-[ \\t]*)?(?:run:[ \\t]*)?gh[ \\t]+skill[ \\t]+publish\\b",
+        r"(?m)^[ \t]*(?:-[ \t]*)?(?:run:[ \t]*)?gh[ \t]+skill[ \t]+publish\b",
         workflow,
     )
     if direct_publish or "gh release create" in workflow or "pip install -e" in workflow:
