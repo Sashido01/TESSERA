@@ -58,6 +58,10 @@ JSON includes `local_tag_status`, `preflight_status`, `checks_status`, `remote_t
 
 Exit 0 means `evidence_status=PASS`; exit 1 means BLOCKED. Neither exit code represents a final application release decision.
 
+## Completed GitHub Actions verification — T09.04
+
+See [Release CI](RELEASE_CI.en.md). After an entire workflow finishes, add explicit `--verify-ci --github-repo owner/repository --run-id 123456789` options. The verifier checks commit SHA, repository name, push to main, expected workflow, and both required jobs. Reports include `ci_status` and verified run identifiers. **Without `--verify-ci`, there is no API request.** Even `CI_VERIFIED` and `CI_AND_REMOTE_TAG_VERIFIED` do not imply a published product: `release_readiness=NOT_VERIFIED`.
+
 ## Security and acceptance
 
 - No Git fetch, push, tag creation, or tag updates.

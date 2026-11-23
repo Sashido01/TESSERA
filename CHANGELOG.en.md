@@ -4,6 +4,17 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.10 — Independent completed GitHub Actions and evidence-state verification
+
+- Added `core/release_ci.py`: validates a completed GitHub Actions run using the official REST API and exact commit SHA, expected workflow, push to main, and both required jobs.
+- Mismatching attempts, missing/skipped/failed required jobs, incomplete API responses, and network failures result in BLOCKED, never a false PASS.
+- Added a pure `core/release_state.py` evidence-stage reducer without an invented RELEASED state.
+- Extended `core/release_report.py` with explicit `--verify-ci`, trusted GitHub repository and completed run ID, and new CI fields in JSON/Markdown.
+- Added 32 positive/negative scenarios covering GitHub API responses, incomplete pagination, SHA/attempt mismatch, and disabled-by-default network access.
+- Updated canonical Russian documents and complete English translations, including previously stale branch-protection descriptions.
+
+**Limits:** public workflows can be queried without a mandatory token only on explicit request. A workflow cannot independently confirm its own completed state while still running. T09.04 does not prove application publication; overall T09 remains PARTIAL.
+
 ## 0.0.9 — Remote annotated-tag verification and evidence-based reporting
 
 - Added `core/release_remote.py` to check the exact remote `refs/tags/<version>` and compare the **annotated tag object SHA**, rejecting missing refs, mismatches, and network errors.
