@@ -26,6 +26,10 @@ python -m unittest discover -s skills/microversion-release/tests -v
 
 If a test environment is unavailable, explicitly list the checks you could not perform.
 
+## Dependency restrictions
+
+Before proposing an installer, validator, or scanner, follow the [approved policy](docs/DEPENDENCIES.en.md). Do not add Vercel Skills CLI, NVIDIA SkillEvaluator Tier 2/3, or mandatory paid AI APIs. Prefer official GitHub tooling and free validation tools; evaluate new dependencies in isolation before adoption.
+
 ## Commits and pull requests
 
 - For **every TESSERA change**, calculate the next catalog microversion from `VERSION`, update the root `VERSION` file and both changelogs. Use PATCH+1 for a working change, or the verified release transition defined in the [version policy](docs/VERSIONING.en.md).

@@ -4,6 +4,17 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.3 — Architecture and roadmap approved
+
+- Expanded the single roadmap with T08–T17, priorities, prerequisites, and verifiable acceptance criteria.
+- Adopted one independent Release Core with thin Codex, Harness, Claude Code, and Hermes adapters.
+- Selected official GitHub CLI as the planned preferred distribution tool; retained a minimal Python offline fallback.
+- Excluded Vercel Skills CLI entirely; limited NVIDIA SkillEvaluator to free Tier 1 after isolated evaluation; excluded Tier 2/3 and mandatory paid AI APIs.
+- Planned reference Agent Skills validation with `skills-ref` and separate measurement of NVIDIA Tier 1 quality and resource usage.
+- Updated architecture, repository rules, and complete English translations without changing executable scripts.
+
+**Status:** documentation and policy changes only. Planned external tools have not been installed and cross-agent integrations remain unverified.
+
 ## 0.0.2 — Skill made portable across agent hosts
 
 - Removed the Harness-only scope of Microversion Release and documented Codex, Claude Code, Hermes, and other compatible hosts.
