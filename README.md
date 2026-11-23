@@ -100,6 +100,10 @@ NVIDIA SkillEvaluator допускается **только на Tier 1**, по�
 
 В [T09.05](docs/RELEASE_PUBLICATION.md) реализованы независимая проверка metadata опубликованного GitHub Release и воспроизводимое неподписанное свидетельство проверки. Git-тег и CI не равны опубликованному GitHub Release. Режимы `--verify-publication` и `--format certificate` не создают релиз и не подтверждают скачанные файлы. **На момент проверки GitHub Releases TESSERA отсутствовали**; автоматическое создание не предусмотрено.
 
+## Проверка реальных байтов выпуска
+
+В [T09.06](docs/RELEASE_ASSETS.md) реализована потоковая проверка размера и SHA-256 настоящих прикреплённых файлов GitHub Release, доступная **только явно** через `--verify-publication --verify-assets`. Запись файлов не выполняется; проверка подлинности сборки и готовность исполняемого ПО остаются `NOT_VERIFIED`. На момент проверки у TESSERA нет опубликованных GitHub Releases, поэтому живое испытание остаётся открытым.
+
 ## Участие в разработке
 
 Правила: [CONTRIBUTING.md](CONTRIBUTING.md). Уязвимости: [SECURITY.md](SECURITY.md). История: [CHANGELOG.md](CHANGELOG.md). Лицензия: [MIT](LICENSE).

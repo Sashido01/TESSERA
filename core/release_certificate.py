@@ -12,11 +12,15 @@ def make_certificate(report: dict[str, Any]) -> dict[str, Any]:
     publication = report.get("publication_status", "NOT_CHECKED")
     remote = report.get("remote_tag_status", "NOT_CHECKED")
     ci = report.get("ci_status", "NOT_CHECKED")
+    asset_status = report.get("publication_asset_content_verification", "NOT_PERFORMED")
     issues = report.get("problems", [])
     if not isinstance(issues, list):
         issues = ["CERTIFICATE_INVALID_PROBLEMS"]
-    if report.get("evidence_status") == "BLOCKED" or issues:
+    if report.get("evidence_status") == "BLOCKED" or issues or asset_status == "BLOCKED":
         status = "BLOCKED"
+    elif (publication == "SOURCE_RELEASE_PUBLISHED" and remote == "PASS"
+          and ci == "PASS" and asset_status == "PASS"):
+        status = "SOURCE_ASSETS_BYTES_VERIFIED"
     elif publication == "SOURCE_RELEASE_PUBLISHED" and remote == "PASS" and ci == "PASS":
         status = "SOURCE_RELEASE_PUBLISHED"
     elif publication not in ("NOT_CHECKED",):
@@ -43,7 +47,9 @@ def make_certificate(report: dict[str, Any]) -> dict[str, Any]:
             "release_metadata": publication,
             "release_id": report.get("publication_release_id"),
             "release_url": report.get("publication_url"),
-            "asset_content_verification": "NOT_PERFORMED",
+            "asset_content_verification": asset_status,
+            "verified_assets": report.get("verified_assets", []),
+            "artifact_provenance": "NOT_VERIFIED",
         },
         "publication_evidence_status": status,
         "application_release_readiness": "NOT_VERIFIED",
@@ -52,7 +58,7 @@ def make_certificate(report: dict[str, Any]) -> dict[str, Any]:
         "limitations": [
             "SHA-256 is a reproducibility checksum, not a digital signature",
             "Source release publication does not prove installation or application delivery",
-            "GitHub release asset bytes and digests were not independently downloaded and checked",
+            "Matching asset bytes to GitHub metadata is not independent artifact provenance attestation",
         ],
     }
     encoded = json.dumps(evidence, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")

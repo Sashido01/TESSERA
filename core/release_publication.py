@@ -137,7 +137,7 @@ def validate_release(
         if digest is not None and (not isinstance(digest, str) or SHA256.fullmatch(digest) is None):
             problems.append("PUBLICATION_ASSET_DIGEST_INVALID")
             continue
-        summaries.append({"name": name, "size": size, "reported_digest": digest})
+        summaries.append({"name": name, "size": size, "reported_digest": digest, "browser_download_url": asset.get("browser_download_url")})
 
     if problems:
         status = "BLOCKED"

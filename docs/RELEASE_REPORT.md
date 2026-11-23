@@ -66,6 +66,10 @@ JSON содержит `local_tag_status`, `preflight_status`, `checks_status`, `
 
 См. [Release Publication](RELEASE_PUBLICATION.md). Флаг `--verify-publication` требует доверенный `--github-repo`, проверяет соответствие Git remote и запрашивает **опубликованный** GitHub Release. `--format certificate` выдаёт неподписанное свидетельство с воспроизводимым SHA-256 его полей. Полный статус `SOURCE_RELEASE_PUBLISHED` возможен только при подтверждённых удалённом теге, завершённом CI и опубликованных metadata Release. Даже тогда `release_readiness=NOT_VERIFIED` для исполняемого приложения.
 
+## Действительные байты файлов — T09.06
+
+Раздел [RELEASE_ASSETS](RELEASE_ASSETS.md) добавляет явную `--verify-assets` при уже подтверждённом `--verify-publication`. В отчёт включены `publication_asset_content_verification`, `verified_assets` и `artifact_provenance=NOT_VERIFIED`; в свидетельстве `SOURCE_ASSETS_BYTES_VERIFIED` возможен только при подтверждённых CI, удалённом теге, опубликованном Release и реально скачанных совпадающих байтах. Контрольная сумма самого свидетельства не является его подписью.
+
 ## Безопасность и приёмка
 
 - Git fetch/push, создание или обновление тегов не выполняются.
