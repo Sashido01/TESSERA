@@ -27,7 +27,7 @@ EXPECTED = {
         "actions/upload-artifact": 1,
     },
 }
-USE = re.compile(r"(?m)^\s*uses:\s*(\S+)\s*(?:#.*)?$")
+USE = re.compile(r"(?m)^[ \t]*(?:-[ \t]*)?uses:[ \t]*(\S+)[ \t]*(?:#.*)?$")
 REF = re.compile(r"([a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+)@([a-f0-9]{40})\Z")
 
 
