@@ -23,7 +23,13 @@ def controls(workflow: str, lock: str) -> list[str]:
     if ("--only-binary=:all: --require-hashes -r tools/skills-ref-requirements.txt" not in workflow
             or "tools/check_reference_skills.py --repo . --reference-src .external/agentskills/skills-ref/src" not in workflow):
         problems.append("REFERENCE_VALIDATION_NOT_REQUIRED")
-    if "gh skill publish" in workflow or "gh release create" in workflow or "pip install -e" in workflow:
+    # Step titles and comments may mention the safe command. Only executable
+    # direct invocation is forbidden: CI must use the isolated wrapper.
+    direct_publish = re.search(
+        r"(?m)^[ \\t]*(?:-[ \\t]*)?(?:run:[ \\t]*)?gh[ \\t]+skill[ \\t]+publish\\b",
+        workflow,
+    )
+    if direct_publish or "gh release create" in workflow or "pip install -e" in workflow:
         problems.append("REFERENCE_UNSAFE_EXECUTION")
     try:
         build = workflow.index("run: python tools/build_catalog_package.py")
