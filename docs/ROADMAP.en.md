@@ -16,7 +16,7 @@
 - `NOT_STARTED`: implementation has not begun; this roadmap is not evidence of completion.
 - `BLOCKED`: a specific blocker and its cause have been recorded.
 
-The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.16`. They do **not** prove execution in installed agent clients or local Windows environments.
+The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.17`. They do **not** prove execution in installed agent clients or local Windows environments.
 
 ## Foundation stages T00–T07
 
@@ -42,6 +42,8 @@ Complete work as small verifiable changes, assigning a new microversion only to 
 **Priority P0 · Status PARTIAL (server protections active; some negative scenarios NOT_VERIFIED).** `Protect main` and `release tags` Rulesets are active. Pull Request #1 verified blocking of an invalid version, successful merge of the corrected version, and creation of annotated `v0.0.6`. [Instructions and evidence](GITHUB_SECURITY.en.md). Prepare validated GitHub Rulesets requiring CI checks before changes to a protected branch, preventing forced pushes and history deletion, protecting published tags against modification/deletion, and minimizing GitHub Actions permissions. Test ordinary PRs, administrator behavior, CI-based tagging, and concurrent updates. Changing repository settings requires separately authorized access; if permissions are unavailable, report BLOCKED rather than claiming protection.
 
 **Acceptance:** controls are actually enforced by GitHub; bypassing mandatory checks or moving an existing tag is refused. Record settings and test evidence.
+
+**T08.01 (CI maintenance):** pinned GitHub Actions upgraded to supported Node.js 24, with a required exact-SHA check and negative rollback tests. [Evidence and full pin table](GITHUB_SECURITY.en.md). This substage requires verified `main` CI and an annotated tag after merge. Actual administrative bypass and tag deletion tests remain NOT_VERIFIED; T08 overall is PARTIAL.
 
 ### T09 — Independent Release Core
 
