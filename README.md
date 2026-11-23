@@ -56,6 +56,10 @@ python skills/microversion-release/scripts/next_version.py 0.0.100 --mode releas
 
 [Инструмент T09.09](docs/CATALOG_VERIFICATION.md) проверяет скачанный пакет без распаковки: состав, MANIFEST.json, фактические SHA-256 и соответствие внешнему SHA коммита. Это **не** проверка подписи GitHub и не доказательство публикации. Реальная аттестация и сквозная поставка остаются NOT_VERIFIED.
 
+## Проверка без публикации через официальный GitHub CLI
+
+CI также проверяет официальный `gh skill publish --dry-run` версии `2.105.0` из скачанного по SHA-256 выпуска в изолированной копии `skills/`, без GitHub remote и токенов. Тест проверяет успешную и ошибочную валидацию, не создавая GitHub Release. Это не проверка реального опубликованного выпуска. См. [GH_SKILL_PUBLISH_DRY_RUN](docs/GH_SKILL_PUBLISH_DRY_RUN.md).
+
 ## Проверка по стандарту Agent Skills
 
 В CI дополнительно запускается [эталонный валидатор `skills-ref`](docs/AGENT_SKILLS_STANDARD.md) из зафиксированной ревизии официального репозитория и с зависимостями по SHA-256. Это проверка формата, не доказательство выполнения навыка агентом. Независимый `gh skill publish --dry-run` пока NOT_VERIFIED.
