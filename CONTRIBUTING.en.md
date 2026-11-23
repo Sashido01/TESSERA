@@ -19,6 +19,7 @@ Thanks for suggesting improvements. The goal is to make small, understandable, a
 python tools/validate_skills.py
 python tools/check_public_paths.py
 python tools/check_translations.py
+python tools/check_repository_version.py
 python -m unittest discover -s tests -v
 python -m unittest discover -s skills/microversion-release/tests -v
 ```
@@ -27,6 +28,8 @@ If a test environment is unavailable, explicitly list the checks you could not p
 
 ## Commits and pull requests
 
+- For **every TESSERA change**, calculate the next catalog microversion from `VERSION`, update the root `VERSION` file and both changelogs. Use PATCH+1 for a working change, or the verified release transition defined in the [version policy](docs/VERSIONING.en.md).
+- After successful validation on `main`, the workflow creates an annotated Git tag. Do not bypass checks or forcibly replace tags.
 - Write commit messages in plain Russian, for example «Исправлен расчёт следующей версии при переходе через 99», not “misc fixes” or “bump.”
 - Describe the purpose, changes, actual checks, limitations, and compatibility risks in your pull request.
 - Prefer one related task per pull request.

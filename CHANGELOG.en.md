@@ -4,10 +4,15 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
-## Unreleased
+## 0.0.1 — Mandatory catalog microversioning introduced
 
-- Added English translations of repository documentation and the Microversion Release skill documentation.
-- Established a Russian-first documentation policy and validation checks for translation coverage.
+- Applied the same rules to TESSERA itself as to Microversion Release: PATCH+1 for verified changes, planned `.99` release milestones, and continued `.100+` microversions for unfinished tasks.
+- Introduced the canonical `VERSION` file and validation of each version transition.
+- Configured automated annotated Git tags after successful validation of commits on `main`.
+- Updated both Russian and English development and release instructions.
+- Preserved previously added English translations, language rules, and published Git history.
+
+**Limitation:** tag creation depends on GitHub Actions permissions. Build artifacts and GitHub Releases are not published automatically.
 
 ## 0.0.0 — Initial library (23 November 2026)
 

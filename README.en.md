@@ -38,6 +38,7 @@ Python 3 is required; there are no third-party Python dependencies.
 python tools/validate_skills.py
 python tools/check_public_paths.py
 python tools/check_translations.py
+python tools/check_repository_version.py
 python -m unittest discover -s tests -v
 python -m unittest discover -s skills/microversion-release/tests -v
 ```
@@ -53,13 +54,15 @@ These commands print `0.0.100` and `0.1.0`, respectively. **The second command o
 
 ## Versioning
 
+**Current catalog version:** see [`VERSION`](VERSION). From this point forward, every independently verified change to TESSERA must increment the catalog microversion, update both changelogs, and use a clear, human-readable Russian commit title. After successful GitHub Actions checks, an annotated `vX.Y.Z` Git tag is created. GitHub Releases are not published automatically.
+
 - **The TESSERA catalog** and **each skill** have independent version histories.
 - Work microversions increase PATCH by one. After `.99`, work may continue with `.100`, `.101`, and so on if the task is unfinished.
 - After completion and successful mandatory checks, planned milestones are `0.0.99 → 0.1.0`, `0.1.99 → 0.2.0`, and `0.99.99 → 1.0.0`.
 - Do not create dummy commits or releases to reach a preferred number. New projects start at `0.0.0`; never rewrite published tags or history.
 - Individual skill tags may use namespaces such as `microversion-release/v0.1.0` to avoid collisions with catalog-wide tags.
 
-See the [version policy](docs/VERSIONING.en.md). The repository documents its initial `0.0.0` state; no release artifacts or GitHub Releases have been confirmed as published.
+See the [version policy](docs/VERSIONING.en.md). The historical `0.0.0` baseline is preserved. Mandatory versioning begins at `0.0.1` without rewriting previous commits. No separate build artifacts or GitHub Releases have been published.
 
 ## Contributing
 

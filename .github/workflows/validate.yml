@@ -14,8 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Получить исходники
+      - name: Получить исходники и историю Git
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Настроить Python
         uses: actions/setup-python@v5
         with:
@@ -26,7 +28,47 @@ jobs:
         run: python tools/check_public_paths.py
       - name: Проверить наличие переводов
         run: python tools/check_translations.py
+      - name: Проверить микроверсию TESSERA
+        run: python tools/check_repository_version.py
       - name: Запустить тесты каталога
         run: python -m unittest discover -s tests -v
       - name: Запустить тесты Microversion Release
         run: python -m unittest discover -s skills/microversion-release/tests -v
+
+  tag_microversion:
+    name: Создать аннотированный тег проверенной версии
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.repository == 'Sashido01/TESSERA'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Получить подтверждённый коммит
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Создать тег с понятным русским описанием
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat VERSION)"
+          tag="v${version}"
+          sha="$(git rev-parse HEAD)"
+          if git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null 2>&1; then
+            git fetch origin "refs/tags/${tag}:refs/tags/${tag}"
+            actual="$(git rev-list -n 1 "${tag}")"
+            if [[ "${actual}" == "${sha}" ]]; then
+              echo "Тег ${tag} уже правильно указывает на проверенный коммит"
+              exit 0
+            fi
+            echo "ОШИБКА: тег ${tag} уже указывает на другой коммит" >&2
+            exit 1
+          fi
+          subject="$(git log -1 --format=%s)"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${tag}" -m "Версия ${version} — ${subject}"
+          git push origin "refs/tags/${tag}"
+          echo "Создан аннотированный тег ${tag} для ${sha}"

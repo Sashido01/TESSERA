@@ -19,6 +19,7 @@
 python tools/validate_skills.py
 python tools/check_public_paths.py
 python tools/check_translations.py
+python tools/check_repository_version.py
 python -m unittest discover -s tests -v
 python -m unittest discover -s skills/microversion-release/tests -v
 ```
@@ -27,6 +28,8 @@ python -m unittest discover -s skills/microversion-release/tests -v
 
 ## Коммиты и Pull Requests
 
+- Для **любого изменения TESSERA** заранее вычислите следующую микроверсию относительно `VERSION`, обновите корневой `VERSION` и обе версии CHANGELOG. Используйте рабочий PATCH+1 либо проверенный релизный переход по [правилам](docs/VERSIONING.md).
+- После успешной проверки в `main` workflow создаст аннотированный Git-тег. Запрещено обходить тесты или принудительно перезаписывать теги.
 - Используй простой русский язык: «Исправлен расчёт следующей версии при переходе через 99», а не «misc fixes» или «bump».
 - Описывай в Pull Request цель, изменения, проверки, ограничения и возможные риски совместимости.
 - Один Pull Request желательно посвящать одной связанной задаче.

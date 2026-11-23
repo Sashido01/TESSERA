@@ -8,6 +8,17 @@ The TESSERA catalog has its own version. Each skill may also have an independent
 
 A new project starts at `0.0.0`. Namespaced skill tags may look like `microversion-release/v0.1.0`. Catalog-wide tags may use `v0.1.0` when there is no conflict.
 
+## Applying these rules to TESSERA itself
+
+**TESSERA must follow these rules**, independently of the versions of its individual skills. Its historical baseline is `0.0.0`; the already published history without a mandatory `VERSION` file remains unchanged. The new policy begins with `0.0.1`.
+
+- The canonical machine-readable catalog version lives in the root [`VERSION`](../VERSION) file.
+- Every independently verified repository change must be recorded in one commit that advances the catalog microversion and updates both `CHANGELOG.md` and `CHANGELOG.en.md`.
+- CI verifies the transition against the parent commit: normally PATCH+1, or a release transition to the next `.0` only once PATCH≥99. The initial migration record must be `0.0.1`.
+- Commit titles are specific, natural Russian text rather than `bump` / `chore` templates. After a `main` commit passes CI, GitHub Actions creates an **annotated** `vX.Y.Z` tag with a Russian title. Existing tags must never be reused or moved.
+- A `.0` release of TESSERA is a release of the catalog, documents, and scripts; no binary distribution is inherently required. Release readiness requires passing tests and documentation checks. A GitHub Release is a separate publication step.
+- Updating metadata for the same version is part of that single change, not a reason for an endless chain of extra microversions.
+
 ## Working microversions
 
 - A standalone verified change increments PATCH by one.
