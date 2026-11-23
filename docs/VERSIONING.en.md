@@ -1,0 +1,26 @@
+# Versioning policy for TESSERA and its skills
+
+[Русский — основной язык](VERSIONING.md) | **English — translation**
+
+## Two independent version histories
+
+The TESSERA catalog has its own version. Each skill may also have an independent version. Do not confuse either with the version of an application consuming a skill.
+
+A new project starts at `0.0.0`. Namespaced skill tags may look like `microversion-release/v0.1.0`. Catalog-wide tags may use `v0.1.0` when there is no conflict.
+
+## Working microversions
+
+- A standalone verified change increments PATCH by one.
+- If a task remains unfinished after `.99`, `.100`, `.101`, and further values are allowed, with no artificial limit of 99.
+- Do not invent changes merely to advance a version. Recording release metadata is part of the same release operation, not an endless chain of new versions.
+- Planned new-project milestones are `0.0.99 → 0.1.0`, `0.1.99 → 0.2.0`, and `0.99.99 → 1.0.0`.
+- If a task continues to `0.0.107`, a transition `0.0.107 → 0.1.0` is possible after completion and the required checks. Do not create artificial intermediate versions.
+- Tests and builds are required to the extent specified by the actual project. Do not mark a release ready if mandatory checks fail.
+
+## Human-readable messages
+
+A commit title describes *what changed*, not which tool was run. Example in the canonical Russian style: «Добавлена проверка корректности навыка перед публикацией». A Git tag has a machine-readable name, while the tag annotation explains the change in ordinary language. Release notes contain verified facts and limitations.
+
+## Limitation
+
+This is TESSERA's special release workflow, **not** a claim that the workflow follows standard SemVer rules. Public packages and APIs may require different policies. Never rewrite existing projects' published history or tags.

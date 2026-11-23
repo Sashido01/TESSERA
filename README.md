@@ -1,5 +1,7 @@
 # TESSERA
 
+[**Русский — оригинал**](README.md) | [English — перевод](README.en.md)
+
 **Единая библиотека навыков для AI-агентов.** Каждый навык — самостоятельный модуль, который можно использовать, проверять и развивать независимо от остальных.
 
 TESSERA не является форком Harness или Codex. Здесь хранятся переносимые инструкции [Agent Skills](https://agentskills.io/), скрипты и примеры их подключения. Поддержка конкретной агентной среды и автоматический запуск проверяются отдельно.
@@ -34,6 +36,9 @@ docs/                   Правила, архитектура и дорожна
 
 ```bash
 python tools/validate_skills.py
+python tools/check_public_paths.py
+python tools/check_translations.py
+python -m unittest discover -s tests -v
 python -m unittest discover -s skills/microversion-release/tests -v
 ```
 
@@ -59,6 +64,10 @@ python skills/microversion-release/scripts/next_version.py 0.0.100 --mode releas
 ## Участие в разработке
 
 Правила: [CONTRIBUTING.md](CONTRIBUTING.md). Уязвимости: [SECURITY.md](SECURITY.md). История: [CHANGELOG.md](CHANGELOG.md). Лицензия: [MIT](LICENSE).
+
+## Языки документации
+
+**Русский язык — оригинал и главный источник правил.** Сначала создавайте и проверяйте русскую документацию, затем в рамках того же изменения синхронизируйте её английский перевод. Подробности: [языковая политика](docs/I18N.md).
 
 **Важно:** ни SKILL.md, ни скрипт расчёта версии сами по себе не гарантируют запуск после каждого действия агента. Для обязательного контроля нужны отдельные правила среды или интеграция с её событиями.
 
