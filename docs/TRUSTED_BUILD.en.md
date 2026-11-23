@@ -23,6 +23,10 @@ The existing `validate.yml` creates tags after successful pushes to `main` with 
 
 The safe sequence is a verified tag followed by separate `workflow_dispatch` **at that tag**. Future automation may be researched without PAT secrets or bypassing Rulesets.
 
+## Safe CLI version for verification
+
+Downloading an Actions Artifact and checking provenance requires `gh 2.102.0+`; older versions contained signer-workflow/source-ref matching bugs and unsafe symlink handling when downloading files. `core/release_provenance.py` now rejects outdated or unrecognized CLI versions. Check `gh --version` **before** manually downloading a ZIP; the ZIP inspector remains a separate offline integrity check. See [RELEASE_PROVENANCE](RELEASE_PROVENANCE.en.md).
+
 ## Commands
 
 After the `main` CI and tag have both completed:
