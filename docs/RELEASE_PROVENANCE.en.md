@@ -57,6 +57,10 @@ The final report intentionally omits CLI error details, secrets, local absolute 
 
 With no real signed TESSERA assets, this end-to-end status has not been observed in production. Unit tests simulate the official CLI's outcomes; they **do not substitute for real certificates**.
 
+## Actual catalog source package and signing workflow — T09.08
+
+[TRUSTED_BUILD](TRUSTED_BUILD.en.md) now documents deterministic catalog source ZIP packaging and an independent GitHub `actions/attest` workflow run from a verified annotated tag. Merely adding the workflow **does not prove it was run or that a signed artifact exists**. A workflow Actions Artifact is not a GitHub Release asset, so the T09.07 Release-asset verifier cannot automatically be treated as integrated with the new workflow output.
+
 ## Remaining work for full T09
 
 1. Design a trusted build workflow that produces an artifact from a fixed release tag; pin actions to SHAs and minimize privileges.

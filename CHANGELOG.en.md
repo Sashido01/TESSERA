@@ -4,6 +4,17 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.14 — Deterministic catalog package and trusted attestation preparation
+
+- Added `tools/build_catalog_package.py`: genuine Agent Skills catalog source ZIP with fixed ZIP metadata, LICENSE, VERSION, runtime skill files, SHA-256 manifest, and exact source Git commit.
+- Added separate `build-attested-catalog.yml` **manually dispatched at an annotated tag**, with read-only source permissions and limited GitHub/Sigstore attestation rights. All third-party Actions are pinned to full SHAs; GitHub Releases are not auto-published.
+- `release-checks.json` now requires the actual catalog build rather than NOT_APPLICABLE. Ordinary PR CI builds and checks determinism without OIDC signing.
+- Added security checks for the signing workflow and negative tests for wrong refs/tags, unsafe files, and source modifications.
+- Simplified Git policy: **one working branch per coherent goal and one PR**, not one branch for every intermediate correction. Documented in bilingual [BRANCHING](docs/BRANCHING.en.md).
+- Updated canonical Russian and complete English translations of roadmap, VERSIONING, GITHUB_SECURITY, architecture, README, and AGENTS.
+
+**Limits:** executing the workflow against a real tag and validating a genuine signed attestation remain NOT_VERIFIED. The ZIP is stored as a GitHub Actions Artifact, not a GitHub Release; the workflow does not sign executable applications. T09 remains PARTIAL.
+
 ## 0.0.13 — Signed release artifact provenance verification
 
 - Added `core/release_provenance.py` to independently hash a local file against GitHub Release metadata and cryptographically verify a Sigstore/SLSA attestation via official `gh attestation verify`.

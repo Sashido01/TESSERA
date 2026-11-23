@@ -19,6 +19,10 @@ A new project starts at `0.0.0`. Namespaced skill tags may look like `microversi
 - A `.0` release of TESSERA is a release of the catalog, documents, and scripts; no binary distribution is inherently required. Release readiness requires passing tests and documentation checks. A GitHub Release is a separate publication step.
 - Updating metadata for the same version is part of that single change, not a reason for an endless chain of extra microversions.
 
+## Branches are not microversions
+
+A new Git branch is **not necessary for every intermediate change, correction, or test**. Under the active `main` Ruleset, use one short-lived branch for a coherent goal and keep intermediate fixes within the same PR. Only its accepted completed result receives **one next microversion**, synchronized VERSION/CHANGELOG, and an annotated tag of the final `main` commit. See [BRANCHING](BRANCHING.en.md).
+
 ## Mandatory release tag
 
 **Every TESSERA and individual skill release requires an annotated Git tag** pointing to the release commit. Catalog tags use `vMAJOR.MINOR.PATCH`; independent skill tags may use `<skill>/vMAJOR.MINOR.PATCH`. Releases such as `0.1.0`, `0.2.0`, and `1.0.0` must report `BLOCKED / RELEASE_NOT_TAGGED` if the tag is missing, even when documentation or builds exist. Annotations must clearly describe the real result in Russian. Never create lightweight tags, force-move existing tags, or claim GitHub publication based on a local tag alone.

@@ -16,7 +16,7 @@
 - `NOT_STARTED`: implementation has not begun; this roadmap is not evidence of completion.
 - `BLOCKED`: a specific blocker and its cause have been recorded.
 
-The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.12`. They do **not** prove execution in installed agent clients or local Windows environments.
+The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.13`. They do **not** prove execution in installed agent clients or local Windows environments.
 
 ## Foundation stages T00–T07
 
@@ -45,7 +45,7 @@ Complete work as small verifiable changes, assigning a new microversion only to 
 
 ### T09 — Independent Release Core
 
-**Priority P0 · Status PARTIAL (T09.01–T09.07).** Implemented [local inspection](RELEASE_CORE.en.md), [Preflight](RELEASE_PREFLIGHT.en.md), [remote evidence](RELEASE_REPORT.en.md), [completed CI](RELEASE_CI.en.md), [publication metadata](RELEASE_PUBLICATION.en.md), [byte verification](RELEASE_ASSETS.en.md), and [signed artifact provenance verification](RELEASE_PROVENANCE.en.md). The new optional check uses official `gh attestation verify` constrained by exact source SHA, tag, and signing workflow, and independently hashes the local artifact. TESSERA has no real published and attested build yet; end-to-end verification is NOT_VERIFIED. Application release readiness and concurrency controls remain unimplemented. Continue by separating `inspect`, `next`, `preflight`, `verify-build`, `tag`, `verify-tag`, `verify-remote`, and `report`. Read actual build/test commands only from target-project configuration. Check version/changelog consistency, exact release commit SHA, unexpected changes, Git permissions, and annotated tagging. Model WORKING, PREPARED, VALIDATED, TAGGED, RELEASED, and BLOCKED as distinct states. A tag is not evidence of a passing build or a published release.
+**Priority P0 · Status PARTIAL (T09.01–T09.08).** Existing [local inspection](RELEASE_CORE.en.md), [Preflight](RELEASE_PREFLIGHT.en.md), [remote proof](RELEASE_REPORT.en.md), [completed CI](RELEASE_CI.en.md), [GitHub Release metadata](RELEASE_PUBLICATION.en.md), [asset bytes](RELEASE_ASSETS.en.md), [provenance verification](RELEASE_PROVENANCE.en.md) now include [trusted deterministic catalog source packaging](TRUSTED_BUILD.en.md). T09.08 creates reproducible ZIP content from an exact Git commit. A separate workflow can **manually, from a verified annotated tag**, generate a GitHub/Sigstore attestation and provide the artifact via GitHub Actions Artifacts. GitHub Releases are not auto-published. Live attestation and end-to-end verification remain NOT_VERIFIED until signing runs, as do application readiness and concurrent release coordination. Continue by separating `inspect`, `next`, `preflight`, `verify-build`, `tag`, `verify-tag`, `verify-remote`, and `report`. Read actual build/test commands only from target-project configuration. Check version/changelog consistency, exact release commit SHA, unexpected changes, Git permissions, and annotated tagging. Model WORKING, PREPARED, VALIDATED, TAGGED, RELEASED, and BLOCKED as distinct states. A tag is not evidence of a passing build or a published release.
 
 **Acceptance:** negative tests for missing, lightweight, wrongly targeted, and reused tags; historical release verification without assuming current HEAD; reproducible recovery from failures. Any mandatory check failure blocks the release.
 

@@ -47,6 +47,10 @@ A separate Tag Ruleset for `v*` should prevent edits or deletions of published t
 
 **GitHub Actions must still be allowed to create new tags after PASS.** An unrestricted bypass that can also rewrite old tags is unacceptable. Test safe exceptions using a temporary, nonproduction prefix.
 
+## Simpler branch cycle and safe signing build
+
+[BRANCHING](BRANCHING.en.md) documents that **no new branch is required for every commit or correction**. One short-lived branch covers a coherent change and one Pull Request. Tag publication follows CI and merge into protected `main`. T09.08 adds [TRUSTED_BUILD](TRUSTED_BUILD.en.md): signing requires manual dispatch on an annotated tag, has no Git write permission, and never signs PR code. A static checker enforces pinned actions and narrow permissions.
+
 ## T08 acceptance
 
 - Rulesets are active and match `main` and protected tags.
