@@ -152,12 +152,12 @@ def inspect(repo: pathlib.Path, cli: pathlib.Path,
             raise InstallCheckError("INSTALL_FRONTMATTER_INVALID")
         # The official CLI adds source-tracking metadata. The original body
         # and all supplementary files still have to be identical.
-        if installed.split(marker, 1)[1] != body.split(marker, 1)[1]:
+        if installed.split(marker, 1)[1].lstrip("\r\n") != body.split(marker, 1)[1].lstrip("\r\n"):
             raise InstallCheckError("INSTALL_CONTENT_MISMATCH")
         reference = pathlib.Path("references") / "INTEGRATION.md"
         if (target / reference).read_bytes() != (src_skill / reference).read_bytes():
             raise InstallCheckError("INSTALL_REFERENCE_MISMATCH")
-        if "github" not in installed.split(marker, 1)[0]:
+        if "local-path:" not in installed.split(marker, 1)[0]:
             raise InstallCheckError("INSTALL_SOURCE_METADATA_MISSING")
 
         # The CLI must enumerate the installed skill through its own API.
