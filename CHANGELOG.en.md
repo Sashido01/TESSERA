@@ -4,6 +4,15 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.15 — Offline verification of actual catalog ZIP bytes
+
+- Added `tools/verify_catalog_package.py` to validate archive structure, required files, manifest, every member SHA-256, exact version, and externally supplied full source commit SHA.
+- Unsafe paths, symlinks, duplicates, unsupported encoding/compression, limits, and tampered bytes fail closed; ZIP contents are never extracted or executed.
+- Added negative unit tests and a bilingual [CATALOG_VERIFICATION](docs/CATALOG_VERIFICATION.en.md) guide.
+- Archive internal integrity is distinct from independently verified cryptographic attestation; signing and publication remain NOT_VERIFIED.
+
+**Limits:** live signing, publishing, and agent-client integration remain NOT_VERIFIED; T09 PARTIAL. CI acceptance for this version must be checked after the PR is opened.
+
 ## 0.0.14 — Deterministic catalog package and trusted attestation preparation
 
 - Added `tools/build_catalog_package.py`: genuine Agent Skills catalog source ZIP with fixed ZIP metadata, LICENSE, VERSION, runtime skill files, SHA-256 manifest, and exact source Git commit.
