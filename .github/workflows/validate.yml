@@ -37,6 +37,8 @@ jobs:
         run: python tools/check_workflow_security.py
       - name: Проверить ограничения сборки и подписывающего workflow
         run: python tools/check_build_workflow_security.py
+      - name: Проверить фиксированные Node.js 24 Actions в обоих workflows
+        run: python tools/check_actions_runtime.py
       - name: Проверить воспроизводимый пакет каталога
         run: python tools/build_catalog_package.py --repo . --output-dir dist --check-reproducible
       - name: Запустить тесты каталога
