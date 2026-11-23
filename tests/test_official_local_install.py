@@ -50,7 +50,7 @@ class OfficialInstallTests(unittest.TestCase):
             installed = dest / "SKILL.md"
             content = installed.read_text(encoding="utf-8")
             installed.write_text(content.replace(
-                "\n---\n", "\nmetadata:\n  github-source: local\n---\n", 1
+                "\n---\n", "\nmetadata:\n  local-path: source\n---\n", 1
             ), encoding="utf-8")
             return subprocess.CompletedProcess(argv, 0, "Installed microversion-release", "")
         if argv[1:3] == ["skill", "list"]:
@@ -73,7 +73,7 @@ class OfficialInstallTests(unittest.TestCase):
             self.assertNotIn("GH_TOKEN", env)
             self.assertIs(opts["stdin"], subprocess.DEVNULL)
             self.assertTrue(opts["capture_output"])
-        self.assertNotIn("github-source",
+        self.assertNotIn("local-path:",
                          (self.skill / "SKILL.md").read_text(encoding="utf-8"))
 
     def test_reject_existing_destination(self):
