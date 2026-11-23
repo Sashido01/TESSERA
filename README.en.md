@@ -78,7 +78,7 @@ NVIDIA SkillEvaluator is permitted **only at Tier 1**, after compatibility and r
 
 ## GitHub protection
 
-The [Rulesets setup guide](docs/GITHUB_SECURITY.en.md) documents branch and tag protection. **Rulesets are active:** Pull Requests, `validate`, and an up-to-date branch are required, and published tags are protected. The negative CI acceptance test behaved as expected. Positive merge and next annotated tag acceptance remain pending.
+The [Rulesets setup guide](docs/GITHUB_SECURITY.en.md) documents branch and tag protection. **Rulesets are active:** Pull Requests, `validate`, and an up-to-date branch are required, and published tags are protected. The negative CI acceptance test behaved as expected. Both negative and positive Pull Request cases and creation of a new annotated tag are verified. Destructive tag-rewrite tests have not been performed.
 
 ## Independent release verification
 
@@ -91,6 +91,10 @@ A [Release Preflight](docs/RELEASE_PREFLIGHT.en.md) and a `release-checks.json` 
 ## Evidence reports and remote tags
 
 [T09.03](docs/RELEASE_REPORT.en.md) documents verification of an annotated tag object SHA on a Git remote and machine/human-readable evidence reports. By default, reporting is local and runs no project commands; network queries require `--verify-remote`, and build/test execution requires `--execute-checks`. **PASS covers only explicitly requested checks, not application release readiness.**
+
+## Completed GitHub Actions verification
+
+[T09.04](docs/RELEASE_CI.en.md) adds independent verification of a completed GitHub Actions run by exact commit SHA and required jobs. Explicit `--verify-ci`, a trusted repository and run ID are required. No paid AI APIs are involved; network queries are disabled by default. `CI_VERIFIED` is not RELEASED.
 
 ## Contributing
 

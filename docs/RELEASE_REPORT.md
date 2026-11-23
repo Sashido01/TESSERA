@@ -58,6 +58,10 @@ JSON содержит `local_tag_status`, `preflight_status`, `checks_status`, `
 
 Команда завершается кодом 0 при `evidence_status=PASS`, кодом 1 при BLOCKED. Это **не** код подтверждения готовности приложения к выпуску.
 
+## Проверка завершённого GitHub Actions — T09.04
+
+См. [Release CI](RELEASE_CI.md). После полного завершения workflow можно добавить явные параметры `--verify-ci --github-repo owner/repository --run-id 123456789`. Будут проверены SHA коммита, имя репозитория, событие push в main, правильный workflow и обе обязательные jobs. В отчёт добавляются `ci_status` и реквизиты проверенного run. **Без `--verify-ci` API не вызывается.** Даже `CI_VERIFIED` и `CI_AND_REMOTE_TAG_VERIFIED` не означают готовый или опубликованный продукт: `release_readiness=NOT_VERIFIED`.
+
 ## Безопасность и приёмка
 
 - Git fetch/push, создание или обновление тегов не выполняются.

@@ -29,6 +29,10 @@ The official `skills-ref` validator is planned for standard Agent Skills format 
 
 T09.01 introduces the [read-only Git evidence inspector](RELEASE_CORE.en.md). It reads the version and validates an annotated tag against an exact, possibly historical, commit. It does **not** run builds or execute `git push`, and it does not claim RELEASED status. Its JSON output is agent-independent and intended for future adapters.
 
+## Completed CI verification (T09.04)
+
+[Release CI](RELEASE_CI.en.md) documents independent GitHub Actions API verification of a fully completed workflow run, with no automatic network access. The pure stage reducer considers only requested and actually verified evidence and **never** claims RELEASED. Self-verification of a still-running workflow is prohibited to avoid circular dependencies.
+
 ## Installation
 
 Identify the actual active skills directory in each agent system. Copy the complete skill directory. Use symlinks or junctions only after confirming that the agent supports them and that the path is safe. A file existing on disk does not prove the skill is automatically activated.

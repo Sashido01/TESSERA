@@ -16,7 +16,7 @@
 - `NOT_STARTED`: implementation has not begun; this roadmap is not evidence of completion.
 - `BLOCKED`: a specific blocker and its cause have been recorded.
 
-The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.8`. They do **not** prove execution in installed agent clients or local Windows environments.
+The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.9`. They do **not** prove execution in installed agent clients or local Windows environments.
 
 ## Foundation stages T00–T07
 
@@ -45,7 +45,7 @@ Complete work as small verifiable changes, assigning a new microversion only to 
 
 ### T09 — Independent Release Core
 
-**Priority P0 · Status PARTIAL (T09.01–T09.03).** Implemented a [Git-tag inspector](RELEASE_CORE.en.md), [Release Preflight](RELEASE_PREFLIGHT.en.md), and [remote verification with a report](RELEASE_REPORT.en.md). Version/release notes, annotated local tag, exact remote tag object and explicitly authorized build/test steps can be verified. By default, reporting performs no network calls or project commands. Final release readiness, external CI and software publication remain NOT_VERIFIED. Continue by separating `inspect`, `next`, `preflight`, `verify-build`, `tag`, `verify-tag`, `verify-remote`, and `report`. Read actual build/test commands only from target-project configuration. Check version/changelog consistency, exact release commit SHA, unexpected changes, Git permissions, and annotated tagging. Model WORKING, PREPARED, VALIDATED, TAGGED, RELEASED, and BLOCKED as distinct states. A tag is not evidence of a passing build or a published release.
+**Priority P0 · Status PARTIAL (T09.01–T09.04).** Implemented [local tag inspection](RELEASE_CORE.en.md), [Release Preflight](RELEASE_PREFLIGHT.en.md), [remote evidence reports](RELEASE_REPORT.en.md), and [completed GitHub Actions verification](RELEASE_CI.en.md). The latter compares exact commit SHA, completed run, workflow, and both required jobs via the GitHub REST API. Network requests and project commands remain opt-in. Release readiness, artifacts, and software publication remain NOT_VERIFIED. Continue by separating `inspect`, `next`, `preflight`, `verify-build`, `tag`, `verify-tag`, `verify-remote`, and `report`. Read actual build/test commands only from target-project configuration. Check version/changelog consistency, exact release commit SHA, unexpected changes, Git permissions, and annotated tagging. Model WORKING, PREPARED, VALIDATED, TAGGED, RELEASED, and BLOCKED as distinct states. A tag is not evidence of a passing build or a published release.
 
 **Acceptance:** negative tests for missing, lightweight, wrongly targeted, and reused tags; historical release verification without assuming current HEAD; reproducible recovery from failures. Any mandatory check failure blocks the release.
 

@@ -16,10 +16,14 @@ try:
     from .release_inspect import InspectionError, canonical_repo, inspect, resolve_commit
     from .release_preflight import preflight
     from .release_remote import verify_remote_tag
+    from .release_ci import verify_github_ci
+    from .release_state import evidence_stage
 except ImportError:
     from release_inspect import InspectionError, canonical_repo, inspect, resolve_commit
     from release_preflight import preflight
     from release_remote import verify_remote_tag
+    from release_ci import verify_github_ci
+    from release_state import evidence_stage
 
 
 def build_report(
@@ -32,7 +36,12 @@ def build_report(
     remote: str = "origin",
     verify_remote: bool = False,
     execute_checks: bool = False,
+    verify_ci: bool = False,
+    github_repo: str | None = None,
+    run_id: int | None = None,
 ) -> dict[str, Any]:
+    if verify_ci and (not github_repo or run_id is None):
+        raise InspectionError("CI_REQUIRES_GITHUB_REPO_AND_RUN_ID")
     root = canonical_repo(repo)
     local = inspect(root, version, prefix=prefix, commit=commit)
     target_sha = local["expected_commit_sha"]
@@ -73,17 +82,22 @@ def build_report(
             remote_status = remote_info["remote_tag_status"]
             problems.extend(remote_info["problems"])
 
+    ci_info: dict[str, Any] | None = None
+    ci_status = "NOT_CHECKED"
+    if verify_ci:
+        assert github_repo is not None and run_id is not None
+        ci_info = verify_github_ci(github_repo, run_id, target_sha)
+        ci_status = ci_info["ci_status"]
+        problems.extend(ci_info["problems"])
+
     problems = list(dict.fromkeys(problems))
-    if problems:
-        stage = "BLOCKED"
-    elif remote_status == "PASS" and checks_status == "PASS":
-        stage = "REMOTE_TAG_VERIFIED_CHECKS_PASSED"
-    elif remote_status == "PASS":
-        stage = "REMOTE_TAG_VERIFIED_CHECKS_NOT_RUN"
-    elif checks_status == "PASS":
-        stage = "LOCAL_TAG_VERIFIED_CHECKS_PASSED"
-    else:
-        stage = "LOCAL_TAG_VERIFIED_CHECKS_NOT_RUN"
+    stage = evidence_stage(
+        problems=problems,
+        local_tag_status=local["inspection_status"],
+        remote_tag_status=remote_status,
+        checks_status=checks_status,
+        ci_status=ci_status,
+    )
     return {
         "schema_version": 1,
         "requested_version": version,
@@ -97,15 +111,20 @@ def build_report(
         "checks_status": checks_status,
         "executed_checks": check_results,
         "remote_tag_status": remote_status,
+        "ci_status": ci_status,
+        "ci_run_id": run_id if verify_ci else None,
+        "ci_repository": github_repo if verify_ci else None,
+        "ci_observed_commit_sha": ci_info.get("observed_commit_sha") if ci_info else None,
+        "ci_run_attempt": ci_info.get("run_attempt") if ci_info else None,
         "remote_tag_object_sha": remote_info["remote_tag_object_sha"] if remote_info else None,
         "remote_publication": remote_info["remote_publication"] if remote_info else "NOT_CHECKED",
         "github_release": "NOT_CHECKED",
         "stage": stage,
-        "evidence_status": "PASS" if not problems else "BLOCKED",
+        "evidence_status": "PASS" if stage != "BLOCKED" else "BLOCKED",
         "release_readiness": "NOT_VERIFIED",
         "problems": problems,
         "limitations": [
-            "Нет независимого подтверждения внешнего CI или выпущенного приложения",
+            "Нет независимого подтверждения выпущенного приложения или защищённого доказательства полноты тестов",
             "Аннотированный тег и remote-ref не доказывают публикацию готового ПО",
             "Данные исполняемых тестов не сохраняются как подписанные доказательства",
         ],
@@ -123,6 +142,8 @@ def markdown(result: dict[str, Any]) -> str:
         f"- Preflight: {result['preflight_status']}",
         f"- Реальные проверки: {result['checks_status']}",
         f"- Удалённый тег: {result['remote_tag_status']}",
+        f"- Завершённый CI: {result['ci_status']}",
+        f"- CI run ID: {result['ci_run_id']}",
         f"- Доказательства: {result['evidence_status']}",
         f"- Этап: {result['stage']}",
         f"- Готовность релиза: {result['release_readiness']}",
@@ -152,6 +173,9 @@ def main() -> int:
     parser.add_argument("--remote", default="origin", help="Имя доверенного Git remote")
     parser.add_argument("--verify-remote", action="store_true", help="Явно разрешить сетевую проверку тега")
     parser.add_argument("--execute-checks", action="store_true", help="Явно запустить проверенные команды проекта")
+    parser.add_argument("--verify-ci", action="store_true", help="Явно разрешить запрос к GitHub Actions API")
+    parser.add_argument("--github-repo", help="Доверенный владелец/репозиторий GitHub, например owner/repository")
+    parser.add_argument("--run-id", type=int, help="Идентификатор уже завершённого запуска GitHub Actions")
     parser.add_argument("--format", choices=("json", "markdown"), default="json")
     args = parser.parse_args()
     try:
@@ -159,6 +183,7 @@ def main() -> int:
             args.repo, args.version, prefix=args.prefix, commit=args.commit,
             config=args.config, remote=args.remote,
             verify_remote=args.verify_remote, execute_checks=args.execute_checks,
+            verify_ci=args.verify_ci, github_repo=args.github_repo, run_id=args.run_id,
         )
     except (InspectionError, OSError) as exc:
         print(f"BLOCKED: {exc}", file=sys.stderr)
