@@ -42,6 +42,14 @@ class WorkflowSecurityTests(unittest.TestCase):
         )
         self.assertTrue(any("ZIP после тестов" in e for e in module.validate_workflow(modified)))
 
+    def test_remote_install_is_required(self):
+        modified = WORKFLOW.replace("run: python tools/check_official_remote_install.py", "run: echo")
+        self.assertTrue(any("удалённой проверки" in e for e in module.validate_workflow(modified)))
+
+    def test_remote_install_cannot_use_personal_token(self):
+        modified = WORKFLOW.replace("GH_TOKEN: ${{ github.token }}", "GH_TOKEN: ${{ secrets.PAT }}")
+        self.assertTrue(any("read-only токеном" in e for e in module.validate_workflow(modified)))
+
     def test_tag_job_needs_validation(self):
         modified = WORKFLOW.replace("    needs: validate", "    needs: unknown")
         self.assertTrue(any("validate" in e for e in module.validate_workflow(modified)))
