@@ -171,6 +171,17 @@ class CIEvidenceTests(unittest.TestCase):
         self.assertEqual(len(urls), 2)
         self.assertTrue(all(x.startswith("https://api.github.com/repos/Sashido01/TESSERA/") for x in urls))
 
+    def test_shared_transport_rejects_noncanonical_release_routes(self):
+        root = "https://api.github.com/repos/owner/repo/releases/tags/"
+        with mock.patch.object(release_ci.urllib.request, "build_opener") as builder:
+            for tag in ("../v0.1.0", "a%252Fv0.1.0", "a%2Fb%2Fv0.1.0",
+                        "a/v0.1.0", "a%2fv0.1.0", "v0.1.0?extra=1",
+                        "v0.1.0#fragment", "v01.1.0", "v0.01.0"):
+                with self.subTest(tag=tag), self.assertRaisesRegex(
+                        release_ci.CIEvidenceError, "CI_API_URL_INVALID"):
+                    release_ci.get_public_json(root + tag)
+            builder.assert_not_called()
+
     def test_api_redirect_handler_rejects_before_dispatch(self):
         from urllib.request import Request
         handler = release_ci.NoAPIRedirect()
