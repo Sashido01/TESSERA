@@ -47,6 +47,13 @@ def validate_workflow(workflow: str) -> list[str]:
     )
     if remote_step not in validate:
         errors.append("Нет обязательной удалённой проверки с ограниченным read-only токеном CI")
+    update_step = (
+        "        env:\n"
+        "          GH_TOKEN: ${{ github.token }}\n"
+        '        run: python tools/check_official_skill_update.py --repo . --cli "$RUNNER_TEMP/gh_2.105.0_linux_amd64/bin/gh"'
+    )
+    if update_step not in validate:
+        errors.append("Нет обязательной проверки обновления с read-only токеном CI")
     if "contents: write" in validate:
         errors.append("Право записи обнаружено в проверяющей задаче")
     if "needs: validate" not in tagging:
