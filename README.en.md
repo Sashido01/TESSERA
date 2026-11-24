@@ -56,6 +56,8 @@ These commands print `0.0.100` and `0.1.0`, respectively. **The second command o
 
 CI tests actual `gh skill install --from-local --dir` followed by `gh skill list` on a temporary skill copy. **Direct local installation may overwrite existing files without `--force`**: only use a new empty directory, and prefer the safe offline installer for existing projects. Remote `--pin` installation remains NOT_VERIFIED. [Details](docs/GH_SKILL_INSTALL.en.md).
 
+**T09.10 — signing build:** the first live [run at v0.0.19 failed](https://github.com/Sashido01/TESSERA/actions/runs/45347443989) because Python bytecode caches were created under runtime `scripts/`. Disabled bytecode emission and added post-test ZIP validation; **no new live signature is confirmed**. See [TRUSTED_BUILD](docs/TRUSTED_BUILD.en.md).
+
 ## Official GitHub CLI validation without publication
 
 CI additionally runs SHA-256-pinned official `gh 2.105.0` with `gh skill publish --dry-run` on a temporary, tokenless `skills/` snapshot without a GitHub remote. It verifies valid and invalid formats without creating a GitHub Release. It does not validate remote publication readiness. See [GH_SKILL_PUBLISH_DRY_RUN](docs/GH_SKILL_PUBLISH_DRY_RUN.en.md).
