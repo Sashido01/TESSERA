@@ -101,6 +101,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: python tools/check_official_remote_install.py --repo . --cli "$RUNNER_TEMP/gh_2.105.0_linux_amd64/bin/gh"
 
+      - name: Проверить реальное обновление и безопасный staged re-pin
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python tools/check_official_skill_update.py --repo . --cli "$RUNNER_TEMP/gh_2.105.0_linux_amd64/bin/gh"
+
   tag_microversion:
     name: Создать аннотированный тег проверенной версии
     needs: validate
