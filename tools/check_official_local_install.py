@@ -157,6 +157,13 @@ def inspect(repo: pathlib.Path, cli: pathlib.Path,
         reference = pathlib.Path("references") / "INTEGRATION.md"
         if (target / reference).read_bytes() != (src_skill / reference).read_bytes():
             raise InstallCheckError("INSTALL_REFERENCE_MISMATCH")
+        # A separately licensed skill must keep its actual license bytes.
+        license_file = src_skill / "LICENSE.txt"
+        installed_license = target / "LICENSE.txt"
+        if license_file.exists():
+            if (not installed_license.is_file() or installed_license.is_symlink()
+                    or installed_license.read_bytes() != license_file.read_bytes()):
+                raise InstallCheckError("INSTALL_LICENSE_MISMATCH")
         if "local-path:" not in installed.split(marker, 1)[0]:
             raise InstallCheckError("INSTALL_SOURCE_METADATA_MISSING")
 
@@ -202,6 +209,7 @@ def inspect(repo: pathlib.Path, cli: pathlib.Path,
         "test_mode": "TEMPORARY_LOCAL_ONLY",
         "official_install": "PASS",
         "official_discovery": "PASS",
+        "standalone_license": "PASS" if license_file.exists() else "NOT_PRESENT",
         "no_overwrite_guard": "PASS",
         "local_pin": "NOT_SUPPORTED",
         "remote_pinned_install": "NOT_VERIFIED",

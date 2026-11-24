@@ -56,3 +56,7 @@ python -m unittest discover -s tests -v
 ## Compatibility and limitations
 
 The portable structure and CLI can be validated in TESSERA CI. **Installation, automatic activation, and enforcement in actual installed Codex, Harness, Claude, and Hermes clients remain NOT_VERIFIED.** A SKILL.md file does not replace audited lifecycle hooks, Git/CI verification, or concurrency locking. Never rewrite the published history of an existing project.
+
+## License
+
+MIT. The complete license travels with the skill: [LICENSE.txt](LICENSE.txt).

@@ -76,6 +76,22 @@ class OfficialInstallTests(unittest.TestCase):
         self.assertNotIn("local-path:",
                          (self.skill / "SKILL.md").read_text(encoding="utf-8"))
 
+    def test_standalone_license_preserved(self):
+        (self.skill / "LICENSE.txt").write_text("Test license", encoding="utf-8")
+        result = mod.inspect(self.repo, pathlib.Path(sys.executable), runner=self.fake)
+        self.assertEqual(result["standalone_license"], "PASS")
+
+    def test_missing_standalone_license_blocks(self):
+        (self.skill / "LICENSE.txt").write_text("Test license", encoding="utf-8")
+        def without_license(argv, **kwargs):
+            result = self.fake(argv, **kwargs)
+            if argv[1:3] == ["skill", "install"] and "--pin" not in argv:
+                dest = pathlib.Path(argv[argv.index("--dir") + 1]) / mod.SKILL
+                (dest / "LICENSE.txt").unlink()
+            return result
+        with self.assertRaisesRegex(mod.InstallCheckError, "INSTALL_LICENSE_MISMATCH"):
+            mod.inspect(self.repo, pathlib.Path(sys.executable), runner=without_license)
+
     def test_reject_existing_destination(self):
         target = self.repo / "target"
         (target / mod.SKILL).mkdir(parents=True)

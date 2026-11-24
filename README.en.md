@@ -166,3 +166,5 @@ Original project: [Sashido01/TESSERA](https://github.com/Sashido01/TESSERA).
 **T12.02.02.03:** [direct static SkillSpector 2.13.6](docs/SKILLSPECTOR_REVIEW.en.md), [CI 45370414762](https://github.com/Sashido01/TESSERA/actions/runs/45370414762) PASS: 454+19 tests; 16/16 files, 100% coverage, complete_with_caveats (4 reference_missing), risk 78/100 HIGH, exit 1 (threshold 50 exceeded), 12 findings (10 MEDIUM, 2 HIGH), zero suppressions, both synthetic fixtures PASS, 13.32 s. T12.02.02.03 COMPLETE within direct static execution scope; findings and full NVIDIA security acceptance remain open.
 
 **T12.02.02.04:** [dependency and license metadata review](docs/DEPENDENCY_REVIEW.en.md), live CI pending.
+
+**T12.03.01:** [portable skill license and references](docs/SKILL_PORTABILITY.en.md); live CI pending.

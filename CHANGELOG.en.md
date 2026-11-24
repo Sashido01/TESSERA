@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.33 — Portable Microversion Release license and references (T12.03.01)
+
+- Standalone MIT license, portable references, corrected distribution guidance, ZIP and official local installation regressions. Actual CI acceptance required.
+
 ## 0.0.32 — Dependency CVE and license metadata review (T12.02.02.04)
 
 - Exact installed Python inventory, OSV queries with pagination and negative control, license metadata; Go binary build info for gh/Gitleaks, module and toolchain OSV queries, deps.dev license metadata. Advisory findings, fail-closed execution, no LLM. Actual CI acceptance required; legal compatibility not verified.

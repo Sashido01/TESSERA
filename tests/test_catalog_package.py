@@ -85,6 +85,18 @@ class PackageTests(unittest.TestCase):
     def test_archive_contains_license(self):
         self.assertIn("TESSERA-0.0.14/LICENSE", self.entries())
 
+    def test_standalone_skill_license_is_packaged(self):
+        skill = self.root / "skills" / "microversion-release"
+        license_bytes = (self.root / "LICENSE").read_bytes()
+        (skill / "LICENSE.txt").write_bytes(license_bytes)
+        self.assertEqual(self.entries()["TESSERA-0.0.14/skills/microversion-release/LICENSE.txt"], license_bytes)
+
+    def test_standalone_skill_license_symlink_rejected(self):
+        skill = self.root / "skills" / "microversion-release"
+        (skill / "LICENSE.txt").symlink_to(self.root / "LICENSE")
+        with self.assertRaisesRegex(package.PackageError, "PACKAGE_INVALID_FILE"):
+            self.zip()
+
     def test_bad_version_rejected(self):
         with self.assertRaisesRegex(package.PackageError, "PACKAGE_VERSION_INVALID"):
             package.package_bytes(self.root, "0.00.14", self.sha)
