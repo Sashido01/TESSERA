@@ -149,4 +149,4 @@ Original project: [Sashido01/TESSERA](https://github.com/Sashido01/TESSERA).
 
 **T10.02 — COMPLETE:** isolated remote install with official `gh 2.105.0` using a fully qualified Git ref and SHA, file and metadata checks, pinned update --dry-run and duplicate refusal. [Live CI PASS](https://github.com/Sashido01/TESSERA/actions/runs/45351217500). [Details](docs/GH_SKILL_INSTALL.en.md). Agent-client activation remains unverified.
 
-**T10.03.01:** actual update and guarded staged re-pin harness; local edits block the guarded transition. Native update is tested against synthetic edits. Acceptance requires live CI; do not apply this harness to user profiles. [Details](docs/GH_SKILL_INSTALL.en.md).
+**T10.03.01 — COMPLETE (harness):** actual update and guarded staged re-pin harness; local edits block the guarded transition. Native update is tested against synthetic edits. [Live CI PASS](https://github.com/Sashido01/TESSERA/actions/runs/45352932764); native local-edit removal confirmed. Do not apply this harness to user profiles. [Details](docs/GH_SKILL_INSTALL.en.md).
