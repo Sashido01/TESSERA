@@ -47,14 +47,20 @@ def git_bytes(repo: pathlib.Path, env: dict[str, str], *args: str) -> bytes:
     return result.stdout
 
 
-def expected_files(repo: pathlib.Path, env: dict[str, str]) -> tuple[str, dict[str, bytes]]:
-    require(git_bytes(repo, env, "rev-parse", REF).decode().strip() == TAG_OBJECT,
+def expected_files(repo: pathlib.Path, env: dict[str, str], *, ref: str = REF,
+                   commit: str = COMMIT, tag_object: str = TAG_OBJECT) -> tuple[str, dict[str, bytes]]:
+    require(git_bytes(repo, env, "rev-parse", ref).decode().strip() == tag_object,
             "REMOTE_TAG_OBJECT_MISMATCH")
-    require(git_bytes(repo, env, "cat-file", "-t", REF).strip() == b"tag",
+    require(git_bytes(repo, env, "cat-file", "-t", ref).strip() == b"tag",
             "REMOTE_ANNOTATED_TAG_REQUIRED")
-    require(git_bytes(repo, env, "rev-parse", REF + "^{commit}").decode().strip() == COMMIT,
+    require(git_bytes(repo, env, "rev-parse", ref + "^{commit}").decode().strip() == commit,
             "REMOTE_TAG_COMMIT_MISMATCH")
-    tree = git_bytes(repo, env, "rev-parse", COMMIT + ":" + SKILL_PATH).decode().strip()
+    return files_at_commit(repo, env, commit)
+
+
+def files_at_commit(repo: pathlib.Path, env: dict[str, str], commit: str) -> tuple[str, dict[str, bytes]]:
+    require(bool(re.fullmatch(r"[0-9a-f]{40}", commit)), "REMOTE_COMMIT_INVALID")
+    tree = git_bytes(repo, env, "rev-parse", commit + ":" + SKILL_PATH).decode().strip()
     require(bool(re.fullmatch(r"[0-9a-f]{40}", tree)), "REMOTE_TREE_INVALID")
     records = git_bytes(repo, env, "ls-tree", "-r", "-z", tree).split(b"\0")
     files: dict[str, bytes] = {}
@@ -84,14 +90,17 @@ def split_skill(data: bytes) -> tuple[str, bytes]:
     return header.decode("utf-8"), body.lstrip(b"\r\n")
 
 
-def check_metadata(header: str, tree: str, pin: str) -> None:
+def check_metadata(header: str, tree: str, pin: str | None, *, ref: str | None = None) -> None:
     expected = {
         "github-repo": URL,
         "github-path": SKILL_PATH,
-        "github-ref": pin,
-        "github-pinned": pin,
+        "github-ref": ref if ref is not None else pin,
         "github-tree-sha": tree,
     }
+    if pin is not None:
+        expected["github-pinned"] = pin
+    else:
+        require(not re.search(r"(?m)^[ \t]+github-pinned:", header), "REMOTE_UNEXPECTED_PIN")
     for key, value in expected.items():
         matches = re.findall(r"(?m)^[ \t]+" + re.escape(key) + r":[ \t]*(.*?)\s*$", header)
         require(len(matches) == 1, "REMOTE_METADATA_MISSING_OR_DUPLICATE")
@@ -101,7 +110,8 @@ def check_metadata(header: str, tree: str, pin: str) -> None:
         require(actual == value, "REMOTE_METADATA_MISMATCH")
 
 
-def verify_install(target: pathlib.Path, files: dict[str, bytes], tree: str, pin: str) -> None:
+def verify_install(target: pathlib.Path, files: dict[str, bytes], tree: str,
+                   pin: str | None, *, ref: str | None = None) -> None:
     require(target.is_dir() and not target.is_symlink(), "REMOTE_TARGET_INVALID")
     installed: dict[str, pathlib.Path] = {}
     for p in target.rglob("*"):
@@ -119,7 +129,7 @@ def verify_install(target: pathlib.Path, files: dict[str, bytes], tree: str, pin
             _, original_body = split_skill(raw)
             header, body = split_skill(got)
             require(body == original_body, "REMOTE_SKILL_BODY_MISMATCH")
-            check_metadata(header, tree, pin)
+            check_metadata(header, tree, pin, ref=ref)
         else:
             require(got == raw, "REMOTE_FILE_BYTES_MISMATCH")
 
