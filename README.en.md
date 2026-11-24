@@ -146,3 +146,5 @@ See [contribution guidelines](CONTRIBUTING.en.md), [security policy](SECURITY.en
 
 ---
 Original project: [Sashido01/TESSERA](https://github.com/Sashido01/TESSERA).
+
+**T10.02:** isolated remote install with official `gh 2.105.0` using a fully qualified Git ref and SHA, file and metadata checks, pinned update --dry-run and duplicate refusal. Acceptance requires real CI. [Details](docs/GH_SKILL_INSTALL.en.md).
