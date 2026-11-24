@@ -168,3 +168,5 @@ Original project: [Sashido01/TESSERA](https://github.com/Sashido01/TESSERA).
 **T12.02.02.04:** [dependency and license metadata review](docs/DEPENDENCY_REVIEW.en.md), live CI pending.
 
 **T12.03.01:** [portable skill license and references](docs/SKILL_PORTABILITY.en.md); live CI pending.
+
+[CI 45373618225](https://github.com/Sashido01/TESSERA/actions/runs/45373618225): 486+19 tests PASS. SkillSpector 2.13.6: complete, 17/17 files, 100%, reference_missing 4→0, risk 78→36 (HIGH→MEDIUM), HIGH 2→0, MEDIUM 10, zero suppressions, both fixtures PASS, 19.40 s. NVIDIA: license allowed, RU quality 80.0 (65×0.35 + 80×0.25 + 95×0.25 + 90×0.15), Codex custom provider degraded→loads. Overall CI FAIL only at inherited Go review; release and real activation NOT_VERIFIED.
