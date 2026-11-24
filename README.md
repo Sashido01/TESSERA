@@ -146,3 +146,5 @@ NVIDIA SkillEvaluator допускается **только на Tier 1**, по�
 
 ---
 Оригинальный проект: [Sashido01/TESSERA](https://github.com/Sashido01/TESSERA).
+
+**T10.02 — COMPLETE:** изолированная удалённая установка официальным `gh 2.105.0` по полному Git ref и SHA, проверка файлов и метаданных, pinned update --dry-run и отказ повторной установки. [Живой CI PASS](https://github.com/Sashido01/TESSERA/actions/runs/45351217500). [Детали](docs/GH_SKILL_INSTALL.md). Активация в агентных клиентах не подтверждена.

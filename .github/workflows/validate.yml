@@ -95,6 +95,12 @@ jobs:
           set -euo pipefail
           python tools/check_official_local_install.py --repo . --cli "$RUNNER_TEMP/gh_2.105.0_linux_amd64/bin/gh"
 
+      - name: Проверить удалённую установку навыка по полному тегу и SHA
+        # Only the short-lived read-only validation-job token is used.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python tools/check_official_remote_install.py --repo . --cli "$RUNNER_TEMP/gh_2.105.0_linux_amd64/bin/gh"
+
   tag_microversion:
     name: Создать аннотированный тег проверенной версии
     needs: validate
