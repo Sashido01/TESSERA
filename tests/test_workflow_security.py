@@ -67,7 +67,7 @@ class WorkflowSecurityTests(unittest.TestCase):
         self.assertTrue(any("статического обзора NVIDIA" in e for e in module.validate_workflow(modified)))
 
     def test_bandit_review_is_required(self):
-        modified = WORKFLOW.replace("run: python tools/check_bandit_review.py", "run: echo")
+        modified = WORKFLOW.replace("python tools/check_bandit_review.py", "echo")
         self.assertTrue(any("Bandit" in e for e in module.validate_workflow(modified)))
 
     def test_gitleaks_review_is_required(self):
@@ -133,6 +133,11 @@ class WorkflowSecurityTests(unittest.TestCase):
     def test_gitleaks_paths_container_required(self):
         modified = WORKFLOW.replace("run: python tools/check_gitleaks_paths_container.py", "run: echo")
         self.assertTrue(any("контейнерной проверки правил Gitleaks по пути" in e for e in module.validate_workflow(modified)))
+
+
+    def test_bandit_container_required(self):
+        modified = WORKFLOW.replace("run: python tools/check_bandit_container.py", "run: echo")
+        self.assertTrue(any("контейнерной проверки Bandit" in e for e in module.validate_workflow(modified)))
 
 
 if __name__ == "__main__":

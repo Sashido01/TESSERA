@@ -125,3 +125,11 @@ TSG1 worker uses two concurrent stdin processes, GOMAXPROCS=1 per process, windo
 ## T12.03.26 — integrated Gitleaks Docker (candidate)
 
 Pinned NVIDIA SecretsValidator: exact 12-argument and version contract; copy only allowed skill/fixture root, byte-identical TOML with restricted schema, preserve relative paths/empty dirs, binary SHA256 before and inside container, one read-only stage mount, no network/nonroot/caps drop, existing cgroups, stdout/stderr per-file RLIMIT_FSIZE, 100s deadline and cleanup. Only NVIDIA-consumed JSON fields plus REDACTED, no raw Match/Line; exit 0/10 preserved. Actual clean/positive controls and integrated policy require CI. Eight new offline regressions. Not proof against host TOCTOU/malicious scanner, daemon failures or hard aggregate disk quota. Standalone host parity retained; no host fallback for integrated mode. T12 PARTIAL.
+
+## T12.03.26 — PR result
+
+[CI 45453412802](https://github.com/Sashido01/TESSERA/actions/runs/45453412802) PASS: 604+38=642 tests, integrated Gitleaks DOCKER_RESTRICTED_SNAPSHOT, clean/detection/redaction/source controls PASS, Secrets Detection and Tier 1 policy PASS. History Docker 921 blobs/12,027,318 bytes/249.95s/0 findings. v0.0.57 main CI 45453163183 and tag verified; v0.0.58 merged into main, tag separate.
+
+## T12.03.27 — standalone Bandit Docker (candidate)
+
+Exact subset of seven hash-pinned wheels from existing NVIDIA lock, no extras, host install into separate target, exact distribution inventory and fingerprint on host/container. Container CPython 3.13, offline, only two read-only mounts (Python source snapshot/tools and packages), no network/nonroot/cgroups, separate tmpfs, direct Bandit with existing arguments, complete report coverage and host parity, clean and B307 nosec fixtures, recheck sources. Four offline regressions (3+workflow guard). Actual execution, native PyYAML ABI and performance require CI. Integrated Bandit remains host. T12 PARTIAL.

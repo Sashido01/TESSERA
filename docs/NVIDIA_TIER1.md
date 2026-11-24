@@ -125,3 +125,11 @@ T12.03.20: [CI 45428224320](https://github.com/Sashido01/TESSERA/actions/runs/45
 ## T12.03.26 — интегрированный Gitleaks Docker (кандидат)
 
 Закреплённый NVIDIA SecretsValidator: точный контракт 12 аргументов и version; копия только разрешённого skill/fixture root, байтовый TOML с ограниченной схемой, сохранение относительных путей/пустых каталогов, проверка SHA256 бинарника до и внутри контейнера, один read-only stage mount, no network/nonroot/caps drop, прежние cgroups, stdout/stderr per-file RLIMIT_FSIZE, deadline 100s и cleanup. Только нужные NVIDIA поля JSON + REDACTED, никаких raw Match/Line; коды 0/10 сохраняются. Реальные clean/positive controls и integrated policy требуют CI. Восемь новых offline регрессий. Не доказывает полную защиту от host TOCTOU/вредоносного сканера, daemon failures или hard aggregate disk quota. Standalone host parity сохранён; нет host fallback в интегрированном режиме. T12 PARTIAL.
+
+## T12.03.26 — результат PR
+
+[CI 45453412802](https://github.com/Sashido01/TESSERA/actions/runs/45453412802) PASS: 604+38=642 теста, интегрированный Gitleaks DOCKER_RESTRICTED_SNAPSHOT, clean/detection/redaction/source controls PASS, Secrets Detection и Tier 1 policy PASS. History Docker 921 blobs/12 027 318 байт/249.95s/0 findings. v0.0.57 main CI 45453163183 и тег проверены; v0.0.58 принят в main, тег отдельно.
+
+## T12.03.27 — самостоятельный Bandit Docker (кандидат)
+
+Точный subset семи hash-pinned wheel существующего NVIDIA lock, без extras, установка host в отдельный target, проверка exact dist inventory и fingerprint на host/container. В контейнере CPython 3.13, offline, только две read-only mount (Python source snapshot/tools и пакеты), no network/nonroot/cgroups, отдельный tmpfs, прямой Bandit с прежними аргументами, полный отчёт coverage и host parity, clean и B307 nosec fixtures, повторная проверка исходных данных. Четыре offline регрессии (3+workflow guard). Реальное выполнение, ABI native PyYAML и производительность требуют CI. Integrated Bandit остаётся host. T12 PARTIAL.

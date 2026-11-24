@@ -193,3 +193,5 @@ T12.03.08: CI 45391798766 — 513+29 PASS, GOVULN_CONTROL_VERSION BLOCKED; new c
 **T12.03.24:** CI 45442813029 PASS, 631 tests, 3/3 upstream license + RECORD MATCH. **T12.03.25 — candidate:** two TSG1 workers under unchanged resource profile, three regressions, host parity retained. CI required; T12 PARTIAL.
 
 **T12.03.25:** CI 45448926511 PASS, 634 tests, history 243.73s/911 blobs. **T12.03.26 — candidate:** integrated Gitleaks Docker, exact NVIDIA contract, staged snapshot, bounded output, cleanup, eight regressions; CI required. T12 PARTIAL.
+
+**T12.03.26:** CI 45453412802 PASS, 642 tests, integrated Gitleaks Docker controls PASS. **T12.03.27 — candidate:** standalone Bandit Docker, seven wheels, exact host parity, four regressions. CI required; T12 PARTIAL.
