@@ -6,7 +6,7 @@ This file tracks changes to the **shared catalog**. Individual skills may mainta
 
 ## 0.0.28 — Direct Bandit static review (T12.02.02.01)
 
-- Isolated review of all tracked Python files with pinned Bandit 1.9.4, strict coverage and report validation, synthetic positive and negative cases, safe aggregates, mandatory CI and bilingual documentation. Live CI required for acceptance; full NVIDIA code-integrity, Gitleaks, SkillSpector and CVEs remain NOT_VERIFIED.
+- Isolated review of all tracked Python files with pinned Bandit 1.9.4, strict coverage and report validation, synthetic positive and negative cases, safe aggregates, mandatory CI and bilingual documentation. [CI 45365133732](https://github.com/Sashido01/TESSERA/actions/runs/45365133732) PASS: 414+19 tests, 60 Python files, 87 findings (45 runtime, 42 tests; 2 medium, 85 low, 0 high); clean and negative fixtures PASS; direct review 1.69 s. Direct scan execution COMPLETE; full NVIDIA code-integrity, Gitleaks, SkillSpector and CVEs remain NOT_VERIFIED.
 
 ## 0.0.27 — NVIDIA static review and language alternatives (T12.02.01)
 
