@@ -4,6 +4,12 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.23 — Verify remote skill installation at exact tag and SHA (T10.02)
+
+- Added actual official gh 2.105.0 CI acceptance: install from public TESSERA by refs/tags/v0.0.22 and full commit SHA, verify independent Git tree, file inventory and bytes, pin metadata and gh skill list discovery.
+- Verify duplicate installation refusal without --force and pinned update --dry-run skipping without file mutation. Isolated HOME and GH_CONFIG_DIR, read-only CI token only, offline negative tests.
+- T10.02 acceptance requires real GH_SKILL_REMOTE_PIN_PASS; overall T10 PARTIAL. Applied updates, multi-skill behavior and client activation remain unverified. Updated bilingual docs and ROADMAP.
+
 ## 0.0.22 — Record live independent acceptance of the signed ZIP (T09.10)
 
 - At annotated tag `v0.0.21` (commit `0c83ae9ef119a0cfc9d07c83dbae91e5d026e407`), [signing run 45348928593](https://github.com/Sashido01/TESSERA/actions/runs/45348928593) completed SUCCESS; [Attestation 71489191](https://github.com/Sashido01/TESSERA/attestations/71489191), [Actions Artifact 14898798605](https://github.com/Sashido01/TESSERA/actions/runs/45348928593/artifacts/14898798605). Independent verification checked the 105849-byte ZIP, SHA-256 `55db489f0219739e9296fc941fa51fa58d23c3277878fe5e3a352642947eeb73` and all 17 manifest files. The owner on Windows confirmed that digest and supplied official `gh 2.105.0` output: `Verification succeeded!`, one attestation matched SLSA v1, exact repository, commit, tag, signer workflow, OIDC issuer and GitHub-hosted runner. T09.10 COMPLETE, `SIGNED_ARTIFACT=PASS` only for the verified v0.0.21 ZIP.
