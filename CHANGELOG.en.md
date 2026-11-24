@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.43 — Hardened Release Core local inspection (T12.03.11)
+
+- Fixed tag object and direct commit, rechecks, minimal environment, no Git replace objects, timeout. Eight regressions; CI required. Remote and concurrency locking remain separate.
+
 ## 0.0.42 — Shared Gitleaks safe launch contract (T12.03.10)
 
 - Fixed stdout/redact and archive-depth options; bounded temporary-file invariants, four regressions. CI required; not an OS sandbox.

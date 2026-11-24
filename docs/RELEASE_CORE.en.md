@@ -62,3 +62,7 @@ python -m unittest discover -s tests -v
 ```
 
 Tests create temporary Git repositories and never modify unrelated projects.
+
+## T12.03.11 — fixed-object local inspection (candidate)
+
+Shared read-only Git helper for inspect/preflight/report rejects inherited Git context, forwards an explicit environment allowlist without identity/signing/auth, uses --no-replace-objects, --no-optional-locks, disables fsmonitor, prohibits interactive prompting and requests no lazy fetch. 30 seconds per invocation, closed stdin, fixed error codes without raw stderr. Trusted Git/PATH, configuration and filesystem remain prerequisites; not a hard memory quota, network sandbox or proof of no side effects. Tag inspection reads a fixed SHA, requires a direct commit and matching embedded tag name, rechecks the ref and current HEAD; historical mode requires exact commit SHA, not tag object SHA. JSON schema v1 retained. Eight new regressions; live CI required. ABA/TOCTOU after inspection, remote subprocess and user preflight commands remain separate concerns. T15 remains open.
