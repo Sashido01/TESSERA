@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.36 — Offline installer path hardening (T12.03.04)
+
+- Candidate: reject redirection of standard project paths and links/special files in the source; recheck destination after creating parent directories. Regressions for external links, dangling links and source links. CI not yet accepted; TOCTOU races and Windows junctions NOT_VERIFIED.
+
 ## 0.0.35 — SkillSpector security upgrade (T12.03.03)
 
 - Candidate 2.13.7, pinned commit/wheel/lock, unchanged static no-LLM contract and zero-suppression enforcement, repeat CVE review. [CI 45376675127](https://github.com/Sashido01/TESSERA/actions/runs/45376675127) PASS: 494+19 tests; SkillSpector 2.13.7, 17/17 files, complete, 100%, 16 MEDIUM (AE4 6, AST3 6, AST4 3, LP3 1), zero HIGH, risk 53/100 HIGH, exit 1, zero suppressions, both fixtures PASS, 11.37 s. OSV: 74 Python distributions, zero packages with entries, zero source-commit entries; cryptography 50.0.2, langgraph 1.2.20, pyasn1 0.6.5. T12.03.03 COMPLETE within upgrade and repeat OSV scope; new AST3 and threshold exceedance remain open. Release awaits sequential acceptance.

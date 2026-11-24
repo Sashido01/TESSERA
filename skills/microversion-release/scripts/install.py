@@ -21,6 +21,24 @@ class InstallError(ValueError):
     pass
 
 
+def require_direct_path(path: pathlib.Path) -> None:
+    # Reject links (including dangling links) and redirected directories such as junctions.
+    if path.is_symlink() or path.resolve() != path:
+        raise InstallError("Перенаправление пути установки запрещено")
+
+
+def require_plain_tree(root: pathlib.Path) -> None:
+    pending = [root]
+    while pending:
+        folder = pending.pop()
+        for entry in folder.iterdir():
+            require_direct_path(entry)
+            if entry.is_dir():
+                pending.append(entry)
+            elif not entry.is_file():
+                raise InstallError("Недопустимый тип файла в исходном навыке")
+
+
 def destination(platform: str, project_root: pathlib.Path | None, target_root: pathlib.Path | None) -> pathlib.Path:
     if (project_root is None) == (target_root is None):
         raise InstallError("Укажите либо --project-root, либо --target-root")
@@ -31,14 +49,22 @@ def destination(platform: str, project_root: pathlib.Path | None, target_root: p
     root = project_root.expanduser().resolve()
     if not root.is_dir():
         raise InstallError("Корневой каталог проекта не существует")
-    return root / PROJECT_ROOTS[platform] / SKILL_NAME
+    parent = root
+    for component in pathlib.Path(PROJECT_ROOTS[platform]).parts:
+        parent = parent / component
+        require_direct_path(parent)
+        if parent.exists() and not parent.is_dir():
+            raise InstallError("Компонент пути установки не является каталогом")
+    return parent / SKILL_NAME
 
 
 def run(platform: str, project_root: pathlib.Path | None, target_root: pathlib.Path | None, apply: bool) -> pathlib.Path:
     src = pathlib.Path(__file__).resolve().parents[1]
     if not (src / "SKILL.md").is_file():
         raise InstallError("Не найден исходный SKILL.md")
+    require_plain_tree(src)
     dst = destination(platform, project_root, target_root)
+    require_direct_path(dst)
     if dst.exists() or dst.is_symlink():
         raise InstallError(f"Каталог уже существует; перезапись запрещена: {dst}")
     if dst == src or src in dst.parents:
@@ -47,6 +73,9 @@ def run(platform: str, project_root: pathlib.Path | None, target_root: pathlib.P
         print(f"DRY-RUN: {src} -> {dst} (без изменений)")
         return dst
     dst.parent.mkdir(parents=True, exist_ok=True)
+    if destination(platform, project_root, target_root) != dst:
+        raise InstallError("Путь установки изменился")
+    require_direct_path(dst)
     shutil.copytree(
         src, dst, symlinks=False,
         ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache"),
