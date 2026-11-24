@@ -44,3 +44,5 @@ Reviewed JSON protocol and extract in [pinned upstream v1.10.0](https://github.c
 CI 45386658684 PASS: 504+22 tests, four regressions; tiktoken and tqdm UPSTREAM_TEXT_MATCH and RECORD MATCH; 99 Python checks, zero OSV findings. Go license remains verified only at upstream level.
 
 Before acceptance of the same candidate: inventory the built Govulncheck with go version -m, require exact VCS SHA, clean build and versioned modules; OSV for modules, stdlib, toolchain and source commit. Scanner SHA-256 before/after review. Two additional tests. Advisory findings remain visible; scanner license compliance and reachability are not claimed. Output size is checked on reading after the process exits, not a hard disk-write quota.
+
+Candidate extension: two official upstream controls from pinned cmd/govulncheck/testdata/main, one with no findings and one with fictitious GO-9999-9999. Verify exact Git blob IDs for ten inputs, private copies and local file:// DB; never execute the fixture binaries. Additional contract test. This is actual scanner execution against a synthetic database, not a public-database positive control. CI still required.

@@ -94,6 +94,16 @@ class BinaryReviewTests(unittest.TestCase):
             with self.subTest(raw=raw), self.assertRaises(g.InstallCheckError):
                 g.scanner_inventory(raw, lambda _: self.fail("invalid scanner must not be queried"))
 
+    def test_control_requires_exact_expected_fictitious_advisory(self):
+        clean = {"findings": []}
+        found = {"findings": [{"id": "GO-9999-9999"}]}
+        g.control_expected(clean, False)
+        g.control_expected(found, True)
+        for report, expected in ((clean, True), (found, False),
+                                 ({"findings": [{"id": "GO-2026-0001"}]}, True)):
+            with self.subTest(report=report), self.assertRaises(g.InstallCheckError):
+                g.control_expected(report, expected)
+
 
 if __name__ == "__main__":
     unittest.main()

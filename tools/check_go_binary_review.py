@@ -62,7 +62,7 @@ def extract_evidence(raw):
             "symbol_evidence": "EXTRACTED" if symbols else "MODULE_ONLY_FALLBACK"}
 
 
-def scan_evidence(raw, extraction):
+def scan_evidence(raw, extraction, *, database=DB):
     config = sbom = None
     ids = set()
     levels = {}
@@ -77,7 +77,7 @@ def scan_evidence(raw, extraction):
                     and value.get("scanner_name") == "govulncheck"
                     and isinstance(value.get("scanner_version"), str)
                     and value["scanner_version"].startswith("v0.0.0-" + PIN[:12])
-                    and value.get("db") == DB and value.get("scan_mode") == "binary"
+                    and value.get("db") == database and value.get("scan_mode") == "binary"
                     and value.get("scan_level") == "symbol", "GOVULN_CONFIG_INVALID")
             config = value
         elif key == "SBOM":
@@ -151,7 +151,64 @@ def scanner_digest(cli):
         return sha256_stream(stream, 128 * 1024 * 1024)[0]
 
 
-def accept(cli, gh, gitleaks, gh_archive, gitleaks_archive):
+# Pinned upstream test files; the advisory is deliberately fictitious.
+FIXTURE_BLOBS = {
+    "modules/vuln/vuln_main_devel": "b9000b96f39bcf811d9d77e9218a2883c40a9d02",
+    "modules/vuln/vuln_main_v0.3.1": "b19da9875e9edb9bbd2fe33bd524142884dd24af",
+    "vulndb-v1/ID/GO-9999-9999.json": "a64aedce4eddb71d24f564af9cd3ad28f53639cc",
+    "vulndb-v1/index/db.json": "dc248551b5fc6cdd7229332999fe38a10c67de9e",
+    "vulndb-v1/index/modules.json": "c04a01083af282f7eca6dfd7b12cbfe01132a1e6",
+    "vulndb-v1/index/vulns.json": "aac52734c42dcfce599f3db46744c31e804771c6",
+    "vulndb-v1/ID/GO-9999-9999.json.gz": "13947a2a6e1e667cf96d130ed151085bc3669c9c",
+    "vulndb-v1/index/db.json.gz": "202f44d1cb739307dd084a54835d6d540d9eea1a",
+    "vulndb-v1/index/modules.json.gz": "5eb193728649ea422537e4645f57a552921de7ba",
+    "vulndb-v1/index/vulns.json.gz": "7593021cf18f92dd62b6121406660237bc3010fd",
+}
+
+
+def control_expected(report, vulnerable):
+    expected = {"GO-9999-9999"} if vulnerable else set()
+    require({row["id"] for row in report["findings"]} == expected, "GOVULN_CONTROL_FAILED")
+
+
+def run_controls(cli, fixture_root, temp, env):
+    source = fixture_root.resolve(strict=True)
+    local = temp / "control"
+    local.mkdir()
+    for name, oid in FIXTURE_BLOBS.items():
+        path = source / name
+        require(path.is_file() and path.resolve(strict=True) == path
+                and path.stat().st_size <= 4 * 1024 * 1024, "GOVULN_CONTROL_INPUT")
+        # Verify and copy the same bytes, then only inspect those private copies.
+        raw = read_output(path)
+        checked = subprocess.run(["git", "hash-object", "--stdin"], input=raw,
+                                 cwd=temp, env=env, capture_output=True, check=True,
+                                 timeout=10).stdout.decode("ascii").strip()
+        require(checked == oid, "GOVULN_CONTROL_DIGEST")
+        target = local / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(raw)
+    database = (local / "vulndb-v1").as_uri()
+    for label, vulnerable in (("vuln_main_devel", False), ("vuln_main_v0.3.1", True)):
+        binary = local / "modules" / "vuln" / label
+        meta = subprocess.run(["go", "version", "-m", str(binary)], cwd=temp, env=env,
+                              capture_output=True, check=True, timeout=15).stdout.decode("utf-8")
+        version = meta.splitlines()[0].rsplit(": ", 1)[-1]
+        require(GO_VERSION.fullmatch(version), "GOVULN_CONTROL_VERSION")
+        output = local / (label + ".json")
+        with output.open("wb") as out:
+            subprocess.run([str(cli), "-mode=binary", "-scan=symbol", "-format=json",
+                            "-db=" + database, str(binary)], cwd=temp, env=env,
+                           stdin=subprocess.DEVNULL, stdout=out, stderr=subprocess.DEVNULL,
+                           check=True, timeout=60)
+        # Control proves detection of the fictitious ID, not physical symbols.
+        result = scan_evidence(read_output(output), {"go_version": version,
+                               "symbols_extracted": 0}, database=database)
+        control_expected(result, vulnerable)
+    return "PASS"
+
+
+def accept(cli, gh, gitleaks, gh_archive, gitleaks_archive, fixture_root):
     cli = cli.resolve(strict=True)
     with tempfile.TemporaryDirectory(prefix="tessera-go-binary-") as folder:
         temp = pathlib.Path(folder)
@@ -165,6 +222,7 @@ def accept(cli, gh, gitleaks, gh_archive, gitleaks_archive):
         meta = subprocess.run(["go", "version", "-m", str(cli)], cwd=temp, env=env,
                               capture_output=True, check=True, timeout=15).stdout
         scanner = scanner_inventory(meta)
+        controls = run_controls(cli, fixture_root, temp, env)
         reports = {}
         for label, binary, archive in (("gh", gh, gh_archive), ("gitleaks", gitleaks, gitleaks_archive)):
             digest = verify_binary(archive, binary, *ARCHIVES[label])
@@ -189,16 +247,17 @@ def accept(cli, gh, gitleaks, gh_archive, gitleaks_archive):
             "scanner_sha256": initial_digest, "scanner_inventory": scanner,
             "scope": "GO_BINARY_EXTRACT_AND_BINARY_MODE", "telemetry": "OFF_REQUESTED",
             "network_sandbox": "NOT_IMPLEMENTED", "binaries": reports,
-            "call_reachability": "NOT_VERIFIED", "live_positive_control": "NOT_IMPLEMENTED"}
+            "call_reachability": "NOT_VERIFIED", "local_upstream_controls": controls,
+            "live_public_database_positive_control": "NOT_IMPLEMENTED"}
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    for flag in ("cli", "gh", "gitleaks", "gh-archive", "gitleaks-archive"):
+    for flag in ("cli", "gh", "gitleaks", "gh-archive", "gitleaks-archive", "fixture-root"):
         parser.add_argument("--" + flag, type=pathlib.Path, required=True)
     args = parser.parse_args()
     try:
-        result = accept(args.cli, args.gh, args.gitleaks, args.gh_archive, args.gitleaks_archive)
+        result = accept(args.cli, args.gh, args.gitleaks, args.gh_archive, args.gitleaks_archive, args.fixture_root)
     except (InstallCheckError, OSError, ValueError, subprocess.SubprocessError) as exc:
         print("BLOCKED: " + (str(exc) if isinstance(exc, InstallCheckError)
               else "GOVULN_RUNTIME_FAILED"), file=sys.stderr)

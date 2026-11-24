@@ -148,3 +148,5 @@ Within the same T12.03.07 candidate: `git -C` does not isolate inherited GIT_DIR
 **T12.03.08 — candidate:** Govulncheck v1.10.0 exact SHA, CI build with lock and isolated environment. Extract + binary, archive/config/SBOM checks and explicit fallback when symbols are absent. Five regressions. Network sandbox, live positive control, symbol completeness, scanner vulnerabilities and call reachability remain open. Not a runtime dependency. CI 45386658684: 504+22 PASS, both Python license records matched upstream.
 
 T12.03.08 extended with Govulncheck self-audit (OSV of exact modules/toolchain/commit and before/after SHA-256); two additional tests, seven total. Live acceptance remains open.
+
+T12.03.08 extended with two actual upstream Govulncheck controls with a local synthetic DB, Git blob ID checks and an eighth regression; public DB positive control remains open. CI not yet run.
