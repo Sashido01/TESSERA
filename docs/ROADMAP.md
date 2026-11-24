@@ -163,3 +163,5 @@ T12.03.08: CI 45391798766 — 513+29 PASS, GOVULN_CONTROL_VERSION BLOCKED; но�
 **T12.03.11 — кандидат:** [локальная проверка Release Core](RELEASE_CORE.md): фиксированный SHA тега, direct target/name, повторная сверка ref/HEAD, минимальное окружение Git, запрет replace objects и timeout; восемь регрессий, CI обязателен. T12.03.10 PR CI 45398390191 PASS, 518+29, все четыре регрессии, 168 файлов и 738 blob без находок, пять path controls PASS. T12 PARTIAL.
 
 **T12.03.11:** PR CI 45399800597 PASS, 526+29 тестов, восемь регрессий PASS, SkillSpector 19 MEDIUM, 53/100, 0 подавлений. **T12.03.12 — кандидат:** [remote inspection](RELEASE_CORE.md), один именованный remote, ограничение транспорта, фиксированный upload-pack, минимальное окружение, повторная сверка URL/объекта/commit, 10 регрессий; CI обязателен. T12 PARTIAL.
+
+**T12.03.12:** PR CI 45401945520 PASS, 536+29, десять регрессий; реальные HTTPS/SSH NOT_VERIFIED. **T12.03.13 — кандидат:** [интегрированный NVIDIA Tier 1](NVIDIA_TIER1.md), 11 групп/13 валидаторов, закреплённые сканеры, фиксированный redaction-адаптер, семь регрессий; Semgrep NOT_RUN, сертификация NOT_VERIFIED, CI обязателен. T12 PARTIAL.

@@ -1,0 +1,196 @@
+#!/usr/bin/env python3
+"""Integrated static Tier 1, with explicit scanner scope and no raw CI reports."""
+from __future__ import annotations
+import argparse
+import hashlib
+import json
+import os
+import pathlib
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+
+from check_nvidia_tier1 import VERSION, REPORT, NAME, require
+from check_official_local_install import fixture_env, tree_fingerprint, InstallCheckError
+
+CHECKS = "schema,version,security,pii,license,code-integrity,unicode,quality,lint,harness,dependency"
+VALIDATORS = {
+    "Schema & Repository Governance", "Semantic Version Validation", "Security Scan",
+    "PII Scan", "License Compliance", "Code Risk Analysis", "Secrets Detection",
+    "Code Integrity & Hygiene", "Unicode Smuggling Detection", "QUALITY",
+    "SCRIPT_LINT", "Harness Compatibility", "Dependency Vulnerability Audit",
+}
+SCANNERS = {"Security Scan": ("skillspector", "2.13.7"),
+            "Code Risk Analysis": ("bandit", "1.9.4"),
+            "Secrets Detection": ("gitleaks", "8.30.1")}
+GITLEAKS_SHA = "88f91962aa2f93ac6ab281d553b9e125f5197bbbce38f9f2437f7299c32e5509"
+MAX_REPORT = 16 * 1024 * 1024
+
+# Explicitly support the pinned upstream SecretsValidator argument contract only.
+# No arbitrary flags, reports on disk, or silent fallback to an older scanner.
+SHIM = r'''import os
+import sys
+args = sys.argv[1:]
+if args == ["version"] or args == ["--version"]:
+    os.execv(BINARY, [BINARY, "version"])
+if (len(args) != 12 or args[:3] != ["detect", "--source", "."]
+        or args[3:9] != ["--report-format", "json", "--report-path", "-", "--exit-code", "10"]
+        or args[9] != "--config" or not os.path.isabs(args[10])
+        or args[11] != "--no-git"):
+    sys.exit(2)
+os.execv(BINARY, [BINARY, *args, "--redact=100", "--max-archive-depth", "0"])
+'''
+
+
+def summary(report, rc):
+    require(isinstance(report, dict) and report.get("version") == VERSION
+            and rc in (0, 1), "FULL_TIER1_VERSION_OR_EXIT")
+    workflow = report.get("workflow")
+    require(isinstance(workflow, dict) and workflow.get("tier") == 1
+            and isinstance(workflow.get("stages"), dict)
+            and workflow["stages"].get("llm") == {
+                "status": "skipped", "reason": "LLM checks disabled by --no-llm."},
+            "FULL_TIER1_SCOPE")
+    rows = report.get("results")
+    require(isinstance(rows, list) and len(rows) == len(VALIDATORS)
+            and all(isinstance(r, dict) for r in rows)
+            and {r.get("validator") for r in rows} == VALIDATORS, "FULL_TIER1_VALIDATORS")
+    states = {}
+    for row in rows:
+        name = row["validator"]
+        status = row.get("status")
+        require(status in ("passed", "failed", "skipped", "incomplete")
+                and isinstance(row.get("skipped"), bool)
+                and isinstance(row.get("incomplete_scans"), list)
+                and isinstance(row.get("passed"), bool), "FULL_TIER1_ROW")
+        findings = row.get("findings")
+        require(isinstance(findings, list) and len(findings) <= 10000, "FULL_TIER1_FINDINGS")
+        counts = {s: 0 for s in ("critical", "high", "medium", "low", "info")}
+        for item in findings:
+            require(isinstance(item, dict) and isinstance(item.get("severity"), str)
+                    and item["severity"].lower() in counts, "FULL_TIER1_FINDING")
+            counts[item["severity"].lower()] += 1
+        scanners = row.get("scanners", {})
+        require(isinstance(scanners, dict), "FULL_TIER1_SCANNERS")
+        if name in SCANNERS:
+            scanner, version = SCANNERS[name]
+            require(scanners.get(scanner) == version, "FULL_TIER1_SCANNER_VERSION:" + scanner)
+            require(not row["skipped"] and not row["incomplete_scans"]
+                    and status in ("passed", "failed"), "FULL_TIER1_SCANNER_INCOMPLETE:" + scanner)
+        states[name] = {"status": status.upper(), "skipped": row["skipped"],
+                        "incomplete": bool(row["incomplete_scans"]), "findings": counts}
+    overall = report.get("overall_passed")
+    require(type(overall) is bool and (rc == 0) == overall, "FULL_TIER1_EXIT_MISMATCH")
+    require(isinstance(report.get("incomplete_scans"), list), "FULL_TIER1_INCOMPLETE_FIELD")
+    incomplete = bool(report["incomplete_scans"]) or any(
+        r["incomplete"] or r["skipped"] or r["status"] not in ("PASSED", "FAILED")
+        for r in states.values())
+    return {"validators": states, "policy_verdict": "PASS" if overall else "FAIL",
+            "coverage": "PARTIAL" if incomplete else "ALL_VALIDATOR_ROWS",
+            "scanner_versions": {s: v for s, v in SCANNERS.values()},
+            "semgrep": "NOT_RUN", "certification": "NOT_VERIFIED"}
+
+
+def executable(path):
+    path = path.resolve(strict=True)
+    require(path.is_file() and os.access(path, os.X_OK), "FULL_TIER1_EXECUTABLE")
+    return path
+
+
+def accept(repo, cli, skillspector, bandit, gitleaks):
+    repo = repo.resolve(strict=True)
+    cli, skillspector, bandit, gitleaks = map(executable, (cli, skillspector, bandit, gitleaks))
+    require(hashlib.sha256(gitleaks.read_bytes()).hexdigest() == GITLEAKS_SHA,
+            "FULL_TIER1_GITLEAKS_HASH")
+    original = repo / "skills"
+    before = tree_fingerprint(original)
+    with tempfile.TemporaryDirectory(prefix="tessera-full-tier1-") as folder:
+        temp = pathlib.Path(folder)
+        env = fixture_env(temp)
+        private_bin = temp / "bin"
+        private_bin.mkdir()
+        private_tmp = temp / "tmp"
+        private_tmp.mkdir()
+        shim = private_bin / "gitleaks"
+        require(not any(c.isspace() for c in sys.executable), "FULL_TIER1_PYTHON_PATH")
+        shim.write_text("#!" + sys.executable + "\nBINARY = " + repr(str(gitleaks)) + "\n" + SHIM,
+                        encoding="utf-8")
+        shim.chmod(0o700)
+        env.update({"PATH": os.pathsep.join((str(private_bin), str(cli.parent), "/usr/bin", "/bin")),
+                    "SKILLEVALUATOR_SKILLSPECTOR_PATH": str(skillspector),
+                    "SKILLEVALUATOR_BANDIT_PATH": str(bandit),
+                    "SKILLEVALUATOR_RUNTIME_DIR": str(temp / "runtime"),
+                    "TMPDIR": str(private_tmp), "PYTHONNOUSERSITE": "1",
+                    "PYTHONDONTWRITEBYTECODE": "1", "PYTHONSAFEPATH": "1",
+                    "PIP_NO_INDEX": "1", "UV_OFFLINE": "1", "CI": "true"})
+        require(shutil.which("gitleaks", path=env["PATH"]) == str(shim)
+                and shutil.which("semgrep", path=env["PATH"]) is None,
+                "FULL_TIER1_SCANNER_RESOLUTION")
+        def run(path, args, timeout=15):
+            return subprocess.run([str(path), *args], cwd=temp, env=env,
+                                  stdin=subprocess.DEVNULL, capture_output=True,
+                                  timeout=timeout, check=False)
+        version = run(cli, ["--version"])
+        require(version.returncode == 0 and version.stdout.strip() ==
+                ("skillevaluator, version " + VERSION).encode(), "FULL_TIER1_CLI_VERSION")
+        version = run(skillspector, ["--version"])
+        require(version.returncode == 0 and version.stdout.strip() ==
+                b"SkillSpector v2.13.7", "FULL_TIER1_SKILLSPECTOR_VERSION")
+        version = run(bandit, ["--version"])
+        require(version.returncode == 0 and re.search(rb"\bbandit 1\.9\.4\b", version.stdout),
+                "FULL_TIER1_BANDIT_VERSION")
+        version = run(shim, ["version"])
+        require(version.returncode == 0 and version.stdout.strip() == b"8.30.1",
+                "FULL_TIER1_GITLEAKS_VERSION")
+        require(run(shim, ["detect", "--report-path", "unexpected.json"]).returncode == 2
+                and not (temp / "unexpected.json").exists(), "FULL_TIER1_SHIM_REJECT")
+        source = temp / "skills"
+        shutil.copytree(original, source)
+        require(tree_fingerprint(source) == before, "FULL_TIER1_SNAPSHOT")
+        results = {}
+        for skill in sorted(source.iterdir()):
+            require(skill.is_dir() and not skill.is_symlink() and NAME.fullmatch(skill.name)
+                    and (skill / "SKILL.md").is_file(), "FULL_TIER1_SKILL")
+            # No third-party dependency resolution in this candidate. The actual
+            # skill has no Python dependency manifest; future manifests need a
+            # separate pinned audit contract rather than implicit network calls.
+            require(not any(p.is_file() for p in skill.rglob("*")
+                    if p.name in ("pyproject.toml", "Pipfile", "Pipfile.lock", "setup.py", "setup.cfg")
+                    or p.name.startswith("requirements")), "FULL_TIER1_DEPENDENCY_MANIFEST")
+            out = temp / "reports" / skill.name
+            result = run(cli, ["tier1", str(skill), "--no-llm", "--checks", CHECKS,
+                               "--min-score", "70", "-r", "json", "-o", str(out)], 180)
+            report = out / REPORT
+            require(report.is_file() and not report.is_symlink()
+                    and 0 < report.stat().st_size <= MAX_REPORT, "FULL_TIER1_REPORT_MISSING")
+            results[skill.name] = summary(json.loads(report.read_text(encoding="utf-8")), result.returncode)
+        require(results and tree_fingerprint(source) == before
+                and tree_fingerprint(original) == before, "FULL_TIER1_SOURCE_MUTATED")
+        require(not (temp / "runtime" / "skillspector").exists()
+                and not (temp / "runtime" / "gitleaks").exists(), "FULL_TIER1_MANAGED_FALLBACK")
+        require(hashlib.sha256(gitleaks.read_bytes()).hexdigest() == GITLEAKS_SHA,
+                "FULL_TIER1_GITLEAKS_CHANGED")
+    return {"execution": "PASS", "scope": "INTEGRATED_STATIC_TIER1", "checks": CHECKS.split(","),
+            "llm": "DISABLED", "semgrep": "NOT_RUN", "skills": results,
+            "policy": "ADVISORY_FINDINGS", "certification": "NOT_VERIFIED"}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    for name in ("repo", "cli", "skillspector", "bandit", "gitleaks"):
+        parser.add_argument("--" + name, type=pathlib.Path, required=True)
+    args = parser.parse_args()
+    try:
+        result = accept(args.repo, args.cli, args.skillspector, args.bandit, args.gitleaks)
+    except (InstallCheckError, OSError, ValueError, UnicodeError, subprocess.SubprocessError) as exc:
+        print("BLOCKED: " + (str(exc) if isinstance(exc, InstallCheckError)
+                              else "FULL_TIER1_RUNTIME_FAILED"), file=sys.stderr)
+        return 1
+    print("FULL_TIER1_EXECUTION_PASS: " + json.dumps(result, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

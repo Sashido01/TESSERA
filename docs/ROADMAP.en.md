@@ -163,3 +163,5 @@ T12.03.08: CI 45391798766 — 513+29 PASS, GOVULN_CONTROL_VERSION BLOCKED; new c
 **T12.03.11 candidate:** [Release Core local inspection](RELEASE_CORE.en.md): fixed tag SHA, direct target/name, ref/HEAD recheck, minimal Git environment, no replace objects and timeout; eight regressions, CI required. T12.03.10 PR CI 45398390191 PASS, 518+29, all four regressions, 168 files and 738 blobs without findings, five path controls PASS. T12 PARTIAL.
 
 **T12.03.11:** PR CI 45399800597 PASS, 526+29 tests, eight regressions PASS, SkillSpector 19 MEDIUM, 53/100, zero suppressions. **T12.03.12 candidate:** [remote inspection](RELEASE_CORE.en.md), one named remote, transport scope, fixed upload-pack, minimal environment, URL/object/commit rechecks, 10 regressions; CI required. T12 PARTIAL.
+
+**T12.03.12:** PR CI 45401945520 PASS, 536+29, ten regressions; actual HTTPS/SSH NOT_VERIFIED. **T12.03.13 candidate:** [integrated NVIDIA Tier 1](NVIDIA_TIER1.en.md), 11 groups/13 validators, pinned scanners, fixed redaction adapter, seven regressions; Semgrep NOT_RUN, certification NOT_VERIFIED, CI required. T12 PARTIAL.

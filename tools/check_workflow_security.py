@@ -61,6 +61,8 @@ def validate_workflow(workflow: str) -> list[str]:
         errors.append("Нет обязательной проверки нескольких навыков")
     if '--require-hashes -r tools/nvidia-tier1-requirements.txt' not in validate or 'run: python tools/check_nvidia_tier1.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/skillevaluator"' not in validate:
         errors.append("Нет обязательной ограниченной проверки NVIDIA Tier 1")
+    if 'run: python tools/check_nvidia_full_tier1.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/skillevaluator" --skillspector "$RUNNER_TEMP/skillspector/bin/skillspector" --bandit "$RUNNER_TEMP/nvidia-tier1/bin/bandit" --gitleaks "$RUNNER_TEMP/gitleaks-8.30.1"' not in validate:
+        errors.append("Нет обязательной интегрированной проверки NVIDIA Tier 1")
     if 'run: python tools/check_nvidia_static_review.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/skillevaluator"' not in validate:
         errors.append("Нет обязательного статического обзора NVIDIA Tier 1")
     if 'run: python tools/check_bandit_review.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/bandit"' not in validate:
