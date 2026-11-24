@@ -9,7 +9,6 @@ from __future__ import annotations
 import datetime as dt
 import pathlib
 import re
-import subprocess
 import urllib.error
 import urllib.parse
 from typing import Any, Callable
@@ -17,9 +16,11 @@ from typing import Any, Callable
 try:
     from .release_ci import CIEvidenceError, REPOSITORY, get_public_json
     from .release_inspect import InspectionError, tag_name
+    from .release_remote import remote_url, github_remote_matches
 except ImportError:
     from release_ci import CIEvidenceError, REPOSITORY, get_public_json
     from release_inspect import InspectionError, tag_name
+    from release_remote import remote_url, github_remote_matches
 
 TAG_PATTERN = re.compile(r"(?:[a-z0-9]+(?:-[a-z0-9]+)*/)?v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)\Z")
 SHA256 = re.compile(r"sha256:[0-9a-f]{64}\Z")
@@ -38,33 +39,11 @@ def valid_repository(repository: str) -> None:
 def verify_github_remote_identity(root: pathlib.Path, remote: str, repository: str) -> str:
     """Bind chosen Git remote to the explicit GitHub owner/repository."""
     valid_repository(repository)
-    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}", remote):
-        return "BLOCKED"
     try:
-        result = subprocess.run(
-            ["git", "-C", str(root), "remote", "get-url", remote],
-            text=True, encoding="utf-8", capture_output=True, check=False,
-            timeout=5,
-        )
-    except (OSError, subprocess.TimeoutExpired):
+        address = remote_url(root, remote)
+    except (InspectionError, OSError, UnicodeError, ValueError):
         return "BLOCKED"
-    if result.returncode != 0:
-        return "BLOCKED"
-    address = result.stdout.strip()
-    if address.startswith("git@github.com:"):
-        path = address.removeprefix("git@github.com:")
-    else:
-        parts = urllib.parse.urlsplit(address)
-        if (parts.scheme not in ("https", "ssh")
-                or parts.hostname != "github.com"
-                or parts.port is not None
-                or parts.query or parts.fragment
-                or (parts.scheme == "ssh" and parts.username != "git")
-                or (parts.scheme == "https" and (parts.username or parts.password))):
-            return "BLOCKED"
-        path = parts.path.lstrip("/")
-    path = path.removesuffix(".git")
-    return "PASS" if path.casefold() == repository.casefold() else "BLOCKED"
+    return "PASS" if github_remote_matches(address, repository) else "BLOCKED"
 
 
 def valid_tag(tag: str) -> None:

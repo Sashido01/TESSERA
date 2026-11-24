@@ -205,6 +205,15 @@ class RemoteIdentityTests(unittest.TestCase):
         self.git("remote", "add", "origin", str(self.root))
         self.assertEqual(release_publication.verify_github_remote_identity(self.root, "origin", REPOSITORY), "BLOCKED")
 
+    def test_malformed_port_rejected(self):
+        self.git("remote", "add", "origin", "https://github.com:invalid/Sashido01/TESSERA.git")
+        self.assertEqual(release_publication.verify_github_remote_identity(self.root, "origin", REPOSITORY), "BLOCKED")
+
+    def test_multiple_urls_rejected(self):
+        self.git("remote", "add", "origin", "https://github.com/Sashido01/TESSERA.git")
+        self.git("config", "--add", "remote.origin.url", "https://github.com/other/repo.git")
+        self.assertEqual(release_publication.verify_github_remote_identity(self.root, "origin", REPOSITORY), "BLOCKED")
+
     def test_missing_remote_rejected(self):
         self.assertEqual(release_publication.verify_github_remote_identity(self.root, "origin", REPOSITORY), "BLOCKED")
 
@@ -343,6 +352,8 @@ class PublicationReportIntegrationTests(unittest.TestCase):
              }), \
              mock.patch.object(release_report, "verify_remote_tag", return_value={
                  "remote_tag_status": "PASS", "remote_publication": "TAG_REF_VERIFIED",
+                 "expected_commit_sha": self.sha,
+                 "local_tag_object_sha": self.git("rev-parse", "refs/tags/" + TAG),
                  "remote_tag_object_sha": self.git("rev-parse", "refs/tags/" + TAG),
                  "problems": []
              }):

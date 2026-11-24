@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.44 — Hardened remote Release Core inspection (T12.03.12)
+
+- One named remote, transport scope, fixed upload-pack, minimal environment and consistent evidence. Ten regressions; CI required, live network acceptance separate.
+
 ## 0.0.43 — Hardened Release Core local inspection (T12.03.11)
 
 - Fixed tag object and direct commit, rechecks, minimal environment, no Git replace objects, timeout. Eight regressions; CI required. Remote and concurrency locking remain separate.

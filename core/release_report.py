@@ -100,8 +100,17 @@ def build_report(
         else:
             remote_info = verify_remote_tag(
                 root, version, prefix=prefix, commit=commit, remote=remote,
+                expected_repository=github_repo if verify_publication else None,
             )
             remote_status = remote_info["remote_tag_status"]
+            if remote_status == "PASS" and (
+                    remote_info.get("expected_commit_sha") != target_sha
+                    or remote_info.get("local_tag_object_sha") != local["tag_object_sha"]
+                    or remote_info.get("remote_tag_object_sha") != local["tag_object_sha"]):
+                remote_info = {**remote_info, "remote_tag_status": "BLOCKED",
+                               "remote_publication": "NOT_VERIFIED",
+                               "problems": [*remote_info["problems"], "REMOTE_REPORT_EVIDENCE_MISMATCH"]}
+                remote_status = "BLOCKED"
             problems.extend(remote_info["problems"])
 
     ci_info: dict[str, Any] | None = None

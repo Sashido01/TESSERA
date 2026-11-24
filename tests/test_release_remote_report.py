@@ -3,10 +3,12 @@ from __future__ import annotations
 
 import json
 import pathlib
+import os
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -100,6 +102,86 @@ class RemoteReleaseTests(unittest.TestCase):
         self.remote_git("update-ref", "refs/tags/v0.0.9", self.sha)
         report = release_remote.verify_remote_tag(self.repo, "0.0.9")
         self.assertIn("REMOTE_TAG_OBJECT_MISMATCH", report["problems"])
+
+    def test_custom_uploadpack_not_used(self):
+        self.make_tag()
+        self.push_tag()
+        self.git("config", "remote.origin.uploadpack", "nonexistent-fixture-upload-pack")
+        self.assertEqual(release_remote.verify_remote_tag(self.repo, "0.0.9")["remote_tag_status"], "PASS")
+
+    def test_missing_named_remote_never_falls_back_to_path(self):
+        self.make_tag()
+        self.git("remote", "remove", "origin")
+        subprocess.run(["git", "init", "--bare", "-q", str(self.repo / "origin")], check=True)
+        with patch.object(release_remote, "query_remote", side_effect=AssertionError):
+            report = release_remote.verify_remote_tag(self.repo, "0.0.9")
+        self.assertIn("REMOTE_QUERY_FAILED", report["problems"])
+
+    def test_multiple_fetch_urls_rejected_before_query(self):
+        self.make_tag()
+        self.git("config", "--add", "remote.origin.url", str(self.root / "other.git"))
+        with patch.object(release_remote, "query_remote", side_effect=AssertionError):
+            report = release_remote.verify_remote_tag(self.repo, "0.0.9")
+        self.assertIn("REMOTE_QUERY_FAILED", report["problems"])
+
+    def test_unsupported_transports_rejected_before_query(self):
+        self.make_tag()
+        for url in ("ext::fixture", "http://example.invalid/repo", "git://example.invalid/repo",
+                    "https://user:synthetic@example.invalid/repo", "https://example.invalid:invalid/repo"):
+            with self.subTest(url=url):
+                self.git("remote", "set-url", "origin", url)
+                with patch.object(release_remote, "query_remote", side_effect=AssertionError):
+                    report = release_remote.verify_remote_tag(self.repo, "0.0.9")
+                self.assertIn("REMOTE_QUERY_FAILED", report["problems"])
+
+    def test_remote_environment_fixed_and_no_raw_credentials(self):
+        with patch.dict(os.environ, {"TESSERA_PRIVATE_MARKER": "synthetic",
+                                     "GIT_SSH_COMMAND": "synthetic",
+                                     "GH_TOKEN": "synthetic", "SSH_AUTH_SOCK": "synthetic"}):
+            with patch.object(release_remote.subprocess, "run") as run:
+                release_remote.query_remote(self.repo, "origin", "refs/tags/v0.0.9", 15)
+                args, kwargs = run.call_args
+                self.assertIn("--upload-pack=git-upload-pack", args[0])
+                self.assertEqual(kwargs["env"]["GIT_ALLOW_PROTOCOL"], "file:https:ssh")
+                self.assertEqual(kwargs["env"]["SSH_AUTH_SOCK"], "synthetic")
+                self.assertEqual(kwargs["stdin"], subprocess.DEVNULL)
+                self.assertEqual(kwargs["timeout"], 15)
+                for key in ("TESSERA_PRIVATE_MARKER", "GIT_SSH_COMMAND", "GH_TOKEN"):
+                    self.assertNotIn(key, kwargs["env"])
+
+    def test_remote_evidence_rechecked_after_query(self):
+        self.make_tag()
+        self.push_tag()
+        actual = release_remote.query_remote
+        def moved(*args):
+            response = actual(*args)
+            self.git("tag", "-f", "-a", "v0.0.9", "-m", "changed fixture annotation")
+            return response
+        with patch.object(release_remote, "query_remote", side_effect=moved):
+            report = release_remote.verify_remote_tag(self.repo, "0.0.9")
+        self.assertIn("REMOTE_EVIDENCE_CHANGED", report["problems"])
+
+    def test_remote_url_rechecked_after_query(self):
+        self.make_tag()
+        self.push_tag()
+        actual = release_remote.query_remote
+        def moved(*args):
+            response = actual(*args)
+            self.git("remote", "set-url", "origin", str(self.root / "other.git"))
+            return response
+        with patch.object(release_remote, "query_remote", side_effect=moved):
+            report = release_remote.verify_remote_tag(self.repo, "0.0.9")
+        self.assertIn("REMOTE_EVIDENCE_CHANGED", report["problems"])
+
+    def test_report_rejects_inconsistent_remote_proof(self):
+        self.make_tag()
+        with patch.object(release_report, "verify_remote_tag", return_value={
+                "remote_tag_status": "PASS", "remote_publication": "TAG_REF_VERIFIED",
+                "expected_commit_sha": "a" * 40, "local_tag_object_sha": "b" * 40,
+                "remote_tag_object_sha": "b" * 40, "problems": []}):
+            report = release_report.build_report(self.repo, "0.0.9", verify_remote=True)
+        self.assertEqual(report["remote_tag_status"], "BLOCKED")
+        self.assertIn("REMOTE_REPORT_EVIDENCE_MISMATCH", report["problems"])
 
     def test_invalid_remote_name_rejected(self):
         self.make_tag()
