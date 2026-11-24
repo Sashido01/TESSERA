@@ -103,5 +103,40 @@ class FullTier1Tests(unittest.TestCase):
                              b"nonfunctional-marker", detected=False)
 
 
+    def test_security_high_attribution_preserves_counts_and_policy(self):
+        r = self.report()
+        r["overall_passed"] = False
+        row = next(x for x in r["results"] if x["validator"] == "Security Scan")
+        row.update({"status": "failed", "passed": False, "findings": [
+            {"severity": "high", "category": "SECURITY", "check_name": "skillspector_risk_score",
+             "message": "synthetic private text"},
+            {"severity": "HIGH", "category": "SECURITY", "check_name": "other"},
+            {"severity": "medium", "category": "SECURITY", "check_name": "skillspector_risk_score"},
+            {"severity": "critical", "category": "SECURITY", "check_name": "other"},
+        ]})
+        result = f.summary(r, 1)
+        security = result["validators"]["Security Scan"]
+        self.assertEqual(security["high_attribution"], {"aggregate_risk_gate": 1, "other_high": 1})
+        self.assertEqual(security["findings"], {"critical": 1, "high": 2, "medium": 1, "low": 0, "info": 0})
+        self.assertEqual(result["policy_verdict"], "FAIL")
+        self.assertNotIn("synthetic private text", str(result))
+
+    def test_security_high_attribution_does_not_trust_messages_or_unknown_category(self):
+        r = self.report()
+        r["overall_passed"] = False
+        row = next(x for x in r["results"] if x["validator"] == "Security Scan")
+        row.update({"status": "failed", "passed": False, "findings": [
+            {"severity": "high", "category": "OTHER", "check_name": "skillspector_risk_score"},
+            {"severity": "high", "message": "skillspector_risk_score"},
+            {"severity": "high", "category": "SECURITY", "check_name": "skillspector_risk_score_suffix"},
+        ]})
+        security = f.summary(r, 1)["validators"]["Security Scan"]
+        self.assertEqual(security["high_attribution"], {"aggregate_risk_gate": 0, "other_high": 3})
+
+    def test_clean_security_high_attribution_is_zero(self):
+        security = f.summary(self.report(), 0)["validators"]["Security Scan"]
+        self.assertEqual(security["high_attribution"], {"aggregate_risk_gate": 0, "other_high": 0})
+
+
 if __name__ == "__main__":
     unittest.main()
