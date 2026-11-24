@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.62 — Safe Bandit coordinates (T12.03.30)
+
+- Bounded finding locations, host/container parity, six regressions. CI required; T12 PARTIAL.
+
 ## 0.0.61 — Scanner configuration SHA-256 (T12.03.29)
 
 - Pin exact Semgrep and Bandit configuration SHA-256 instead of SHA-1; retain Git blob provenance. Two regression tests, no suppression. CI required; T12 PARTIAL.

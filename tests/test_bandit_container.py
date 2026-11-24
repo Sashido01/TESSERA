@@ -41,6 +41,19 @@ class BanditContainerTests(unittest.TestCase):
                 c.parity({**report, **change}, host, "a", "b")
 
 
+    def test_parity_includes_location_coordinates(self):
+        catalog = {"files": 1, "findings": 1, "primary_locations": [{"line": 1}],
+                   "primary_locations_unresolved": 0, "primary_locations_omitted": 0}
+        host = {"execution": "PASS", "scanner": "bandit", "version": c.VERSION,
+                "snapshot_sha256": "a", "catalog": catalog,
+                "clean_fixture": "PASS", "negative_nosec_fixture": "PASS"}
+        report = {k: v for k, v in host.items() if k not in ("execution", "scanner")}
+        report["package_sha256"] = "b"
+        c.parity(report, host, "a", "b")
+        with self.assertRaisesRegex(RuntimeError, "PARITY"):
+            c.parity({**report, "catalog": {**catalog, "primary_locations": [{"line": 2}]}},
+                     host, "a", "b")
+
     def test_staged_import_closure(self):
         with tempfile.TemporaryDirectory() as folder:
             stage = pathlib.Path(folder)

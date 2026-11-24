@@ -20,6 +20,8 @@ from check_nvidia_tier1 import require
 VERSION = "1.9.4"
 LEVELS = {"LOW", "MEDIUM", "HIGH"}
 MAX_REPORT = 16 * 1024 * 1024
+MAX_LOCATIONS = 1000
+PUBLIC_PATH = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]*(?:/[A-Za-z0-9][A-Za-z0-9_.-]*)*\Z")
 
 
 def scope(name):
@@ -63,7 +65,29 @@ def reported_name(name):
     return name[2:] if isinstance(name, str) and name.startswith('./') else name
 
 
-def summarize(report, rc, expected):
+def finding_locations(rows, source):
+    """Only bounded, inventory-confirmed primary coordinates; never source or messages."""
+    locations = []
+    unresolved = 0
+    for row in rows:
+        name = reported_name(row.get("filename"))
+        line = row.get("line_number")
+        if (not isinstance(name, str) or len(name) > 240 or not PUBLIC_PATH.fullmatch(name)
+                or name not in source or type(line) is not int
+                or not 1 <= line <= max(1, len(source[name].splitlines()))):
+            unresolved += 1
+            continue
+        locations.append({"file": name, "line": line, "rule": row["test_id"],
+                          "scope": scope(name), "severity": row["issue_severity"],
+                          "confidence": row["issue_confidence"]})
+    locations.sort(key=lambda x: (x["file"], x["line"], x["rule"], x["severity"], x["confidence"]))
+    return {"primary_locations": locations[:MAX_LOCATIONS],
+            "primary_locations_unresolved": unresolved,
+            "primary_locations_omitted": max(0, len(locations) - MAX_LOCATIONS),
+            "location_scope": "PRIMARY_ONLY"}
+
+
+def summarize(report, rc, expected, *, source=None):
     require(isinstance(report, dict) and rc in (0, 1)
             and report.get("errors") == [], "BANDIT_SCAN_INCOMPLETE")
     metrics, rows = report.get("metrics"), report.get("results")
@@ -87,11 +111,15 @@ def summarize(report, rc, expected):
                 and isinstance(confidence, str) and confidence in LEVELS,
                 "BANDIT_FINDING_INVALID")
         counter[(scope(name), rule, severity, confidence)] += 1
-    return {"files": len(expected), "findings": len(rows),
+    result = {"files": len(expected), "findings": len(rows),
             "verdict": "FINDINGS" if rows else "NO_FINDINGS",
             "by_rule": [{"scope": s, "rule": r, "severity": sev, "confidence": conf,
                          "count": count}
                         for (s, r, sev, conf), count in sorted(counter.items())]}
+    if source is not None:
+        require(set(source) == set(expected), "BANDIT_LOCATION_SOURCE_MISMATCH")
+        result.update(finding_locations(rows, source))
+    return result
 
 
 def accept(repo, cli):
@@ -129,7 +157,7 @@ def accept(repo, cli):
             require(report.is_file() and not report.is_symlink()
                     and report.stat().st_size <= MAX_REPORT, "BANDIT_REPORT_MISSING")
             summary = summarize(json.loads(report.read_text(encoding="utf-8")),
-                                result.returncode, set(names))
+                                result.returncode, set(names), source=data)
             require(all((root / name).read_bytes() == content
                         for name, content in data.items()), "BANDIT_SNAPSHOT_MUTATED")
             return summary

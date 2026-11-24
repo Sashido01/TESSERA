@@ -153,3 +153,11 @@ T12.03.20: [CI 45428224320](https://github.com/Sashido01/TESSERA/actions/runs/45
 ## T12.03.29 — SHA-256 конфигураций сканеров (кандидат)
 
 Две проверки B324: SHA-1 использовался для сравнения Git blob конфигураций Semgrep и Bandit. Для обеих закреплены точные SHA-256 и размер (semgrep_rules.yaml 3376 bytes, `fff4537f6679a52c48e024e001b73e163b24587635a028e5c012583f19876abf`; bandit.ini 355 bytes, `f96ccbcabbdb99f6f6835bac26ee33f92f35fa1c53ee53694668bfac04517387`), полученные из закреплённого NVIDIA commit 5625c2534bf266f810aea489ffbe69da0bb2645e; вычисленные Git blob OID совпадают с upstream. Git blob сохраняется как происхождение, не как криптографическая проверка конфигурации. Проверка фактического wheel в живых control сохранена. Четыре локальных теста точных upstream bytes PASS, два новых offline regression в repo; реальный результат Bandit и полный CI требуют проверки. Без suppressions, без изменений правил сканеров. Нативная идентификация исторических Git SHA-1 объектов не меняется. T12 PARTIAL.
+
+## T12.03.29 — результат PR
+
+[CI 45468107315](https://github.com/Sashido01/TESSERA/actions/runs/45468107315) PASS: 619+38=657 тестов. Bandit 94 files/173 findings, HIGH B324 2→0, MEDIUM20 LOW153, exact host parity. Live SHA256 configuration controls и Tier 1 policy PASS. History Docker 958 blobs/12 955 181 bytes/215.04s/0 findings. v0.0.60 main CI 45467866557 и аннотированный тег проверены; v0.0.61 принят в main, тег отдельно.
+
+## T12.03.30 — безопасные координаты Bandit (кандидат)
+
+Для standalone Bandit host и Docker в отчёт включены только проверенные относительно snapshot имена публичных файлов, строки в границах исходника, rule/severity/confidence/scope; raw code, issue_text и прочие scanner metadata не публикуются. Детерминированный порядок, максимум 1000 первичных мест, отдельные unresolved/omitted counts без изменения общего числа findings, точная parity включая координаты. Шесть offline regression (5+1); реальное покрытие и перечень замечаний требуют CI. Это подготовка предметного triage, не устранение 20 MEDIUM/153 LOW. T12 PARTIAL.

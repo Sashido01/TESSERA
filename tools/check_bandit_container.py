@@ -88,7 +88,7 @@ def worker():
                           "--", *sorted(data)], root)
             require(report.is_file() and not report.is_symlink()
                     and report.stat().st_size <= MAX_REPORT, "BANDIT_CONTAINER_REPORT")
-            summary = summarize(json.loads(report.read_text(encoding="utf-8")), result.returncode, set(data))
+            summary = summarize(json.loads(report.read_text(encoding="utf-8")), result.returncode, set(data), source=data)
             require(snapshot(root)[0] == data, "BANDIT_CONTAINER_SOURCE_MUTATED")
             return summary
         actual = scan("catalog", source, original)
@@ -118,6 +118,7 @@ ERROR_CODES = frozenset({
     "BANDIT_CONTAINER_CLEANUP", "BANDIT_CONTAINER_STAGE_MUTATED",
     "BANDIT_SCAN_INCOMPLETE", "BANDIT_REPORT_INVALID", "BANDIT_COVERAGE_MISMATCH",
     "BANDIT_METRICS_INVALID", "BANDIT_EXIT_MISMATCH", "BANDIT_FINDING_INVALID",
+    "BANDIT_LOCATION_SOURCE_MISMATCH",
     "INTEGRATED_PATH_REDIRECTED", "INTEGRATED_FILE_LIMIT", "INTEGRATED_FILE_CHANGED",
     "INTEGRATED_SOURCE", "INTEGRATED_DIR", "INTEGRATED_FILE", "INTEGRATED_TOTAL",
     "INTEGRATED_EMPTY", "INTEGRATED_OUTPUT_LIMIT",

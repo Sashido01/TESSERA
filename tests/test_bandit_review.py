@@ -1,5 +1,6 @@
 """Offline report-contract tests; actual Bandit runs separately in CI."""
 import pathlib
+from unittest import mock
 import sys
 import unittest
 
@@ -78,6 +79,48 @@ class BanditReviewTests(unittest.TestCase):
         self.assertEqual(b.scope("skills/fixture/tests/test_example.py"), "tests")
         self.assertEqual(b.scope("tests/test_example.py"), "tests")
         self.assertEqual(b.scope("core/example.py"), "runtime")
+
+
+    def test_location_safe_and_known(self):
+        data = self.report()
+        data["results"] = [{**self.finding(), "filename": "./fixture.py", "line_number": 1}]
+        result = b.summarize(data, 1, {"fixture.py"}, source={"fixture.py": b"answer=42\n"})
+        self.assertEqual(result["primary_locations"], [{"file": "fixture.py", "line": 1,
+            "rule": "B307", "scope": "runtime", "severity": "MEDIUM", "confidence": "HIGH"}])
+        self.assertEqual(result["primary_locations_unresolved"], 0)
+        self.assertNotIn("raw", str(result))
+        self.assertNotIn("private", str(result))
+
+    def test_invalid_locations_counted_not_hidden(self):
+        data = self.report()
+        data["results"] = [{**self.finding(), "line_number": x} for x in (True, 0, 2, None, "1")]
+        result = b.summarize(data, 1, {"fixture.py"}, source={"fixture.py": b"x\n"})
+        self.assertEqual(result["findings"], 5)
+        self.assertEqual(result["primary_locations"], [])
+        self.assertEqual(result["primary_locations_unresolved"], 5)
+
+    def test_location_bound_and_order(self):
+        data = self.report()
+        data["results"] = [{**self.finding(), "line_number": x} for x in (3, 1, 2, 1)]
+        with mock.patch.object(b, "MAX_LOCATIONS", 2):
+            result = b.summarize(data, 1, {"fixture.py"}, source={"fixture.py": b"x\ny\nz\n"})
+        self.assertEqual([x["line"] for x in result["primary_locations"]], [1, 1])
+        self.assertEqual(result["primary_locations_omitted"], 2)
+        self.assertEqual(result["findings"], 4)
+
+    def test_location_source_mismatch(self):
+        with self.assertRaisesRegex(RuntimeError, "LOCATION_SOURCE"):
+            b.summarize(self.report(), 0, {"fixture.py"}, source={"other.py": b"x"})
+
+    def test_location_rejects_nonpublic_name(self):
+        name = "synthetic private.py"
+        row = {**self.finding(), "filename": name, "line_number": 1}
+        data = self.report()
+        data["metrics"][name] = data["metrics"].pop("fixture.py")
+        data["results"] = [row]
+        result = b.summarize(data, 1, {name}, source={name: b"x"})
+        self.assertEqual(result["primary_locations_unresolved"], 1)
+        self.assertNotIn(name, str(result))
 
 
 if __name__ == "__main__":

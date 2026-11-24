@@ -153,3 +153,11 @@ Pinned NVIDIA contract: recursive root with exact exclusions or named batch, `-f
 ## T12.03.29 — Scanner configuration SHA-256 (candidate)
 
 Two B324 findings: SHA-1 was used to compare Git blobs of Semgrep and Bandit configurations. Both now pin exact SHA-256 and size (semgrep_rules.yaml 3376 bytes, `fff4537f6679a52c48e024e001b73e163b24587635a028e5c012583f19876abf`; bandit.ini 355 bytes, `f96ccbcabbdb99f6f6835bac26ee33f92f35fa1c53ee53694668bfac04517387`) from pinned NVIDIA commit 5625c2534bf266f810aea489ffbe69da0bb2645e; independently recomputed Git blob OIDs match upstream. Git blob remains provenance, not configuration security digest. Actual installed wheel checks retained in live controls. Four local exact upstream byte tests PASS; two new repository offline regressions; actual Bandit result and full CI require verification. No suppression or scanner rule change. Native historical Git SHA-1 object identity unchanged. T12 PARTIAL.
+
+## T12.03.29 — PR result
+
+[CI 45468107315](https://github.com/Sashido01/TESSERA/actions/runs/45468107315) PASS: 619+38=657 tests. Bandit 94 files/173 findings, HIGH B324 2→0, MEDIUM20 LOW153, exact host parity. Live SHA256 configuration controls and Tier 1 policy PASS. History Docker 958 blobs/12,955,181 bytes/215.04s/0 findings. v0.0.60 main CI 45467866557 and annotated tag verified; v0.0.61 merged into main, tag separate.
+
+## T12.03.30 — safe Bandit coordinates (candidate)
+
+Standalone Bandit host and Docker reports include only snapshot-confirmed public relative filenames, bounded source line numbers, rule/severity/confidence/scope; no raw code, issue_text or other scanner metadata. Deterministic order, maximum 1000 primary locations, separate unresolved/omitted counts without changing total findings, exact parity including coordinates. Six offline regressions (5+1); actual coverage and finding inventory require CI. Preparation for per-site triage, not remediation of 20 MEDIUM/153 LOW. T12 PARTIAL.
