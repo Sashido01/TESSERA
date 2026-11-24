@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.38 — Installed license content verification (T12.03.06)
+
+- Candidate: bounded license record checks for two exact Python versions, RECORD SHA-256 and size, upstream comparison; original metadata preserved. Four regressions; CI required. Go license confirmed at upstream level, not binary level.
+
 ## 0.0.37 — Evidence-bound SkillSpector finding locations (T12.03.05)
 
 - Candidate: primary locations only for known relative paths in the inspected skill inventory; bounded output with explicit unresolved and omitted counts. No snippets, raw messages or occurrence metadata; unchanged rules and thresholds. Three regressions; real CI acceptance required.
