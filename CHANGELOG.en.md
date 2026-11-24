@@ -6,7 +6,7 @@ This file tracks changes to the **shared catalog**. Individual skills may mainta
 
 ## 0.0.34 — Restrict CI evidence API redirects (T12.03.02)
 
-- Exact GitHub Actions API endpoints, reject redirects before following, verify exact response URL, four regressions. Actual CI required; no Bandit suppression.
+- Exact GitHub Actions API endpoints, reject redirects before following, verify exact response URL, four regressions. [CI 45376483433](https://github.com/Sashido01/TESSERA/actions/runs/45376483433) PASS: 493+19 tests, four new regressions PASS, Bandit B310 absent in the repeat review; 110 findings (no HIGH), no rule suppression. T12.03.02 COMPLETE within implemented control and CI scope; live network execution separately NOT_VERIFIED.
 
 ## 0.0.33 — Portable Microversion Release license and references (T12.03.01)
 

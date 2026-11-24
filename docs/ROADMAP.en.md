@@ -124,4 +124,4 @@ Complete work as small verifiable changes, assigning a new microversion only to 
 - One microversioning core, not four independent implementations; keep host adapters thin.
 - Unknown or unverified behavior must be marked NOT_VERIFIED rather than guessed.
 
-**T12.03.02:** [CI evidence network restriction](RELEASE_CI_SECURITY.en.md) — implementation prepared, actual CI pending. Other Bandit findings open.
+**T12.03.02:** [CI evidence network restriction](RELEASE_CI_SECURITY.en.md) — [CI 45376483433](https://github.com/Sashido01/TESSERA/actions/runs/45376483433) PASS: 493+19 tests, four new regressions PASS, Bandit B310 absent in the repeat review; 110 findings (no HIGH), no rule suppression. T12.03.02 COMPLETE within implemented control and CI scope; live network execution separately NOT_VERIFIED.
