@@ -17,3 +17,8 @@ In the verified 2.13.6 environment [CI 45375135316](https://github.com/Sashido01
 Status PARTIAL, actual CI required. Gitleaks/gh, legal compatibility, confirmed CVE reachability, native components and network sandbox remain separate tasks. No Tier 2/3 or paid APIs.
 
 [CI 45376675127](https://github.com/Sashido01/TESSERA/actions/runs/45376675127) PASS: 494+19 tests; SkillSpector 2.13.7, 17/17 files, complete, 100%, 16 MEDIUM (AE4 6, AST3 6, AST4 3, LP3 1), zero HIGH, risk 53/100 HIGH, exit 1, zero suppressions, both fixtures PASS, 11.37 s. OSV: 74 Python distributions, zero packages with entries, zero source-commit entries; cryptography 50.0.2, langgraph 1.2.20, pyasn1 0.6.5. T12.03.03 COMPLETE within upgrade and repeat OSV scope; new AST3 and threshold exceedance remain open. Release awaits sequential acceptance.
+
+
+## T12.03.05 — finding localization (candidate)
+
+The pinned `Finding.to_dict()` implementation in `src/skillspector/models.py` contains a primary `location` and a separate `occurrences` list. The wrapper now emits only validated primary coordinates: rule, severity, relative inventory path, start and optional end line. Unknown, absolute or malformed paths/coordinates are not emitted; their count is recorded in `primary_locations_unresolved`. Beyond 1000 rows, `primary_locations_omitted` increases. Overall finding counts are unchanged. The byte-based limit is an upper bound on line count, not exact line verification. Code snippets, messages, context and occurrences are not emitted. This is diagnostic preparation, not finding remediation; live CI acceptance is required.

@@ -85,6 +85,53 @@ class SkillSpectorTests(unittest.TestCase):
         self.assertEqual(result["findings"], 1)
         self.assertNotIn("raw text", str(result))
 
+    def test_location_is_inventory_bound_and_sanitized(self):
+        data = self.report()
+        data["issues"] = [{"id": "AST3", "severity": "MEDIUM",
+                           "location": {"file": "SKILL.md", "start_line": 3, "end_line": 4},
+                           "code_snippet": "synthetic confidential content",
+                           "occurrences": [{"file": "external/private.txt", "start_line": 8}]}]
+        data["analysis_completeness"].update({"findings_before_filtering": 1,
+                                             "findings_after_filtering": 1})
+        result = self.check(data)
+        self.assertEqual(result["primary_locations"], [
+            {"rule": "AST3", "severity": "MEDIUM", "file": "SKILL.md",
+             "start_line": 3, "end_line": 4}])
+        self.assertEqual(result["primary_locations_unresolved"], 0)
+        self.assertEqual(result["location_scope"], "PRIMARY_ONLY_NOT_ALL_OCCURRENCES")
+        self.assertNotIn("confidential", str(result))
+        self.assertNotIn("external/private", str(result))
+
+    def test_untrusted_location_not_echoed(self):
+        for location in (
+            {"file": "/private/marker", "start_line": 1},
+            {"file": "../marker", "start_line": 1},
+            {"file": "unknown.md", "start_line": 1},
+            {"file": "SKILL.md", "start_line": True},
+            {"file": "SKILL.md", "start_line": 0},
+            {"file": "SKILL.md", "start_line": 102},
+            {"file": "SKILL.md", "start_line": 3, "end_line": 2},
+        ):
+            with self.subTest(location=location):
+                data = self.report()
+                data["issues"] = [{"id": "AST3", "severity": "MEDIUM", "location": location}]
+                result = self.check(data)
+                self.assertEqual(result["primary_locations"], [])
+                self.assertEqual(result["primary_locations_unresolved"], 1)
+                self.assertEqual(result["findings"], 1)
+                self.assertNotIn("marker", str(result))
+                self.assertNotIn("unknown.md", str(result))
+
+    def test_location_output_is_bounded_without_hiding_findings(self):
+        data = self.report()
+        data["issues"] = [{"id": "AST3", "severity": "MEDIUM",
+                           "location": {"file": "SKILL.md", "start_line": 1}}] * (s.MAX_LOCATION_ROWS + 2)
+        result = self.check(data)
+        self.assertEqual(len(result["primary_locations"]), s.MAX_LOCATION_ROWS)
+        self.assertEqual(result["primary_locations_omitted"], 2)
+        self.assertEqual(result["findings"], s.MAX_LOCATION_ROWS + 2)
+        self.assertEqual(result["by_rule"][0]["count"], s.MAX_LOCATION_ROWS + 2)
+
 
 if __name__ == "__main__":
     unittest.main()
