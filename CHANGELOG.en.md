@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.41 — Minimum tool scope and Go audit evidence (T12.03.09)
+
+- Explicit skill access boundaries without preapproved tools, independent Git/CI verification; actual v0.0.40 evidence and OSV/Govulncheck ID comparison. No LP3 suppression; CI required.
+
 ## 0.0.40 — Go binary review using Govulncheck (T12.03.08)
 
 - Candidate: pinned source, isolated CI build, extract and binary mode, explicit distinction between fallback and extracted symbols, scanner OSV self-audit and before/after SHA-256, eight offline regressions and two upstream local-database controls; live acceptance required. Call reachability not proven.

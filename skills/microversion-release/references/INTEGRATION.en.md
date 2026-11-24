@@ -8,6 +8,19 @@ The `SKILL.md + scripts/ + references/` layout follows the Agent Skills conventi
 
 Different environments use different skill directories, discovery rules, trust prompts, and enforcement mechanisms. Having a `SKILL.md` file does not itself guarantee execution after each change.
 
+## Minimum tool scope (LP3)
+
+| Operation | Required access and boundary |
+| --- | --- |
+| Version calculation | Python, no project writes |
+| Release tag verification | Read selected repository, trusted Git |
+| Project checks | Only approved project commands |
+| Installation | Explicit --apply, write only a new skill directory |
+| Commit and tag creation | Authorized writes to selected repository, leave existing tag unchanged |
+| Publication | Separate authorization, trusted remote, minimum token scope |
+
+The experimental allowed-tools field in the [Agent Skills specification](https://agentskills.io/specification) describes preapproved tools, not a permission ceiling. It is not added to clear LP3. This table documents intent and does not create an OS sandbox. Actual Codex, Harness and other host permission enforcement requires separate verification. A hook does not replace independent Git/CI acceptance; hook failure is not proof of a successful check.
+
 ## Safe installation
 
 From the root of a cloned TESSERA repository (replace `<project-root>` with the destination project directory):

@@ -50,3 +50,27 @@ Candidate extension: two official upstream controls from pinned cmd/govulncheck/
 First live CI 45389727364: Govulncheck build PASS, execution BLOCKED: GO_ROOT_MISMATCH. Exact build metadata line was not printed; a SHA-only shallow checkout without its tag is the likely cause. Candidate fix: fetch exact v1.10.0 and verify its commit, strictly validate root version (only v1.10.0 or devel), accept release version in JSON scanner config. Additional regression. Live re-acceptance required. Issue #36: Python license evidence accepted in v0.0.38; Go binary/reachability, tqdm redistribution conditions and Go binary license correspondence remain open in the roadmap, administrative issue closure does not mean COMPLETE.
 
 Retry CI 45391798766: 513+29 tests PASS, build PASS, blocked on GOVULN_CONTROL_VERSION after scanner build metadata and OSV check. Exact historical binary version was not printed. Use Go 1.26.11 machine-readable go version -m -json, bounded historical GoVersion for pinned control blobs only; require exact match to SBOM. Strict GO_VERSION for gh/Gitleaks unchanged. Correct pseudo-version scanner_version UTC timestamp length (14 digits per upstream). Add regression; move Govulncheck before long Gitleaks history checks for earlier failure. CI required.
+
+## T12.03.08 — actual v0.0.40 acceptance
+
+[Main CI 45395642625](https://github.com/Sashido01/TESSERA/actions/runs/45395642625), commit 2b8a9af5578508b4ae51972d0d5e0cf11a22d82e, 514+29=543 tests PASS. Govulncheck v1.10.0 (ef4cb2f7cae47fe3e21fc596455f694951867b29), SHA-256 652a228f87149c66d2b5f258ed01fde937fade94696ef89b010a7b39d38d2e27. Both local upstream controls PASS. Scanner self-audit: 5 modules, Go 1.26.11, no OSV findings for versions and commit in this run. License compliance not established.
+
+- gh: SHA-256 fa7cff06d4db9eee98e00b10ac93beebfe1822109ac04a6cbbf9d806c21d0073; 154 extracted modules, 0 extracted symbols, 297 OSV records, 1 findings.
+- gitleaks: SHA-256 88f91962aa2f93ac6ab281d553b9e125f5197bbbce38f9f2437f7299c32e5509; 66 extracted modules, 0 extracted symbols, 227 OSV records, 73 findings.
+
+All 74 binary findings are MODULE_ONLY_FALLBACK; no symbols extracted. Exact ID intersection for one run, without alias merging:
+
+| Binary | Component | Version | OSV | Shared | OSV only |
+| --- | --- | --- | ---: | ---: | ---: |
+| gh | github.com/gorilla/websocket | v1.5.3 | 1 | 1 | 0 |
+| gitleaks | github.com/andybalholm/brotli | v1.1.2-0.20250424173009-453214e765f3 | 1 | 1 | 0 |
+| gitleaks | github.com/klauspost/compress | v1.17.11 | 3 | 2 | 1 |
+| gitleaks | github.com/nwaples/rardecode/v2 | v2.1.0 | 2 | 1 | 1 |
+| gitleaks | github.com/ulikunitz/xz | v0.5.12 | 2 | 1 | 1 |
+| gitleaks | golang.org/x/crypto | v0.35.0 | 34 | 19 | 15 |
+| gitleaks | golang.org/x/sys | v0.30.0 | 1 | 0 | 1 |
+| gitleaks | golang.org/x/text | v0.22.0 | 2 | 2 | 0 |
+| gitleaks | stdlib | 1.24.11 | 48 | 47 | 1 |
+| gitleaks | toolchain | 1.24.11 | 24 | 0 | 24 |
+
+GitHub CLI: 1 shared ID, 0 OSV-only. Gitleaks: 117 distinct module/toolchain OSV IDs, 73 shared, 44 OSV-only, 0 binary-only. Separate source commit CVE-2026-124039 (not in 117). Do not treat the 44 as ruled out or 117 as independent CVEs: databases, aliases and scope differ. GO-2026-6278 appears in both reports; reviewed command source files skills/install, skills/publish, run/download, attestation/verify have no direct Gorilla WebSocket imports, not proof of no indirect call. Codespaces uses Microsoft Dev Tunnels. [CLI source](https://github.com/cli/cli/tree/e1219499a578b69e3437adaa31cd60614e23c802). Do not claim NOT_AFFECTED without exact call graph. Gitleaks processes data and archives; assess updating old Go toolchain and dependencies separately, do not replace pinned binary without acceptance. T12.03.08 execution COMPLETE, applicability/reachability PARTIAL. Public positive control and sandbox remain open.
