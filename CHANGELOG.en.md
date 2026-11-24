@@ -8,7 +8,7 @@ This file tracks changes to the **shared catalog**. Individual skills may mainta
 
 - Added actual official gh 2.105.0 CI acceptance: install from public TESSERA by refs/tags/v0.0.22 and full commit SHA, verify independent Git tree, file inventory and bytes, pin metadata and gh skill list discovery.
 - Verify duplicate installation refusal without --force and pinned update --dry-run skipping without file mutation. Isolated HOME and GH_CONFIG_DIR, read-only CI token only, offline negative tests.
-- T10.02 acceptance requires real GH_SKILL_REMOTE_PIN_PASS; overall T10 PARTIAL. Applied updates, multi-skill behavior and client activation remain unverified. Updated bilingual docs and ROADMAP.
+- T10.02 COMPLETE: [live CI 45351217500](https://github.com/Sashido01/TESSERA/actions/runs/45351217500) confirmed GH_SKILL_REMOTE_PIN_PASS; 362+19 tests passed. Overall T10 PARTIAL. Applied updates, multi-skill behavior and client activation remain unverified. Updated bilingual docs and ROADMAP.
 
 ## 0.0.22 — Record live independent acceptance of the signed ZIP (T09.10)
 
