@@ -4,6 +4,11 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.26 — Focused NVIDIA SkillEvaluator Tier 1 evaluation (T12.01)
+
+- Pinned official 1.2.0 wheel and 19 dependencies from uv.lock by SHA-256, separate Linux CPython 3.13 environment, schema/quality only without LLM or extras. Verify JSON, exit code and negative case. Findings advisory; execution failure blocks CI. Live acceptance [CI 45358283596](https://github.com/Sashido01/TESSERA/actions/runs/45358283596): schema/quality PASS, 75/100, 18 findings, 393+19 tests PASS; corrected first-run JSON validator name mismatch (QUALITY). T12.01 COMPLETE within stated scope.
+- Updated bilingual docs. Full Tier 1, scanners and agent compatibility NOT_VERIFIED; no Tier 2/3.
+
 ## 0.0.25 — Isolated multi-skill and independent tag acceptance (T10.03.02)
 
 - Temporary Git repository with two synthetic skills, five annotated tags and independent Git tree checks. Actual local snapshot installs with gh 2.105.0, scoped replacement and rollback, namespace collisions and duplicate refusal. 7 offline tests plus a mandatory CI guard test.

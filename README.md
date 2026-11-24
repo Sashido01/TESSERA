@@ -152,3 +152,5 @@ NVIDIA SkillEvaluator допускается **только на Tier 1**, по�
 **T10.03.01 — COMPLETE (стенд):** стенд реального обновления и безопасного staged re-pin; пользовательские правки не перезаписываются безусловно, а блокируют контролируемый переход. Нативное обновление проверяется на синтетических правках. [Живой CI PASS](https://github.com/Sashido01/TESSERA/actions/runs/45352932764); риск удаления локальных правок подтверждён. Не запускать стенд для пользовательских профилей. [Детали](docs/GH_SKILL_INSTALL.md).
 
 **T10.03.02:** локальный стенд независимых тегов нескольких навыков и реальной установки/коллизий официальным gh; [Живой CI PASS](https://github.com/Sashido01/TESSERA/actions/runs/45354011607) для локального стенда. T10.03.02 PARTIAL: remote namespaced pin и T16 не подтверждены. [Детали](docs/GH_SKILL_INSTALL.md).
+
+**T12.01 — COMPLETE в пределах schema/quality:** ограниченная оценка NVIDIA SkillEvaluator 1.2.0 (schema/quality, --no-llm, advisory), [реальный CI PASS: 75/100](https://github.com/Sashido01/TESSERA/actions/runs/45358283596). [Границы и зависимости](docs/NVIDIA_TIER1.md). Полный Tier 1 не подтверждён; Tier 2/3 запрещены.
