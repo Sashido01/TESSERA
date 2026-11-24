@@ -61,6 +61,8 @@ def validate_workflow(workflow: str) -> list[str]:
         errors.append("Нет обязательной проверки нескольких навыков")
     if '--require-hashes -r tools/nvidia-tier1-requirements.txt' not in validate or 'run: python tools/check_nvidia_tier1.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/skillevaluator"' not in validate:
         errors.append("Нет обязательной ограниченной проверки NVIDIA Tier 1")
+    if 'run: python tools/check_nvidia_static_review.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/skillevaluator"' not in validate:
+        errors.append("Нет обязательного статического обзора NVIDIA Tier 1")
     if "contents: write" in validate:
         errors.append("Право записи обнаружено в проверяющей задаче")
     if "needs: validate" not in tagging:
