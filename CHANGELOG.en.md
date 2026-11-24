@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.50 — Simplified skill test imports (T12.03.18)
+
+- Ordinary imports of three checkout modules, origin and conflicting cache checks, three regressions. CI required; no threshold or suppression changes.
+
 ## 0.0.49 — Hardened skill Git helper (T12.03.17)
 
 - Absolute executable, timeout, closed stdin, safe diagnostics and post-capture output limit; six regressions. CI required; trusted configuration and environment limitations remain.

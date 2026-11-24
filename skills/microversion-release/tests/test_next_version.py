@@ -1,16 +1,26 @@
-import importlib.util
 import pathlib
 import subprocess
 import sys
 import unittest
 
 PATH = pathlib.Path(__file__).resolve().parents[1] / "scripts" / "next_version.py"
-spec = importlib.util.spec_from_file_location("next_version", PATH)
-module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(module)
+# A test must exercise this checkout, not an unrelated installed/cached module.
+cached = sys.modules.get("next_version")
+if cached is not None and pathlib.Path(getattr(cached, "__file__", "") or ".").resolve() != PATH:
+    raise RuntimeError("Unexpected cached test module")
+sys.path.insert(0, str(PATH.parent))
+try:
+    import next_version as module
+finally:
+    sys.path.pop(0)
+if pathlib.Path(module.__file__).resolve() != PATH:
+    raise RuntimeError("Unexpected test module origin")
 
 
 class VersionTests(unittest.TestCase):
+    def test_import_origin(self):
+        self.assertEqual(pathlib.Path(module.__file__).resolve(), PATH)
+
     def test_work_commits_continue_past_99(self):
         pairs = {
             "0.0.0": "0.0.1",

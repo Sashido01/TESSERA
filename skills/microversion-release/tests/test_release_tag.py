@@ -1,18 +1,29 @@
-import importlib.util
 import os
 import pathlib
+import sys
 import subprocess
 import tempfile
 import unittest
 from unittest import mock
 
 PATH = pathlib.Path(__file__).resolve().parents[1] / "scripts" / "release_tag.py"
-spec = importlib.util.spec_from_file_location("release_tag", PATH)
-module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(module)
+# A test must exercise this checkout, not an unrelated installed/cached module.
+cached = sys.modules.get("release_tag")
+if cached is not None and pathlib.Path(getattr(cached, "__file__", "") or ".").resolve() != PATH:
+    raise RuntimeError("Unexpected cached test module")
+sys.path.insert(0, str(PATH.parent))
+try:
+    import release_tag as module
+finally:
+    sys.path.pop(0)
+if pathlib.Path(module.__file__).resolve() != PATH:
+    raise RuntimeError("Unexpected test module origin")
 
 
 class ReleaseTagTests(unittest.TestCase):
+    def test_import_origin(self):
+        self.assertEqual(pathlib.Path(module.__file__).resolve(), PATH)
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)

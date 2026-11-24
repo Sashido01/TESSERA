@@ -173,3 +173,5 @@ T12.03.08: CI 45391798766 — 513+29 PASS, GOVULN_CONTROL_VERSION BLOCKED; new c
 **T12.03.15:** [CI 45418208676](https://github.com/Sashido01/TESSERA/actions/runs/45418208676) PASS, 551+29, aggregate_risk_gate=1, other_high=0, policy FAIL. **T12.03.16 — candidate:** [Semgrep 1.182.0](NVIDIA_TIER1.en.md), upstream lock, local rules and live controls, required scanner row, OSV/licenses, five regressions; CI required. T12 PARTIAL.
 
 **T12.03.16:** [CI 45419767513](https://github.com/Sashido01/TESSERA/actions/runs/45419767513) PASS, 585 tests, Semgrep EXECUTED; 8 OSV IDs in 3 packages and 3 UNKNOWN license metadata open. **T12.03.17 — candidate:** skill Git helper hardening, timeout, absolute executable, safe errors, six regressions, no suppressions. T12 PARTIAL; CI required.
+
+**T12.03.17:** [CI 45421559705](https://github.com/Sashido01/TESSERA/actions/runs/45421559705) PASS, 591 tests, 53/100 and 19 MEDIUM without suppressions. **T12.03.18 — candidate:** ordinary imports in three test modules, origin and conflicting cache checks, three regressions; CI required. T12 PARTIAL.
