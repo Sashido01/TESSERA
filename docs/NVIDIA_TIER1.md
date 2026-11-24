@@ -117,3 +117,11 @@ T12.03.20: [CI 45428224320](https://github.com/Sashido01/TESSERA/actions/runs/45
 ## T12.03.25 — ограниченная параллельность Gitleaks (кандидат)
 
 В TSG1 worker два одновременных stdin-процесса, GOMAXPROCS=1 на процесс, окна ровно до двух записей; нет новых заданий после ошибки окна. Сохраняются 2 CPU/512 MiB/64 PID, все лимиты/дедлайны, контрольные сценарии, host parity, каждый непустой объект проверяется отдельно. TSP1 не меняется. Три offline регрессии (реальная синхронизация двух mocked scanner calls, прекращение после ошибки, просроченный deadline). Фактические ускорение/пиковая память и Docker workload требуют CI; 20-minute job cap неизменён. Сравнить с 425.15s на 902 blobs, не обещать ускорение. T12 PARTIAL.
+
+## T12.03.25 — результат PR
+
+[CI 45448926511](https://github.com/Sashido01/TESSERA/actions/runs/45448926511) PASS: 596+38=634 теста; Docker history 911 blobs / 11 754 891 bytes / 243.73s / 0 findings. Предыдущий PR 425.15s / 902 blobs, снижение elapsed 42.7%, не контролируемый benchmark. v0.0.56 main CI 45448734293 и тег подтверждены; v0.0.57 принят в main, собственная приёмка отдельно.
+
+## T12.03.26 — интегрированный Gitleaks Docker (кандидат)
+
+Закреплённый NVIDIA SecretsValidator: точный контракт 12 аргументов и version; копия только разрешённого skill/fixture root, байтовый TOML с ограниченной схемой, сохранение относительных путей/пустых каталогов, проверка SHA256 бинарника до и внутри контейнера, один read-only stage mount, no network/nonroot/caps drop, прежние cgroups, stdout/stderr per-file RLIMIT_FSIZE, deadline 100s и cleanup. Только нужные NVIDIA поля JSON + REDACTED, никаких raw Match/Line; коды 0/10 сохраняются. Реальные clean/positive controls и integrated policy требуют CI. Восемь новых offline регрессий. Не доказывает полную защиту от host TOCTOU/вредоносного сканера, daemon failures или hard aggregate disk quota. Standalone host parity сохранён; нет host fallback в интегрированном режиме. T12 PARTIAL.

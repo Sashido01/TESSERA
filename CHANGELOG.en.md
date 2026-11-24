@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.58 — Integrated Gitleaks Docker (T12.03.26)
+
+- Isolated NVIDIA adapter, skill snapshot, restricted TOML and report, eight regressions. CI required; T12 PARTIAL.
+
 ## 0.0.57 — Bounded Gitleaks concurrency (T12.03.25)
 
 - Two TSG1 workers, unchanged limits, full coverage, three regression tests. CI required; T12 PARTIAL.
