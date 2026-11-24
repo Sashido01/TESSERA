@@ -45,3 +45,11 @@ The real pinned binary is invoked through the same private shim with the exact u
 ## T12.03.16 — Semgrep in Tier 1 (candidate)
 
 Use NVIDIA upstream lock 5625c2534bf266f810aea489ffbe69da0bb2645e, blob 11859086088d6720e5f4f303de0740a4830b065b (66 pinned package rows, 915 SHA-256 lines), separate venv, wheel-only, require-hashes, pip check, OSV and license metadata of the actual environment. Semgrep 1.182.0, six local NVIDIA rules (blob 3ef2067b69ef50f09b39c933771f751bc227b3db), exact version, explicit override and REQUIRE_SEMGREP=1. Clean and positive Python fixtures are scanned but never executed; check exit, no errors, scanned path, exact ID and preservation. The Tier 1 report must record the exact Semgrep version in Code Risk Analysis; absence/incompleteness blocks execution. Five regressions. Metrics and version check disabled, no registry/Pro/LLM; not an OS network sandbox, native OCaml binary audit or certification. Upstream excludes tests/test in integrated analysis; independent Bandit/Gitleaks/SkillSpector remain. Live CI required, T12 PARTIAL.
+
+## T12.03.16 — PR result
+
+[CI 45419767513](https://github.com/Sashido01/TESSERA/actions/runs/45419767513) PASS: 556+29=585 tests, Semgrep 1.182.0 EXECUTED, clean/detection/coverage/fixture PASS, Code Risk Analysis PASSED. 67 Python distributions, OSV 8 IDs in 3 packages (mcp 1.29.0:5, opentelemetry-api 1.37.0:2, wcmatch 8.5.2:1), 3 UNKNOWN license metadata, native binaries NOT_SCANNED. Separate open risks; policy FAIL 19 MEDIUM + aggregate HIGH unchanged. v0.0.47 main CI and annotated tag verified; v0.0.48 merged into main, its acceptance separate.
+
+## T12.03.17 — skill Git helper hardening (candidate)
+
+Based on the 19 MEDIUM review (PR 48, comment 7135272307): production AST4 corresponds to actual Git invocation; each call limited to 60 s, absolute executable from absolute PATH entries, closed stdin, shell=False, fixed errors without raw diagnostics, post-capture limit of 1,048,576 characters. Six regressions; memory/pipe risk, trusted PATH/config, Windows and races remain limitations. AST4 may remain as an expected subprocess finding; no suppressions. CI required, T12 PARTIAL.

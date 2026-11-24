@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.49 — Hardened skill Git helper (T12.03.17)
+
+- Absolute executable, timeout, closed stdin, safe diagnostics and post-capture output limit; six regressions. CI required; trusted configuration and environment limitations remain.
+
 ## 0.0.48 — Pinned Semgrep in NVIDIA Tier 1 (T12.03.16)
 
 - Upstream lock, local rules, live controls and required scanner report, OSV/licenses; five regressions. CI required, sandbox and certification open.

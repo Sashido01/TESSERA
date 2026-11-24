@@ -45,3 +45,11 @@
 ## T12.03.16 — Semgrep в Tier 1 (кандидат)
 
 Используем upstream lock NVIDIA 5625c2534bf266f810aea489ffbe69da0bb2645e, blob 11859086088d6720e5f4f303de0740a4830b065b (66 строк закреплённых пакетов, 915 SHA-256), отдельный venv, wheel-only, require-hashes, pip check, OSV и метаданные лицензий реального окружения. Semgrep 1.182.0, локальные шесть правил NVIDIA (blob 3ef2067b69ef50f09b39c933771f751bc227b3db), точная версия, явный override и REQUIRE_SEMGREP=1. Чистый и положительный Python fixture сканируются, но не исполняются; проверяются exit, отсутствие errors, scanned path, точный ID, сохранность. В отчёте Tier 1 обязательна точная версия Semgrep в Code Risk Analysis; отсутствие/неполнота блокируют выполнение. Пять регрессий. Метрики и version check отключены, registry/Pro/LLM не используются; это не OS-сетевой sandbox, не аудит нативного OCaml-бинарника и не сертификация. Upstream исключает tests/test при интегрированном анализе; независимые Bandit/Gitleaks/SkillSpector сохранены. Живой CI обязателен, T12 PARTIAL.
+
+## T12.03.16 — результат PR
+
+[CI 45419767513](https://github.com/Sashido01/TESSERA/actions/runs/45419767513) PASS: 556+29=585 тестов, Semgrep 1.182.0 EXECUTED, clean/detection/coverage/fixture PASS, Code Risk Analysis PASSED. 67 Python distributions, OSV 8 ID в 3 пакетах (mcp 1.29.0:5, opentelemetry-api 1.37.0:2, wcmatch 8.5.2:1), 3 UNKNOWN license metadata, native binaries NOT_SCANNED. Это отдельные открытые риски; policy FAIL 19 MEDIUM + aggregate HIGH без изменений. v0.0.47 main CI и аннотированный тег подтверждены; v0.0.48 принят в main, собственная приёмка отдельно.
+
+## T12.03.17 — усиление Git helper навыка (кандидат)
+
+По обзору 19 MEDIUM (PR 48, комментарий 7135272307): production AST4 соответствует реальному вызову Git; ограничение каждого вызова 60 с, абсолютный executable из абсолютных PATH entries, закрытый stdin, shell=False, фиксированные ошибки без сырых диагностик, post-capture лимит 1 048 576 символов. Шесть регрессий; риск memory/pipe, доверие к PATH/config, Windows и гонки остаются ограничениями. AST4 может сохраниться как ожидаемый subprocess; подавлений нет. CI обязателен, T12 PARTIAL.
