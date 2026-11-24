@@ -123,3 +123,7 @@ Complete work as small verifiable changes, assigning a new microversion only to 
 - A SKILL.md file being present is not proof of automatic activation.
 - One microversioning core, not four independent implementations; keep host adapters thin.
 - Unknown or unverified behavior must be marked NOT_VERIFIED rather than guessed.
+
+**T12.03.02:** [CI evidence network restriction](RELEASE_CI_SECURITY.en.md) — [CI 45376483433](https://github.com/Sashido01/TESSERA/actions/runs/45376483433) PASS: 493+19 tests, four new regressions PASS, Bandit B310 absent in the repeat review; 110 findings (no HIGH), no rule suppression. T12.03.02 COMPLETE within implemented control and CI scope; live network execution separately NOT_VERIFIED.
+
+**T12.03.02 regression correction:** Before merge, a shared get_public_json regression was found: the original strict URL allowlist blocked the existing GitHub Release metadata call. Permit only the canonical /releases/tags/vMAJOR.MINOR.PATCH route and one namespace encoded as %2F; arbitrary escaping, extra paths and parameters remain forbidden. Three regressions exercise verify_github_publication through the actual shared transport (ordinary and namespaced tag), changed response URL rejection and invalid routes. Only networking is mocked, validation and response handling are real. Historical PASS missed this defect; repeat acceptance is required.

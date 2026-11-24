@@ -12,7 +12,7 @@ from unittest import mock
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from core import release_publication, release_certificate, release_report
+from core import release_publication, release_certificate, release_report, release_ci
 
 REPOSITORY = "Sashido01/TESSERA"
 TAG = "v0.0.11"
@@ -140,6 +140,32 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(urls, [
             f"https://api.github.com/repos/{REPOSITORY}/releases/tags/{TAG}"
         ])
+
+    def test_default_transport_preserves_release_queries(self):
+        for tag, endpoint_tag in ((TAG, TAG),
+                                  ("microversion-release/" + TAG,
+                                   "microversion-release%2F" + TAG)):
+            with self.subTest(tag=tag), mock.patch.object(
+                    release_ci.urllib.request, "build_opener") as builder:
+                endpoint = f"https://api.github.com/repos/{REPOSITORY}/releases/tags/{endpoint_tag}"
+                response = builder.return_value.open.return_value.__enter__.return_value
+                response.geturl.return_value = endpoint
+                data = release_metadata()
+                data.update({"tag_name": tag,
+                             "html_url": f"https://github.com/{REPOSITORY}/releases/tag/{tag}"})
+                response.read.return_value = json.dumps(data).encode("utf-8")
+                result = release_publication.verify_github_publication(REPOSITORY, tag)
+                self.assertEqual(result["publication_status"], "SOURCE_RELEASE_PUBLISHED")
+                self.assertEqual(builder.return_value.open.call_args.args[0].full_url, endpoint)
+                self.assertIsInstance(builder.call_args.args[0], release_ci.NoAPIRedirect)
+
+    def test_default_transport_rejects_release_redirect(self):
+        with mock.patch.object(release_ci.urllib.request, "build_opener") as builder:
+            response = builder.return_value.open.return_value.__enter__.return_value
+            response.geturl.return_value = "https://example.invalid/other"
+            result = release_publication.verify_github_publication(REPOSITORY, TAG)
+            self.assertEqual(result["publication_status"], "BLOCKED")
+            response.read.assert_not_called()
 
     def test_unavailable_api_is_blocked_not_published(self):
         def unavailable(url):
