@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.32 — Dependency CVE and license metadata review (T12.02.02.04)
+
+- Exact installed Python inventory, OSV queries with pagination and negative control, license metadata; Go binary build info for gh/Gitleaks, module and toolchain OSV queries, deps.dev license metadata. Advisory findings, fail-closed execution, no LLM. [CI 45375135316](https://github.com/Sashido01/TESSERA/actions/runs/45375135316) PASS: 477+19 tests; 97 Python package checks, 3 packages with OSV entries; 212 distinct Go modules (gh 155, Gitleaks 66), 8 affected modules across the binaries, Gitleaks stdlib/toolchain and one source-commit entry; 211 Go licenses reported by deps.dev, one NOT_INDEXED. T12.02.02.04 COMPLETE within inventory/query execution scope; CVE remediation, code reachability and legal compatibility remain open.
+
 ## 0.0.31 — Direct static SkillSpector review (T12.02.02.03)
 
 - Pinned SkillSpector 2.13.6 source and official wheel, offline lock export, wheel/hash-only separate environment, no LLM, strict scan report and completeness checks, synthetic clean and P1 fixtures, CI and bilingual documentation. [CI 45370414762](https://github.com/Sashido01/TESSERA/actions/runs/45370414762) PASS: 454+19 tests; 16/16 files, 100% coverage, complete_with_caveats (4 reference_missing), risk 78/100 HIGH, exit 1 (threshold 50 exceeded), 12 findings (10 MEDIUM, 2 HIGH), zero suppressions, both synthetic fixtures PASS, 13.32 s. T12.02.02.03 COMPLETE within direct static execution scope; findings and full NVIDIA security acceptance remain open.

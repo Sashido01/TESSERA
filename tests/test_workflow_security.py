@@ -94,6 +94,15 @@ class WorkflowSecurityTests(unittest.TestCase):
         modified = WORKFLOW.replace("e7b46c55e726405b2a068d375d1ee8e799e15d86f3fc05f84feb5ba962198b15", "0" * 64)
         self.assertTrue(any("SkillSpector" in e for e in module.validate_workflow(modified)))
 
+    def test_dependency_review_is_required(self):
+        for value in ("--locked tools/skills-ref-requirements.txt", "--root skillevaluator==1.2.0", "--root skillspector==2.13.6"):
+            modified = WORKFLOW.replace("tools/check_dependency_review.py " + value, "echo omitted")
+            self.assertTrue(any("аудита CVE" in e for e in module.validate_workflow(modified)))
+
+    def test_go_review_is_required(self):
+        modified = WORKFLOW.replace("run: python tools/check_go_dependency_review.py", "run: echo")
+        self.assertTrue(any("аудита CVE" in e for e in module.validate_workflow(modified)))
+
     def test_tag_job_needs_validation(self):
         modified = WORKFLOW.replace("    needs: validate", "    needs: unknown")
         self.assertTrue(any("validate" in e for e in module.validate_workflow(modified)))
