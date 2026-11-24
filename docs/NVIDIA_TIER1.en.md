@@ -85,3 +85,11 @@ Second PR CI 45427736161: 562+38=600 tests PASS, NAMESPACE_UNSHARE_PERMISSION_DE
 ## T12.03.21 — containerized Gitleaks (candidate)
 
 T12.03.20: [CI 45428224320](https://github.com/Sashido01/TESSERA/actions/runs/45428224320) PASS, 566+38=604 tests, Docker synthetic preflight PASS. v0.0.52 merged into main, tag separate. New mandatory control compares host and container for tracked UTF-8 stdin scope: identical snapshot fingerprint, TSG1 digest, exact file/byte counts, findings by rule, clean/negative/redaction controls. One nonroot container with pinned image and SHA256 binary, minimal helper modules and binary in separate read-only bind, no repo/.git/socket mounts, network disabled, 2 CPU/512 MiB/64 PID, log-driver none, 300s timeout and rm --force. Nine offline regressions; actual new code and Docker workload require CI. Host scan retained, history/path checks not isolated, image not certified, retained report limit not hard disk quota, cleanup timeout/daemon failures unproven. T12 PARTIAL.
+
+## T12.03.21 — PR result
+
+[CI 45432568241](https://github.com/Sashido01/TESSERA/actions/runs/45432568241) PASS: 575+38=613 tests; Docker Gitleaks 177 files, 1,404,601 bytes, 0 findings, host parity/frame digest/redaction/source preservation PASS. Host history: 864 blobs, 10,663,788 bytes, 0 findings. Integrated Tier 1 policy PASS; v0.0.52 main CI 45432307038 and annotated tag verified. v0.0.53 merged into main, its acceptance separate.
+
+## T12.03.22 — containerized history scanning (candidate)
+
+Reusable Gitleaks transport, separate required reachable UTF-8 blob check: host inventory, Git blob OID SHA-1/SHA-256 validation, inventory fingerprint, TSG1 batches <=256 objects and <=16 MiB each, unchanged aggregate cap 128 MiB/2048 blobs. Overall deadline 540s, each scan up to 300s; exact coverage/findings parity with host, synthetic previous-content and existing live Git fixture on host. No .git/OID/path passed to container; only bytes and other category. Seven new offline regressions. CI required; performance and complete Docker workload NOT_VERIFIED, path-specific/integrated scans remain on host. Git SHA-1 is not proof of cryptographic collision resistance. T12 PARTIAL.

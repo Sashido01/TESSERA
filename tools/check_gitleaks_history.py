@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import collections
 import concurrent.futures
+import hashlib
 import json
 import os
 import pathlib
@@ -68,10 +69,23 @@ def inventory(repo, env):
     return blob_metadata(raw, set(ids))
 
 
+def blob_oid(content, length):
+    require(length in (40, 64), "HISTORY_OBJECT_INVALID")
+    digest = hashlib.new("sha1" if length == 40 else "sha256")
+    digest.update(f"blob {len(content)}\0".encode("ascii"))
+    digest.update(content)
+    return digest.hexdigest()
+
+
+def history_snapshot(blobs):
+    return hashlib.sha256(json.dumps(blobs, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
 def checked_blob(repo, env, oid, size):
     require(OID.fullmatch(oid) is not None, "HISTORY_OBJECT_INVALID")
     content = git(repo, env, "cat-file", "blob", oid)
     require(len(content) == size, "HISTORY_BLOB_SIZE_MISMATCH")
+    require(blob_oid(content, len(oid)) == oid, "HISTORY_BLOB_OID_MISMATCH")
     require(b"\0" not in content, "HISTORY_UNSUPPORTED_BINARY")
     try:
         content.decode("utf-8", errors="strict")
@@ -108,7 +122,7 @@ def review(repo, cli, temp, env):
     require(seen == set(before) and bytes_scanned == sum(before.values()),
             "HISTORY_BLOB_COVERAGE_MISMATCH")
     require(inventory(repo, env) == before, "HISTORY_REFS_CHANGED")
-    return {"distinct_blobs": len(before), "empty": empty,
+    return {"snapshot_sha256": history_snapshot(before), "distinct_blobs": len(before), "empty": empty,
             "scanned_nonempty": len(before) - empty, "bytes_scanned": bytes_scanned,
             "findings": sum(counts.values()),
             "verdict": "FINDINGS" if counts else "NO_FINDINGS",

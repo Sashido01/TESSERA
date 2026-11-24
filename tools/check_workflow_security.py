@@ -77,8 +77,10 @@ def validate_workflow(workflow: str) -> list[str]:
         errors.append("Нет обязательной закреплённой проверки Gitleaks")
     if 'run: python tools/check_gitleaks_container.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1" --host-report "$RUNNER_TEMP/gitleaks-host-report.jsonl"' not in validate:
         errors.append("Нет обязательной контейнерной проверки Gitleaks")
-    if 'run: python tools/check_gitleaks_history.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1"' not in validate:
+    if 'python tools/check_gitleaks_history.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1" > "$RUNNER_TEMP/gitleaks-history-host.jsonl"' not in validate:
         errors.append("Нет обязательной проверки истории Gitleaks")
+    if 'run: python tools/check_gitleaks_history_container.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1" --host-report "$RUNNER_TEMP/gitleaks-history-host.jsonl"' not in validate:
+        errors.append("Нет обязательной контейнерной проверки истории Gitleaks")
     if 'run: python tools/check_gitleaks_paths.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1"' not in validate:
         errors.append("Нет обязательной проверки правил Gitleaks по пути")
     if 'c323ad4c43e3c8f2de051572cc25b2711d11e648' not in validate or 'e2356aa11f0d484f789543f25da6208fe2408641c8b16e7b59bc6600c5c39ffb' not in validate or 'run: python tools/check_skillspector_review.py --repo . --cli "$RUNNER_TEMP/skillspector/bin/skillspector"' not in validate:
