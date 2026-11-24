@@ -12,7 +12,9 @@ One workflow for Codex, Harness, Claude Code, Hermes and other Agent Skills-comp
 
 Work only in the explicitly selected project. Reading Git and calculating a version do not authorize writes. Commits, tags and publication require appropriate authorization and adherence to project rules; publication needs separate authorization. Keep the installed skill, security settings, agent memory and other people's files unchanged. Do not bypass checks, move existing tags or force-push. Report BLOCKED if authorization conflicts.
 
-SKILL.md cannot enforce automatic activation. Mandatory execution requires project instructions and independent Git/CI checks or a tested lifecycle hook.
+Minimum access: read the selected project, calculate versions, run local checks; write only for authorized changes, commits and tags. Network, publication and secret access are outside ordinary verification. Do not request broader permissions to improve a scanner score. See [INTEGRATION.en.md](INTEGRATION.en.md).
+
+SKILL.md cannot enforce automatic activation. Mandatory execution requires project instructions and independent Git/CI checks; a lifecycle hook is an additional control.
 
 ## Microversion rules
 

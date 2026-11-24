@@ -50,3 +50,27 @@ CI 45386658684 PASS: 504+22 теста, четыре регрессии; tiktoke
 Первый реальный CI 45389727364: сборка Govulncheck PASS, запуск BLOCKED: GO_ROOT_MISMATCH. Точная строка build metadata не была выведена; вероятная причина — SHA-only shallow checkout без тега. Кандидат исправлен: отдельное получение exact v1.10.0 и проверка его commit, строгая проверка root version (только v1.10.0 или devel), поддержка release version в JSON scanner config. Новая регрессия. Реальная повторная приёмка необходима. Issue #36 — доказательства лицензий Python приняты в v0.0.38; Go binary/reachability, условия распространения tqdm и соответствие лицензии Go бинарнику остаются открытыми в дорожной карте, административное закрытие Issue не означает их COMPLETE.
 
 Повторный CI 45391798766: 513+29 тестов PASS, сборка PASS, проверка остановилась на GOVULN_CONTROL_VERSION после проверки метаданных и OSV самого сканера. Точная версия исторического бинарника не была выведена. Используется Go 1.26.11 machine-readable `go version -m -json`, допустимый ограниченный исторический GoVersion только для закреплённых контрольных blob; точное совпадение со SBOM обязательно. Для gh/Gitleaks строгий GO_VERSION не изменён. Исправлена длина UTC timestamp в псевдоверсии scanner_version (14 цифр по upstream). Добавлена регрессия, проверка Govulncheck перенесена до длительных исторических проверок Gitleaks для раннего обнаружения ошибки. Повторный CI обязателен.
+
+## T12.03.08 — фактическая приёмка v0.0.40
+
+[Основной CI 45395642625](https://github.com/Sashido01/TESSERA/actions/runs/45395642625), commit 2b8a9af5578508b4ae51972d0d5e0cf11a22d82e, 514+29=543 теста PASS. Govulncheck v1.10.0 (ef4cb2f7cae47fe3e21fc596455f694951867b29), SHA-256 652a228f87149c66d2b5f258ed01fde937fade94696ef89b010a7b39d38d2e27. Два локальных upstream-контроля PASS. Самоаудит: 5 модулей, Go 1.26.11, OSV по версиям и commit без находок в этом запуске. Лицензионная совместимость не доказана.
+
+- gh: SHA-256 fa7cff06d4db9eee98e00b10ac93beebfe1822109ac04a6cbbf9d806c21d0073; 154 extracted modules, 0 extracted symbols, 297 OSV records, 1 findings.
+- gitleaks: SHA-256 88f91962aa2f93ac6ab281d553b9e125f5197bbbce38f9f2437f7299c32e5509; 66 extracted modules, 0 extracted symbols, 227 OSV records, 73 findings.
+
+Все 74 binary findings — MODULE_ONLY_FALLBACK; извлечённых символов нет. Сопоставление точных идентификаторов по одному запуску, без склейки alias:
+
+| Бинарник | Компонент | Версия | OSV | Общие | Только OSV |
+| --- | --- | --- | ---: | ---: | ---: |
+| gh | github.com/gorilla/websocket | v1.5.3 | 1 | 1 | 0 |
+| gitleaks | github.com/andybalholm/brotli | v1.1.2-0.20250424173009-453214e765f3 | 1 | 1 | 0 |
+| gitleaks | github.com/klauspost/compress | v1.17.11 | 3 | 2 | 1 |
+| gitleaks | github.com/nwaples/rardecode/v2 | v2.1.0 | 2 | 1 | 1 |
+| gitleaks | github.com/ulikunitz/xz | v0.5.12 | 2 | 1 | 1 |
+| gitleaks | golang.org/x/crypto | v0.35.0 | 34 | 19 | 15 |
+| gitleaks | golang.org/x/sys | v0.30.0 | 1 | 0 | 1 |
+| gitleaks | golang.org/x/text | v0.22.0 | 2 | 2 | 0 |
+| gitleaks | stdlib | 1.24.11 | 48 | 47 | 1 |
+| gitleaks | toolchain | 1.24.11 | 24 | 0 | 24 |
+
+GitHub CLI: 1 общий ID, 0 только OSV. Gitleaks: 117 уникальных ID в module/toolchain OSV, 73 общих, 44 только OSV, 0 только binary. Отдельно source commit CVE-2026-124039 (не включён в 117). Не считать 44 исключёнными или 117 независимыми CVE: базы, aliases и scope отличаются. GO-2026-6278 присутствует в обоих отчётах; прямых импортов Gorilla WebSocket в проверенных исходных файлах команд skills/install, skills/publish, run/download, attestation/verify нет; это не доказательство отсутствия косвенного вызова. Codespaces использует Microsoft Dev Tunnels. [Исходник CLI](https://github.com/cli/cli/tree/e1219499a578b69e3437adaa31cd60614e23c802). До проверки точного call graph не выдавать NOT_AFFECTED. Gitleaks проверяет данные и архивы; обновление старого Go toolchain и зависимостей оценить отдельно, не заменять закреплённый бинарник без приёмки. T12.03.08 execution COMPLETE, оценка применимости/достижимости PARTIAL. Публичный positive control и sandbox открыты.
