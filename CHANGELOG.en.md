@@ -6,7 +6,7 @@ This file tracks changes to the **shared catalog**. Individual skills may mainta
 
 ## 0.0.30 — Reachable Git history content review (T12.02.02.02)
 
-- Gitleaks scans each distinct reachable UTF-8 blob from local refs and HEAD via stdin; validates complete object inventory, byte coverage, immutable inventory and synthetic removed-secret fixture. CI required for acceptance; filename-dependent rules, unavailable refs and unreachable objects not covered.
+- Gitleaks scans each distinct reachable UTF-8 blob from local refs and HEAD via stdin; validates complete object inventory, byte coverage, immutable inventory and synthetic removed-secret fixture. [CI 45368434188](https://github.com/Sashido01/TESSERA/actions/runs/45368434188) PASS: 437+19 tests; 585/585 distinct UTF-8 blobs, 5431003 bytes, zero findings, removed-marker fixture PASS, 128.81 s. Added separate five path-constrained rules review; live path acceptance pending. Unavailable refs and unreachable objects not covered.
 
 ## 0.0.29 — Gitleaks text snapshot review (T12.02.02.02)
 

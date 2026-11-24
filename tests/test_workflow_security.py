@@ -82,6 +82,10 @@ class WorkflowSecurityTests(unittest.TestCase):
         modified = WORKFLOW.replace("run: python tools/check_gitleaks_history.py", "run: echo")
         self.assertTrue(any("истории Gitleaks" in e for e in module.validate_workflow(modified)))
 
+    def test_gitleaks_paths_are_required(self):
+        modified = WORKFLOW.replace("run: python tools/check_gitleaks_paths.py", "run: echo")
+        self.assertTrue(any("по пути" in e for e in module.validate_workflow(modified)))
+
     def test_tag_job_needs_validation(self):
         modified = WORKFLOW.replace("    needs: validate", "    needs: unknown")
         self.assertTrue(any("validate" in e for e in module.validate_workflow(modified)))

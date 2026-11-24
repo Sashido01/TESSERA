@@ -161,4 +161,4 @@ Original project: [Sashido01/TESSERA](https://github.com/Sashido01/TESSERA).
 
 **T12.02.02.02:** [Gitleaks](docs/GITLEAKS_REVIEW.en.md) — [CI 45367459045](https://github.com/Sashido01/TESSERA/actions/runs/45367459045) PASS: 428+19 tests, 144/144 tracked UTF-8 files, 998544 bytes, zero findings, positive/negative and redaction fixtures PASS; 65.29 s. Snapshot acceptance COMPLETE; history/path-specific rules NOT_VERIFIED; T12.02.02.02 remains PARTIAL.
 
-**0.0.30:** reachable Git blob content review implementation; live CI pending.
+**0.0.30:** [CI 45368434188](https://github.com/Sashido01/TESSERA/actions/runs/45368434188) PASS: 437+19 tests; 585/585 distinct UTF-8 blobs, 5431003 bytes, zero findings, removed-marker fixture PASS, 128.81 s. Separate path-constrained rules review awaits live CI.
