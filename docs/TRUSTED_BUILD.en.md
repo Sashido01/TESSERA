@@ -10,6 +10,16 @@ TESSERA is a public Agent Skills catalog, **not an executable application**. T09
 
 This is a **real catalog build output**, so `release-checks.json` now declares a required build command instead of declaring builds inapplicable. Both existing test suites remain required.
 
+## Real T09.10 incident and correction
+
+On 24 November 2026, the user dispatched `build-attested-catalog.yml` at verified annotated `v0.0.19`. [GitHub Actions run #45347443989](https://github.com/Sashido01/TESSERA/actions/runs/45347443989) ended `completed/failure`: exact commit and annotated tag checks passed and 333+19 tests succeeded, but packaging failed with `BLOCKED: PACKAGE_RUNTIME_FILE_INVALID`. Sigstore attestation and artifact upload were skipped; there were zero Actions Artifacts.
+
+**Root cause:** tests in `skills/microversion-release/tests/` import Python modules from `skills/microversion-release/scripts/*.py`. By default, Python writes `scripts/__pycache__/*.pyc`. The ZIP builder correctly rejects anything other than ordinary `.py` files in runtime `scripts/`. Previous PR CI packaged **before running tests**, so it did not exercise the signing workflow's **test-then-package** order.
+
+**Correction:** both signing and validation jobs now set `PYTHONDONTWRITEBYTECODE: '1'`, and CI performs a second reproducible ZIP build in `dist/post-tests` after unit tests. Static security checks enforce both controls; a negative test retains the strict rejection of generated `__pycache__`. OIDC privileges, immutable action SHA pins, tag/ancestry checks and allowlisting are unchanged.
+
+**Status:** passing main CI does not create a signature. A new signing workflow must be manually dispatched at a **newly confirmed annotated tag**, complete SUCCESS, and yield an actual ZIP whose digest, manifest and Sigstore attestation are independently verified. Do not rerun signing on `v0.0.19`; published historical refs must remain unchanged.
+
 ## Two distinct phases
 
 1. **PR/CI**: execute tests, static signing-workflow checks, and a reproducible ZIP build, **without attestations, OIDC, or GitHub Release publication**. Failed CI blocks merging.
