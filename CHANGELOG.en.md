@@ -6,7 +6,7 @@ This file tracks changes to the **shared catalog**. Individual skills may mainta
 
 ## 0.0.27 — NVIDIA static review and language alternatives (T12.02.01)
 
-- Compare default and localized quality, sanitized finding codes and four dimensions. PII/license/unicode/lint, negative Unicode fixture, six static profiles and Codex scenarios. No LLM, Tier 2/3 or external scanners. Acceptance pending; T12 PARTIAL. Updated bilingual docs.
+- Compare default and localized quality, sanitized finding codes and four dimensions. PII/license/unicode/lint, negative Unicode fixture, six static profiles and Codex scenarios. No LLM, Tier 2/3 or external scanners. [CI 45360122208](https://github.com/Sashido01/TESSERA/actions/runs/45360122208) PASS, 403+19 tests, 75.0/78.8, 18/16 findings, Unicode negative PASS, static profiles confirmed, license not_detected and PII/lint warnings retained. T12.02.01 COMPLETE within fixture scope; T12 PARTIAL. Updated bilingual docs.
 
 ## 0.0.26 — Focused NVIDIA SkillEvaluator Tier 1 evaluation (T12.01)
 
