@@ -1,4 +1,7 @@
 import pathlib
+import shutil
+import subprocess
+import tempfile
 import sys
 import unittest
 
@@ -36,6 +39,24 @@ class BanditContainerTests(unittest.TestCase):
                        {"catalog": {"files": True, "findings": 0}}, {"clean_fixture": "FAIL"}):
             with self.assertRaises(RuntimeError):
                 c.parity({**report, **change}, host, "a", "b")
+
+
+    def test_staged_import_closure(self):
+        with tempfile.TemporaryDirectory() as folder:
+            stage = pathlib.Path(folder)
+            for module in c.MODULES:
+                shutil.copyfile(ROOT / "tools" / module, stage / module)
+            result = subprocess.run([sys.executable, "-I", "-B", "-c",
+                "import sys; sys.path.insert(0, sys.argv[1]); import check_bandit_container",
+                str(stage)], cwd=stage, capture_output=True, timeout=15)
+            self.assertEqual(result.returncode, 0, result.stderr.decode("utf-8", errors="replace"))
+
+    def test_diagnostics_allowlist(self):
+        self.assertEqual(c.error_code(RuntimeError("BANDIT_CONTAINER_PARITY")), "BANDIT_CONTAINER_PARITY")
+        self.assertEqual(c.error_code(RuntimeError("synthetic raw report")), "BANDIT_CONTAINER_FAILED")
+        self.assertEqual(c.worker_error(b'{"error":"BANDIT_CONTAINER_VERSION"}'), "BANDIT_CONTAINER_VERSION")
+        for raw in (b'{"error":"raw source"}', b'{"error":[]}', b'{"error":"BANDIT_CONTAINER_VERSION","raw":"x"}', b'invalid', b'x'*513):
+            self.assertEqual(c.worker_error(raw), "BANDIT_CONTAINER_WORKER")
 
 
 if __name__ == "__main__":

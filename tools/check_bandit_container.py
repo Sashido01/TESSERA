@@ -21,7 +21,8 @@ from check_nvidia_tier1 import require
 
 VERSIONS = {"bandit":"1.9.4","markdown-it-py":"4.2.0","mdurl":"0.1.2","pygments":"2.20.0","pyyaml":"6.0.3","rich":"15.0.0","stevedore":"5.9.0"}
 MODULES = ("check_bandit_container.py", "check_bandit_review.py", "check_docker_preflight.py",
-           "check_integrated_gitleaks.py", "check_gitleaks_container.py", "gitleaks_frame.py",
+           "check_integrated_gitleaks.py", "check_gitleaks_container.py", "check_gitleaks_review.py",
+           "gitleaks_frame.py",
            "check_official_local_install.py", "check_nvidia_tier1.py")
 ENTRY = "import sys;sys.path.insert(0,'/packages');from bandit.cli.main import main;main()"
 
@@ -103,10 +104,46 @@ def worker():
             "catalog": actual, "clean_fixture": "PASS", "negative_nosec_fixture": "PASS"}
 
 
+# Only fixed codes can cross the diagnostic boundary; never echo scanner text.
+ERROR_CODES = frozenset({
+    "BANDIT_PACKAGE_ROOT", "BANDIT_DUPLICATE_DIST", "BANDIT_PACKAGE_INVENTORY",
+    "BANDIT_PACKAGE_LINK", "BANDIT_PACKAGE_LIMIT", "BANDIT_PACKAGE_EMPTY",
+    "BANDIT_LOCK_MISMATCH", "BANDIT_LOCK_DUPLICATE", "BANDIT_LOCK_COVERAGE",
+    "BANDIT_SOURCE_TYPE", "BANDIT_CONTAINER_VERSION", "BANDIT_CONTAINER_REPORT",
+    "BANDIT_CONTAINER_SOURCE_MUTATED", "BANDIT_CONTAINER_FIXTURE", "BANDIT_PACKAGE_MUTATED",
+    "BANDIT_CONTAINER_PARITY", "BANDIT_CONTAINER_RUNNER", "BANDIT_CONTAINER_HOST_REPORT",
+    "BANDIT_CONTAINER_STAGE", "BANDIT_CONTAINER_CREATE", "BANDIT_CONTAINER_WORKER",
+    "BANDIT_CONTAINER_CLEANUP", "BANDIT_CONTAINER_STAGE_MUTATED",
+    "BANDIT_SCAN_INCOMPLETE", "BANDIT_REPORT_INVALID", "BANDIT_COVERAGE_MISMATCH",
+    "BANDIT_METRICS_INVALID", "BANDIT_EXIT_MISMATCH", "BANDIT_FINDING_INVALID",
+    "INTEGRATED_PATH_REDIRECTED", "INTEGRATED_FILE_LIMIT", "INTEGRATED_FILE_CHANGED",
+    "INTEGRATED_SOURCE", "INTEGRATED_DIR", "INTEGRATED_FILE", "INTEGRATED_TOTAL",
+    "INTEGRATED_EMPTY", "INTEGRATED_OUTPUT_LIMIT",
+    "BANDIT_CONTAINER_IMPORT", "BANDIT_CONTAINER_FAILED",
+})
+
+
+def error_code(exc):
+    return str(exc) if isinstance(exc, RuntimeError) and str(exc) in ERROR_CODES else "BANDIT_CONTAINER_FAILED"
+
+
+def worker_error(raw):
+    if len(raw) > 512:
+        return "BANDIT_CONTAINER_WORKER"
+    try:
+        obj = json.loads(raw)
+        if isinstance(obj, dict) and set(obj) == {"error"} and isinstance(obj["error"], str) and obj["error"] in ERROR_CODES:
+            return obj["error"]
+    except (ValueError, TypeError):
+        pass
+    return "BANDIT_CONTAINER_WORKER"
+
+
 def worker_main():
     try:
         print(json.dumps(worker(), sort_keys=True))
-    except (OSError, RuntimeError, ValueError, TypeError, KeyError, subprocess.SubprocessError):
+    except (OSError, RuntimeError, ValueError, TypeError, KeyError, subprocess.SubprocessError) as exc:
+        print(json.dumps({"error": error_code(exc)}))
         sys.exit(1)
 
 
@@ -172,7 +209,7 @@ def accept(repo, package_root, host_path):
             require(rc == 0, "BANDIT_CONTAINER_CREATE")
             created = True
             rc, raw = invoke(["start", "--attach", name], home, 180)
-            require(rc == 0, "BANDIT_CONTAINER_WORKER")
+            require(rc == 0, worker_error(raw))
             report = json.loads(raw)
             parity(report, host, source_digest, digest)
         finally:
@@ -197,8 +234,8 @@ def main():
     args = parser.parse_args()
     try:
         result = accept(args.repo, args.packages, args.host_report)
-    except (OSError, RuntimeError, ValueError, TypeError, KeyError, subprocess.SubprocessError):
-        print("BLOCKED: BANDIT_CONTAINER_FAILED", file=sys.stderr)
+    except (OSError, RuntimeError, ValueError, TypeError, KeyError, subprocess.SubprocessError) as exc:
+        print("BLOCKED: " + error_code(exc), file=sys.stderr)
         return 1
     print("BANDIT_CONTAINER_PASS: " + json.dumps(result, sort_keys=True))
     return 0
