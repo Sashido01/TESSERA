@@ -161,3 +161,11 @@ T12.03.20: [CI 45428224320](https://github.com/Sashido01/TESSERA/actions/runs/45
 ## T12.03.30 — безопасные координаты Bandit (кандидат)
 
 Для standalone Bandit host и Docker в отчёт включены только проверенные относительно snapshot имена публичных файлов, строки в границах исходника, rule/severity/confidence/scope; raw code, issue_text и прочие scanner metadata не публикуются. Детерминированный порядок, максимум 1000 первичных мест, отдельные unresolved/omitted counts без изменения общего числа findings, точная parity включая координаты. Шесть offline regression (5+1); реальное покрытие и перечень замечаний требуют CI. Это подготовка предметного triage, не устранение 20 MEDIUM/153 LOW. T12 PARTIAL.
+
+## T12.03.30 — результат PR
+
+[CI 45470763020](https://github.com/Sashido01/TESSERA/actions/runs/45470763020) PASS: 625+38=663 теста, 94 Python files/173 findings, все 173 primary locations, unresolved/omitted 0, exact host parity, HIGH0 MEDIUM20 LOW153. History Docker 969 blobs/13 244 932 bytes/160.31s/0 findings. v0.0.61 main CI 45470561925 и тег подтверждены; v0.0.62 принят в main, тег отдельно.
+
+## T12.03.31 — самостоятельный SkillSpector Docker (кандидат)
+
+Exact 74 distribution inventory (CI 45468107315, включая bootstrap pip), существующая hash-pinned wheel установка и pip check сохранены; потоковый SHA256 всего дерева пакетов и исходников, ограничения размера/числа файлов, no-follow и проверка identity; stage только skills/fixtures/minimal trusted tools, два read-only mount, Python -I -S -B, no network/nonroot/cgroups 1 GiB/2 CPU/64 pids/64 MiB tmpfs, no LLM, bounded output и cleanup. Реальный SkillSpector 2.13.7 version, clean/P1 fixtures, exact normalized host parity, snapshot/package preservation требуют CI. Восемь offline регрессий (7+workflow guard). Bootstrap pip инвентаризован, не отдельный hash-pinned wheel; ABI и native advisories, daemon races, resource exhaustion не доказаны. Integrated SkillSpector пока host. T12 PARTIAL.

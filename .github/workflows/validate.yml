@@ -226,7 +226,13 @@ jobs:
           "$RUNNER_TEMP/skillspector/bin/python" -m pip --isolated install --disable-pip-version-check --no-cache-dir --only-binary=:all: --require-hashes -r "$RUNNER_TEMP/skillspector-requirements.txt"
           "$RUNNER_TEMP/skillspector/bin/python" -m pip check
       - name: Проверить навыки через SkillSpector без LLM
-        run: python tools/check_skillspector_review.py --repo . --cli "$RUNNER_TEMP/skillspector/bin/skillspector"
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          python tools/check_skillspector_review.py --repo . --cli "$RUNNER_TEMP/skillspector/bin/skillspector" > "$RUNNER_TEMP/skillspector-host.jsonl"
+      - name: Сопоставить изолированный SkillSpector с проверкой хоста
+        run: python tools/check_skillspector_container.py --repo . --packages "$RUNNER_TEMP/skillspector/lib/python3.13/site-packages" --host-report "$RUNNER_TEMP/skillspector-host.jsonl"
 
       - name: Проверить CVE и лицензии зависимостей skills-ref
         run: python tools/check_dependency_review.py --locked tools/skills-ref-requirements.txt --source-commit 83021e2be457a9b6679148719c1f6074f0ad975e

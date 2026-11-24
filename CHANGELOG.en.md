@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.63 — Standalone SkillSpector Docker (T12.03.31)
+
+- Isolated static SkillSpector, 74 distribution pins, host/container parity, eight regressions. CI required; T12 PARTIAL.
+
 ## 0.0.62 — Safe Bandit coordinates (T12.03.30)
 
 - Bounded finding locations, host/container parity, six regressions. CI required; T12 PARTIAL.

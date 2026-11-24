@@ -87,8 +87,10 @@ def validate_workflow(workflow: str) -> list[str]:
         errors.append("Нет обязательной проверки правил Gitleaks по пути")
     if 'run: python tools/check_gitleaks_paths_container.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1" --host-report "$RUNNER_TEMP/gitleaks-path-host.jsonl"' not in validate:
         errors.append("Нет обязательной контейнерной проверки правил Gitleaks по пути")
-    if 'c323ad4c43e3c8f2de051572cc25b2711d11e648' not in validate or 'e2356aa11f0d484f789543f25da6208fe2408641c8b16e7b59bc6600c5c39ffb' not in validate or 'run: python tools/check_skillspector_review.py --repo . --cli "$RUNNER_TEMP/skillspector/bin/skillspector"' not in validate:
+    if 'c323ad4c43e3c8f2de051572cc25b2711d11e648' not in validate or 'e2356aa11f0d484f789543f25da6208fe2408641c8b16e7b59bc6600c5c39ffb' not in validate or 'python tools/check_skillspector_review.py --repo . --cli "$RUNNER_TEMP/skillspector/bin/skillspector" > "$RUNNER_TEMP/skillspector-host.jsonl"' not in validate:
         errors.append("Нет обязательной закреплённой проверки SkillSpector")
+    if 'run: python tools/check_skillspector_container.py --repo . --packages "$RUNNER_TEMP/skillspector/lib/python3.13/site-packages" --host-report "$RUNNER_TEMP/skillspector-host.jsonl"' not in validate:
+        errors.append("Нет обязательной контейнерной проверки SkillSpector")
     if ('tools/check_dependency_review.py --locked tools/skills-ref-requirements.txt' not in validate
             or 'tools/check_dependency_review.py --root skillevaluator==1.2.0' not in validate
             or 'tools/check_dependency_review.py --root skillspector==2.13.7' not in validate

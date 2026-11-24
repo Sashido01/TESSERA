@@ -87,7 +87,7 @@ class WorkflowSecurityTests(unittest.TestCase):
         self.assertTrue(any("по пути" in e for e in module.validate_workflow(modified)))
 
     def test_skillspector_review_is_required(self):
-        modified = WORKFLOW.replace("run: python tools/check_skillspector_review.py", "run: echo")
+        modified = WORKFLOW.replace("python tools/check_skillspector_review.py", "echo")
         self.assertTrue(any("SkillSpector" in e for e in module.validate_workflow(modified)))
 
     def test_skillspector_digest_is_required(self):
@@ -138,6 +138,11 @@ class WorkflowSecurityTests(unittest.TestCase):
     def test_bandit_container_required(self):
         modified = WORKFLOW.replace("run: python tools/check_bandit_container.py", "run: echo")
         self.assertTrue(any("контейнерной проверки Bandit" in e for e in module.validate_workflow(modified)))
+
+
+    def test_skillspector_container_required(self):
+        modified = WORKFLOW.replace("run: python tools/check_skillspector_container.py", "run: echo")
+        self.assertTrue(any("контейнерной проверки SkillSpector" in e for e in module.validate_workflow(modified)))
 
 
 if __name__ == "__main__":
