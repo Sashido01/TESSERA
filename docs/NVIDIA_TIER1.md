@@ -101,3 +101,11 @@ T12.03.20: [CI 45428224320](https://github.com/Sashido01/TESSERA/actions/runs/45
 ## T12.03.23 — контейнерная проверка по путям (кандидат)
 
 Отдельный TSP1 режим транспорта: 10 фиксированных категорий (2 области x 5 существующих правил), до 256 targets/16 MiB в пакете, общий лимит 4096 targets/192 MiB, deadline 180s. Пустой пакет допустим только TSP1 для запуска пяти контрольных fixtures. Реальные пути/OID/.git не передаются; фиксированные канонические имена, прежний scan_rule, строгие десять строк отчёта и snapshot parity с host, повторная проверка источника. Девять новых offline регрессий (8 + workflow guard). Старые проверки сохраняются; integrated Gitleaks остаётся host. Реальное выполнение и допустимость лимитов требуют CI. T12 PARTIAL.
+
+## T12.03.23 — результат PR
+
+[CI 45439256012](https://github.com/Sashido01/TESSERA/actions/runs/45439256012) PASS: 591+38=629 тестов, Docker current 181 файл/1 437 066 байт, history 893 blobs/11 251 084 байта/416.82s, path 4 current+37 history targets/5 fixtures/21.52s; 0 находок во всех областях, host parity PASS, Tier 1 policy PASS. v0.0.54 main CI и тег подтверждены; v0.0.55 принят в main, собственная приёмка отдельно. Рост времени history с 316.56 до 416.82s требует измерений и оптимизации CI без снижения coverage.
+
+## T12.03.24 — лицензии Semgrep (кандидат)
+
+Три точных upstream LICENSE полностью прочитаны; Git blob SHA-1 пересчитан и совпал; SHA-256 закреплён для сравнения с установленным wheel RECORD. face 26.0.1 BSD-3-Clause: commit 86ec4072580809cc3978f5d6bb40261eb60c3045, blob 50c51841a2efd87b46c053beeceff5617ad8cfa1, 1497 bytes (CRLF сохранены); peewee 3.19.0 MIT: commit 45c166bce4630a55729f513a4b11fb95af23df5b, blob c752ab3ead2e7be324e5cafb5e1d53135c16af13, 1058 bytes; protobuf 6.33.6 BSD-3-Clause с пояснением generated code: commit 6e1998413a5bca7c058b85999667893f167434bc, blob 19b305b00060a774a9180fb916c14b49edb2008f, 1732 bytes. Существующий проверяющий механизм, без подмены metadata или нормализации текста; два новых offline теста. Локальный DNS PyPI заблокирован; реальное соответствие wheel/RECORD ожидает CI, несовпадение остаётся открытым, юридическая совместимость NOT_VERIFIED. Восемь OSV IDs не устранены. T12 PARTIAL.

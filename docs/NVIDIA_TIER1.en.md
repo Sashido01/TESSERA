@@ -101,3 +101,11 @@ Reusable Gitleaks transport, separate required reachable UTF-8 blob check: host 
 ## T12.03.23 — containerized path check (candidate)
 
 Separate TSP1 transport mode: 10 fixed categories (2 scopes x 5 existing rules), up to 256 targets/16 MiB per batch, aggregate cap 4096 targets/192 MiB, 180s deadline. Empty batch permitted only for TSP1 to execute five control fixtures. No real paths/OIDs/.git passed; fixed canonical names, existing scan_rule, strict ten report rows and snapshot parity with host, repeated source check. Nine new offline regressions (8 + workflow guard). Existing checks retained; integrated Gitleaks remains host. Real execution and limits require CI. T12 PARTIAL.
+
+## T12.03.23 — PR result
+
+[CI 45439256012](https://github.com/Sashido01/TESSERA/actions/runs/45439256012) PASS: 591+38=629 tests, Docker current 181 files/1,437,066 bytes, history 893 blobs/11,251,084 bytes/416.82s, path 4 current+37 history targets/5 fixtures/21.52s; zero findings in all scopes, host parity PASS, Tier 1 policy PASS. v0.0.54 main CI and tag verified; v0.0.55 merged into main, its acceptance separate. History runtime increase from 316.56 to 416.82s requires measurement and CI optimization without reducing coverage.
+
+## T12.03.24 — Semgrep licenses (candidate)
+
+Three exact upstream LICENSE texts fully read; Git blob SHA-1 recalculated and matched; SHA-256 pinned for comparison with installed wheel RECORD. face 26.0.1 BSD-3-Clause: commit 86ec4072580809cc3978f5d6bb40261eb60c3045, blob 50c51841a2efd87b46c053beeceff5617ad8cfa1, 1497 bytes (CRLF preserved); peewee 3.19.0 MIT: commit 45c166bce4630a55729f513a4b11fb95af23df5b, blob c752ab3ead2e7be324e5cafb5e1d53135c16af13, 1058 bytes; protobuf 6.33.6 BSD-3-Clause with generated-code clarification: commit 6e1998413a5bca7c058b85999667893f167434bc, blob 19b305b00060a774a9180fb916c14b49edb2008f, 1732 bytes. Existing evidence mechanism, no metadata override or text normalization; two new offline tests. Local PyPI DNS blocked; actual wheel/RECORD comparison awaits CI, mismatches remain open, legal compliance NOT_VERIFIED. Eight OSV IDs unresolved. T12 PARTIAL.
