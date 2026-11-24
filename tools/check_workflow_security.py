@@ -54,6 +54,11 @@ def validate_workflow(workflow: str) -> list[str]:
     )
     if update_step not in validate:
         errors.append("Нет обязательной проверки обновления с read-only токеном CI")
+    multi_step = (
+        '        run: python tools/check_official_multi_skill.py --repo . --cli "$RUNNER_TEMP/gh_2.105.0_linux_amd64/bin/gh"'
+    )
+    if multi_step not in validate:
+        errors.append("Нет обязательной проверки нескольких навыков")
     if "contents: write" in validate:
         errors.append("Право записи обнаружено в проверяющей задаче")
     if "needs: validate" not in tagging:

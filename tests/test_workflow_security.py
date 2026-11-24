@@ -54,6 +54,10 @@ class WorkflowSecurityTests(unittest.TestCase):
         modified = WORKFLOW.replace("run: python tools/check_official_skill_update.py", "run: echo")
         self.assertTrue(any("проверки обновления" in e for e in module.validate_workflow(modified)))
 
+    def test_multi_skill_check_is_required(self):
+        modified = WORKFLOW.replace("run: python tools/check_official_multi_skill.py", "run: echo")
+        self.assertTrue(any("проверки нескольких навыков" in e for e in module.validate_workflow(modified)))
+
     def test_tag_job_needs_validation(self):
         modified = WORKFLOW.replace("    needs: validate", "    needs: unknown")
         self.assertTrue(any("validate" in e for e in module.validate_workflow(modified)))

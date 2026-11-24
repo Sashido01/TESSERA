@@ -15,7 +15,7 @@ Actual installation **from a remote Git tag or commit SHA** is tested separately
 Review of the **official GitHub CLI `v2.105.0`** source at commit `e1219499a578b69e3437adaa31cd60614e23c802` identifies two distinct constraints:
 
 1. `--from-local` and `--pin` are **mutually exclusive**. A local copy cannot be claimed as version-pinned to a Git tag or source commit.
-2. The local `InstallLocal` implementation writes files using `os.WriteFile` without checking whether the same-named skill directory/files already exist. Repeating `gh skill install --from-local --dir ...` may therefore overwrite user-edited files even **without `--force`**. Never perform this direct operation in a preexisting user skill directory without backup, review and explicit consent.
+2. Low-level `InstallLocal` writes files without its own overwrite check; the CLI invokes `checkOverwrite` before installation. T10.03.02 checks actual ordinary non-interactive duplicate refusal without `--force`. Keep TESSERA's independent guard.
 
 Official `gh skill install` has **no `--dry-run` flag**. This differs from `gh skill publish --dry-run` (format validation) and `gh skill update --dry-run` (non-mutating update check).
 
@@ -72,4 +72,18 @@ The guarded exact re-pin scenario never uses `--force` or directly updates a liv
 This is **an acceptance harness, not a production user-profile updater**. Exclusive directory access is required; crash recovery, concurrent writers, parent path substitution, Windows and live agent clients are not verified. Never silently merge local edits or apply this scenario to existing profiles. T10.03.02 separately covers multi-skill collisions and independent tags without publishing fictitious skills in TESSERA. T10.03.01 acceptance requires an actual CI `GH_SKILL_UPDATE_PASS`.
 
 **T10.03.01 — COMPLETE within the acceptance harness (24 November 2026).** [CI 45352932764](https://github.com/Sashido01/TESSERA/actions/runs/45352932764) confirmed `GH_SKILL_UPDATE_PASS`: native_unpin_dry_run, native_unpin_apply, local_edit_refusal, staged_repin, injected_rename_rollback, explicit_restore — PASS; native_local_edits_removed — CONFIRMED. Old tree `54c2f075ac9212e428198071bd0e1ed3a04ac142`, new tree `4ed1f6095092b51cfd80d12f68865eecc6f86398`. 375 catalog tests + 19 skill tests PASS. Crash recovery, concurrent writers, Windows and client activation remain unverified.
+
+## T10.03.02 — multiple skills and independent tags (local fixture)
+
+Synthetic skills are generated **only in a temporary Git repository without a remote**. Nothing is added to the production TESSERA catalog. Verify globally unique flat names, independent versions, annotated refs/tags/fixture-alpha/v0.0.1, refs/tags/fixture-alpha/v0.0.2, refs/tags/fixture-beta/v0.0.1, refs/tags/fixture-beta/v0.0.2 and a separate catalog ref refs/tags/v0.0.1. Changing one skill must preserve the other's Git tree. Export exact Git blobs, not the mutable worktree.
+
+Actual gh 2.105.0 installs two skills from different local snapshots in one temporary directory. Guarded replacement and restoration of one skill must preserve the other's complete snapshot. Check `gh skill list`, absence of remote pin metadata for local installations, refusal of duplicate installation without --force, refusal of --all with duplicate names and the impossibility of co-installing equal names from different namespaces into one flat directory. Test explicit namespace selection in separate directories and ambiguous bare-name selection using synthetic files.
+
+Review [collisions.go](https://github.com/cli/cli/blob/v2.105.0/internal/skills/discovery/collisions.go) and [install.go](https://github.com/cli/cli/blob/v2.105.0/pkg/cmd/skills/install/install.go): namespaces distinguish sources, not installed directory names; the local selector returns the first match, whereas the remote selector may reject ambiguity. Low-level InstallLocal lacks its own overwrite check, but the CLI invokes checkOverwrite before installation. Clarify the earlier claim about overwriting without --force: an ordinary non-interactive invocation is expected to refuse existing targets; TESSERA keeps its independent guard, especially for unusual paths/links and races.
+
+Local fixture acceptance requires GH_SKILL_MULTI_FIXTURE_PASS.
+
+**T10.03.02 result (24 November 2026): local fixture PASS.** [CI 45354011607](https://github.com/Sashido01/TESSERA/actions/runs/45354011607), `GH_SKILL_MULTI_FIXTURE_PASS`: annotated_independent_tags, independent_git_trees, two_local_installs, scoped_swap_and_restore, cli_duplicate_refusal, batch_collision_refusal — PASS; flat_namespace_collision and local_bare_name_ambiguity — CONFIRMED. 383 catalog tests + 19 skill tests PASS. Actual ordinary local CLI refused an existing target without --force, clarifying the earlier low-level InstallLocal warning. Remote namespaced pin — NOT_VERIFIED; production_skill_versions — NOT_IMPLEMENTED. T10.03.02 remains PARTIAL pending separate remote acceptance.
+
+ **Remote namespaced pin, production independent releases (T16), and live agent updates remain unverified**. Local fixture tags are not published; a real multi-skill remote test requires a second genuine skill or an explicitly approved test repository. A namespaced skill tag identifies the whole repository commit, not just a skill Git tree; both identifiers need validation. Never treat --unpin as an automatic update to the latest per-skill tag.
 

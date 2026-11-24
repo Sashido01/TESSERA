@@ -4,6 +4,11 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.25 — Isolated multi-skill and independent tag acceptance (T10.03.02)
+
+- Temporary Git repository with two synthetic skills, five annotated tags and independent Git tree checks. Actual local snapshot installs with gh 2.105.0, scoped replacement and rollback, namespace collisions and duplicate refusal. 7 offline tests plus a mandatory CI guard test.
+- Clarified low-level InstallLocal versus CLI checkOverwrite; retained defensive guard. Local fixture PASS: [CI 45354011607](https://github.com/Sashido01/TESSERA/actions/runs/45354011607), GH_SKILL_MULTI_FIXTURE_PASS, 383+19 tests. T10.03.02 PARTIAL pending separate remote acceptance. Remote namespaced pin and T16 remain unverified. Updated bilingual docs.
+
 ## 0.0.24 — Actual update and guarded re-pin (T10.03.01)
 
 - Actual gh 2.105.0 update --unpin --dry-run and --unpin --all harness against disposable synthetic local edits; verify new Git tree and directory replacement behavior.
