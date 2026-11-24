@@ -170,7 +170,13 @@ jobs:
         run: python tools/check_go_binary_review.py --cli "$RUNNER_TEMP/govulncheck" --gh "$RUNNER_TEMP/gh_2.105.0_linux_amd64/bin/gh" --gitleaks "$RUNNER_TEMP/gitleaks-8.30.1" --gh-archive "$RUNNER_TEMP/gh_2.105.0_linux_amd64.tar.gz" --gitleaks-archive "$RUNNER_TEMP/gitleaks_8.30.1_linux_x64.tar.gz" --fixture-root .external/govulncheck/cmd/govulncheck/testdata/main
 
       - name: Проверить отслеживаемые текстовые файлы Gitleaks
-        run: python tools/check_gitleaks_review.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1"
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          python tools/check_gitleaks_review.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1" > "$RUNNER_TEMP/gitleaks-host-report.jsonl"
+      - name: Сопоставить изолированный Gitleaks с проверкой хоста
+        run: python tools/check_gitleaks_container.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1" --host-report "$RUNNER_TEMP/gitleaks-host-report.jsonl"
 
       - name: Проверить достижимые исторические Git-объекты Gitleaks
         run: python tools/check_gitleaks_history.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1"

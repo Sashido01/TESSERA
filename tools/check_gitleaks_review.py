@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import collections
+import hashlib
 import json
 import os
 import pathlib
@@ -161,6 +162,7 @@ def accept(repo, cli):
         require(fingerprint(inventory(repo)) == before, "GITLEAKS_SOURCE_MUTATED")
     return {"execution": "PASS", "scanner": "gitleaks", "version": VERSION,
             "scope": "TRACKED_UTF8_CONTENT_STDIN", "policy": "ADVISORY_FINDINGS",
+            "snapshot_sha256": hashlib.sha256(json.dumps(before, sort_keys=True, separators=(",", ":")).encode()).hexdigest(),
             "files": len(original), "scanned_nonempty": scanned, "empty": empty,
             "bytes_scanned": bytes_scanned, "findings": sum(counts.values()),
             "verdict": "FINDINGS" if counts else "NO_FINDINGS",
