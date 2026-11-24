@@ -70,7 +70,9 @@ def parse_build(raw, root, release, commit):
             previous = None
             if fields[0] == "build" and len(fields) == 2 and fields[1].startswith("vcs.revision="):
                 source_revision = fields[1].split("=", 1)[1]
-    require(root_version is not None and 0 < len(modules) <= 300, "GO_BUILD_INFO_INCOMPLETE")
+    require(root_version is not None, "GO_ROOT_MODULE_NOT_RECORDED:" + root)
+    require(len(modules) > 0, "GO_NO_DEPENDENCIES:" + root)
+    require(len(modules) <= 300, "GO_DEPENDENCY_LIMIT:" + root + ":" + str(len(modules)))
     require(source_revision is None or source_revision == commit, "GO_SOURCE_REVISION_MISMATCH")
     unresolved = sorted({name for name, version in modules.values() if version == "(devel)"})
     result = {(name, version) for name, version in modules.values() if version != "(devel)"}
@@ -128,6 +130,13 @@ def accept(gh, gitleaks):
             root, release, commit = ROOTS[label]
             result = subprocess.run(["go", "version", "-m", str(path)], cwd=temp, env=env,
                                     capture_output=True, timeout=30, check=True)
+            # Public, hash-verified binaries only: record shape, never local paths.
+            rows = [line.strip().split() for line in result.stdout.decode("utf-8", errors="strict").splitlines()[1:]]
+            print("GO_BUILD_INFO_SHAPE: " + json.dumps({"binary": label,
+                "mod_rows": sum(bool(row) and row[0] == "mod" for row in rows),
+                "dep_rows": sum(bool(row) and row[0] == "dep" for row in rows),
+                "path_rows": sum(bool(row) and row[0] == "path" for row in rows),
+                "unversioned_dep_rows": sum(len(row) >= 3 and row[0] == "dep" and row[2] == "(devel)" for row in rows)}, sort_keys=True))
             report = parse_build(result.stdout, root, release, commit)
             all_modules.update(report["modules"])
             queries = [{"package": {"ecosystem": "Go", "name": name}, "version": version}
