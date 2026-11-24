@@ -16,7 +16,7 @@
 - `NOT_STARTED`: implementation has not begun; this roadmap is not evidence of completion.
 - `BLOCKED`: a specific blocker and its cause have been recorded.
 
-The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.19`. They do **not** prove execution in installed agent clients or local Windows environments.
+The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.20`. They do **not** prove execution in installed agent clients or local Windows environments.
 
 ## Foundation stages T00–T07
 
@@ -51,7 +51,9 @@ Complete work as small verifiable changes, assigning a new microversion only to 
 
 **T09.09:** the new [offline ZIP verifier](CATALOG_VERIFICATION.en.md) inspects package contents without extraction. It checks internal integrity against MANIFEST.json and independently supplied version/commit values, not GitHub attestation. T09 stays PARTIAL pending a real signing run and end-to-end verification.
 
-**T09.10 (partial):** mitigated the known risk of using a vulnerable `gh attestation verify`: provenance checks now require GitHub CLI `2.102.0+`, failing closed for unknown versions. The [live attestation issue](https://github.com/Sashido01/TESSERA/issues/11) remains open. This connector does not offer `workflow_dispatch`; live signing, download, and independent verification remain NOT_VERIFIED. The next objective is real end-to-end evidence, not a simulated signature.
+**T09.10 — live failure and mitigation (24 November 2026):** [Run 45347443989](https://github.com/Sashido01/TESSERA/actions/runs/45347443989) at annotated `v0.0.19` finished FAILURE: tests passed, ZIP build `PACKAGE_RUNTIME_FILE_INVALID`, signing and upload SKIPPED, artifacts 0. The tests generate `__pycache__` in runtime `scripts/`. T09.10.01 disables bytecode emission during CI/signing, adds a post-test ZIP build in main CI, retains strict allowlisting and adds negative regression checks. T09.10 remains PARTIAL until a **real** successful new-tag signing run and independently verified Sigstore provenance. See [TRUSTED_BUILD](TRUSTED_BUILD.en.md).
+
+**T09.10 (partial, historical context):** mitigated the known risk of using a vulnerable `gh attestation verify`: provenance checks now require GitHub CLI `2.102.0+`, failing closed for unknown versions. The [live attestation issue](https://github.com/Sashido01/TESSERA/issues/11) remains open. This connector does not offer `workflow_dispatch`; live signing, download, and independent verification remain NOT_VERIFIED. The next objective is real end-to-end evidence, not a simulated signature.
 
 **Acceptance:** negative tests for missing, lightweight, wrongly targeted, and reused tags; historical release verification without assuming current HEAD; reproducible recovery from failures. Any mandatory check failure blocks the release.
 
