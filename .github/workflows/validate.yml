@@ -125,6 +125,21 @@ jobs:
       - name: Проверить безопасность Python прямым запуском Bandit
         run: python tools/check_bandit_review.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/bandit"
 
+      - name: Скачать и проверить официальный Gitleaks 8.30.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          archive="$RUNNER_TEMP/gitleaks_8.30.1_linux_x64.tar.gz"
+          curl --fail --location --silent --show-error --retry 2 --connect-timeout 10 --max-time 120 \
+            --proto '=https' --tlsv1.2 --output "$archive" \
+            https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  $archive" | sha256sum --check --
+          tar --extract --gzip --to-stdout --file "$archive" gitleaks > "$RUNNER_TEMP/gitleaks-8.30.1"
+          chmod 700 "$RUNNER_TEMP/gitleaks-8.30.1"
+      - name: Проверить отслеживаемые текстовые файлы Gitleaks
+        run: python tools/check_gitleaks_review.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1"
+
   tag_microversion:
     name: Создать аннотированный тег проверенной версии
     needs: validate
