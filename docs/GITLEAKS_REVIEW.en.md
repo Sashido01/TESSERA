@@ -17,4 +17,10 @@ Uses official [Gitleaks v8.30.1](https://github.com/gitleaks/gitleaks/releases/t
 
 `python tools/check_gitleaks_review.py --repo . --cli <path-to-gitleaks>`
 
-GITLEAKS_REVIEW_EXECUTION_PASS confirms the execution contract, not absence of leaks. T12.02.02.02 is PARTIAL: snapshot check implementation prepared, actual CI required; history and path-dependent rules remain unverified. Full NVIDIA Tier 1 and T12 remain PARTIAL.
+GITLEAKS_REVIEW_EXECUTION_PASS confirms the execution contract, not absence of leaks. T12.02.02.02 is PARTIAL: snapshot scan execution COMPLETE; history and path-dependent rules remain unverified. Full NVIDIA Tier 1 and T12 remain PARTIAL.
+
+## Actual acceptance
+
+[CI 45367459045](https://github.com/Sashido01/TESSERA/actions/runs/45367459045) PASS: 428+19 tests, 144/144 tracked UTF-8 files, 998544 bytes, zero findings, positive/negative and redaction fixtures PASS; 65.29 s. Snapshot acceptance COMPLETE; history/path-specific rules NOT_VERIFIED; T12.02.02.02 remains PARTIAL.
+
+First CI failed because the synthetic marker used digits outside the upstream AWS rule alphabet. Corrected the marker and added a regression test; no scanner rules disabled.

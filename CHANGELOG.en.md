@@ -6,7 +6,7 @@ This file tracks changes to the **shared catalog**. Individual skills may mainta
 
 ## 0.0.29 — Gitleaks text snapshot review (T12.02.02.02)
 
-- Official SHA-256 pinned Gitleaks 8.30.1, separate stdin per tracked UTF-8 file, byte coverage, redaction and exit code checks, negative allow-comment fixture, CI and bilingual documentation. Actual CI required; history, path-specific rules and full Tier 1 NOT_VERIFIED.
+- Official SHA-256 pinned Gitleaks 8.30.1, separate stdin per tracked UTF-8 file, byte coverage, redaction and exit code checks, negative allow-comment fixture, CI and bilingual documentation. [CI 45367459045](https://github.com/Sashido01/TESSERA/actions/runs/45367459045) PASS: 428+19 tests, 144/144 tracked UTF-8 files, 998544 bytes, zero findings, positive/negative and redaction fixtures PASS; 65.29 s. Snapshot acceptance COMPLETE; history/path-specific rules NOT_VERIFIED; T12.02.02.02 remains PARTIAL.
 
 ## 0.0.28 — Direct Bandit static review (T12.02.02.01)
 

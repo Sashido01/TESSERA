@@ -159,4 +159,4 @@ Original project: [Sashido01/TESSERA](https://github.com/Sashido01/TESSERA).
 
 **T12.02.02.01:** [direct Bandit review](docs/BANDIT_REVIEW.en.md) COMPLETE within direct scan execution scope. [CI 45365133732](https://github.com/Sashido01/TESSERA/actions/runs/45365133732) PASS: 414+19 tests, 60 Python files, 87 findings (45 runtime, 42 tests; 2 medium, 85 low, 0 high); clean and negative fixtures PASS; direct review 1.69 s. Full NVIDIA code-integrity and other scanners remain unverified.
 
-**T12.02.02.02:** [Gitleaks](docs/GITLEAKS_REVIEW.en.md) — text snapshot via stdin; live CI results, history and path-specific rules remain unverified.
+**T12.02.02.02:** [Gitleaks](docs/GITLEAKS_REVIEW.en.md) — [CI 45367459045](https://github.com/Sashido01/TESSERA/actions/runs/45367459045) PASS: 428+19 tests, 144/144 tracked UTF-8 files, 998544 bytes, zero findings, positive/negative and redaction fixtures PASS; 65.29 s. Snapshot acceptance COMPLETE; history/path-specific rules NOT_VERIFIED; T12.02.02.02 remains PARTIAL.
