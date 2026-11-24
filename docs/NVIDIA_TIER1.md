@@ -93,3 +93,11 @@ T12.03.20: [CI 45428224320](https://github.com/Sashido01/TESSERA/actions/runs/45
 ## T12.03.22 — контейнерное сканирование истории (кандидат)
 
 Повторно используемый транспорт Gitleaks, отдельная обязательная проверка достижимых UTF-8 blobs: host inventory, проверка Git blob OID SHA-1/SHA-256, fingerprint inventory, TSG1 batches <=256 объектов и <=16 MiB каждый, суммарный прежний предел 128 MiB/2048 blobs. Общий deadline 540s, каждое сканирование до 300s; точная сверка coverage/findings с host, synthetic previous-content и прежний реальный Git fixture на host. Не передаём .git/OID/path в контейнер; только bytes и категория other. Семь новых offline регрессий. CI обязателен; производительность и полный Docker workload NOT_VERIFIED, path-specific/integrated scans остаются на host. Git SHA-1 не доказательство криптографической стойкости к коллизиям. T12 PARTIAL.
+
+## T12.03.22 — результат PR
+
+[CI 45434506035](https://github.com/Sashido01/TESSERA/actions/runs/45434506035) PASS: 582+38=620 тестов; история Docker 878 blobs, 10 952 864 байта, 4 пакета, 316.56s, 0 находок; identity, digest, host parity, previous-content PASS. CI 795s при лимите 1200s. v0.0.53 main CI и тег подтверждены; v0.0.54 принят в main, тег отдельно.
+
+## T12.03.23 — контейнерная проверка по путям (кандидат)
+
+Отдельный TSP1 режим транспорта: 10 фиксированных категорий (2 области x 5 существующих правил), до 256 targets/16 MiB в пакете, общий лимит 4096 targets/192 MiB, deadline 180s. Пустой пакет допустим только TSP1 для запуска пяти контрольных fixtures. Реальные пути/OID/.git не передаются; фиксированные канонические имена, прежний scan_rule, строгие десять строк отчёта и snapshot parity с host, повторная проверка источника. Девять новых offline регрессий (8 + workflow guard). Старые проверки сохраняются; integrated Gitleaks остаётся host. Реальное выполнение и допустимость лимитов требуют CI. T12 PARTIAL.

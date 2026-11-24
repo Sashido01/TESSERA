@@ -93,3 +93,11 @@ T12.03.20: [CI 45428224320](https://github.com/Sashido01/TESSERA/actions/runs/45
 ## T12.03.22 — containerized history scanning (candidate)
 
 Reusable Gitleaks transport, separate required reachable UTF-8 blob check: host inventory, Git blob OID SHA-1/SHA-256 validation, inventory fingerprint, TSG1 batches <=256 objects and <=16 MiB each, unchanged aggregate cap 128 MiB/2048 blobs. Overall deadline 540s, each scan up to 300s; exact coverage/findings parity with host, synthetic previous-content and existing live Git fixture on host. No .git/OID/path passed to container; only bytes and other category. Seven new offline regressions. CI required; performance and complete Docker workload NOT_VERIFIED, path-specific/integrated scans remain on host. Git SHA-1 is not proof of cryptographic collision resistance. T12 PARTIAL.
+
+## T12.03.22 — PR result
+
+[CI 45434506035](https://github.com/Sashido01/TESSERA/actions/runs/45434506035) PASS: 582+38=620 tests; Docker history 878 blobs, 10,952,864 bytes, 4 batches, 316.56s, 0 findings; identity, digest, host parity, previous-content PASS. CI 795s against 1200s limit. v0.0.53 main CI and tag verified; v0.0.54 merged into main, tag separate.
+
+## T12.03.23 — containerized path check (candidate)
+
+Separate TSP1 transport mode: 10 fixed categories (2 scopes x 5 existing rules), up to 256 targets/16 MiB per batch, aggregate cap 4096 targets/192 MiB, 180s deadline. Empty batch permitted only for TSP1 to execute five control fixtures. No real paths/OIDs/.git passed; fixed canonical names, existing scan_rule, strict ten report rows and snapshot parity with host, repeated source check. Nine new offline regressions (8 + workflow guard). Existing checks retained; integrated Gitleaks remains host. Real execution and limits require CI. T12 PARTIAL.

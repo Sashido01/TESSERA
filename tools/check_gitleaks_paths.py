@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import collections
+import hashlib
 import json
 import os
 import pathlib
@@ -94,6 +95,12 @@ def fixtures(cli, temp, env):
         require(scan_rule(cli, temp, env, rule, data) > 0, "PATH_NEGATIVE_NOT_DETECTED")
 
 
+def path_snapshot(current, blobs, pairs, commits):
+    data = {"current": {name: hashlib.sha256(content).hexdigest() for name, content in current.items()},
+            "blobs": blobs, "pairs": sorted(pairs), "commits": commits}
+    return hashlib.sha256(json.dumps(data, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
 def accept(repo, cli):
     repo, cli = repo.resolve(strict=True), cli.resolve(strict=True)
     require(cli.is_file() and os.access(cli, os.X_OK), "PATH_CLI_MISSING")
@@ -129,6 +136,7 @@ def accept(repo, cli):
                 and historical_pairs(repo, env, blobs) == (pairs, commits), "PATH_SOURCE_MUTATED")
     return {"execution": "PASS", "scanner": "gitleaks", "version": VERSION,
             "scope": "FIVE_PINNED_PATH_CONSTRAINED_RULES",
+            "snapshot_sha256": path_snapshot(current, blobs, pairs, commits),
             "history_commits": commits, "negative_fixtures": len(RULES),
             "report_destination": "CAPTURED_STDOUT", "archive_depth": 0,
             "fixture_top_level_entries_unchanged": "PASS",

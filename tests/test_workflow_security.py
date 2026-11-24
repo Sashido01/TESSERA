@@ -83,7 +83,7 @@ class WorkflowSecurityTests(unittest.TestCase):
         self.assertTrue(any("истории Gitleaks" in e for e in module.validate_workflow(modified)))
 
     def test_gitleaks_paths_are_required(self):
-        modified = WORKFLOW.replace("run: python tools/check_gitleaks_paths.py", "run: echo")
+        modified = WORKFLOW.replace("python tools/check_gitleaks_paths.py", "echo")
         self.assertTrue(any("по пути" in e for e in module.validate_workflow(modified)))
 
     def test_skillspector_review_is_required(self):
@@ -128,6 +128,11 @@ class WorkflowSecurityTests(unittest.TestCase):
     def test_gitleaks_history_container_required(self):
         modified = WORKFLOW.replace("run: python tools/check_gitleaks_history_container.py", "run: echo")
         self.assertTrue(any("контейнерной проверки истории Gitleaks" in e for e in module.validate_workflow(modified)))
+
+
+    def test_gitleaks_paths_container_required(self):
+        modified = WORKFLOW.replace("run: python tools/check_gitleaks_paths_container.py", "run: echo")
+        self.assertTrue(any("контейнерной проверки правил Gitleaks по пути" in e for e in module.validate_workflow(modified)))
 
 
 if __name__ == "__main__":

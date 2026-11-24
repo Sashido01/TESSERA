@@ -77,7 +77,11 @@ def worker():
             "fixture_top_level_entries_unchanged": "PASS"}
 
 
-def args_for(name, stage):
+def args_for(name, stage, *, mode="content"):
+    require(mode in ("content", "paths"), "CONTAINER_MODE_INVALID")
+    entry = ("import sys;sys.path.insert(0,'/stage');import check_gitleaks_container as m;m.worker_main()"
+             if mode == "content" else
+             "import sys;sys.path.insert(0,'/stage');import check_gitleaks_paths_container as m;m.worker_main()")
     return ["create", "--name", name, "--pull=never", "--platform=linux/amd64",
             "--interactive", "--log-driver=none", "--network=none", "--read-only",
             "--cap-drop=ALL", "--security-opt=no-new-privileges=true", "--user=65534:65534",
@@ -86,7 +90,7 @@ def args_for(name, stage):
             "--tmpfs=/tmp:rw,noexec,nosuid,nodev,size=32m,mode=1777",
             "--mount", f"type=bind,source={stage},target=/stage,readonly",
             "--entrypoint=/usr/local/bin/python3", IMAGE, "-I", "-B", "-c",
-            "import sys;sys.path.insert(0,'/stage');import check_gitleaks_container as m;m.worker_main()"]
+            entry]
 
 
 def verify(report, host, digest):
@@ -123,13 +127,16 @@ def accept(repo, cli, host_file):
             "history": "NOT_RUN", "path_specific_rules": "NOT_RUN"}
 
 
-def run_records(cli, records, timeout=300):
+def run_records(cli, records, timeout=300, *, mode="content"):
+    require(mode in ("content", "paths"), "CONTAINER_MODE_INVALID")
+    modules = MODULES if mode == "content" else MODULES + (
+        "check_gitleaks_paths_container.py", "check_gitleaks_paths.py", "check_gitleaks_history.py")
     with tempfile.TemporaryDirectory(prefix="tessera-isolated-") as folder:
         home = pathlib.Path(folder)
         stage = home / "stage"
         stage.mkdir(mode=0o755)
         source = pathlib.Path(__file__).resolve().parent
-        for module in MODULES:
+        for module in modules:
             dest = stage / module
             shutil.copyfile(source / module, dest)
             dest.chmod(0o444)
@@ -139,9 +146,9 @@ def run_records(cli, records, timeout=300):
         stage.chmod(0o555)
         name = "tessera-gitleaks-" + uuid.uuid4().hex
         with tempfile.TemporaryFile() as frame, tempfile.TemporaryFile() as out, tempfile.TemporaryFile() as err:
-            digest = encode(records, frame)
+            digest = encode(records, frame, mode=mode)
             frame.seek(0)
-            required(args_for(name, stage), home, "CONTAINER_CREATE_FAILED")
+            required(args_for(name, stage, mode=mode), home, "CONTAINER_CREATE_FAILED")
             try:
                 env = {"PATH": "/usr/bin:/bin", "HOME": str(home), "LANG": "C", "LC_ALL": "C",
                        "DOCKER_CONFIG": str(home / "docker-config")}
