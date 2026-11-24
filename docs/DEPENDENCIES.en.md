@@ -15,7 +15,7 @@ This document records the owner's decision of 23 November 2026. The Russian docu
 | Official GitHub CLI (`gh skill`) | T11.02 actual offline dry-run passed; T10.01 isolated local install in CI; remote tag/SHA pin NOT_VERIFIED | Discovery, installation, SHA/tag pinning, updates |
 | Agent Skills | Skill publishing standard | Portable SKILL.md and directory layout |
 | Official `skills-ref` | Planned reference validator | Standard-format verification |
-| NVIDIA SkillEvaluator **Tier 1** | Only after isolated evaluation | Free baseline static checks; not a runtime dependency |
+| NVIDIA SkillEvaluator **Tier 1** | 1.2.0 — isolated T12.01 evaluation | [schema/quality, separate venv, hash-locked wheels](NVIDIA_TIER1.en.md); not a runtime dependency |
 | Custom Codex/Harness/Claude/Hermes adapters | Planned | Shared core invocation and enforcement |
 
 The description of Tier 1 as free refers to not requiring paid AI APIs. CI infrastructure may still incur its normal operational limitations and costs. Verify commands, pinned versions, and actual resource use before adoption.
