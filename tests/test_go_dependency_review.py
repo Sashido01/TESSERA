@@ -39,6 +39,22 @@ class GoMetadataTests(unittest.TestCase):
         self.assertIn(("example.org/fork", "v2.0.0"),
                       self.parse("\t=>\texample.org/fork\tv2.0.0\n")["modules"])
 
+    def test_unversioned_module_is_explicit_coverage_gap(self):
+        report = self.parse("\tdep\texample.org/unversioned\t(devel)\n")
+        self.assertEqual(report["unversioned_modules"], ["example.org/unversioned"])
+        self.assertEqual(report["dependency_coverage"], "PARTIAL")
+        self.assertNotIn(("example.org/unversioned", "(devel)"), report["modules"])
+
+    def test_versioned_replacement_resolves_devel(self):
+        report = self.parse("\tdep\texample.org/unversioned\t(devel)\n"
+                            "\t=>\texample.org/fork\tv1.2.3\n")
+        self.assertEqual(report["unversioned_modules"], [])
+        self.assertIn(("example.org/fork", "v1.2.3"), report["modules"])
+
+    def test_unknown_version_fails_closed(self):
+        with self.assertRaisesRegex(g.InstallCheckError, "VERSION_UNVERIFIED"):
+            self.parse("\tdep\texample.org/unversioned\tunknown\n")
+
     def test_local_replacement_blocked(self):
         with self.assertRaisesRegex(g.InstallCheckError, "REPLACEMENT"):
             self.parse("\t=>\t../local\t(devel)\n")

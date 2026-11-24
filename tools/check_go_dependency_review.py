@@ -53,7 +53,11 @@ def parse_build(raw, root, release, commit):
             require(len(fields) in (3, 4), "GO_DEPENDENCY_FIELD_COUNT_" + str(len(fields)))
             require(MODULE.fullmatch(fields[1]), "GO_DEPENDENCY_PATH_INVALID")
             require(fields[1] not in modules, "GO_DEPENDENCY_DUPLICATE")
-            require(VERSION.fullmatch(fields[2]), "GO_DEPENDENCY_VERSION_UNVERIFIED")
+            # Go build info may contain an unversioned (devel) module. A
+            # later versioned replacement resolves it; otherwise keep it as
+            # an explicit coverage gap instead of querying a guessed version.
+            require(VERSION.fullmatch(fields[2]) or fields[2] == "(devel)",
+                    "GO_DEPENDENCY_VERSION_UNVERIFIED:" + fields[1])
             previous = fields[1]
             modules[previous] = (fields[1], fields[2])
         elif fields[0] == "=>":
@@ -68,10 +72,13 @@ def parse_build(raw, root, release, commit):
                 source_revision = fields[1].split("=", 1)[1]
     require(root_version is not None and 0 < len(modules) <= 300, "GO_BUILD_INFO_INCOMPLETE")
     require(source_revision is None or source_revision == commit, "GO_SOURCE_REVISION_MISMATCH")
-    result = set(modules.values()) | {(root, release)}
+    unresolved = sorted({name for name, version in modules.values() if version == "(devel)"})
+    result = {(name, version) for name, version in modules.values() if version != "(devel)"}
+    result.add((root, release))
     return {"toolchain": toolchain, "root_build_version": root_version,
             "source_revision": "MATCH" if source_revision else "NOT_RECORDED",
-            "modules": sorted(result)}
+            "modules": sorted(result), "unversioned_modules": unresolved,
+            "dependency_coverage": "PARTIAL" if unresolved else "VERSIONED"}
 
 
 def license_lookup(item):
@@ -135,6 +142,7 @@ def accept(gh, gitleaks):
                                   for (name, version), ids in zip(labels, found) if ids]
             report["source_commit_ids"] = found[-1]
             report["module_count"] = len(report["modules"])
+            report["unversioned_count"] = len(report["unversioned_modules"])
             reports[label] = report
     require(0 < len(all_modules) <= 400, "GO_MODULE_COUNT_INVALID")
     # License data are public metadata, not a legal compatibility assessment.
@@ -144,6 +152,8 @@ def accept(gh, gitleaks):
     return {"execution": "PASS", "scope": "GO_MODULE_BUILD_METADATA_OSV_AND_LICENSE_METADATA",
             "policy": "ADVISORY_FINDINGS", "go_parser": match.group(1).decode("ascii"),
             "binaries": reports, "distinct_modules": len(all_modules),
+            "coverage": ("PARTIAL" if any(row["unversioned_count"] for row in reports.values())
+                         else "VERSIONED_MODULES"),
             "license_status_counts": dict(sorted(counts.items())),
             "license_inventory": [{"module": name, "version": version, **row}
                                   for (name, version), row in zip(sorted(all_modules), license_rows)],
