@@ -49,3 +49,5 @@
 - [Архитектура](ARCHITECTURE.md)
 - [Версионирование](VERSIONING.md)
 - [Языковая политика](I18N.md)
+
+**T12.02.02.03:** SkillSpector 2.13.6 ограничен изолированным статическим обзором, закреплёнными источником/wheel/lock hashes, без LLM; реальная приёмка необходима. [SKILLSPECTOR_REVIEW](SKILLSPECTOR_REVIEW.md).

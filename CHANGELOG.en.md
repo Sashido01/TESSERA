@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.31 — Direct static SkillSpector review (T12.02.02.03)
+
+- Pinned SkillSpector 2.13.6 source and official wheel, offline lock export, wheel/hash-only separate environment, no LLM, strict scan report and completeness checks, synthetic clean and P1 fixtures, CI and bilingual documentation. Live acceptance required; full NVIDIA security remains NOT_VERIFIED.
+
 ## 0.0.30 — Reachable Git history content review (T12.02.02.02)
 
 - Gitleaks scans each distinct reachable UTF-8 blob from local refs and HEAD via stdin; validates complete object inventory, byte coverage, immutable inventory and synthetic removed-secret fixture. [CI 45368434188](https://github.com/Sashido01/TESSERA/actions/runs/45368434188) PASS: 437+19 tests; 585/585 distinct UTF-8 blobs, 5431003 bytes, zero findings, removed-marker fixture PASS, 128.81 s. Added separate five path-constrained rules review; live path acceptance pending. Unavailable refs and unreachable objects not covered.

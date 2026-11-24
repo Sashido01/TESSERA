@@ -146,6 +146,27 @@ jobs:
       - name: Проверить пять правил Gitleaks, зависящих от имени файла
         run: python tools/check_gitleaks_paths.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1"
 
+      - name: Получить закреплённый источник SkillSpector 2.13.6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 (node24)
+        with:
+          repository: NVIDIA/SkillSpector
+          ref: e2674da339b0bddc6e565d059c0577c6d9cd25da
+          path: .external/skillspector
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Установить SkillSpector из закреплённых wheel в отдельное окружение
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C .external/skillspector rev-parse HEAD)" = "e2674da339b0bddc6e565d059c0577c6d9cd25da"
+          "$RUNNER_TEMP/nvidia-tier1/bin/uv" export --project .external/skillspector --frozen --offline --no-default-groups --no-emit-project --format requirements-txt --output-file "$RUNNER_TEMP/skillspector-requirements.txt"
+          printf '\n%s\n' 'skillspector @ https://github.com/NVIDIA/SkillSpector/releases/download/v2.13.6/skillspector-2.13.6-py3-none-any.whl --hash=sha256:e7b46c55e726405b2a068d375d1ee8e799e15d86f3fc05f84feb5ba962198b15' >> "$RUNNER_TEMP/skillspector-requirements.txt"
+          python -m venv "$RUNNER_TEMP/skillspector"
+          "$RUNNER_TEMP/skillspector/bin/python" -m pip --isolated install --disable-pip-version-check --no-cache-dir --only-binary=:all: --require-hashes -r "$RUNNER_TEMP/skillspector-requirements.txt"
+          "$RUNNER_TEMP/skillspector/bin/python" -m pip check
+      - name: Проверить навыки через SkillSpector без LLM
+        run: python tools/check_skillspector_review.py --repo . --cli "$RUNNER_TEMP/skillspector/bin/skillspector"
+
   tag_microversion:
     name: Создать аннотированный тег проверенной версии
     needs: validate

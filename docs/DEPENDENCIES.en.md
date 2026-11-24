@@ -49,3 +49,5 @@ The existing Python `install.py` remains a minimal offline and custom-profile op
 - [Architecture](ARCHITECTURE.en.md)
 - [Version policy](VERSIONING.en.md)
 - [Language policy](I18N.en.md)
+
+**T12.02.02.03:** SkillSpector 2.13.6 is limited to isolated static review, pinned source/wheel/lock hashes, no LLM; acceptance pending. See [SKILLSPECTOR_REVIEW](SKILLSPECTOR_REVIEW.en.md).
