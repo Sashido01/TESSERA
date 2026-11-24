@@ -201,3 +201,5 @@ T12.03.08: CI 45391798766 — 513+29 PASS, GOVULN_CONTROL_VERSION BLOCKED; но�
 **T12.03.28:** CI 45465436002 PASS, 655 тестов, integrated Bandit Docker controls PASS. **T12.03.29 — кандидат:** SHA-256 для двух конфигураций вместо SHA-1, без suppressions, два регрессионных теста; CI обязателен. T12 PARTIAL.
 
 **T12.03.29:** CI 45468107315 PASS, 657 тестов, Bandit HIGH 2→0. **T12.03.30 — кандидат:** безопасные координаты Bandit и точная parity, шесть регрессий; CI обязателен. T12 PARTIAL.
+
+**T12.03.30:** CI 45470763020 PASS, 663 теста, все 173 coordinates. **T12.03.31 — кандидат:** standalone SkillSpector Docker, 74 packages, exact parity, восемь регрессий; CI обязателен. T12 PARTIAL.

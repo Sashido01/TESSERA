@@ -161,3 +161,11 @@ Two B324 findings: SHA-1 was used to compare Git blobs of Semgrep and Bandit con
 ## T12.03.30 — safe Bandit coordinates (candidate)
 
 Standalone Bandit host and Docker reports include only snapshot-confirmed public relative filenames, bounded source line numbers, rule/severity/confidence/scope; no raw code, issue_text or other scanner metadata. Deterministic order, maximum 1000 primary locations, separate unresolved/omitted counts without changing total findings, exact parity including coordinates. Six offline regressions (5+1); actual coverage and finding inventory require CI. Preparation for per-site triage, not remediation of 20 MEDIUM/153 LOW. T12 PARTIAL.
+
+## T12.03.30 — PR result
+
+[CI 45470763020](https://github.com/Sashido01/TESSERA/actions/runs/45470763020) PASS: 625+38=663 tests, 94 Python files/173 findings, all 173 primary locations, unresolved/omitted 0, exact host parity, HIGH0 MEDIUM20 LOW153. History Docker 969 blobs/13,244,932 bytes/160.31s/0 findings. v0.0.61 main CI 45470561925 and tag verified; v0.0.62 merged into main, tag separate.
+
+## T12.03.31 — standalone SkillSpector Docker (candidate)
+
+Exact 74 distribution inventory (CI 45468107315, including bootstrap pip), existing hash-pinned wheel installation and pip check retained; streaming SHA256 of package/source trees, bounded file counts/sizes, no-follow and identity checks; stage only skills/fixtures/minimal trusted tools, two read-only mounts, Python -I -S -B, no network/nonroot/cgroups 1 GiB/2 CPU/64 pids/64 MiB tmpfs, no LLM, bounded output and cleanup. Actual SkillSpector 2.13.7 version, clean/P1 fixtures, exact normalized host parity and snapshot/package preservation require CI. Eight offline regressions (7+workflow guard). Bootstrap pip inventoried, not a separate hash-pinned wheel; ABI/native advisories, daemon races and resource exhaustion not proven. Integrated SkillSpector remains host. T12 PARTIAL.
