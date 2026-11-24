@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import pathlib
 import re
 import subprocess
@@ -16,10 +17,26 @@ class TagError(ValueError):
     """Невозможность создать или подтвердить корректный релизный тег."""
 
 
+# An explicit repository argument must not be redirected by inherited Git context.
+GIT_CONTEXT = frozenset({
+    "GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR", "GIT_INDEX_FILE",
+    "GIT_OBJECT_DIRECTORY", "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+    "GIT_NAMESPACE", "GIT_GRAFT_FILE", "GIT_SHALLOW_FILE",
+    "GIT_REPLACE_REF_BASE", "GIT_IMPLICIT_WORK_TREE", "GIT_PREFIX",
+    "GIT_INTERNAL_SUPER_PREFIX", "GIT_CONFIG", "GIT_CONFIG_PARAMETERS",
+    "GIT_CONFIG_COUNT", "GIT_CONFIG_SYSTEM", "GIT_CONFIG_GLOBAL",
+    "GIT_CONFIG_NOSYSTEM", "GIT_EXEC_PATH",
+})
+
+
 def git(repo: pathlib.Path, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
+    env = dict(os.environ)
+    if any(key.upper() in GIT_CONTEXT or key.upper().startswith(("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_"))
+           for key in env):
+        raise TagError("RELEASE_NOT_TAGGED: внешнее окружение Git может изменить выбранный репозиторий или конфигурацию")
     proc = subprocess.run(
-        ["git", "-C", str(repo), *args],
-        text=True, encoding="utf-8", capture_output=True, check=False,
+        ["git", "--no-replace-objects", "-C", str(repo), *args],
+        text=True, encoding="utf-8", capture_output=True, check=False, env=env,
     )
     if check and proc.returncode:
         raise TagError(f"Git: {proc.stderr.strip() or proc.stdout.strip()}")
@@ -35,29 +52,52 @@ def name_for(version: str, prefix: str = "") -> str:
     return f"{prefix}v{version}"
 
 
-def verify(repo: pathlib.Path, version: str, prefix: str = "") -> str:
+OID = re.compile(r"(?:[a-f0-9]{40}|[a-f0-9]{64})\Z")
+
+
+def head_commit(repo: pathlib.Path, expected_head: str | None = None) -> str:
+    commit = git(repo, "rev-parse", "--verify", "HEAD^{commit}").stdout.strip()
+    if not OID.fullmatch(commit):
+        raise TagError("RELEASE_NOT_TAGGED: некорректный SHA HEAD")
+    if expected_head is not None and (
+            not OID.fullmatch(expected_head) or expected_head != commit):
+        raise TagError("RELEASE_NOT_TAGGED: HEAD не совпадает с проверенным коммитом")
+    return commit
+
+
+def verify(repo: pathlib.Path, version: str, prefix: str = "",
+           *, expected_head: str | None = None) -> str:
     tag = name_for(version, prefix)
     repo = repo.resolve(strict=True)
     top = pathlib.Path(git(repo, "rev-parse", "--show-toplevel").stdout.strip()).resolve()
     if top != repo:
         raise TagError("Укажите корень Git-репозитория, а не вложенный каталог")
-    obj = git(repo, "rev-parse", "--verify", f"refs/tags/{tag}", check=False)
+    commit = head_commit(repo, expected_head)
+    ref = f"refs/tags/{tag}"
+    obj = git(repo, "rev-parse", "--verify", ref, check=False)
     if obj.returncode != 0:
         raise TagError(f"RELEASE_NOT_TAGGED: отсутствует тег {tag}")
-    kind = git(repo, "cat-file", "-t", f"refs/tags/{tag}").stdout.strip()
+    oid = obj.stdout.strip()
+    if not OID.fullmatch(oid):
+        raise TagError("RELEASE_NOT_TAGGED: некорректный SHA тега")
+    # Inspect a fixed object, not a ref that could change between reads.
+    kind = git(repo, "cat-file", "-t", oid).stdout.strip()
     if kind != "tag":
         raise TagError(f"RELEASE_NOT_TAGGED: тег {tag} не аннотирован")
-    annotated = git(repo, "cat-file", "-p", f"refs/tags/{tag}").stdout
-    if not annotated.partition("\n\n")[2].strip():
+    annotated = git(repo, "cat-file", "-p", oid).stdout
+    header, separator, message = annotated.partition("\n\n")
+    if not separator or not message.strip():
         raise TagError(f"RELEASE_NOT_TAGGED: у тега {tag} пустая аннотация")
-    commit = git(repo, "rev-parse", "HEAD^{commit}").stdout.strip()
-    actual = git(repo, "rev-parse", f"refs/tags/{tag}^{{commit}}").stdout.strip()
-    if actual != commit:
-        raise TagError(f"RELEASE_NOT_TAGGED: {tag} указывает не на HEAD")
-    return obj.stdout.strip()
+    fields = header.splitlines()
+    if fields[:3] != [f"object {commit}", "type commit", f"tag {tag}"]:
+        raise TagError(f"RELEASE_NOT_TAGGED: {tag} указывает не на HEAD напрямую или имя объекта не совпадает")
+    if head_commit(repo) != commit or git(repo, "rev-parse", "--verify", ref).stdout.strip() != oid:
+        raise TagError("RELEASE_NOT_TAGGED: HEAD или ссылка тега изменились во время проверки")
+    return oid
 
 
-def create(repo: pathlib.Path, version: str, message: str, prefix: str = "") -> str:
+def create(repo: pathlib.Path, version: str, message: str, prefix: str = "",
+           *, expected_head: str | None = None) -> str:
     tag = name_for(version, prefix)
     if not message.strip() or len(message.strip()) < 12:
         raise TagError("Для аннотированного тега нужно осмысленное описание релиза")
@@ -65,12 +105,13 @@ def create(repo: pathlib.Path, version: str, message: str, prefix: str = "") -> 
     top = pathlib.Path(git(repo, "rev-parse", "--show-toplevel").stdout.strip()).resolve()
     if top != repo:
         raise TagError("Укажите корень Git-репозитория")
+    commit = head_commit(repo, expected_head)
     exists = git(repo, "rev-parse", "--verify", f"refs/tags/{tag}", check=False)
     if exists.returncode == 0:
-        # Повторный запуск допускается только для правильного тега того же коммита.
-        return verify(repo, version, prefix)
-    git(repo, "tag", "-a", tag, "-m", message.strip())
-    return verify(repo, version, prefix)
+        return verify(repo, version, prefix, expected_head=commit)
+    # Explicit target prevents tagging a different HEAD if another writer moves it.
+    git(repo, "tag", "-a", tag, "-m", message.strip(), commit)
+    return verify(repo, version, prefix, expected_head=commit)
 
 
 def main() -> int:
@@ -81,12 +122,13 @@ def main() -> int:
         p.add_argument("version", help="Релизная версия, например 0.1.0")
         p.add_argument("--repo", type=pathlib.Path, required=True, help="Корень проекта")
         p.add_argument("--prefix", default="", help="Префикс для монорепозитория, например skill-name/")
+        p.add_argument("--expected-head", help="Полный SHA ранее проверенного релизного коммита")
         if action == "create":
             p.add_argument("--message", required=True, help="Русская аннотация реального релиза")
     args = parser.parse_args()
     try:
-        sha = (create(args.repo, args.version, args.message, args.prefix)
-               if args.command == "create" else verify(args.repo, args.version, args.prefix))
+        sha = (create(args.repo, args.version, args.message, args.prefix, expected_head=args.expected_head)
+               if args.command == "create" else verify(args.repo, args.version, args.prefix, expected_head=args.expected_head))
     except (OSError, TagError) as exc:
         print(f"BLOCKED / RELEASE_NOT_TAGGED: {exc}", file=sys.stderr)
         return 1

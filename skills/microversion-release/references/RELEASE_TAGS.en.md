@@ -46,3 +46,8 @@ If the release is declared **published**, a local tag alone is not enough: confi
 - Concurrent agents: coordinate release operations before tagging.
 
 **Limitation:** a verified Git tag does not replace actual build and application testing.
+
+
+To bind to previously completed checks, pass `--expected-head <full-SHA>` to `create` and `verify`. A mismatch with HEAD blocks the operation. Even without the option, `create` captures the current SHA before writing and passes it explicitly to Git; verification inspects the immutable annotated tag object, its direct target commit and internal tag name. Rechecking HEAD and the ref detects observed changes. If a conflict occurs after creation, the tag is not automatically deleted or moved; report BLOCKED and investigate. This is not an atomic concurrent-writer lock, proof of passing tests, or complete race protection.
+
+A normal Git environment without external repository, namespace, object-store or configuration redirection through the listed environment variables is required. The CLI blocks rather than silently ignores these settings. Invocation from a Git hook or custom environment may require a separately reviewed adapter. The installed Git, PATH, selected repository configuration (including signing programs and hooks), and filesystem must be trusted; this is not a sandbox.

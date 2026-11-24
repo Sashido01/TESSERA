@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.39 — Bind tag to the exact verified commit (T12.03.07)
+
+- Candidate: explicit target SHA, immutable object verification, direct commit and tag name, `--expected-head`, ref recheck; six regressions, including rejection of inherited Git context/config overrides. CI required; concurrent locking is not implemented.
+
 ## 0.0.38 — Installed license content verification (T12.03.06)
 
 - Candidate: bounded license record checks for two exact Python versions, RECORD SHA-256 and size, upstream comparison; original metadata preserved. Four regressions; CI required. Go license confirmed at upstream level, not binary level.
