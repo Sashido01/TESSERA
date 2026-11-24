@@ -12,7 +12,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     # Signing also runs tests before the package build: keep both paths clean.
     env:
       PYTHONDONTWRITEBYTECODE: '1'
@@ -198,6 +198,8 @@ jobs:
 
       - name: Проверить CVE и лицензии зависимостей skills-ref
         run: python tools/check_dependency_review.py --locked tools/skills-ref-requirements.txt --source-commit 83021e2be457a9b6679148719c1f6074f0ad975e
+      - name: Выполнить интегрированный статический NVIDIA Tier 1 без LLM
+        run: python tools/check_nvidia_full_tier1.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/skillevaluator" --skillspector "$RUNNER_TEMP/skillspector/bin/skillspector" --bandit "$RUNNER_TEMP/nvidia-tier1/bin/bandit" --gitleaks "$RUNNER_TEMP/gitleaks-8.30.1"
       - name: Проверить CVE и лицензии зависимостей NVIDIA Tier 1
         run: '"$RUNNER_TEMP/nvidia-tier1/bin/python" tools/check_dependency_review.py --root skillevaluator==1.2.0 --source-commit 5625c2534bf266f810aea489ffbe69da0bb2645e'
       - name: Проверить CVE и лицензии зависимостей SkillSpector

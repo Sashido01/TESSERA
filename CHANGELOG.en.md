@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.45 — Integrated static NVIDIA Tier 1 (T12.03.13)
+
+- Explicit complete check-group lineup, pinned scanners and bounded Gitleaks adapter, aggregate-only reports, seven regressions. CI required; Semgrep and certification not verified.
+
 ## 0.0.44 — Hardened remote Release Core inspection (T12.03.12)
 
 - One named remote, transport scope, fixed upload-pack, minimal environment and consistent evidence. Ten regressions; CI required, live network acceptance separate.
