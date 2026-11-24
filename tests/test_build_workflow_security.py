@@ -70,6 +70,10 @@ class BuildWorkflowSecurityTests(unittest.TestCase):
         )
         self.assertIn("ATTEST_UNEXPECTED_ACTION", sec.validate(bad))
 
+    def test_missing_no_bytecode_guard_rejected(self):
+        bad = self.original.replace("PYTHONDONTWRITEBYTECODE: '1'", "PYTHONDONTWRITEBYTECODE: '0'")
+        self.assertIn("ATTEST_PYCACHE_ISOLATION_MISSING", sec.validate(bad))
+
     def test_concurrency_not_canceled(self):
         bad = self.original.replace("cancel-in-progress: false", "cancel-in-progress: true")
         self.assertIn("ATTEST_CONCURRENCY_UNSAFE", sec.validate(bad))
