@@ -88,6 +88,12 @@ def license_info(meta, files):
 
 # Reviewed exact upstream license texts; never replace package metadata with these.
 LICENSE_PINS = {
+    # Exact upstream commit 86ec4072580809cc3978f5d6bb40261eb60c3045.
+    ("face", "26.0.1"): ("LICENSE", "c642862bf261c6d05d89766e68801bd8225d508205776a04fb1ace9866b5b66f"),
+    # Exact upstream commit 45c166bce4630a55729f513a4b11fb95af23df5b.
+    ("peewee", "3.19.0"): ("LICENSE", "3740096125b08735a247b8dd08cd82e0ba984d3bebd9221d378576637e5240da"),
+    # Exact upstream commit 6e1998413a5bca7c058b85999667893f167434bc.
+    ("protobuf", "6.33.6"): ("LICENSE", "6e5e117324afd944dcf67f36cf329843bc1a92229a8cd9bb573d7a83130fea7d"),
     ("tiktoken", "0.13.0"): ("LICENSE", "418cb499b436128d653d79941333a5437b7be2ea9213dcc2f04d15d5d2c51d86"),
     ("tqdm", "4.68.3"): ("LICENCE", "fcff87c3a47ce8028a8512aa182d4fcf0ad1c90544ee75cf9b343684cac194de"),
 }

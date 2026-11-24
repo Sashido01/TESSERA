@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.56 — Semgrep license evidence (T12.03.24)
+
+- Three pinned upstream LICENSE texts, existing wheel/RECORD verification, two regression tests. CI required; T12 PARTIAL.
+
 ## 0.0.55 — Containerized path check (T12.03.23)
 
 - TSP1, five rules, ten categories, host parity and nine regressions. CI required, T12 PARTIAL.

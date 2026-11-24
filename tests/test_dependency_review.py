@@ -51,8 +51,9 @@ class DependencyReviewTests(unittest.TestCase):
             d.query([{"commit": "a" * 40}],
                     request=lambda _: {"results": [{"next_page_token": "fixture"}]})
 
-    def license_fixture(self, root, raw):
-        entry = importlib.metadata.PackagePath("tiktoken-0.13.0.dist-info/licenses/LICENSE")
+    def license_fixture(self, root, raw, name="tiktoken", version="0.13.0", nested=True):
+        suffix = "licenses/LICENSE" if nested else "LICENSE"
+        entry = importlib.metadata.PackagePath(f"{name}-{version}.dist-info/{suffix}")
         digest = hashlib.sha256(raw)
         encoded = base64.urlsafe_b64encode(digest.digest()).decode("ascii").rstrip("=")
         entry.hash = importlib.metadata.FileHash("sha256=" + encoded)
@@ -106,6 +107,31 @@ class DependencyReviewTests(unittest.TestCase):
                 self.skipTest("Symlink creation unavailable")
             result = d.installed_license_evidence(dist, "tiktoken", "0.13.0", [entry])
             self.assertEqual(result["status"], "REDIRECTED_PATH")
+
+
+    def test_semgrep_license_pins_exact_versions(self):
+        expected = {
+            ("face", "26.0.1"): ("LICENSE", "c642862bf261c6d05d89766e68801bd8225d508205776a04fb1ace9866b5b66f"),
+            ("peewee", "3.19.0"): ("LICENSE", "3740096125b08735a247b8dd08cd82e0ba984d3bebd9221d378576637e5240da"),
+            ("protobuf", "6.33.6"): ("LICENSE", "6e5e117324afd944dcf67f36cf329843bc1a92229a8cd9bb573d7a83130fea7d"),
+        }
+        for key, pin in expected.items():
+            self.assertEqual(d.LICENSE_PINS[key], pin)
+            self.assertIsNone(d.installed_license_evidence(None, key[0], "0.0.0", []))
+
+    def test_semgrep_license_record_layouts(self):
+        for name, version in (("face", "26.0.1"), ("peewee", "3.19.0"), ("protobuf", "6.33.6")):
+            for nested in (True, False):
+                with self.subTest(name=name, nested=nested), tempfile.TemporaryDirectory() as folder:
+                    dist, entry, path, digest = self.license_fixture(pathlib.Path(folder).resolve(),
+                        b"synthetic license\r\n", name, version, nested)
+                    with mock.patch.dict(d.LICENSE_PINS, {(name, version): ("LICENSE", digest)}):
+                        result = d.installed_license_evidence(dist, name, version, [entry])
+                        self.assertEqual(result["status"], "UPSTREAM_TEXT_MATCH")
+                        self.assertEqual(result["record_integrity"], "MATCH")
+                        path.write_bytes(b"synthetic license\n")
+                        self.assertEqual(d.installed_license_evidence(dist, name, version, [entry])["status"],
+                                         "RECORD_MISMATCH_OR_UNVERIFIED")
 
 
 if __name__ == "__main__":
