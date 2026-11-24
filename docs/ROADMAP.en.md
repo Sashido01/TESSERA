@@ -179,3 +179,5 @@ T12.03.08: CI 45391798766 — 513+29 PASS, GOVULN_CONTROL_VERSION BLOCKED; new c
 **T12.03.18:** [CI 45423325658](https://github.com/Sashido01/TESSERA/actions/runs/45423325658) PASS, 594 tests, AST3 6→0, SkillSpector 36/100, policy PASS, no suppressions. **T12.03.19 — candidate:** 22 editorial substitutions in six skill files, mixed tokens 22→0 by independent count; CI required. T12 PARTIAL, Semgrep CVEs and isolation open.
 
 **T12.03.19:** [CI 45425640926](https://github.com/Sashido01/TESSERA/actions/runs/45425640926) PASS, 594 tests, AE4=0, SkillSpector 22/100, 7 MEDIUM, policy PASS. **T12.03.20 — candidate:** required Linux namespace preflight, five offline regressions; live local synthetic PASS, GitHub CI required; scanner/file isolation and aggregate resources NOT_VERIFIED. T12 PARTIAL.
+
+**T12.03.20:** unshare BLOCKED on GitHub Ubuntu 26.04 (CI 45427736161); explicit required Docker synthetic preflight selected without changing AppArmor, with cgroup and access boundary checks. CI required; not scanner isolation. T12 PARTIAL.

@@ -6,7 +6,7 @@ This file tracks changes to the **shared catalog**. Individual skills may mainta
 
 ## 0.0.52 — Linux namespace preflight (T12.03.20)
 
-- Required synthetic network, PID, rlimits and timeout preflight; five offline regressions. Local prototype PASS, GitHub CI required; not a complete sandbox.
+- Required synthetic network, PID, rlimits and timeout preflight; five offline regressions. Local unshare PASS, GitHub unshare BLOCKED; explicit required Docker synthetic preflight, CI required; not a complete sandbox.
 
 ## 0.0.51 — Clarified Russian skill terminology (T12.03.19)
 

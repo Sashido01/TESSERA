@@ -6,7 +6,7 @@
 
 ## 0.0.52 — Проверка Linux namespace (T12.03.20)
 
-- Обязательный synthetic preflight сети, PID, rlimits и timeout; пять offline регрессий. Локальный прототип PASS, GitHub CI обязателен; не полноценная песочница.
+- Обязательный synthetic preflight сети, PID, rlimits и timeout; пять offline регрессий. Локальный unshare PASS, GitHub unshare BLOCKED; отдельный обязательный Docker synthetic preflight, CI обязателен; не полноценная песочница.
 
 ## 0.0.51 — Уточнена русская терминология навыка (T12.03.19)
 

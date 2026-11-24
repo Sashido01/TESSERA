@@ -51,8 +51,8 @@ jobs:
       - name: Повторить сборку ZIP после тестов (регрессия подписывающего CI)
         run: python tools/build_catalog_package.py --repo . --output-dir dist/post-tests --check-reproducible
 
-      - name: Проверить живой Linux namespace preflight
-        run: python tools/check_namespace_preflight.py
+      - name: Проверить живой Linux Docker preflight
+        run: python tools/check_docker_preflight.py
 
       # Demonstration-only upstream reference: checkout by immutable SHA.
       # Keep this after the packaging checks: the nested checkout is untracked.
