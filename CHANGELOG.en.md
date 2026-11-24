@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.64 — Integrated SkillSpector Docker (T12.03.32)
+
+- Static-only NVIDIA adapter, report validation and receipts, five regressions. CI required; T12 PARTIAL.
+
 ## 0.0.63 — Standalone SkillSpector Docker (T12.03.31)
 
 - Isolated static SkillSpector, 74 distribution pins, host/container parity, eight regressions. CI required; T12 PARTIAL.

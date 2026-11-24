@@ -169,3 +169,11 @@ Standalone Bandit host and Docker reports include only snapshot-confirmed public
 ## T12.03.31 — standalone SkillSpector Docker (candidate)
 
 Exact 74 distribution inventory (CI 45468107315, including bootstrap pip), existing hash-pinned wheel installation and pip check retained; streaming SHA256 of package/source trees, bounded file counts/sizes, no-follow and identity checks; stage only skills/fixtures/minimal trusted tools, two read-only mounts, Python -I -S -B, no network/nonroot/cgroups 1 GiB/2 CPU/64 pids/64 MiB tmpfs, no LLM, bounded output and cleanup. Actual SkillSpector 2.13.7 version, clean/P1 fixtures, exact normalized host parity and snapshot/package preservation require CI. Eight offline regressions (7+workflow guard). Bootstrap pip inventoried, not a separate hash-pinned wheel; ABI/native advisories, daemon races and resource exhaustion not proven. Integrated SkillSpector remains host. T12 PARTIAL.
+
+## T12.03.31 — PR result
+
+[CI 45475253034](https://github.com/Sashido01/TESSERA/actions/runs/45475253034) PASS: 633+38=671 tests; SkillSpector Docker 74 distributions/14109 files/2128 dirs/252237592 bytes, clean/P1, exact host parity, source/package preservation PASS. Risk22, coverage100%, seven MEDIUM, zero suppressed. Bandit 96 files/177 findings (HIGH0 MEDIUM20 LOW157), all coordinates. History 981 blobs/13566473 bytes/267.05s/0 findings. v0.0.62 main CI 45474929540 and tag verified; v0.0.63 merged into main, tag separate.
+
+## T12.03.32 — integrated SkillSpector Docker (candidate)
+
+NVIDIA static-only exact CLI contract; current skill or two control fixtures only, no baseline/LLM/remote inputs. Existing verified 74-package runtime, streaming fingerprint, two read-only mounts, no network, nonroot and cgroups 1 GiB/2 CPU/64 pids. Validate complete coverage/zero suppression/static provenance of original JSON before forwarding to NVIDIA; raw JSON remains private process-to-process, not published or claimed secret-free. Normalized report receipt per skill, clean/P1/reject-scope controls, bounded cleanup. Five offline regressions; live integration requires CI. Upstream staged artifact roots not yet supported (fail closed), current skill has no artifact dirs. Semgrep remains host. T12 PARTIAL.

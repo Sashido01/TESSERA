@@ -169,3 +169,11 @@ T12.03.20: [CI 45428224320](https://github.com/Sashido01/TESSERA/actions/runs/45
 ## T12.03.31 — самостоятельный SkillSpector Docker (кандидат)
 
 Exact 74 distribution inventory (CI 45468107315, включая bootstrap pip), существующая hash-pinned wheel установка и pip check сохранены; потоковый SHA256 всего дерева пакетов и исходников, ограничения размера/числа файлов, no-follow и проверка identity; stage только skills/fixtures/minimal trusted tools, два read-only mount, Python -I -S -B, no network/nonroot/cgroups 1 GiB/2 CPU/64 pids/64 MiB tmpfs, no LLM, bounded output и cleanup. Реальный SkillSpector 2.13.7 version, clean/P1 fixtures, exact normalized host parity, snapshot/package preservation требуют CI. Восемь offline регрессий (7+workflow guard). Bootstrap pip инвентаризован, не отдельный hash-pinned wheel; ABI и native advisories, daemon races, resource exhaustion не доказаны. Integrated SkillSpector пока host. T12 PARTIAL.
+
+## T12.03.31 — результат PR
+
+[CI 45475253034](https://github.com/Sashido01/TESSERA/actions/runs/45475253034) PASS: 633+38=671 тест; SkillSpector Docker 74 distributions/14109 files/2128 dirs/252237592 bytes, clean/P1, exact host parity, source/package preservation PASS. Risk22, coverage100%, seven MEDIUM, zero suppressed. Bandit 96 files/177 findings (HIGH0 MEDIUM20 LOW157), all coordinates. History 981 blobs/13566473 bytes/267.05s/0 findings. v0.0.62 main CI 45474929540 и тег проверены; v0.0.63 принят в main, тег отдельно.
+
+## T12.03.32 — интегрированный SkillSpector Docker (кандидат)
+
+NVIDIA static-only exact CLI contract; только текущий skill или две контрольные fixtures, без baseline/LLM/remote inputs. Прежний verified 74-package runtime, потоковый fingerprint, два read-only mount, no network, nonroot и cgroups 1 GiB/2 CPU/64 pids. Проверка полного coverage/zero suppression/static provenance оригинального JSON перед передачей NVIDIA; raw JSON остаётся private process-to-process, не публикуется, не заявляется secret-free. Receipt нормализованного отчёта для каждого skill, clean/P1/reject-scope controls, bounded cleanup. Пять offline regressions; live integration требует CI. Upstream staged artifact roots пока не поддержаны (fail closed), current skill без artifact dirs. Semgrep остаётся host. T12 PARTIAL.
