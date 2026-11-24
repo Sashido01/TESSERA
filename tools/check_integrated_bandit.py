@@ -21,6 +21,8 @@ from check_docker_preflight import IMAGE
 from check_nvidia_tier1 import NAME, require
 
 INI_BLOB = "3d1f1b039c78013871f85efee6dd92d35c89aebd"
+INI_SHA256 = "f96ccbcabbdb99f6f6835bac26ee33f92f35fa1c53ee53694668bfac04517387"
+INI_SIZE = 355
 SKIP_DIRS = frozenset({"tests", "test", "evals", ".evals", "results", ".results",
                        "versions", ".versions", "__pycache__", ".git", ".venv", "node_modules"})
 MAX_TARGETS = 2048
@@ -29,8 +31,9 @@ TARGET = "/stage/input"
 
 
 def ini_ok(raw):
-    require(hashlib.sha1(b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw).hexdigest() ==
-            INI_BLOB, "INTEGRATED_BANDIT_INI")
+    # Preserve INI_BLOB as the upstream Git object identity, not a security digest.
+    require(len(raw) == INI_SIZE and hashlib.sha256(raw).hexdigest() == INI_SHA256,
+            "INTEGRATED_BANDIT_INI")
 
 
 def exclusions(root):

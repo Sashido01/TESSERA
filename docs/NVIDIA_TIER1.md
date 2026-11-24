@@ -145,3 +145,11 @@ T12.03.20: [CI 45428224320](https://github.com/Sashido01/TESSERA/actions/runs/45
 ## T12.03.28 — интегрированный Bandit Docker (кандидат)
 
 Закреплённый NVIDIA contract: recursive root с точными exclusions или named batch, `-f json -q -ll --exclude ... --ini ... --ignore-nosec`; проверка INI Git blob 3d1f1b039c78013871f85efee6dd92d35c89aebd, безопасный снимок, два read-only mount, семь wheel, no network, nonroot, прежние resource limits, bounded output/cleanup. Сверка coverage и типов отчёта, remap только известных путей, удаление raw code, receipt фактического scan. `issue_text` нужен NVIDIA и может содержать данные входа; raw report не публикуется. Шесть offline регрессий; реальные clean/B307, исключённый test, игнорирование skill .bandit/nosec и policy требуют CI. Без host fallback; standalone parity сохраняется. T12 PARTIAL.
+
+## T12.03.28 — результат PR
+
+[CI 45465436002](https://github.com/Sashido01/TESSERA/actions/runs/45465436002) PASS: 617+38=655 тестов; integrated Bandit Docker clean/B307/ignored skill INI and nosec/excluded test/source controls PASS, Tier 1 policy PASS. Standalone Bandit 94 Python files/175 advisory findings (2 HIGH B324, 20 MEDIUM B108, 153 LOW), exact host parity. History Docker 947 blobs/12 654 872 bytes/197.37s/0 findings. v0.0.59 main CI 45465154352 и аннотированный тег проверены; v0.0.60 принят в main, тег отдельно.
+
+## T12.03.29 — SHA-256 конфигураций сканеров (кандидат)
+
+Две проверки B324: SHA-1 использовался для сравнения Git blob конфигураций Semgrep и Bandit. Для обеих закреплены точные SHA-256 и размер (semgrep_rules.yaml 3376 bytes, `fff4537f6679a52c48e024e001b73e163b24587635a028e5c012583f19876abf`; bandit.ini 355 bytes, `f96ccbcabbdb99f6f6835bac26ee33f92f35fa1c53ee53694668bfac04517387`), полученные из закреплённого NVIDIA commit 5625c2534bf266f810aea489ffbe69da0bb2645e; вычисленные Git blob OID совпадают с upstream. Git blob сохраняется как происхождение, не как криптографическая проверка конфигурации. Проверка фактического wheel в живых control сохранена. Четыре локальных теста точных upstream bytes PASS, два новых offline regression в repo; реальный результат Bandit и полный CI требуют проверки. Без suppressions, без изменений правил сканеров. Нативная идентификация исторических Git SHA-1 объектов не меняется. T12 PARTIAL.
