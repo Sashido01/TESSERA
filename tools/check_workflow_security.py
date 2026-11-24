@@ -80,6 +80,10 @@ def validate_workflow(workflow: str) -> list[str]:
         errors.append("Нет обязательного аудита CVE и лицензий")
     if "contents: write" in validate:
         errors.append("Право записи обнаружено в проверяющей задаче")
+    if ("ef4cb2f7cae47fe3e21fc596455f694951867b29" not in validate
+            or "go build -mod=readonly -buildvcs=true" not in validate
+            or "tools/check_go_binary_review.py" not in validate):
+        errors.append("Нет закреплённой проверки Go-бинарников Govulncheck")
     if "needs: validate" not in tagging:
         errors.append("Публикация тега не зависит от успешного validate")
     if "permissions:\n      contents: write" not in tagging:

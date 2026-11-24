@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.40 — Go binary review using Govulncheck (T12.03.08)
+
+- Candidate: pinned source, isolated CI build, extract and binary mode, explicit distinction between fallback and extracted symbols, scanner OSV self-audit and before/after SHA-256, eight offline regressions and two upstream local-database controls; live acceptance required. Call reachability not proven.
+
 ## 0.0.39 — Bind tag to the exact verified commit (T12.03.07)
 
 - Candidate: explicit target SHA, immutable object verification, direct commit and tag name, `--expected-head`, ref recheck; seven regressions, including rejection of inherited Git context/config overrides and child environment minimization. CI required; concurrent locking is not implemented.

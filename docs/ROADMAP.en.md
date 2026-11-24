@@ -143,3 +143,15 @@ Complete work as small verifiable changes, assigning a new microversion only to 
 Within the same T12.03.07 candidate: `git -C` does not isolate inherited GIT_DIR/GIT_WORK_TREE and other context variables. Reject these before executing Git; two regressions (two repositories and config/namespace/object overrides). Do not alter the owner's environment or disable local signing policies or hooks. Trusted configuration, PATH and lack of full concurrent locking remain limitations.
 
 [CI 45387991659](https://github.com/Sashido01/TESSERA/actions/runs/45387991659): 504+28 tests PASS, but SkillSpector 81/100 CRITICAL (21 findings including HIGH E2 for full environment copying and MEDIUM EA2 for wording of the prohibition on tag changes). Candidate not accepted. Replace full copying with fixed variable allowlist, retain context rejection and local identity/signing context, add arbitrary-marker exclusion test. Clarify explicit requirement to leave the tag unchanged. Seven regressions in current candidate, CI rerun required; no presumed risk score.
+
+
+**T12.03.08 — candidate:** Govulncheck v1.10.0 exact SHA, CI build with lock and isolated environment. Extract + binary, archive/config/SBOM checks and explicit fallback when symbols are absent. Five regressions. Network sandbox, live positive control, symbol completeness, scanner vulnerabilities and call reachability remain open. Not a runtime dependency. CI 45386658684: 504+22 PASS, both Python license records matched upstream.
+
+T12.03.08 extended with Govulncheck self-audit (OSV of exact modules/toolchain/commit and before/after SHA-256); two additional tests, seven total. Live acceptance remains open.
+
+T12.03.08 extended with two actual upstream Govulncheck controls with a local synthetic DB, Git blob ID checks and an eighth regression; public DB positive control remains open. CI not yet run.
+
+
+**Unified remaining work (replacing separate issues #36/#40):** T12.03.08 PARTIAL: first run 45389727364 BLOCKED GO_ROOT_MISMATCH after successful build; retry with verified upstream tag. Python license evidence v0.0.38 PASS, tqdm redistribution conditions and Go binary license correspondence NOT_VERIFIED; GO-2026-6278 advisory range conflicts with source, do not close without analysis; classify all Go advisories, source/call reachability, public DB positive control, network sandbox and full Tier 1 acceptance remain open. T13 NOT_STARTED: [research and acceptance #40](https://github.com/Sashido01/TESSERA/issues/40), pinned Codex/Harness schemas, Stop bridge not fail-closed; shared read-only core, explicit root/SHA, bounded JSON, no transcript reads, bounded repeat Stop, independent Git/CI gate; fixture and actual client acceptance. Administrative issue consolidation does not complete technical tasks. v0.0.39 CI 45388943208 504+29 PASS, E2/EA2 absent, 19 MEDIUM, 53/100, zero suppressions; main CI 45390253290 PASS, tag verified.
+
+T12.03.08: CI 45391798766 — 513+29 PASS, GOVULN_CONTROL_VERSION BLOCKED; new candidate uses JSON build info of historical controls and verifies GoVersion against SBOM, tenth regression. Govulncheck before long Gitleaks history checks. Re-acceptance open.
