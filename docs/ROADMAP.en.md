@@ -125,3 +125,5 @@ Complete work as small verifiable changes, assigning a new microversion only to 
 - Unknown or unverified behavior must be marked NOT_VERIFIED rather than guessed.
 
 **T12.03.02:** [CI evidence network restriction](RELEASE_CI_SECURITY.en.md) — implementation prepared, actual CI pending. Other Bandit findings open.
+
+**T12.03.03:** [SkillSpector 2.13.7 security upgrade](SKILLSPECTOR_UPGRADE.en.md) — candidate; live acceptance pending. Historical 2.13.6 results retained.

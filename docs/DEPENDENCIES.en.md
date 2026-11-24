@@ -53,3 +53,5 @@ The existing Python `install.py` remains a minimal offline and custom-profile op
 **T12.02.02.03:** SkillSpector 2.13.6 is limited to isolated static review, pinned source/wheel/lock hashes, no LLM; acceptance pending. See [SKILLSPECTOR_REVIEW](SKILLSPECTOR_REVIEW.en.md).
 
 [CI 45370414762](https://github.com/Sashido01/TESSERA/actions/runs/45370414762) PASS: 454+19 tests; 16/16 files, 100% coverage, complete_with_caveats (4 reference_missing), risk 78/100 HIGH, exit 1 (threshold 50 exceeded), 12 findings (10 MEDIUM, 2 HIGH), zero suppressions, both synthetic fixtures PASS, 13.32 s. T12.02.02.03 COMPLETE within direct static execution scope; findings and full NVIDIA security acceptance remain open.
+
+**T12.03.03:** [SkillSpector 2.13.7 security upgrade](SKILLSPECTOR_UPGRADE.en.md) — candidate; live acceptance pending. Historical 2.13.6 results retained.

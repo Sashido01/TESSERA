@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.35 — SkillSpector security upgrade (T12.03.03)
+
+- Candidate 2.13.7, pinned commit/wheel/lock, unchanged static no-LLM contract and zero-suppression enforcement, repeat CVE review. Actual CI required.
+
 ## 0.0.34 — Restrict CI evidence API redirects (T12.03.02)
 
 - Exact GitHub Actions API endpoints, reject redirects before following, verify exact response URL, four regressions. Actual CI required; no Bandit suppression.

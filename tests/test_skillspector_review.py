@@ -70,6 +70,12 @@ class SkillSpectorTests(unittest.TestCase):
             "scanned_components": 0, "coverage_percent": 0})
         self.assertEqual(self.check(data)["analysis_status"], "partial")
 
+    def test_suppression_is_forbidden(self):
+        data = self.report()
+        data["suppressed_count"] = 1
+        with self.assertRaisesRegex(s.InstallCheckError, "SUPPRESSION"):
+            self.check(data)
+
     def test_findings_sanitized(self):
         data = self.report()
         data["issues"] = [{"id": "P1", "severity": "HIGH", "finding": "raw text"}]

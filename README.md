@@ -172,3 +172,5 @@ NVIDIA SkillEvaluator допускается **только на Tier 1**, по�
 [CI 45373618225](https://github.com/Sashido01/TESSERA/actions/runs/45373618225): 486+19 тестов PASS. SkillSpector 2.13.6: complete, 17/17 файлов, 100%, reference_missing 4→0, риск 78→36 (HIGH→MEDIUM), HIGH 2→0, MEDIUM 10, подавлений 0, оба fixture PASS, 19,40 с. NVIDIA: лицензия allowed, качество RU 80,0 (65×0,35 + 80×0,25 + 95×0,25 + 90×0,15), Codex custom provider degraded→loads. Общий CI FAIL только на унаследованном Go-аудите; выпуск и реальная активация NOT_VERIFIED.
 
 **T12.03.02:** [ограничение сетевых запросов проверки CI](docs/RELEASE_CI_SECURITY.md) — реализация подготовлена, необходим реальный CI. Остальные находки Bandit открыты.
+
+**T12.03.03:** [обновление SkillSpector 2.13.7 по безопасности](docs/SKILLSPECTOR_UPGRADE.md) — кандидат; необходим реальный CI. Исторические результаты 2.13.6 сохранены.
