@@ -4,9 +4,13 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.31 — Direct static SkillSpector review (T12.02.02.03)
+
+- Pinned SkillSpector 2.13.6 source and official wheel, offline lock export, wheel/hash-only separate environment, no LLM, strict scan report and completeness checks, synthetic clean and P1 fixtures, CI and bilingual documentation. [CI 45370414762](https://github.com/Sashido01/TESSERA/actions/runs/45370414762) PASS: 454+19 tests; 16/16 files, 100% coverage, complete_with_caveats (4 reference_missing), risk 78/100 HIGH, exit 1 (threshold 50 exceeded), 12 findings (10 MEDIUM, 2 HIGH), zero suppressions, both synthetic fixtures PASS, 13.32 s. T12.02.02.03 COMPLETE within direct static execution scope; findings and full NVIDIA security acceptance remain open.
+
 ## 0.0.30 — Reachable Git history content review (T12.02.02.02)
 
-- Gitleaks scans each distinct reachable UTF-8 blob from local refs and HEAD via stdin; validates complete object inventory, byte coverage, immutable inventory and synthetic removed-secret fixture. [CI 45368434188](https://github.com/Sashido01/TESSERA/actions/runs/45368434188) PASS: 437+19 tests; 585/585 distinct UTF-8 blobs, 5431003 bytes, zero findings, removed-marker fixture PASS, 128.81 s. Added separate five path-constrained rules review; live path acceptance pending. Unavailable refs and unreachable objects not covered.
+- Gitleaks scans each distinct reachable UTF-8 blob from local refs and HEAD via stdin; validates complete object inventory, byte coverage, immutable inventory and synthetic removed-secret fixture. [CI 45368434188](https://github.com/Sashido01/TESSERA/actions/runs/45368434188) PASS: 437+19 tests; 585/585 distinct UTF-8 blobs, 5431003 bytes, zero findings, removed-marker fixture PASS, 128.81 s. [CI 45369335974](https://github.com/Sashido01/TESSERA/actions/runs/45369335974) PASS: 443+19 tests; 598 distinct UTF-8 blobs, 5639755 bytes, zero findings; five synthetic rule fixtures PASS; 4 current YAML files and 28 historical rule/blob pairs across 37 commits, zero findings. T12.02.02.02 COMPLETE within declared scope. Unavailable refs and unreachable objects not covered.
 
 ## 0.0.29 — Gitleaks text snapshot review (T12.02.02.02)
 

@@ -19,7 +19,7 @@ PINS = {
     "actions/upload-artifact": "cf430e030ddbb5b0abf93d22962f4752f3646cd9",  # v7.0.2 node24
 }
 EXPECTED = {
-    "validate.yml": {"actions/checkout": 3, "actions/setup-python": 2},
+    "validate.yml": {"actions/checkout": 4, "actions/setup-python": 2},
     "build-attested-catalog.yml": {
         "actions/checkout": 1,
         "actions/setup-python": 1,

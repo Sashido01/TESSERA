@@ -86,6 +86,14 @@ class WorkflowSecurityTests(unittest.TestCase):
         modified = WORKFLOW.replace("run: python tools/check_gitleaks_paths.py", "run: echo")
         self.assertTrue(any("по пути" in e for e in module.validate_workflow(modified)))
 
+    def test_skillspector_review_is_required(self):
+        modified = WORKFLOW.replace("run: python tools/check_skillspector_review.py", "run: echo")
+        self.assertTrue(any("SkillSpector" in e for e in module.validate_workflow(modified)))
+
+    def test_skillspector_digest_is_required(self):
+        modified = WORKFLOW.replace("e7b46c55e726405b2a068d375d1ee8e799e15d86f3fc05f84feb5ba962198b15", "0" * 64)
+        self.assertTrue(any("SkillSpector" in e for e in module.validate_workflow(modified)))
+
     def test_tag_job_needs_validation(self):
         modified = WORKFLOW.replace("    needs: validate", "    needs: unknown")
         self.assertTrue(any("validate" in e for e in module.validate_workflow(modified)))

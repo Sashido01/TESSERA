@@ -71,6 +71,8 @@ def validate_workflow(workflow: str) -> list[str]:
         errors.append("Нет обязательной проверки истории Gitleaks")
     if 'run: python tools/check_gitleaks_paths.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1"' not in validate:
         errors.append("Нет обязательной проверки правил Gitleaks по пути")
+    if 'e2674da339b0bddc6e565d059c0577c6d9cd25da' not in validate or 'e7b46c55e726405b2a068d375d1ee8e799e15d86f3fc05f84feb5ba962198b15' not in validate or 'run: python tools/check_skillspector_review.py --repo . --cli "$RUNNER_TEMP/skillspector/bin/skillspector"' not in validate:
+        errors.append("Нет обязательной закреплённой проверки SkillSpector")
     if "contents: write" in validate:
         errors.append("Право записи обнаружено в проверяющей задаче")
     if "needs: validate" not in tagging:
