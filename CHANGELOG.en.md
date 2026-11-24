@@ -4,6 +4,11 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.22 — Record live independent acceptance of the signed ZIP (T09.10)
+
+- At annotated tag `v0.0.21` (commit `0c83ae9ef119a0cfc9d07c83dbae91e5d026e407`), [signing run 45348928593](https://github.com/Sashido01/TESSERA/actions/runs/45348928593) completed SUCCESS; [Attestation 71489191](https://github.com/Sashido01/TESSERA/attestations/71489191), [Actions Artifact 14898798605](https://github.com/Sashido01/TESSERA/actions/runs/45348928593/artifacts/14898798605). Independent verification checked the 105849-byte ZIP, SHA-256 `55db489f0219739e9296fc941fa51fa58d23c3277878fe5e3a352642947eeb73` and all 17 manifest files. The owner on Windows confirmed that digest and supplied official `gh 2.105.0` output: `Verification succeeded!`, one attestation matched SLSA v1, exact repository, commit, tag, signer workflow, OIDC issuer and GitHub-hosted runner. T09.10 COMPLETE, `SIGNED_ARTIFACT=PASS` only for the verified v0.0.21 ZIP.
+- Updated bilingual ROADMAP, TRUSTED_BUILD, README and AGENTS. This microversion records evidence; it does not claim a new signature of its own. No GitHub Release was created; overall T09 remains PARTIAL.
+
 ## 0.0.21 — Fix ZIP preparation before Sigstore attestation (T09.10)
 
 - Live signing run `45347443989` for `v0.0.19` failed: tag checks and 333+19 tests passed, but the source ZIP builder refused `PACKAGE_RUNTIME_FILE_INVALID`. Sigstore and artifact upload were SKIPPED; no downloadable artifacts exist.
