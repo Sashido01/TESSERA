@@ -61,3 +61,11 @@ Based on the 19 MEDIUM review (PR 48, comment 7135272307): production AST4 corre
 ## T12.03.18 — static test imports (candidate)
 
 Three test modules replace fixed-file importlib loading with ordinary imports from scripts in the current trusted checkout: reject conflicting sys.modules cache, temporarily prepend the directory to sys.path, restore after import, verify __file__ against the expected source. Three module-origin checks; existing scenarios retained. This simplifies test code, not a sandbox; checkout and Python import hooks must remain trusted. No changes to scanners, thresholds, suppressions, production skill code or permissions. CI must confirm regressions and actual AST3 counts; score reduction is not promised. T12 PARTIAL.
+
+## T12.03.18 — PR result
+
+[CI 45423325658](https://github.com/Sashido01/TESSERA/actions/runs/45423325658) PASS: 556+38=594 tests, AST3 6→0, SkillSpector 53→36/100, MEDIUM 19→13, aggregate HIGH 1→0, 0 suppressions, coverage 100% of inspected files. Integrated static policy PASS, not security certification. v0.0.49 main CI 45423143946 and annotated tag verified; v0.0.50 merged into main, its acceptance separate.
+
+## T12.03.19 — Russian terminology clarity (candidate)
+
+22 editorial substitutions in six skill files: ordinary phrases instead of mixed hyphenated tokens. Preliminary review of 17 files; independent ASCII Latin + Cyrillic/Greek token count in modified files 22→0. Five Russian documents and two release_tag.py exception messages; English translation retains its existing meaning, executable commands, error codes, access policy and algorithms unchanged. Not a full Unicode audit or proof of AE4 removal; live CI required. No rules disabled or suppressions used. AST4 and LP3 remain subject to review; T12 PARTIAL.

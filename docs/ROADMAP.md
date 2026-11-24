@@ -175,3 +175,5 @@ T12.03.08: CI 45391798766 — 513+29 PASS, GOVULN_CONTROL_VERSION BLOCKED; но�
 **T12.03.16:** [CI 45419767513](https://github.com/Sashido01/TESSERA/actions/runs/45419767513) PASS, 585 тестов, Semgrep EXECUTED; 8 OSV ID в 3 пакетах и 3 UNKNOWN license metadata открыты. **T12.03.17 — кандидат:** усиление Git helper навыка, timeout, абсолютный executable, безопасные ошибки, шесть регрессий, без подавлений. T12 PARTIAL; CI обязателен.
 
 **T12.03.17:** [CI 45421559705](https://github.com/Sashido01/TESSERA/actions/runs/45421559705) PASS, 591 тест, 53/100 и 19 MEDIUM без подавлений. **T12.03.18 — кандидат:** обычные импорты трёх тестовых модулей, контроль происхождения и конфликтующего кеша, три регрессии; CI обязателен. T12 PARTIAL.
+
+**T12.03.18:** [CI 45423325658](https://github.com/Sashido01/TESSERA/actions/runs/45423325658) PASS, 594 теста, AST3 6→0, SkillSpector 36/100, policy PASS, без подавлений. **T12.03.19 — кандидат:** 22 редакционные замены в шести файлах навыка, смешанные токены 22→0 по независимому подсчёту; CI обязателен. T12 PARTIAL, CVE Semgrep и изоляция открыты.

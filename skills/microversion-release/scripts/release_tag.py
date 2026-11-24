@@ -118,7 +118,7 @@ def verify(repo: pathlib.Path, version: str, prefix: str = "",
     repo = repo.resolve(strict=True)
     top = pathlib.Path(git(repo, "rev-parse", "--show-toplevel").stdout.strip()).resolve()
     if top != repo:
-        raise TagError("Укажите корень Git-репозитория, а не вложенный каталог")
+        raise TagError("Укажите корень репозитория Git, а не вложенный каталог")
     commit = head_commit(repo, expected_head)
     ref = f"refs/tags/{tag}"
     obj = git(repo, "rev-parse", "--verify", ref, check=False)
@@ -151,7 +151,7 @@ def create(repo: pathlib.Path, version: str, message: str, prefix: str = "",
     repo = repo.resolve(strict=True)
     top = pathlib.Path(git(repo, "rev-parse", "--show-toplevel").stdout.strip()).resolve()
     if top != repo:
-        raise TagError("Укажите корень Git-репозитория")
+        raise TagError("Укажите корень репозитория Git")
     commit = head_commit(repo, expected_head)
     exists = git(repo, "rev-parse", "--verify", f"refs/tags/{tag}", check=False)
     if exists.returncode == 0:
