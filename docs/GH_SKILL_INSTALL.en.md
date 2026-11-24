@@ -8,7 +8,7 @@ T10 uses the official [`gh skill install`](https://cli.github.com/manual/gh_skil
 
 T10.01 checks **local installation** via `gh skill install <source> microversion-release --from-local --dir <destination>`, discovery with `gh skill list --dir`, unchanged source files and a defensive no-overwrite guard. All test destinations are temporary. No real user profile, agent installation, or GitHub Release is modified.
 
-Actual installation **from a remote Git tag or commit SHA** is not yet verified and belongs to T10.02. Seeing installed files does not prove that Codex, Harness, Claude Code, or Hermes loaded or activated the skill (T03/T05).
+Actual installation **from a remote Git tag or commit SHA** is tested separately in T10.02 below. Seeing installed files does not prove that Codex, Harness, Claude Code, or Hermes loaded or activated the skill (T03/T05).
 
 ## Official CLI safety risk
 
@@ -39,8 +39,23 @@ Official local installation should target **a new empty skill directory only**, 
 gh skill install Sashido01/TESSERA microversion-release --pin vX.Y.Z --dir <new-empty-skills-dir>
 ~~~
 
-This is a **planned T10.02 command**, not evidence of a successful pinned remote installation. `--pin` is valid in the **remote GitHub mode**, not alongside `--from-local`. Avoid `--force` on any existing installation.
+Use the fully qualified `refs/tags/vX.Y.Z` to avoid short-ref ambiguity. `--pin` is valid in the **remote GitHub mode**, not alongside `--from-local`. Avoid `--force` on any existing installation.
 
 ## Acceptance and limitations
 
-T10.01 is COMPLETE only after a real GitHub Actions run confirms the official CLI binary, successful local install and list, rejected `--pin` conflict and unchanged original source. Overall T10 remains PARTIAL until actual pinned remote install, update safety and installed agent behavior are verified. The real signed ZIP remains a separate open issue (T09.10).
+T10.01 is COMPLETE only after a real GitHub Actions run confirms the official CLI binary, successful local install and list, rejected `--pin` conflict and unchanged original source. Overall T10 remains PARTIAL until actual pinned remote install, update safety and installed agent behavior are verified. The signed v0.0.21 ZIP was independently verified in T09.10; that does not prove client installation.
+
+## T10.02 — pinned remote installation
+
+Official `gh 2.105.0` resolves a short ref as a branch first, then a tag, then a commit SHA. TESSERA's fixed acceptance baseline therefore uses the **fully qualified** `refs/tags/v0.0.22` and separately commit `34923e27e669da0092440a0bbfb00b2dfdd98a37`. Expected annotated tag object: `b9967ac3aa1abac7fdb8e7abceb8c6a3f79da66c`. Source: [resolveExplicitRef / resolveTagRef in official CLI v2.105.0](https://github.com/cli/cli/blob/v2.105.0/internal/skills/discovery/discovery.go).
+
+`tools/check_official_remote_install.py` tests both pins using the **actual** official CLI. Two separate fresh temporary directories; isolated HOME and GH_CONFIG_DIR; only the short-lived read-only CI token (`github.token`, no PAT or user token). Git verification does not receive this token. The expected file inventory and bytes come from the independently identified annotated tag's Git tree. For SKILL.md, compare Markdown body and github-repo, github-path, github-ref, github-pinned, github-tree-sha metadata; full semantic equivalence of YAML frontmatter is not claimed. `gh skill list --dir --json` checks pinned status, source and version. `gh skill update --dry-run` must skip both pinned skills without mutation; reinstalling into a disposable existing target without --force must be refused without changing files. No skill content is executed.
+
+Acceptance requires a real CI run with `GH_SKILL_REMOTE_PIN_PASS`; mocked tests do not establish remote installation. Actual updates with --unpin, multi-skill name conflicts/independent tags, client activation and unauthenticated API remain NOT_VERIFIED. Do not promise automatic updates to the latest Git tag: per CLI source, an unpinned install first selects the latest GitHub Release and otherwise the default branch. Never use --force in existing profiles.
+
+Example separate installation after passing CI (fresh empty directory; review the skill first):
+
+~~~text
+gh skill install Sashido01/TESSERA microversion-release --pin refs/tags/v0.0.22 --dir <new-empty-skills-dir>
+~~~
+
