@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.59 — Standalone Bandit Docker (T12.03.27)
+
+- Minimal pinned runtime, read-only snapshot, host parity, four regressions. CI required; T12 PARTIAL.
+
 ## 0.0.58 — Integrated Gitleaks Docker (T12.03.26)
 
 - Isolated NVIDIA adapter, skill snapshot, restricted TOML and report, eight regressions. CI required; T12 PARTIAL.

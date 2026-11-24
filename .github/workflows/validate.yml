@@ -126,7 +126,18 @@ jobs:
         run: python tools/check_nvidia_static_review.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/skillevaluator"
 
       - name: Проверить безопасность Python прямым запуском Bandit
-        run: python tools/check_bandit_review.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/bandit"
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          python tools/check_bandit_review.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/bandit" > "$RUNNER_TEMP/bandit-host.jsonl"
+      - name: Установить минимальное закреплённое окружение Bandit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip --isolated install --disable-pip-version-check --no-cache-dir --only-binary=:all: --require-hashes --no-compile --target "$RUNNER_TEMP/bandit-isolated" -r tools/bandit-requirements.txt
+      - name: Сопоставить изолированный Bandit с проверкой хоста
+        run: python tools/check_bandit_container.py --repo . --packages "$RUNNER_TEMP/bandit-isolated" --host-report "$RUNNER_TEMP/bandit-host.jsonl"
 
       - name: Скачать и проверить официальный Gitleaks 8.30.1
         shell: bash

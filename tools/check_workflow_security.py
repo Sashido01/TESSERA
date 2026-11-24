@@ -71,8 +71,10 @@ def validate_workflow(workflow: str) -> list[str]:
         errors.append("Нет обязательной закреплённой проверки Semgrep")
     if 'run: python tools/check_nvidia_static_review.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/skillevaluator"' not in validate:
         errors.append("Нет обязательного статического обзора NVIDIA Tier 1")
-    if 'run: python tools/check_bandit_review.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/bandit"' not in validate:
+    if 'python tools/check_bandit_review.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/bandit" > "$RUNNER_TEMP/bandit-host.jsonl"' not in validate:
         errors.append("Нет обязательной проверки Bandit")
+    if 'run: python tools/check_bandit_container.py --repo . --packages "$RUNNER_TEMP/bandit-isolated" --host-report "$RUNNER_TEMP/bandit-host.jsonl"' not in validate:
+        errors.append("Нет обязательной контейнерной проверки Bandit")
     if '551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb' not in validate or 'python tools/check_gitleaks_review.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1" > "$RUNNER_TEMP/gitleaks-host-report.jsonl"' not in validate:
         errors.append("Нет обязательной закреплённой проверки Gitleaks")
     if 'run: python tools/check_gitleaks_container.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1" --host-report "$RUNNER_TEMP/gitleaks-host-report.jsonl"' not in validate:

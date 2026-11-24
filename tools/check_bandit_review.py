@@ -54,6 +54,10 @@ def fingerprint(data):
     return {name: hashlib.sha256(content).hexdigest() for name, content in data.items()}
 
 
+def snapshot_digest(data):
+    return hashlib.sha256(json.dumps(fingerprint(data), sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
 def reported_name(name):
     # Bandit 1.9.4 prefixes explicit relative targets with './'.
     return name[2:] if isinstance(name, str) and name.startswith('./') else name
@@ -139,7 +143,7 @@ def accept(repo, cli):
                 "BANDIT_NEGATIVE_NOT_DETECTED")
         require(fingerprint(inventory(repo)) == before, "BANDIT_SOURCE_MUTATED")
     return {"execution": "PASS", "scanner": "bandit", "version": VERSION,
-            "policy": "ADVISORY_FINDINGS", "catalog": actual,
+            "policy": "ADVISORY_FINDINGS", "catalog": actual, "snapshot_sha256": snapshot_digest(original),
             "clean_fixture": "PASS", "negative_nosec_fixture": "PASS",
             "elapsed_seconds": round(time.monotonic() - started, 2),
             "nvidia_code_integrity": "NOT_VERIFIED",
