@@ -78,7 +78,7 @@ def scan_evidence(raw, extraction, *, database=DB):
                     and value.get("scanner_name") == "govulncheck"
                     and isinstance(value.get("scanner_version"), str)
                     and (value["scanner_version"] == RELEASE
-                         or re.fullmatch(r"v0\.0\.0-" + PIN[:12] + r"-[0-9]{8}",
+                         or re.fullmatch(r"v0\.0\.0-" + PIN[:12] + r"-[0-9]{14}",
                                          value["scanner_version"]))
                     and value.get("db") == database and value.get("scan_mode") == "binary"
                     and value.get("scan_level") == "symbol", "GOVULN_CONFIG_INVALID")
@@ -179,6 +179,22 @@ def control_expected(report, vulnerable):
     require({row["id"] for row in report["findings"]} == expected, "GOVULN_CONTROL_FAILED")
 
 
+def control_go_version(raw):
+    # These historic upstream fixtures have independently pinned blob IDs.
+    # Go's machine-readable metadata avoids parsing file names or decorated
+    # human-readable version lines. The same value must match the scanner SBOM.
+    require(isinstance(raw, bytes) and 0 < len(raw) <= MAX_OUTPUT,
+            "GOVULN_CONTROL_METADATA")
+    metadata = json.loads(raw)
+    require(isinstance(metadata, dict), "GOVULN_CONTROL_METADATA")
+    version = metadata.get("GoVersion")
+    require(isinstance(version, str) and 0 < len(version) <= 128
+            and all(32 <= ord(c) <= 126 for c in version)
+            and (version.startswith("go1.") or version.startswith("devel go1.")),
+            "GOVULN_CONTROL_VERSION")
+    return version
+
+
 def run_controls(cli, fixture_root, temp, env):
     source = fixture_root.resolve(strict=True)
     local = temp / "control"
@@ -199,10 +215,9 @@ def run_controls(cli, fixture_root, temp, env):
     database = (local / "vulndb-v1").as_uri()
     for label, vulnerable in (("vuln_main_devel", False), ("vuln_main_v0.3.1", True)):
         binary = local / "modules" / "vuln" / label
-        meta = subprocess.run(["go", "version", "-m", str(binary)], cwd=temp, env=env,
-                              capture_output=True, check=True, timeout=15).stdout.decode("utf-8")
-        version = meta.splitlines()[0].rsplit(": ", 1)[-1]
-        require(GO_VERSION.fullmatch(version), "GOVULN_CONTROL_VERSION")
+        meta = subprocess.run(["go", "version", "-m", "-json", str(binary)], cwd=temp, env=env,
+                              capture_output=True, check=True, timeout=15).stdout
+        version = control_go_version(meta)
         output = local / (label + ".json")
         with output.open("wb") as out:
             subprocess.run([str(cli), "-mode=binary", "-scan=symbol", "-format=json",

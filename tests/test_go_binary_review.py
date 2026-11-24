@@ -22,7 +22,7 @@ class BinaryReviewTests(unittest.TestCase):
 
     def config(self):
         return {"config": {"protocol_version": "v1.0.0", "scanner_name": "govulncheck",
-                           "scanner_version": "v0.0.0-" + g.PIN[:12] + "-20261124",
+                           "scanner_version": "v0.0.0-" + g.PIN[:12] + "-20261124000000",
                            "db": g.DB, "scan_mode": "binary", "scan_level": "symbol"}}
 
     def sbom(self):
@@ -104,6 +104,13 @@ class BinaryReviewTests(unittest.TestCase):
                     self.scanner_meta().replace(b"v0.43.0", b"(devel)")):
             with self.subTest(raw=raw), self.assertRaises(g.InstallCheckError):
                 g.scanner_inventory(raw, lambda _: self.fail("invalid scanner must not be queried"))
+
+    def test_control_go_version_machine_metadata(self):
+        for version in ("go1.18", "go1.18.0", "devel go1.18-0123456789ab"):
+            self.assertEqual(g.control_go_version(encode({"GoVersion": version})), version)
+        for version in ("", "unknown", "go1.18\ninvalid", "go1." + "x" * 128, None):
+            with self.subTest(version=version), self.assertRaises(g.InstallCheckError):
+                g.control_go_version(encode({"GoVersion": version}))
 
     def test_control_requires_exact_expected_fictitious_advisory(self):
         clean = {"findings": []}
