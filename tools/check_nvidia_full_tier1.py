@@ -233,11 +233,32 @@ def bandit_control(run, shim, temp, ini):
             "ini_blob": INI_BLOB, "ini_sha256": INI_SHA256}
 
 
-def accept(repo, cli, skillspector, bandit, gitleaks, semgrep, semgrep_rules, bandit_packages):
+def skillspector_control(run, shim, temp):
+    from check_skillspector_container import fixture_text
+    from check_integrated_skillspector import checked_report
+    root = temp / "sp-controls"
+    root.mkdir()
+    for label in ("clean", "negative"):
+        skill = root / ("fixture-" + label)
+        skill.mkdir()
+        content = fixture_text(label)
+        (skill / "SKILL.md").write_bytes(content)
+        result = run(shim, ["scan", str(skill), "--format", "json", "--no-llm"], 165)
+        report = checked_report(result.returncode, result.stdout, {"SKILL.md": len(content)})
+        require(report["findings"] == 0 if label == "clean" else
+                any(row["rule"] == "P1" for row in report["by_rule"]), "FULL_TIER1_SP_CONTROL")
+        require((skill / "SKILL.md").read_bytes() == content, "FULL_TIER1_SP_MUTATION")
+    require(run(shim, ["scan", str(root), "--format", "json", "--no-llm"]).returncode == 2,
+            "FULL_TIER1_SP_REJECT")
+    return {"clean": "PASS", "detection": "PASS", "source_preserved": "PASS", "reject_scope": "PASS"}
+
+
+def accept(repo, cli, skillspector, bandit, gitleaks, semgrep, semgrep_rules, bandit_packages, sp_packages):
     repo = repo.resolve(strict=True)
     cli, skillspector, bandit, gitleaks, semgrep = map(executable, (cli, skillspector, bandit, gitleaks, semgrep))
     semgrep_rules = semgrep_rules.resolve(strict=True)
     bandit_packages = bandit_packages.resolve(strict=True)
+    sp_packages = sp_packages.resolve(strict=True)
     bandit_ini = semgrep_rules.parent / "bandit.ini"
     from check_integrated_bandit import ini_ok
     ini_ok(bandit_ini.read_bytes())
@@ -268,8 +289,16 @@ def accept(repo, cli, skillspector, bandit, gitleaks, semgrep, semgrep_rules, ba
                                + repr(str(temp)) + ", " + repr(str(bandit_packages)) + ", "
                                + repr(str(bandit_ini)) + "))\n", encoding="utf-8")
         bandit_shim.chmod(0o700)
+        sp_shim = private_bin / "skillspector"
+        sp_receipts = temp / "sp-receipts"
+        sp_receipts.mkdir()
+        sp_shim.write_text("#!" + sys.executable + "\nimport sys\nsys.path.insert(0, "
+                           + repr(str(pathlib.Path(__file__).resolve().parent))
+                           + ")\nfrom check_integrated_skillspector import main\nsys.exit(main(sys.argv[1:], "
+                           + repr(str(temp)) + ", " + repr(str(sp_packages)) + "))\n", encoding="utf-8")
+        sp_shim.chmod(0o700)
         env.update({"PATH": os.pathsep.join((str(private_bin), str(cli.parent), "/usr/bin", "/bin")),
-                    "SKILLEVALUATOR_SKILLSPECTOR_PATH": str(skillspector),
+                    "SKILLEVALUATOR_SKILLSPECTOR_PATH": str(sp_shim),
                     "SKILLEVALUATOR_BANDIT_PATH": str(bandit_shim),
                     "SKILLEVALUATOR_SEMGREP_PATH": str(semgrep),
                     "SKILLEVALUATOR_REQUIRE_SEMGREP": "1",
@@ -281,6 +310,7 @@ def accept(repo, cli, skillspector, bandit, gitleaks, semgrep, semgrep_rules, ba
                     "PIP_NO_INDEX": "1", "UV_OFFLINE": "1", "CI": "true"})
         require(shutil.which("gitleaks", path=env["PATH"]) == str(shim)
                 and shutil.which("bandit", path=env["PATH"]) == str(bandit_shim)
+                and shutil.which("skillspector", path=env["PATH"]) == str(sp_shim)
                 and shutil.which("semgrep", path=env["PATH"]) is None,
                 "FULL_TIER1_SCANNER_RESOLUTION")
         def run(path, args, timeout=15, *, cwd=temp):
@@ -290,9 +320,10 @@ def accept(repo, cli, skillspector, bandit, gitleaks, semgrep, semgrep_rules, ba
         version = run(cli, ["--version"])
         require(version.returncode == 0 and version.stdout.strip() ==
                 ("skillevaluator, version " + VERSION).encode(), "FULL_TIER1_CLI_VERSION")
-        version = run(skillspector, ["--version"])
+        version = run(sp_shim, ["--version"], 165)
         require(version.returncode == 0 and version.stdout.strip() ==
                 b"SkillSpector v2.13.7", "FULL_TIER1_SKILLSPECTOR_VERSION")
+        sp_probe = skillspector_control(run, sp_shim, temp)
         version = run(bandit_shim, ["--version"], 115)
         require(version.returncode == 0 and re.search(rb"\bbandit 1\.9\.4\b", version.stdout),
                 "FULL_TIER1_BANDIT_VERSION")
@@ -329,6 +360,8 @@ def accept(repo, cli, skillspector, bandit, gitleaks, semgrep, semgrep_rules, ba
             results[skill.name] = summary(json.loads(report.read_text(encoding="utf-8")), result.returncode)
             require(any(x.name.startswith(skill.name + "-") for x in receipts.iterdir()),
                     "FULL_TIER1_BANDIT_RECEIPT")
+            require(any(x.name.startswith(skill.name + "-") for x in sp_receipts.iterdir()),
+                    "FULL_TIER1_SP_RECEIPT")
         require(results and tree_fingerprint(source) == before
                 and tree_fingerprint(original) == before, "FULL_TIER1_SOURCE_MUTATED")
         require(not (temp / "runtime" / "skillspector").exists()
@@ -341,17 +374,18 @@ def accept(repo, cli, skillspector, bandit, gitleaks, semgrep, semgrep_rules, ba
             "semgrep_control": semgrep_probe,
             "policy": "ADVISORY_FINDINGS", "certification": "NOT_VERIFIED",
             "live_shim_control": control, "gitleaks_isolation": "DOCKER_RESTRICTED_SNAPSHOT",
-            "bandit_isolation": "DOCKER_RESTRICTED_SNAPSHOT", "bandit_control": bandit_probe}
+            "bandit_isolation": "DOCKER_RESTRICTED_SNAPSHOT", "bandit_control": bandit_probe,
+            "skillspector_isolation": "DOCKER_RESTRICTED_SNAPSHOT", "skillspector_control": sp_probe}
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    for name in ("repo", "cli", "skillspector", "bandit", "gitleaks", "semgrep", "semgrep-rules", "bandit-packages"):
+    for name in ("repo", "cli", "skillspector", "bandit", "gitleaks", "semgrep", "semgrep-rules", "bandit-packages", "sp-packages"):
         parser.add_argument("--" + name, type=pathlib.Path, required=True)
     args = parser.parse_args()
     try:
         result = accept(args.repo, args.cli, args.skillspector, args.bandit, args.gitleaks,
-                        args.semgrep, args.semgrep_rules, args.bandit_packages)
+                        args.semgrep, args.semgrep_rules, args.bandit_packages, args.sp_packages)
     except (InstallCheckError, OSError, ValueError, UnicodeError, subprocess.SubprocessError) as exc:
         print("BLOCKED: " + (str(exc) if isinstance(exc, InstallCheckError)
                               else "FULL_TIER1_RUNTIME_FAILED"), file=sys.stderr)

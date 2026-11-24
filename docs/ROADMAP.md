@@ -203,3 +203,5 @@ T12.03.08: CI 45391798766 — 513+29 PASS, GOVULN_CONTROL_VERSION BLOCKED; но�
 **T12.03.29:** CI 45468107315 PASS, 657 тестов, Bandit HIGH 2→0. **T12.03.30 — кандидат:** безопасные координаты Bandit и точная parity, шесть регрессий; CI обязателен. T12 PARTIAL.
 
 **T12.03.30:** CI 45470763020 PASS, 663 теста, все 173 coordinates. **T12.03.31 — кандидат:** standalone SkillSpector Docker, 74 packages, exact parity, восемь регрессий; CI обязателен. T12 PARTIAL.
+
+**T12.03.31:** CI 45475253034 PASS, 671 тест, standalone SkillSpector Docker exact parity. **T12.03.32 — кандидат:** NVIDIA SkillSpector Docker, exact contract и receipts, пять регрессий; CI обязателен. T12 PARTIAL.
