@@ -199,10 +199,39 @@ def semgrep_control(run, semgrep, rules, temp):
             "rules_blob": SEMGREP_RULES_BLOB, "fixture_preserved": "PASS"}
 
 
-def accept(repo, cli, skillspector, bandit, gitleaks, semgrep, semgrep_rules):
+def bandit_control(run, shim, temp, ini):
+    from check_integrated_bandit import exclusions
+    fixture = temp / "bandit-control"
+    fixture.mkdir()
+    target = fixture / "probe.py"
+    ignored = fixture / "tests"
+    ignored.mkdir()
+    (ignored / "test_probe.py").write_bytes(b"eval('1 + 1')\n")
+    (fixture / ".bandit").write_text("[bandit]\nskips=B307\n", encoding="utf-8")
+    args = ["-r", str(fixture), "-f", "json", "-q", "-ll", "--exclude",
+            exclusions(fixture), "--ini", str(ini), "--ignore-nosec"]
+    for detected, content in ((False, b"answer = 42\n"), (True, b"eval('1 + 1')  # nosec\n")):
+        target.write_bytes(content)
+        result = run(shim, args, 115)
+        require(result.returncode == int(detected), "FULL_TIER1_BANDIT_CONTROL_EXIT")
+        report = json.loads(result.stdout)
+        require(report.get("errors") == [] and isinstance(report.get("results"), list)
+                and (not report["results"] if not detected else
+                     len(report["results"]) == 1 and report["results"][0]["test_id"] == "B307"
+                     and report["results"][0]["filename"] == str(target)), "FULL_TIER1_BANDIT_CONTROL")
+        require(target.read_bytes() == content, "FULL_TIER1_BANDIT_CONTROL_MUTATION")
+    return {"clean": "PASS", "detection": "PASS", "ignored_nosec_and_skill_ini": "PASS",
+            "excluded_test": "PASS", "fixture_preserved": "PASS"}
+
+
+def accept(repo, cli, skillspector, bandit, gitleaks, semgrep, semgrep_rules, bandit_packages):
     repo = repo.resolve(strict=True)
     cli, skillspector, bandit, gitleaks, semgrep = map(executable, (cli, skillspector, bandit, gitleaks, semgrep))
     semgrep_rules = semgrep_rules.resolve(strict=True)
+    bandit_packages = bandit_packages.resolve(strict=True)
+    bandit_ini = semgrep_rules.parent / "bandit.ini"
+    from check_integrated_bandit import ini_ok
+    ini_ok(bandit_ini.read_bytes())
     require(hashlib.sha256(gitleaks.read_bytes()).hexdigest() == GITLEAKS_SHA,
             "FULL_TIER1_GITLEAKS_HASH")
     original = repo / "skills"
@@ -221,9 +250,18 @@ def accept(repo, cli, skillspector, bandit, gitleaks, semgrep, semgrep_rules):
                         + repr(str(pathlib.Path(__file__).resolve().parent)) + "\n" + SHIM,
                         encoding="utf-8")
         shim.chmod(0o700)
+        bandit_shim = private_bin / "bandit"
+        receipts = temp / "bandit-receipts"
+        receipts.mkdir()
+        bandit_shim.write_text("#!" + sys.executable + "\nimport sys\nsys.path.insert(0, "
+                               + repr(str(pathlib.Path(__file__).resolve().parent))
+                               + ")\nfrom check_integrated_bandit import main\nsys.exit(main(sys.argv[1:], "
+                               + repr(str(temp)) + ", " + repr(str(bandit_packages)) + ", "
+                               + repr(str(bandit_ini)) + "))\n", encoding="utf-8")
+        bandit_shim.chmod(0o700)
         env.update({"PATH": os.pathsep.join((str(private_bin), str(cli.parent), "/usr/bin", "/bin")),
                     "SKILLEVALUATOR_SKILLSPECTOR_PATH": str(skillspector),
-                    "SKILLEVALUATOR_BANDIT_PATH": str(bandit),
+                    "SKILLEVALUATOR_BANDIT_PATH": str(bandit_shim),
                     "SKILLEVALUATOR_SEMGREP_PATH": str(semgrep),
                     "SKILLEVALUATOR_REQUIRE_SEMGREP": "1",
                     "SEMGREP_SEND_METRICS": "off",
@@ -233,6 +271,7 @@ def accept(repo, cli, skillspector, bandit, gitleaks, semgrep, semgrep_rules):
                     "PYTHONDONTWRITEBYTECODE": "1", "PYTHONSAFEPATH": "1",
                     "PIP_NO_INDEX": "1", "UV_OFFLINE": "1", "CI": "true"})
         require(shutil.which("gitleaks", path=env["PATH"]) == str(shim)
+                and shutil.which("bandit", path=env["PATH"]) == str(bandit_shim)
                 and shutil.which("semgrep", path=env["PATH"]) is None,
                 "FULL_TIER1_SCANNER_RESOLUTION")
         def run(path, args, timeout=15, *, cwd=temp):
@@ -245,9 +284,10 @@ def accept(repo, cli, skillspector, bandit, gitleaks, semgrep, semgrep_rules):
         version = run(skillspector, ["--version"])
         require(version.returncode == 0 and version.stdout.strip() ==
                 b"SkillSpector v2.13.7", "FULL_TIER1_SKILLSPECTOR_VERSION")
-        version = run(bandit, ["--version"])
+        version = run(bandit_shim, ["--version"], 115)
         require(version.returncode == 0 and re.search(rb"\bbandit 1\.9\.4\b", version.stdout),
                 "FULL_TIER1_BANDIT_VERSION")
+        bandit_probe = bandit_control(run, bandit_shim, temp, bandit_ini)
         version = run(semgrep, ["--version"], 30)
         require(version.returncode == 0 and version.stdout.strip() == SEMGREP_VERSION.encode(),
                 "FULL_TIER1_SEMGREP_VERSION")
@@ -278,27 +318,31 @@ def accept(repo, cli, skillspector, bandit, gitleaks, semgrep, semgrep_rules):
             require(report.is_file() and not report.is_symlink()
                     and 0 < report.stat().st_size <= MAX_REPORT, "FULL_TIER1_REPORT_MISSING")
             results[skill.name] = summary(json.loads(report.read_text(encoding="utf-8")), result.returncode)
+            require(any(x.name.startswith(skill.name + "-") for x in receipts.iterdir()),
+                    "FULL_TIER1_BANDIT_RECEIPT")
         require(results and tree_fingerprint(source) == before
                 and tree_fingerprint(original) == before, "FULL_TIER1_SOURCE_MUTATED")
         require(not (temp / "runtime" / "skillspector").exists()
-                and not (temp / "runtime" / "gitleaks").exists(), "FULL_TIER1_MANAGED_FALLBACK")
+                and not (temp / "runtime" / "gitleaks").exists()
+                and not (temp / "runtime" / "bandit").exists(), "FULL_TIER1_MANAGED_FALLBACK")
         require(hashlib.sha256(gitleaks.read_bytes()).hexdigest() == GITLEAKS_SHA,
                 "FULL_TIER1_GITLEAKS_CHANGED")
     return {"execution": "PASS", "scope": "INTEGRATED_STATIC_TIER1", "checks": CHECKS.split(","),
             "llm": "DISABLED", "semgrep": "EXECUTED", "skills": results,
             "semgrep_control": semgrep_probe,
             "policy": "ADVISORY_FINDINGS", "certification": "NOT_VERIFIED",
-            "live_shim_control": control, "gitleaks_isolation": "DOCKER_RESTRICTED_SNAPSHOT"}
+            "live_shim_control": control, "gitleaks_isolation": "DOCKER_RESTRICTED_SNAPSHOT",
+            "bandit_isolation": "DOCKER_RESTRICTED_SNAPSHOT", "bandit_control": bandit_probe}
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    for name in ("repo", "cli", "skillspector", "bandit", "gitleaks", "semgrep", "semgrep-rules"):
+    for name in ("repo", "cli", "skillspector", "bandit", "gitleaks", "semgrep", "semgrep-rules", "bandit-packages"):
         parser.add_argument("--" + name, type=pathlib.Path, required=True)
     args = parser.parse_args()
     try:
         result = accept(args.repo, args.cli, args.skillspector, args.bandit, args.gitleaks,
-                        args.semgrep, args.semgrep_rules)
+                        args.semgrep, args.semgrep_rules, args.bandit_packages)
     except (InstallCheckError, OSError, ValueError, UnicodeError, subprocess.SubprocessError) as exc:
         print("BLOCKED: " + (str(exc) if isinstance(exc, InstallCheckError)
                               else "FULL_TIER1_RUNTIME_FAILED"), file=sys.stderr)

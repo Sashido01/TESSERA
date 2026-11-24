@@ -137,3 +137,11 @@ Exact subset of seven hash-pinned wheels from existing NVIDIA lock, no extras, h
 **v0.0.59 candidate correction:** CI 45456322847: 608+38=646 tests PASS, seven wheels and host Bandit PASS, Docker Bandit FAIL with generic code. Missing transitive module `check_gitleaks_review.py` found in stage allowlist; added, new import test from exact stage copy using Python -I -B, fixed diagnostic code allowlist. Two additional regressions. This is a confirmed stage preparation defect; final live failure cause and correction require repeated CI; version unchanged until candidate acceptance.
 
 **Second v0.0.59 candidate correction:** CI 45459010630: 610+38=648 tests PASS, container reached `BANDIT_CONTAINER_VERSION`. Upstream Bandit 1.9.4 commit `92ae8b82fb422a639f0ed8d99e96cea769594e08`, `bandit/cli/main.py` 154–157 and 374–380: argparse formats version with `%(prog)s`, while Python -c does not reproduce the console-script name. Fixed entry sets `sys.argv[0]='bandit'`; nonzero version exit and format mismatch are distinguished. One new offline regression reproduces argparse contract; final live root cause/correction requires CI. Candidate version unchanged.
+
+## T12.03.27 — PR result
+
+[CI 45460535618](https://github.com/Sashido01/TESSERA/actions/runs/45460535618) PASS: 611+38=649 tests, Bandit Docker 92 Python files/167 advisory findings, host parity, clean/B307 nosec controls PASS; seven exact wheels. History 943 blobs/12,477,834 bytes/244.15s/0 findings. Tier 1 policy PASS. v0.0.58 main CI 45455978368 and tag verified; v0.0.59 merged into main, tag separate.
+
+## T12.03.28 — integrated Bandit Docker (candidate)
+
+Pinned NVIDIA contract: recursive root with exact exclusions or named batch, `-f json -q -ll --exclude ... --ini ... --ignore-nosec`; INI Git blob 3d1f1b039c78013871f85efee6dd92d35c89aebd, restricted snapshot, two read-only mounts, seven wheels, no network, nonroot, existing resource limits, bounded output/cleanup. Coverage and report type verification, remap only known paths, discard raw code, receipt of actual scan. NVIDIA requires issue_text, which may contain input-derived data; raw report not published. Six offline regressions; live clean/B307, excluded test, ignored skill .bandit/nosec and policy require CI. No host fallback; standalone parity retained. T12 PARTIAL.

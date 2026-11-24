@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.60 — Integrated Bandit Docker (T12.03.28)
+
+- Restricted NVIDIA adapter, INI, coverage and report verification, six regressions. CI required; T12 PARTIAL.
+
 ## 0.0.59 — Standalone Bandit Docker (T12.03.27)
 
 - Minimal pinned runtime, read-only snapshot, host parity, four regressions. CI required; T12 PARTIAL.
