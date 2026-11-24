@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.29 — Gitleaks text snapshot review (T12.02.02.02)
+
+- Official SHA-256 pinned Gitleaks 8.30.1, separate stdin per tracked UTF-8 file, byte coverage, redaction and exit code checks, negative allow-comment fixture, CI and bilingual documentation. [CI 45367459045](https://github.com/Sashido01/TESSERA/actions/runs/45367459045) PASS: 428+19 tests, 144/144 tracked UTF-8 files, 998544 bytes, zero findings, positive/negative and redaction fixtures PASS; 65.29 s. Snapshot acceptance COMPLETE; history/path-specific rules NOT_VERIFIED; T12.02.02.02 remains PARTIAL.
+
 ## 0.0.28 — Direct Bandit static review (T12.02.02.01)
 
 - Isolated review of all tracked Python files with pinned Bandit 1.9.4, strict coverage and report validation, synthetic positive and negative cases, safe aggregates, mandatory CI and bilingual documentation. [CI 45365133732](https://github.com/Sashido01/TESSERA/actions/runs/45365133732) PASS: 414+19 tests, 60 Python files, 87 findings (45 runtime, 42 tests; 2 medium, 85 low, 0 high); clean and negative fixtures PASS; direct review 1.69 s. Direct scan execution COMPLETE; full NVIDIA code-integrity, Gitleaks, SkillSpector and CVEs remain NOT_VERIFIED.
