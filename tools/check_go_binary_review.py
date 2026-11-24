@@ -18,6 +18,7 @@ from check_nvidia_tier1 import require
 from check_official_local_install import InstallCheckError, fixture_env
 
 PIN = "ef4cb2f7cae47fe3e21fc596455f694951867b29"
+RELEASE = "v1.10.0"
 DB = "https://vuln.go.dev"
 MAX_OUTPUT = 32 * 1024 * 1024
 MAX_MESSAGES = 100000
@@ -76,7 +77,9 @@ def scan_evidence(raw, extraction, *, database=DB):
             require(config is None and value.get("protocol_version") == "v1.0.0"
                     and value.get("scanner_name") == "govulncheck"
                     and isinstance(value.get("scanner_version"), str)
-                    and value["scanner_version"].startswith("v0.0.0-" + PIN[:12])
+                    and (value["scanner_version"] == RELEASE
+                         or re.fullmatch(r"v0\.0\.0-" + PIN[:12] + r"-[0-9]{8}",
+                                         value["scanner_version"]))
                     and value.get("db") == database and value.get("scan_mode") == "binary"
                     and value.get("scan_level") == "symbol", "GOVULN_CONFIG_INVALID")
             config = value
@@ -129,7 +132,12 @@ def scanner_inventory(raw, lookup=query):
             and sum(line.strip() == "build\tvcs.revision=" + PIN for line in rows) == 1
             and sum(line.strip() == "build\tvcs.modified=false" for line in rows) == 1,
             "GOVULN_SCANNER_IDENTITY")
-    build = parse_build(raw, "golang.org/x/vuln", "v1.10.0", PIN)
+    root_rows = [line.strip().split() for line in rows if line.strip().startswith("mod\t")]
+    require(len(root_rows) == 1 and len(root_rows[0]) in (3, 4)
+            and root_rows[0][1] == "golang.org/x/vuln", "GOVULN_SCANNER_ROOT")
+    root_version = root_rows[0][2]
+    require(root_version in (RELEASE, "(devel)"), "GOVULN_SCANNER_VERSION_UNVERIFIED")
+    build = parse_build(raw, "golang.org/x/vuln", RELEASE, PIN)
     require(build["source_revision"] == "MATCH" and not build["unversioned_modules"],
             "GOVULN_SCANNER_INVENTORY_UNVERIFIED")
     modules = build["modules"] + [(name, build["toolchain"]) for name in ("stdlib", "toolchain")]
@@ -139,7 +147,7 @@ def scanner_inventory(raw, lookup=query):
     found = lookup(queries)
     require(len(found) == len(queries), "GOVULN_SCANNER_OSV_COVERAGE")
     return {"scope": "SCANNER_BUILD_METADATA_OSV", "toolchain": build["toolchain"],
-            "modules": len(build["modules"]), "findings": [
+            "modules": len(build["modules"]), "root_build_version": root_version, "findings": [
                 {"module": name, "version": version, "ids": ids}
                 for (name, version), ids in zip(modules, found) if ids],
             "source_commit_ids": found[-1], "license_compliance": "NOT_VERIFIED",

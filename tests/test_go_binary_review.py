@@ -52,6 +52,17 @@ class BinaryReviewTests(unittest.TestCase):
             with self.subTest(raw=raw), self.assertRaises(g.InstallCheckError):
                 g.scan_evidence(raw, self.extraction())
 
+    def test_release_version_config_and_metadata(self):
+        cfg = self.config()
+        cfg["config"]["scanner_version"] = g.RELEASE
+        self.assertEqual(g.scan_evidence(encode(cfg, self.sbom()), self.extraction())["findings"], [])
+        raw = self.scanner_meta().replace(b"(devel)", g.RELEASE.encode())
+        result = g.scanner_inventory(raw, lambda queries: [[] for _ in queries])
+        self.assertEqual(result["root_build_version"], g.RELEASE)
+        with self.assertRaises(g.InstallCheckError):
+            g.scanner_inventory(raw.replace(g.RELEASE.encode(), b"v1.9.0"),
+                                lambda _: self.fail("wrong version must not be queried"))
+
     def test_wrong_scanner_or_mode_rejected(self):
         for key, value in (("scanner_version", "v0.0.0-wrong"), ("scan_mode", "source"),
                            ("db", "https://example.invalid")):

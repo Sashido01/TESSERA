@@ -189,6 +189,9 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git -C .external/govulncheck rev-parse HEAD)" = "ef4cb2f7cae47fe3e21fc596455f694951867b29"
+          # A shallow SHA-only checkout may omit the version tag used by Go build metadata.
+          git -C .external/govulncheck fetch --no-tags --depth=1 https://github.com/golang/vuln.git refs/tags/v1.10.0:refs/tags/v1.10.0
+          test "$(git -C .external/govulncheck rev-parse 'refs/tags/v1.10.0^{commit}')" = "ef4cb2f7cae47fe3e21fc596455f694951867b29"
           mkdir -p "$RUNNER_TEMP/govuln-home" "$RUNNER_TEMP/govuln-cache" "$RUNNER_TEMP/govuln-mod"
           (
             export HOME="$RUNNER_TEMP/govuln-home" XDG_CONFIG_HOME="$RUNNER_TEMP/govuln-home/config"
