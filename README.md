@@ -60,7 +60,7 @@ python skills/microversion-release/scripts/next_version.py 0.0.100 --mode releas
 
 В CI испытывается реальный `gh skill install --from-local --dir` с последующим `gh skill list` на временной копии навыка. **Прямой локальный `gh skill install` способен перезаписать существующие файлы без `--force`**: используйте только новый пустой каталог, а для существующих проектов — собственный безопасный офлайн-установщик. Удалённая установка по `--pin` пока NOT_VERIFIED. [Подробности](docs/GH_SKILL_INSTALL.md).
 
-**T09.10 — подписывающая сборка:** первый реальный запуск на `v0.0.19` [завершился ошибкой](https://github.com/Sashido01/TESSERA/actions/runs/45347443989) из-за Python bytecode-кэша в папке `scripts/`. Добавлена защита от генерации `__pycache__` и проверка ZIP после тестов; новая живая подпись **не подтверждена**. См. [TRUSTED_BUILD](docs/TRUSTED_BUILD.md).
+**T09.10 — COMPLETE:** реальный ZIP `v0.0.21` подписан и независимо проверен (SHA-256, манифест, Sigstore/SLSA). [Доказательства](docs/TRUSTED_BUILD.md). Приёмка относится только к этому файлу, не к последующим версиям. GitHub Release не создавался.
 
 ## Проверка без публикации через официальный GitHub CLI
 
