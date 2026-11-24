@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import argparse
+import base64
+import hashlib
 import collections
 import importlib.metadata
 import json
@@ -84,6 +86,57 @@ def license_info(meta, files):
     return {"status": status, "declared": value, "license_records": records}
 
 
+# Reviewed exact upstream license texts; never replace package metadata with these.
+LICENSE_PINS = {
+    ("tiktoken", "0.13.0"): ("LICENSE", "418cb499b436128d653d79941333a5437b7be2ea9213dcc2f04d15d5d2c51d86"),
+    ("tqdm", "4.68.3"): ("LICENCE", "fcff87c3a47ce8028a8512aa182d4fcf0ad1c90544ee75cf9b343684cac194de"),
+}
+MAX_LICENSE_BYTES = 256 * 1024
+
+
+def installed_license_evidence(dist, name, version, files):
+    pin = LICENSE_PINS.get((name, version))
+    if pin is None:
+        return None
+    filename, upstream_digest = pin
+    info_dir = name.replace("-", "_") + "-" + version + ".dist-info"
+    allowed = {(info_dir, filename), (info_dir, "licenses", filename)}
+    matches = [entry for entry in files or [] if tuple(entry.parts) in allowed]
+    result = {"status": "NOT_VERIFIED", "upstream_sha256": upstream_digest}
+    if len(matches) != 1:
+        return {**result, "status": "RECORD_MISSING_OR_AMBIGUOUS"}
+    entry = matches[0]
+    try:
+        root = pathlib.Path(dist.locate_file("")).resolve(strict=True)
+        path = root.joinpath(*entry.parts)
+        # Use only the exact fixed record inside the resolved installation root.
+        # No symlinks, redirected directories, arbitrary metadata paths or raw text.
+        parent = root
+        for part in entry.parts:
+            parent = parent / part
+            if parent.is_symlink() or parent.resolve(strict=True) != parent:
+                return {**result, "status": "REDIRECTED_PATH"}
+        if not path.is_file() or path.stat().st_size > MAX_LICENSE_BYTES:
+            return {**result, "status": "INVALID_FILE"}
+        with path.open("rb") as stream:
+            raw = stream.read(MAX_LICENSE_BYTES + 1)
+        if not raw or len(raw) > MAX_LICENSE_BYTES:
+            return {**result, "status": "INVALID_FILE"}
+        digest = hashlib.sha256(raw)
+        actual = digest.hexdigest()
+        record = getattr(entry, "hash", None)
+        size = getattr(entry, "size", None)
+        encoded = base64.urlsafe_b64encode(digest.digest()).decode("ascii").rstrip("=")
+        if (getattr(record, "mode", None) != "sha256"
+                or getattr(record, "value", None) != encoded or size != len(raw)):
+            return {**result, "status": "RECORD_MISMATCH_OR_UNVERIFIED", "installed_sha256": actual}
+        return {**result, "status": ("UPSTREAM_TEXT_MATCH" if actual == upstream_digest
+                                     else "UPSTREAM_TEXT_DIFFERS"),
+                "installed_sha256": actual, "record_integrity": "MATCH"}
+    except (OSError, ValueError, RuntimeError):
+        return result
+
+
 def inventory(locked=None):
     result = {}
     if locked is not None:
@@ -98,7 +151,11 @@ def inventory(locked=None):
                 and name not in result, "DEP_INVENTORY_INVALID")
         if locked is not None:
             require(locked.get(name) == version, "DEP_VERSION_MISMATCH")
-        result[name] = {"version": version, "license": license_info(meta, dist.files)}
+        files = dist.files
+        result[name] = {"version": version, "license": license_info(meta, files)}
+        evidence = installed_license_evidence(dist, name, version, files)
+        if evidence is not None:
+            result[name]["license_text_evidence"] = evidence
     if locked is not None:
         require(set(result) == set(locked), "DEP_COVERAGE_MISMATCH")
     return result
