@@ -54,6 +54,15 @@ class SkillSpectorTests(unittest.TestCase):
         with self.assertRaisesRegex(s.InstallCheckError, "EXECUTION"):
             self.check(self.report(), rc=2)
 
+    def test_risk_exit_is_advisory(self):
+        data = self.report()
+        data["risk_assessment"]["score"] = 51
+        self.assertTrue(self.check(data, rc=1)["risk_threshold_exceeded"])
+        with self.assertRaisesRegex(s.InstallCheckError, "RISK_EXIT_MISMATCH"):
+            self.check(data, rc=0)
+        with self.assertRaisesRegex(s.InstallCheckError, "RISK_EXIT_MISMATCH"):
+            self.check(self.report(), rc=1)
+
     def test_partial_is_retained(self):
         data = self.report()
         data["analysis_completeness"].update({"status": "partial", "is_complete": False,

@@ -26,8 +26,8 @@ ID = re.compile(r"[A-Za-z][A-Za-z0-9_.-]{0,79}\Z")
 
 
 def summary(data, rc, expected):
-    require(rc == 0 and isinstance(data, dict)
-            and data.get("execution_successful") is True, "SP_EXECUTION_FAILED")
+    require(rc in (0, 1) and isinstance(data, dict)
+            and data.get("execution_successful") is True, "SP_EXECUTION_FAILED_RC_" + str(rc))
     meta = data.get("metadata")
     require(isinstance(meta, dict) and meta.get("skillspector_version") == VERSION
             and meta.get("llm_requested") is False and meta.get("llm_available") is False
@@ -92,11 +92,15 @@ def summary(data, rc, expected):
     score = risk.get("score")
     require(type(score) in (int, float) and math.isfinite(score) and 0 <= score <= 100
             and risk.get("severity") in LEVELS, "SP_RISK_INVALID")
+    # Pinned upstream cli.py: normal execution exits 1 for risk_score > 50.
+    # Exit 2 or execution_successful=False is an execution failure, not a finding.
+    require(rc == int(score > 50), "SP_RISK_EXIT_MISMATCH")
     suppressed = data.get("suppressed_count")
     require(type(suppressed) is int and 0 <= suppressed <= 100000, "SP_SUPPRESSION_INVALID")
     return {"analysis_status": status, "coverage_percent": pct, "expected_files": len(expected),
             "reported_files": len(observed), "missing_files": missing, **counts,
-            "risk_score": score, "severity": risk["severity"], "findings": len(rows),
+            "risk_score": score, "scanner_exit": rc, "risk_threshold_exceeded": score > 50,
+            "severity": risk["severity"], "findings": len(rows),
             "suppressed_count": suppressed,
             "by_rule": [{"rule": rule, "severity": sev, "count": n}
                         for (rule, sev), n in sorted(counter.items())],

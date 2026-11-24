@@ -17,7 +17,7 @@ Uses official [Gitleaks v8.30.1](https://github.com/gitleaks/gitleaks/releases/t
 
 `python tools/check_gitleaks_review.py --repo . --cli <path-to-gitleaks>`
 
-GITLEAKS_REVIEW_EXECUTION_PASS confirms the execution contract, not absence of leaks. T12.02.02.02 is PARTIAL: snapshot scan execution COMPLETE; history and path-dependent rules remain unverified. Full NVIDIA Tier 1 and T12 remain PARTIAL.
+GITLEAKS_REVIEW_EXECUTION_PASS confirms the execution contract, not absence of leaks. T12.02.02.02 is COMPLETE within declared scope: text snapshot, reachable UTF-8 blobs and five path rules. Full NVIDIA Tier 1 and T12 remain PARTIAL.
 
 ## Actual acceptance
 
@@ -31,4 +31,4 @@ A second independent check, `python tools/check_gitleaks_history.py --repo . --c
 
 ## Path-constrained rules
 
-Upstream v8.30.1 contains five rules with explicit path predicates: PHP/Freemius, Terraform, Kubernetes YAML, NuGet config, PKCS#12 filenames. A separate review enumerates matching current paths and distinct (rule, blob) pairs from all reachable commit trees. For each candidate, scan under a canonical filename preserving the rule predicate; use exact byte coverage, only the intended rule, and a synthetic positive detection for each of the five rules. This deliberately avoids the archive-like filename bug, but does not reproduce every path-specific allowlist. No original file paths or raw findings are logged. No scan of unreachable objects or unfetched remote refs. Live CI acceptance pending.
+Upstream v8.30.1 contains five rules with explicit path predicates: PHP/Freemius, Terraform, Kubernetes YAML, NuGet config, PKCS#12 filenames. A separate review enumerates matching current paths and distinct (rule, blob) pairs from all reachable commit trees. For each candidate, scan under a canonical filename preserving the rule predicate; use exact byte coverage, only the intended rule, and a synthetic positive detection for each of the five rules. This deliberately avoids the archive-like filename bug, but does not reproduce every path-specific allowlist. No original file paths or raw findings are logged. No scan of unreachable objects or unfetched remote refs. [CI 45369335974](https://github.com/Sashido01/TESSERA/actions/runs/45369335974) PASS: 443+19 tests; 598 distinct UTF-8 blobs, 5639755 bytes, zero findings; five synthetic rule fixtures PASS; 4 current YAML files and 28 historical rule/blob pairs across 37 commits, zero findings. T12.02.02.02 COMPLETE within declared scope.
