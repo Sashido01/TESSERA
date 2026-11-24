@@ -151,4 +151,4 @@ Original project: [Sashido01/TESSERA](https://github.com/Sashido01/TESSERA).
 
 **T10.03.01 — COMPLETE (harness):** actual update and guarded staged re-pin harness; local edits block the guarded transition. Native update is tested against synthetic edits. [Live CI PASS](https://github.com/Sashido01/TESSERA/actions/runs/45352932764); native local-edit removal confirmed. Do not apply this harness to user profiles. [Details](docs/GH_SKILL_INSTALL.en.md).
 
-**T10.03.02:** local fixture for independent skill tags and actual official gh installation/collisions; acceptance requires CI. Remote namespaced pin and T16 remain unverified. [Details](docs/GH_SKILL_INSTALL.en.md).
+**T10.03.02:** local fixture for independent skill tags and actual official gh installation/collisions; [Live CI PASS](https://github.com/Sashido01/TESSERA/actions/runs/45354011607) for the local fixture. T10.03.02 PARTIAL: remote namespaced pin and T16 remain unverified. [Details](docs/GH_SKILL_INSTALL.en.md).
