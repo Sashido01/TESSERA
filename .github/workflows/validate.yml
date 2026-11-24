@@ -46,8 +46,8 @@ jobs:
         run: python tools/build_catalog_package.py --repo . --output-dir dist --check-reproducible
       - name: Запустить тесты каталога
         run: python -m unittest discover -s tests -v
-      - name: Запустить тесты Microversion Release
-        run: python -m unittest discover -s skills/microversion-release/tests -v
+      - name: Запустить тесты всех навыков
+        run: python tools/run_skill_tests.py
       - name: Повторить сборку ZIP после тестов (регрессия подписывающего CI)
         run: python tools/build_catalog_package.py --repo . --output-dir dist/post-tests --check-reproducible
 

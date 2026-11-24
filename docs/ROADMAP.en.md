@@ -18,6 +18,12 @@
 
 The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.21`. They do **not** prove execution in installed agent clients or local Windows environments.
 
+## Product priority (25 November 2026)
+
+The owner approved the staged evolution of Project Audit: I — usable skill; II — deterministic helper; III — extended audit; IV — incremental audit; V — advanced verification. A separate skill roadmap will accompany its sources. T12 remains PARTIAL: Semgrep, advisory applicability, races and native environments remain open; critical risks block affected operations, other work does not delay skill development. Existing mandatory checks remain in force. T13 and T16 are the next parallel product directions.
+
+v0.0.64: main CI 45489532663 PASS, annotated tag verified (commit `2e09871bf1829d70cf314f05f5d0cbbf081aff20`). T02/T16 candidate: shared test runner for all skills, CI and signing; acceptance still requires CI. Independent skill versions and real activation remain open.
+
 ## Foundation stages T00–T07
 
 | Stage | Goal | Verified status |

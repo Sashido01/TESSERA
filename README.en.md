@@ -40,7 +40,7 @@ python tools/check_public_paths.py
 python tools/check_translations.py
 python tools/check_repository_version.py
 python -m unittest discover -s tests -v
-python -m unittest discover -s skills/microversion-release/tests -v
+python tools/run_skill_tests.py
 ```
 
 The following version calculator has no side effects:

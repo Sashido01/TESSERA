@@ -4,6 +4,11 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.65 — Universal skill test runner
+
+- Separate-process unittest discovery for all skills; reject suites with no ordinary successful tests. Validation CI, signing and preflight share the runner. Ten regression scenarios; full CI required.
+- Five-stage Project Audit evolution approved; T12 remains PARTIAL.
+
 ## 0.0.64 — Integrated SkillSpector Docker (T12.03.32)
 
 - Static-only NVIDIA adapter, report validation and receipts, five regressions. CI required; T12 PARTIAL.
