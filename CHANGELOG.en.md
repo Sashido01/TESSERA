@@ -4,6 +4,12 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.24 — Actual update and guarded re-pin (T10.03.01)
+
+- Actual gh 2.105.0 update --unpin --dry-run and --unpin --all harness against disposable synthetic local edits; verify new Git tree and directory replacement behavior.
+- Independently install two exact pins, refuse local edits or staged mutation, retain backup, test injected failure and explicit rollback. 12 offline scenario tests plus mandatory CI guard test.
+- T10.03.01 acceptance requires GH_SKILL_UPDATE_PASS; T10.03.02 (multi-skill collisions and independent tags), crash recovery, concurrent writes and client activation remain unverified. Updated bilingual docs.
+
 ## 0.0.23 — Verify remote skill installation at exact tag and SHA (T10.02)
 
 - Added actual official gh 2.105.0 CI acceptance: install from public TESSERA by refs/tags/v0.0.22 and full commit SHA, verify independent Git tree, file inventory and bytes, pin metadata and gh skill list discovery.
