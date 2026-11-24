@@ -1,5 +1,7 @@
 """Offline report and redaction-adapter contract regression tests."""
 import copy
+import json
+import subprocess
 import pathlib
 import sys
 import unittest
@@ -63,6 +65,42 @@ class FullTier1Tests(unittest.TestCase):
     def test_exit_mismatch(self):
         with self.assertRaisesRegex(f.InstallCheckError, "EXIT_MISMATCH"):
             f.summary(self.report(), 1)
+
+
+    def test_live_control_clean_and_detected(self):
+        marker = b"nonfunctional-marker"
+        f.control_result(subprocess.CompletedProcess([], 0, b"null", b""), marker, detected=False)
+        row = {"RuleID": f.CONTROL_RULE, "Secret": "REDACTED", "File": "probe.txt"}
+        f.control_result(subprocess.CompletedProcess([], 10, json.dumps([row]).encode(), b""),
+                         marker, detected=True)
+
+    def test_live_control_rejects_raw_marker(self):
+        marker = b"nonfunctional-marker"
+        row = {"RuleID": f.CONTROL_RULE, "Secret": "REDACTED", "File": "probe.txt"}
+        for stdout, stderr in ((marker, b""), (json.dumps([row]).encode(), marker)):
+            with self.subTest(channel="stdout" if stdout == marker else "stderr"):
+                with self.assertRaisesRegex(f.InstallCheckError, "CONTROL_REDACTION"):
+                    f.control_result(subprocess.CompletedProcess([], 10, stdout, stderr),
+                                     marker, detected=True)
+
+    def test_live_control_rejects_wrong_exit(self):
+        with self.assertRaisesRegex(f.InstallCheckError, "CONTROL_EXIT"):
+            f.control_result(subprocess.CompletedProcess([], 0, b"[]", b""),
+                             b"nonfunctional-marker", detected=True)
+
+    def test_live_control_rejects_wrong_finding(self):
+        row = {"RuleID": f.CONTROL_RULE, "Secret": "REDACTED", "File": "probe.txt"}
+        for change in ({"RuleID": "wrong"}, {"Secret": "not-redacted"}, {"File": "other.txt"}):
+            with self.subTest(change=change):
+                stdout = json.dumps([{**row, **change}]).encode()
+                with self.assertRaisesRegex(f.InstallCheckError, "CONTROL_FINDING"):
+                    f.control_result(subprocess.CompletedProcess([], 10, stdout, b""),
+                                     b"nonfunctional-marker", detected=True)
+
+    def test_live_control_rejects_findings_in_clean_fixture(self):
+        with self.assertRaisesRegex(f.InstallCheckError, "CONTROL_CLEAN"):
+            f.control_result(subprocess.CompletedProcess([], 0, b"[{}]", b""),
+                             b"nonfunctional-marker", detected=False)
 
 
 if __name__ == "__main__":

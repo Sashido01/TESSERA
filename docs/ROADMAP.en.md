@@ -165,3 +165,5 @@ T12.03.08: CI 45391798766 — 513+29 PASS, GOVULN_CONTROL_VERSION BLOCKED; new c
 **T12.03.11:** PR CI 45399800597 PASS, 526+29 tests, eight regressions PASS, SkillSpector 19 MEDIUM, 53/100, zero suppressions. **T12.03.12 candidate:** [remote inspection](RELEASE_CORE.en.md), one named remote, transport scope, fixed upload-pack, minimal environment, URL/object/commit rechecks, 10 regressions; CI required. T12 PARTIAL.
 
 **T12.03.12:** PR CI 45401945520 PASS, 536+29, ten regressions; actual HTTPS/SSH NOT_VERIFIED. **T12.03.13 candidate:** [integrated NVIDIA Tier 1](NVIDIA_TIER1.en.md), 11 groups/13 validators, pinned scanners, fixed redaction adapter, seven regressions; Semgrep NOT_RUN, certification NOT_VERIFIED, CI required. T12 PARTIAL.
+
+**T12.03.13:** [CI 45403712350](https://github.com/Sashido01/TESSERA/actions/runs/45403712350) PASS, 543+29, execution PASS, policy FAIL (1 HIGH, 19 MEDIUM). **T12.03.14 — candidate:** [live Gitleaks shim control](NVIDIA_TIER1.en.md) with a custom synthetic rule, clean and positive controls, stdout/stderr verification and five offline regressions; live CI required. T12 PARTIAL.
