@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.61 — Scanner configuration SHA-256 (T12.03.29)
+
+- Pin exact Semgrep and Bandit configuration SHA-256 instead of SHA-1; retain Git blob provenance. Two regression tests, no suppression. CI required; T12 PARTIAL.
+
 ## 0.0.60 — Integrated Bandit Docker (T12.03.28)
 
 - Restricted NVIDIA adapter, INI, coverage and report verification, six regressions. CI required; T12 PARTIAL.

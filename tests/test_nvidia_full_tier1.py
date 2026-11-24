@@ -1,5 +1,7 @@
 """Offline report and redaction-adapter contract regression tests."""
 import copy
+import hashlib
+from unittest import mock
 import json
 import subprocess
 import tempfile
@@ -176,6 +178,19 @@ class FullTier1Tests(unittest.TestCase):
                 with self.assertRaisesRegex(f.InstallCheckError, "SEMGREP_" + code):
                     f.semgrep_control_result(subprocess.CompletedProcess([], rc,
                         json.dumps(report).encode(), b""), target, detected=True)
+
+
+    def test_semgrep_rules_sha256_pin(self):
+        self.assertEqual(f.SEMGREP_RULES_SHA256,
+                         "fff4537f6679a52c48e024e001b73e163b24587635a028e5c012583f19876abf")
+        self.assertEqual(f.SEMGREP_RULES_SIZE, 3376)
+        raw = b"synthetic exact rules"
+        with mock.patch.object(f, "SEMGREP_RULES_SIZE", len(raw)), \
+                mock.patch.object(f, "SEMGREP_RULES_SHA256", hashlib.sha256(raw).hexdigest()):
+            f.semgrep_rules_ok(raw)
+            for bad in (raw[:-1], raw+b"\n", b"x"+raw[1:]):
+                with self.assertRaisesRegex(f.InstallCheckError, "SEMGREP_RULES"):
+                    f.semgrep_rules_ok(bad)
 
 
 if __name__ == "__main__":

@@ -197,3 +197,5 @@ T12.03.08: CI 45391798766 — 513+29 PASS, GOVULN_CONTROL_VERSION BLOCKED; но�
 **T12.03.26:** CI 45453412802 PASS, 642 теста, integrated Gitleaks Docker controls PASS. **T12.03.27 — кандидат:** standalone Bandit Docker, семь wheel, exact host parity, четыре регрессии. CI обязателен; T12 PARTIAL.
 
 **T12.03.27:** CI 45460535618 PASS, 649 тестов, Bandit Docker host parity PASS. **T12.03.28 — кандидат:** NVIDIA Bandit Docker, точный contract и coverage, receipt, шесть регрессий; CI обязателен. T12 PARTIAL.
+
+**T12.03.28:** CI 45465436002 PASS, 655 тестов, integrated Bandit Docker controls PASS. **T12.03.29 — кандидат:** SHA-256 для двух конфигураций вместо SHA-1, без suppressions, два регрессионных теста; CI обязателен. T12 PARTIAL.

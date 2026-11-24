@@ -29,6 +29,8 @@ GITLEAKS_SHA = "88f91962aa2f93ac6ab281d553b9e125f5197bbbce38f9f2437f7299c32e5509
 MAX_REPORT = 16 * 1024 * 1024
 SEMGREP_VERSION = "1.182.0"
 SEMGREP_RULES_BLOB = "3ef2067b69ef50f09b39c933771f751bc227b3db"
+SEMGREP_RULES_SHA256 = "fff4537f6679a52c48e024e001b73e163b24587635a028e5c012583f19876abf"
+SEMGREP_RULES_SIZE = 3376
 SEMGREP_CONTROL_RULE = "skillevaluator.python.dynamic-code-execution"
 
 # Explicitly support the pinned upstream SecretsValidator argument contract only.
@@ -175,12 +177,17 @@ def semgrep_control_result(result, target, *, detected):
                 and same_path(row.get("path")), "FULL_TIER1_SEMGREP_FINDINGS")
 
 
+def semgrep_rules_ok(raw):
+    # SHA-256 verifies the exact reviewed upstream bytes; the Git blob OID
+    # identifies provenance only, and neither constitutes a wheel signature.
+    require(len(raw) == SEMGREP_RULES_SIZE
+            and hashlib.sha256(raw).hexdigest() == SEMGREP_RULES_SHA256,
+            "FULL_TIER1_SEMGREP_RULES")
+
+
 def semgrep_control(run, semgrep, rules, temp):
-    # Match exact upstream Git blob; this is not a signature of the wheel.
     raw = rules.read_bytes()
-    require(len(raw) == 3376 and hashlib.sha1(
-        b"blob " + str(len(raw)).encode() + b"\0" + raw).hexdigest() == SEMGREP_RULES_BLOB,
-        "FULL_TIER1_SEMGREP_RULES")
+    semgrep_rules_ok(raw)
     fixture = temp / "semgrep-control"
     fixture.mkdir()
     target = fixture / "probe.py"
@@ -196,11 +203,12 @@ def semgrep_control(run, semgrep, rules, temp):
                 and target.read_bytes() == content and rules.read_bytes() == raw,
                 "FULL_TIER1_SEMGREP_MUTATION")
     return {"clean": "PASS", "detection": "PASS", "coverage": "PASS",
-            "rules_blob": SEMGREP_RULES_BLOB, "fixture_preserved": "PASS"}
+            "rules_blob": SEMGREP_RULES_BLOB, "rules_sha256": SEMGREP_RULES_SHA256,
+            "fixture_preserved": "PASS"}
 
 
 def bandit_control(run, shim, temp, ini):
-    from check_integrated_bandit import exclusions
+    from check_integrated_bandit import exclusions, INI_BLOB, INI_SHA256
     fixture = temp / "bandit-control"
     fixture.mkdir()
     target = fixture / "probe.py"
@@ -221,7 +229,8 @@ def bandit_control(run, shim, temp, ini):
                      and report["results"][0]["filename"] == str(target)), "FULL_TIER1_BANDIT_CONTROL")
         require(target.read_bytes() == content, "FULL_TIER1_BANDIT_CONTROL_MUTATION")
     return {"clean": "PASS", "detection": "PASS", "ignored_nosec_and_skill_ini": "PASS",
-            "excluded_test": "PASS", "fixture_preserved": "PASS"}
+            "excluded_test": "PASS", "fixture_preserved": "PASS",
+            "ini_blob": INI_BLOB, "ini_sha256": INI_SHA256}
 
 
 def accept(repo, cli, skillspector, bandit, gitleaks, semgrep, semgrep_rules, bandit_packages):

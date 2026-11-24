@@ -145,3 +145,11 @@ Exact subset of seven hash-pinned wheels from existing NVIDIA lock, no extras, h
 ## T12.03.28 — integrated Bandit Docker (candidate)
 
 Pinned NVIDIA contract: recursive root with exact exclusions or named batch, `-f json -q -ll --exclude ... --ini ... --ignore-nosec`; INI Git blob 3d1f1b039c78013871f85efee6dd92d35c89aebd, restricted snapshot, two read-only mounts, seven wheels, no network, nonroot, existing resource limits, bounded output/cleanup. Coverage and report type verification, remap only known paths, discard raw code, receipt of actual scan. NVIDIA requires issue_text, which may contain input-derived data; raw report not published. Six offline regressions; live clean/B307, excluded test, ignored skill .bandit/nosec and policy require CI. No host fallback; standalone parity retained. T12 PARTIAL.
+
+## T12.03.28 — PR result
+
+[CI 45465436002](https://github.com/Sashido01/TESSERA/actions/runs/45465436002) PASS: 617+38=655 tests; integrated Bandit Docker clean/B307/ignored skill INI and nosec/excluded test/source controls PASS, Tier 1 policy PASS. Standalone Bandit 94 Python files/175 advisory findings (2 HIGH B324, 20 MEDIUM B108, 153 LOW), exact host parity. History Docker 947 blobs/12,654,872 bytes/197.37s/0 findings. v0.0.59 main CI 45465154352 and annotated tag verified; v0.0.60 merged into main, tag separate.
+
+## T12.03.29 — Scanner configuration SHA-256 (candidate)
+
+Two B324 findings: SHA-1 was used to compare Git blobs of Semgrep and Bandit configurations. Both now pin exact SHA-256 and size (semgrep_rules.yaml 3376 bytes, `fff4537f6679a52c48e024e001b73e163b24587635a028e5c012583f19876abf`; bandit.ini 355 bytes, `f96ccbcabbdb99f6f6835bac26ee33f92f35fa1c53ee53694668bfac04517387`) from pinned NVIDIA commit 5625c2534bf266f810aea489ffbe69da0bb2645e; independently recomputed Git blob OIDs match upstream. Git blob remains provenance, not configuration security digest. Actual installed wheel checks retained in live controls. Four local exact upstream byte tests PASS; two new repository offline regressions; actual Bandit result and full CI require verification. No suppression or scanner rule change. Native historical Git SHA-1 object identity unchanged. T12 PARTIAL.

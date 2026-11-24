@@ -1,3 +1,4 @@
+import hashlib
 import json
 import pathlib
 import sys
@@ -71,6 +72,19 @@ class IntegratedBanditTests(unittest.TestCase):
                 b.run_container(pathlib.Path("/tmp/stage"), pathlib.Path("/tmp"),
                                 pathlib.Path("/tmp/packages"), ["--version"])
             self.assertEqual(invoke.call_args_list[-1].args[0][:2], ["rm", "--force"])
+
+
+    def test_ini_sha256_pin(self):
+        self.assertEqual(b.INI_SHA256,
+                         "f96ccbcabbdb99f6f6835bac26ee33f92f35fa1c53ee53694668bfac04517387")
+        self.assertEqual(b.INI_SIZE, 355)
+        raw = b"synthetic exact ini"
+        with mock.patch.object(b, "INI_SIZE", len(raw)), \
+                mock.patch.object(b, "INI_SHA256", hashlib.sha256(raw).hexdigest()):
+            b.ini_ok(raw)
+            for bad in (raw[:-1], raw+b"\n", b"x"+raw[1:]):
+                with self.assertRaisesRegex(RuntimeError, "INTEGRATED_BANDIT_INI"):
+                    b.ini_ok(bad)
 
 
 if __name__ == "__main__":
