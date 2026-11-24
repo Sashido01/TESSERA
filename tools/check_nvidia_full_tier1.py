@@ -33,17 +33,10 @@ SEMGREP_CONTROL_RULE = "skillevaluator.python.dynamic-code-execution"
 
 # Explicitly support the pinned upstream SecretsValidator argument contract only.
 # No arbitrary flags, reports on disk, or silent fallback to an older scanner.
-SHIM = r'''import os
-import sys
-args = sys.argv[1:]
-if args == ["version"] or args == ["--version"]:
-    os.execv(BINARY, [BINARY, "version"])
-if (len(args) != 12 or args[:3] != ["detect", "--source", "."]
-        or args[3:9] != ["--report-format", "json", "--report-path", "-", "--exit-code", "10"]
-        or args[9] != "--config" or not os.path.isabs(args[10])
-        or args[11] != "--no-git"):
-    sys.exit(2)
-os.execv(BINARY, [BINARY, *args, "--redact=100", "--max-archive-depth", "0"])
+SHIM = r'''import sys
+sys.path.insert(0, TOOLS)
+from check_integrated_gitleaks import main
+sys.exit(main(sys.argv[1:], ROOT, BINARY))
 '''
 
 
@@ -223,7 +216,9 @@ def accept(repo, cli, skillspector, bandit, gitleaks, semgrep, semgrep_rules):
         private_tmp.mkdir()
         shim = private_bin / "gitleaks"
         require(not any(c.isspace() for c in sys.executable), "FULL_TIER1_PYTHON_PATH")
-        shim.write_text("#!" + sys.executable + "\nBINARY = " + repr(str(gitleaks)) + "\n" + SHIM,
+        shim.write_text("#!" + sys.executable + "\nBINARY = " + repr(str(gitleaks))
+                        + "\nROOT = " + repr(str(temp)) + "\nTOOLS = "
+                        + repr(str(pathlib.Path(__file__).resolve().parent)) + "\n" + SHIM,
                         encoding="utf-8")
         shim.chmod(0o700)
         env.update({"PATH": os.pathsep.join((str(private_bin), str(cli.parent), "/usr/bin", "/bin")),
@@ -293,7 +288,7 @@ def accept(repo, cli, skillspector, bandit, gitleaks, semgrep, semgrep_rules):
             "llm": "DISABLED", "semgrep": "EXECUTED", "skills": results,
             "semgrep_control": semgrep_probe,
             "policy": "ADVISORY_FINDINGS", "certification": "NOT_VERIFIED",
-            "live_shim_control": control}
+            "live_shim_control": control, "gitleaks_isolation": "DOCKER_RESTRICTED_SNAPSHOT"}
 
 
 def main():

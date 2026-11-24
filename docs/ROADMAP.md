@@ -191,3 +191,5 @@ T12.03.08: CI 45391798766 — 513+29 PASS, GOVULN_CONTROL_VERSION BLOCKED; но�
 **T12.03.23:** CI 45439256012 PASS, 629 тестов, три самостоятельных Docker scopes Gitleaks PASS. **T12.03.24 — кандидат:** три точных upstream LICENSE pins Semgrep, два offline теста, wheel/RECORD ожидает CI; OSV и юридическая совместимость остаются открытыми. T12 PARTIAL.
 
 **T12.03.24:** CI 45442813029 PASS, 631 тест, 3/3 upstream license + RECORD MATCH. **T12.03.25 — кандидат:** два TSG1 worker при прежнем resource profile, три регрессии, host parity сохранена. CI обязателен; T12 PARTIAL.
+
+**T12.03.25:** CI 45448926511 PASS, 634 теста, history 243.73s/911 blobs. **T12.03.26 — кандидат:** интегрированный Gitleaks Docker, точный NVIDIA contract, staged snapshot, bounded output, cleanup, восемь регрессий; CI обязателен. T12 PARTIAL.

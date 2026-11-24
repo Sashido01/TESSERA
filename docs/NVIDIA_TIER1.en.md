@@ -117,3 +117,11 @@ Three exact upstream LICENSE texts fully read; Git blob SHA-1 recalculated and m
 ## T12.03.25 — bounded Gitleaks concurrency (candidate)
 
 TSG1 worker uses two concurrent stdin processes, GOMAXPROCS=1 per process, windows of at most two records; no new work submitted after a failed window. Retains 2 CPU/512 MiB/64 PID, all limits/deadlines, controls, host parity, separate scan of every nonempty object. TSP1 unchanged. Three offline regressions (actual synchronization of two mocked scanner calls, stop after failure, expired deadline). Actual speedup/peak memory and Docker workload require CI; unchanged 20-minute job cap. Compare against 425.15s on 902 blobs, no promised speedup. T12 PARTIAL.
+
+## T12.03.25 — PR result
+
+[CI 45448926511](https://github.com/Sashido01/TESSERA/actions/runs/45448926511) PASS: 596+38=634 tests; Docker history 911 blobs / 11,754,891 bytes / 243.73s / 0 findings. Previous PR 425.15s / 902 blobs, observed elapsed reduction 42.7%, not controlled benchmark. v0.0.56 main CI 45448734293 and tag verified; v0.0.57 merged into main, own acceptance separate.
+
+## T12.03.26 — integrated Gitleaks Docker (candidate)
+
+Pinned NVIDIA SecretsValidator: exact 12-argument and version contract; copy only allowed skill/fixture root, byte-identical TOML with restricted schema, preserve relative paths/empty dirs, binary SHA256 before and inside container, one read-only stage mount, no network/nonroot/caps drop, existing cgroups, stdout/stderr per-file RLIMIT_FSIZE, 100s deadline and cleanup. Only NVIDIA-consumed JSON fields plus REDACTED, no raw Match/Line; exit 0/10 preserved. Actual clean/positive controls and integrated policy require CI. Eight new offline regressions. Not proof against host TOCTOU/malicious scanner, daemon failures or hard aggregate disk quota. Standalone host parity retained; no host fallback for integrated mode. T12 PARTIAL.
