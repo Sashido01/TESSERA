@@ -163,6 +163,6 @@ Original project: [Sashido01/TESSERA](https://github.com/Sashido01/TESSERA).
 
 **0.0.30:** [CI 45368434188](https://github.com/Sashido01/TESSERA/actions/runs/45368434188) PASS: 437+19 tests; 585/585 distinct UTF-8 blobs, 5431003 bytes, zero findings, removed-marker fixture PASS, 128.81 s. [CI 45369335974](https://github.com/Sashido01/TESSERA/actions/runs/45369335974) PASS: 443+19 tests; 598 distinct UTF-8 blobs, 5639755 bytes, zero findings; five synthetic rule fixtures PASS; 4 current YAML files and 28 historical rule/blob pairs across 37 commits, zero findings. T12.02.02.02 COMPLETE within declared scope.
 
-**T12.02.02.03:** [direct static SkillSpector 2.13.6](docs/SKILLSPECTOR_REVIEW.en.md), live CI acceptance pending.
+**T12.02.02.03:** [direct static SkillSpector 2.13.6](docs/SKILLSPECTOR_REVIEW.en.md), [CI 45370414762](https://github.com/Sashido01/TESSERA/actions/runs/45370414762) PASS: 454+19 tests; 16/16 files, 100% coverage, complete_with_caveats (4 reference_missing), risk 78/100 HIGH, exit 1 (threshold 50 exceeded), 12 findings (10 MEDIUM, 2 HIGH), zero suppressions, both synthetic fixtures PASS, 13.32 s. T12.02.02.03 COMPLETE within direct static execution scope; findings and full NVIDIA security acceptance remain open.
 
 **T12.02.02.04:** [dependency and license metadata review](docs/DEPENDENCY_REVIEW.en.md), live CI pending.

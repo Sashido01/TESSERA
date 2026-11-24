@@ -163,6 +163,6 @@ NVIDIA SkillEvaluator допускается **только на Tier 1**, по�
 
 **0.0.30:** [CI 45368434188](https://github.com/Sashido01/TESSERA/actions/runs/45368434188) PASS: 437+19 тестов; 585/585 уникальных UTF-8 blob, 5431003 байта, находок нет, удалённый синтетический маркер PASS, 128,81 с. [CI 45369335974](https://github.com/Sashido01/TESSERA/actions/runs/45369335974) PASS: 443+19 тестов; 598 уникальных UTF-8 blob, 5639755 байт, 0 находок; пять синтетических правил PASS; 4 текущих YAML-файла, 28 исторических пар правило/blob из 37 коммитов, 0 находок. T12.02.02.02 COMPLETE в заявленных границах.
 
-**T12.02.02.03:** [прямой статический SkillSpector 2.13.6](docs/SKILLSPECTOR_REVIEW.md), реальная приёмка CI необходима.
+**T12.02.02.03:** [прямой статический SkillSpector 2.13.6](docs/SKILLSPECTOR_REVIEW.md), [CI 45370414762](https://github.com/Sashido01/TESSERA/actions/runs/45370414762) PASS: 454+19 тестов; 16/16 файлов, 100% покрытия, complete_with_caveats (4 reference_missing), риск 78/100 HIGH, код 1 (порог 50 превышен), 12 замечаний (10 MEDIUM, 2 HIGH), 0 подавлений, оба синтетических сценария PASS, 13,32 с. T12.02.02.03 COMPLETE в границах прямого статического выполнения; сами замечания и полная приёмка NVIDIA security остаются открытыми.
 
 **T12.02.02.04:** [CVE и метаданные лицензий зависимостей](docs/DEPENDENCY_REVIEW.md), необходим реальный CI.

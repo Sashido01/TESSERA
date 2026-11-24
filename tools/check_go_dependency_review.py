@@ -50,9 +50,10 @@ def parse_build(raw, root, release, commit):
             root_version = fields[2]
             previous = None
         elif fields[0] == "dep":
-            require(len(fields) in (3, 4) and MODULE.fullmatch(fields[1])
-                    and VERSION.fullmatch(fields[2]) and fields[1] not in modules,
-                    "GO_DEPENDENCY_INVALID")
+            require(len(fields) in (3, 4), "GO_DEPENDENCY_FIELD_COUNT_" + str(len(fields)))
+            require(MODULE.fullmatch(fields[1]), "GO_DEPENDENCY_PATH_INVALID")
+            require(fields[1] not in modules, "GO_DEPENDENCY_DUPLICATE")
+            require(VERSION.fullmatch(fields[2]), "GO_DEPENDENCY_VERSION_UNVERIFIED")
             previous = fields[1]
             modules[previous] = (fields[1], fields[2])
         elif fields[0] == "=>":
