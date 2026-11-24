@@ -160,3 +160,5 @@ NVIDIA SkillEvaluator допускается **только на Tier 1**, по�
 **T12.02.02.01:** [прямой обзор Bandit](docs/BANDIT_REVIEW.md) COMPLETE в границах выполнения прямого обзора. [CI 45365133732](https://github.com/Sashido01/TESSERA/actions/runs/45365133732) PASS: 414+19 тестов, 60 Python-файлов, 87 замечаний (45 runtime, 42 tests; 2 medium, 85 low, 0 high); положительный и отрицательный сценарии PASS; непосредственный обзор 1,69 с. Полный NVIDIA code-integrity и остальные сканеры не подтверждены.
 
 **T12.02.02.02:** [Gitleaks](docs/GITLEAKS_REVIEW.md) — [CI 45367459045](https://github.com/Sashido01/TESSERA/actions/runs/45367459045) PASS: 428+19 тестов, 144/144 отслеживаемых UTF-8 файлов, 998544 байта, находок нет, положительный/отрицательный сценарии и редактирование PASS; 65,29 с. Приёмка снимка COMPLETE; история и правила по пути NOT_VERIFIED; T12.02.02.02 остаётся PARTIAL.
+
+**0.0.30:** реализован обзор содержимого достижимых Git blob; необходим реальный CI.

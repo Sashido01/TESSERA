@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.30 — Reachable Git history content review (T12.02.02.02)
+
+- Gitleaks scans each distinct reachable UTF-8 blob from local refs and HEAD via stdin; validates complete object inventory, byte coverage, immutable inventory and synthetic removed-secret fixture. CI required for acceptance; filename-dependent rules, unavailable refs and unreachable objects not covered.
+
 ## 0.0.29 — Gitleaks text snapshot review (T12.02.02.02)
 
 - Official SHA-256 pinned Gitleaks 8.30.1, separate stdin per tracked UTF-8 file, byte coverage, redaction and exit code checks, negative allow-comment fixture, CI and bilingual documentation. [CI 45367459045](https://github.com/Sashido01/TESSERA/actions/runs/45367459045) PASS: 428+19 tests, 144/144 tracked UTF-8 files, 998544 bytes, zero findings, positive/negative and redaction fixtures PASS; 65.29 s. Snapshot acceptance COMPLETE; history/path-specific rules NOT_VERIFIED; T12.02.02.02 remains PARTIAL.

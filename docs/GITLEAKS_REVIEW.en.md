@@ -24,3 +24,7 @@ GITLEAKS_REVIEW_EXECUTION_PASS confirms the execution contract, not absence of l
 [CI 45367459045](https://github.com/Sashido01/TESSERA/actions/runs/45367459045) PASS: 428+19 tests, 144/144 tracked UTF-8 files, 998544 bytes, zero findings, positive/negative and redaction fixtures PASS; 65.29 s. Snapshot acceptance COMPLETE; history/path-specific rules NOT_VERIFIED; T12.02.02.02 remains PARTIAL.
 
 First CI failed because the synthetic marker used digits outside the upstream AWS rule alphabet. Corrected the marker and added a regression test; no scanner rules disabled.
+
+## Reachable Git history (0.0.30)
+
+A second independent check, `python tools/check_gitleaks_history.py --repo . --cli <path-to-gitleaks>`, inventories all objects reachable from local refs and HEAD using Git with replacement objects disabled, rejects shallow repositories, checks distinct blob sizes and UTF-8, then scans each nonempty blob through stdin using a bounded worker pool. It validates the exact inventory before and after, counts bytes, and verifies a synthetic marker removed in a later commit is still detected. Binary and unsupported encoding block the check; reports remain aggregate-only. This is content scanning, not filename-specific rule validation, remote-unfetched refs, commit messages, unreachable objects or archived material. History execution NOT_VERIFIED until live CI. Findings advisory, execution failures block CI.
