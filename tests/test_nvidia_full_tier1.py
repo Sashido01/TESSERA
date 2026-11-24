@@ -2,6 +2,7 @@
 import copy
 import json
 import subprocess
+import tempfile
 import pathlib
 import sys
 import unittest
@@ -13,19 +14,21 @@ import check_nvidia_full_tier1 as f
 
 class FullTier1Tests(unittest.TestCase):
     def report(self):
-        return {"version": f.VERSION, "workflow": {"tier": 1, "stages": {"llm": {
+        report = {"version": f.VERSION, "workflow": {"tier": 1, "stages": {"llm": {
             "status": "skipped", "reason": "LLM checks disabled by --no-llm."}}},
             "overall_passed": True, "incomplete_scans": [], "results": [
             {"validator": name, "status": "passed", "passed": True, "skipped": False,
              "incomplete_scans": [], "findings": [],
              "scanners": dict([f.SCANNERS[name]]) if name in f.SCANNERS else {}}
             for name in sorted(f.VALIDATORS)]}
+        next(x for x in report["results"] if x["validator"] == "Code Risk Analysis")["scanners"]["semgrep"] = f.SEMGREP_VERSION
+        return report
 
     def test_all_rows_not_certification(self):
         r = f.summary(self.report(), 0)
         self.assertEqual(len(r["validators"]), 13)
         self.assertEqual(r["certification"], "NOT_VERIFIED")
-        self.assertEqual(r["semgrep"], "NOT_RUN")
+        self.assertEqual(r["semgrep"], "EXECUTED")
 
     def test_missing_validator_rejected(self):
         r = self.report()
@@ -136,6 +139,43 @@ class FullTier1Tests(unittest.TestCase):
     def test_clean_security_high_attribution_is_zero(self):
         security = f.summary(self.report(), 0)["validators"]["Security Scan"]
         self.assertEqual(security["high_attribution"], {"aggregate_risk_gate": 0, "other_high": 0})
+
+
+    def test_semgrep_version_required(self):
+        for value in (None, "1.0.0"):
+            r = self.report()
+            scanners = next(x for x in r["results"] if x["validator"] == "Code Risk Analysis")["scanners"]
+            scanners["semgrep"] = value
+            with self.assertRaisesRegex(f.InstallCheckError, "SCANNER_VERSION:semgrep"):
+                f.summary(r, 0)
+
+    def test_semgrep_control_clean_and_positive(self):
+        with tempfile.TemporaryDirectory() as folder:
+            target = pathlib.Path(folder).resolve() / "probe.py"
+            for detected in (False, True):
+                report = {"errors": [], "paths": {"scanned": ["probe.py"]}, "results": (
+                    [{"check_id": f.SEMGREP_CONTROL_RULE, "path": "probe.py"}] if detected else [])}
+                f.semgrep_control_result(subprocess.CompletedProcess([], int(detected),
+                    json.dumps(report).encode(), b""), target, detected=detected)
+
+    def test_semgrep_control_rejects_errors_or_missing_coverage(self):
+        with tempfile.TemporaryDirectory() as folder:
+            target = pathlib.Path(folder).resolve() / "probe.py"
+            for report, code in (({"errors": [{}], "paths": {"scanned": ["probe.py"]}, "results": []}, "REPORT"),
+                                 ({"errors": [], "paths": {"scanned": []}, "results": []}, "COVERAGE")):
+                with self.assertRaisesRegex(f.InstallCheckError, "SEMGREP_" + code):
+                    f.semgrep_control_result(subprocess.CompletedProcess([], 0,
+                        json.dumps(report).encode(), b""), target, detected=False)
+
+    def test_semgrep_control_rejects_wrong_exit_or_rule(self):
+        with tempfile.TemporaryDirectory() as folder:
+            target = pathlib.Path(folder).resolve() / "probe.py"
+            report = {"errors": [], "paths": {"scanned": ["probe.py"]},
+                      "results": [{"check_id": "wrong", "path": "probe.py"}]}
+            for rc, code in ((0, "EXIT"), (1, "FINDINGS")):
+                with self.assertRaisesRegex(f.InstallCheckError, "SEMGREP_" + code):
+                    f.semgrep_control_result(subprocess.CompletedProcess([], rc,
+                        json.dumps(report).encode(), b""), target, detected=True)
 
 
 if __name__ == "__main__":
