@@ -124,6 +124,6 @@ Complete work as small verifiable changes, assigning a new microversion only to 
 - One microversioning core, not four independent implementations; keep host adapters thin.
 - Unknown or unverified behavior must be marked NOT_VERIFIED rather than guessed.
 
-**T12.03.02:** [CI evidence network restriction](RELEASE_CI_SECURITY.en.md) — implementation prepared, actual CI pending. Other Bandit findings open.
+**T12.03.02:** [CI evidence network restriction](RELEASE_CI_SECURITY.en.md) — [CI 45376483433](https://github.com/Sashido01/TESSERA/actions/runs/45376483433) PASS: 493+19 tests, four new regressions PASS, Bandit B310 absent in the repeat review; 110 findings (no HIGH), no rule suppression. T12.03.02 COMPLETE within implemented control and CI scope; live network execution separately NOT_VERIFIED.
 
-**T12.03.03:** [SkillSpector 2.13.7 security upgrade](SKILLSPECTOR_UPGRADE.en.md) — candidate; live acceptance pending. Historical 2.13.6 results retained.
+**T12.03.03:** [SkillSpector 2.13.7 security upgrade](SKILLSPECTOR_UPGRADE.en.md) — [CI 45376675127](https://github.com/Sashido01/TESSERA/actions/runs/45376675127) PASS: 494+19 tests; SkillSpector 2.13.7, 17/17 files, complete, 100%, 16 MEDIUM (AE4 6, AST3 6, AST4 3, LP3 1), zero HIGH, risk 53/100 HIGH, exit 1, zero suppressions, both fixtures PASS, 11.37 s. OSV: 74 Python distributions, zero packages with entries, zero source-commit entries; cryptography 50.0.2, langgraph 1.2.20, pyasn1 0.6.5. T12.03.03 COMPLETE within upgrade and repeat OSV scope; new AST3 and threshold exceedance remain open. Release awaits sequential acceptance.

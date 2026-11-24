@@ -13,3 +13,5 @@ Allow only exact HTTPS api.github.com/repos/OWNER/REPO/actions/runs/ID and .../j
 ## Acceptance
 
 Four regressions: reject redirects, reject invalid URLs before network, correct opener/timeout, changed response URL. They do not substitute for live networking checks or prove process network isolation. No Bandit suppression. B310 may remain a heuristic warning; evaluate the actual control and tests, not warning counts. Actual CI required; other Bandit findings open.
+
+[CI 45376483433](https://github.com/Sashido01/TESSERA/actions/runs/45376483433) PASS: 493+19 tests, four new regressions PASS, Bandit B310 absent in the repeat review; 110 findings (no HIGH), no rule suppression. T12.03.02 COMPLETE within implemented control and CI scope; live network execution separately NOT_VERIFIED.

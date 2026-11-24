@@ -6,11 +6,11 @@ This file tracks changes to the **shared catalog**. Individual skills may mainta
 
 ## 0.0.35 — SkillSpector security upgrade (T12.03.03)
 
-- Candidate 2.13.7, pinned commit/wheel/lock, unchanged static no-LLM contract and zero-suppression enforcement, repeat CVE review. Actual CI required.
+- Candidate 2.13.7, pinned commit/wheel/lock, unchanged static no-LLM contract and zero-suppression enforcement, repeat CVE review. [CI 45376675127](https://github.com/Sashido01/TESSERA/actions/runs/45376675127) PASS: 494+19 tests; SkillSpector 2.13.7, 17/17 files, complete, 100%, 16 MEDIUM (AE4 6, AST3 6, AST4 3, LP3 1), zero HIGH, risk 53/100 HIGH, exit 1, zero suppressions, both fixtures PASS, 11.37 s. OSV: 74 Python distributions, zero packages with entries, zero source-commit entries; cryptography 50.0.2, langgraph 1.2.20, pyasn1 0.6.5. T12.03.03 COMPLETE within upgrade and repeat OSV scope; new AST3 and threshold exceedance remain open. Release awaits sequential acceptance.
 
 ## 0.0.34 — Restrict CI evidence API redirects (T12.03.02)
 
-- Exact GitHub Actions API endpoints, reject redirects before following, verify exact response URL, four regressions. Actual CI required; no Bandit suppression.
+- Exact GitHub Actions API endpoints, reject redirects before following, verify exact response URL, four regressions. [CI 45376483433](https://github.com/Sashido01/TESSERA/actions/runs/45376483433) PASS: 493+19 tests, four new regressions PASS, Bandit B310 absent in the repeat review; 110 findings (no HIGH), no rule suppression. T12.03.02 COMPLETE within implemented control and CI scope; live network execution separately NOT_VERIFIED.
 
 ## 0.0.33 — Portable Microversion Release license and references (T12.03.01)
 
