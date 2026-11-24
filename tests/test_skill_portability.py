@@ -38,6 +38,14 @@ class SkillPortabilityTests(unittest.TestCase):
         header = (ROOT / SKILL / "SKILL.md").read_text(encoding="utf-8").split("\n---\n", 1)[0]
         self.assertRegex(header, r"(?m)^license: MIT$")
 
+    def test_compact_canonical_skill(self):
+        raw = (ROOT / SKILL / "SKILL.md").read_bytes()
+        self.assertLess(len(raw), 10000)
+        self.assertIn(b"0.0.100", raw)
+        self.assertIn(b"RELEASE_NOT_TAGGED", raw)
+        self.assertIn(b"NOT_VERIFIED", raw)
+        self.assertNotIn(b"---\nname:", (ROOT / SKILL / "references" / "SKILL.en.md").read_bytes())
+
     def test_packaged_relative_links(self):
         packaged = {p.as_posix() for p in included_paths(ROOT)}
         self.assertIn(SKILL + "/LICENSE.txt", packaged)

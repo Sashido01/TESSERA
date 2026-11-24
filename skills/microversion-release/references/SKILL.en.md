@@ -2,50 +2,64 @@
 
 [Русский — оригинал](../SKILL.md) | **English — translation**
 
-**For reference only:** the single Agent Skills entry point is the canonical Russian `../SKILL.md`. This file is not an independently loadable skill and intentionally has no YAML skill frontmatter.
+The canonical Russian SKILL.md is the only loadable entry point. This translation intentionally has no YAML skill frontmatter.
 
-## Purpose and limits
+## Purpose and prerequisites
 
-Use this skill when preparing a verified software change, Git commit, tag, or release, and before reporting task completion. It uses the same platform-neutral workflow in Codex, DeepSeek Harness, Claude Code, Hermes, and other Agent Skills readers. It does not depend on one model, provider, operating system, or agent runtime. See [INTEGRATION.en.md](INTEGRATION.en.md) for platform-specific installation.
+One workflow for Codex, Harness, Claude Code, Hermes and other Agent Skills-compatible agents. Independent of model, provider and OS. Requires the target Git repository, its versioning policy and checks; Python 3 for helper scripts. Installation: [INTEGRATION.en.md](INTEGRATION.en.md).
 
-A SKILL.md file cannot enforce execution after each commit by itself. Discovery and activation depend on the host platform. For enforcement, use repository-level instructions, Git/CI checks, or an audited lifecycle hook. Never describe skill discovery as proof of mandatory execution.
+## Limits and authorization
+
+Work only in the explicitly selected project. Reading Git and calculating a version do not authorize writes. Commits, tags and publication require appropriate authorization and adherence to project rules; publication needs separate authorization. Keep the installed skill, security settings, agent memory and other people's files unchanged. Do not bypass checks, move existing tags or force-push. Report BLOCKED if authorization conflicts.
+
+SKILL.md cannot enforce automatic activation. Mandatory execution requires project instructions and independent Git/CI checks or a tested lifecycle hook.
 
 ## Microversion rules
 
-1. New projects start at `0.0.0`. Read the actual project's Git history and metadata. Do not guess the current version or rewrite published tags.
-2. Each independently verified substantive change increments PATCH: `0.0.0 → 0.0.1`, …, `0.0.98 → 0.0.99`.
-3. `.99` is a planned release milestone, not a PATCH limit. When the task has actually finished and mandatory checks have passed, prepare `0.0.99 → 0.1.0`, `0.1.99 → 0.2.0`, or `0.99.99 → 1.0.0`.
-4. If the task remains unfinished at `.99`, continue meaningful verified changes with `.100`, `.101`, and beyond. Release only after task completion and the necessary checks—for example, `0.0.107 → 0.1.0`.
-5. Do not manufacture commits to reach a number. Version metadata, changelogs, and release documents are part of the same release operation.
-6. If mandatory build or test checks fail, do not claim the release succeeded. Fix the issue in a justified verified change and rerun validation.
-7. Do not force this non-standard SemVer workflow onto an existing project with incompatible requirements or rewrite historical releases.
+1. New projects start at 0.0.0. For existing projects, establish the version from metadata and Git; preserve published versions.
+2. Each independently verified substantive change increments PATCH by 1.
+3. .99 is a milestone, not a limit. If the task is complete and mandatory checks pass, prepare 0.0.99 → 0.1.0, 0.1.99 → 0.2.0, or 0.99.99 → 1.0.0.
+4. If unfinished at .99, continue .100, .101 and beyond. Release after actual completion and checks, e.g. 0.0.107 → 0.1.0.
+5. Do not manufacture empty changes for version numbers. VERSION, CHANGELOG and release documents belong to one substantive operation.
+6. Failed builds or mandatory tests mean the release is not ready. Fix the cause and rerun checks.
+7. This is a custom policy, not standard SemVer. Do not impose it on an incompatible project.
 
-The read-only calculator returns `0.0.100` for `python scripts/next_version.py 0.0.99 --mode work`, and `0.1.0` for `python scripts/next_version.py 0.0.107 --mode release`. Release calculation alone does **not** establish readiness.
+## Instructions
 
-## Workflow
+1. Inspect Git root, HEAD, branch, worktree status, tags, version, rules and authorization.
+2. Make a concrete change. Run required builds and tests; do not describe unverified work as complete.
+3. Recheck HEAD and tags. With multiple agents, serialize release operations; block release writes if reliable coordination is unavailable. Do not stage other people's files or the whole worktree blindly.
+4. Calculate the next microversion; update metadata, CHANGELOG and roadmap. Update translations alongside originals when required.
+5. Create a substantive Russian commit unless the project specifies another language. Work microversion tags follow project rules.
+6. After completing the task at the milestone, prepare a MAJOR.MINOR.0 or MAJOR.0.0 release and run actual mandatory checks.
+7. Every successful release requires an annotated Git tag, e.g. v0.1.0 or microversion-release/v0.1.0. Its annotation describes the real outcome. Verify tag object type, nonempty annotation and exact release commit.
+8. Without a valid release tag, report BLOCKED / RELEASE_NOT_TAGGED. For a claimed authorized publication, separately verify the remote tag and identical commit.
+9. A local tag, remote tag, GitHub Release and artifact are separate outcomes. Before reporting, recheck versions, Git, tests, builds, RU/EN documentation and limitations.
 
-1. Inspect the actual repository root, HEAD, branch, worktree, tags, current version, repository rules, and authorization for release operations.
-2. Make a concrete change and run the required tests and build. Do not describe unverified work as complete.
-3. Recheck Git and concurrent release activity before committing. Never blindly stage other people's files using `git add -A`.
-4. Compute the next work microversion, update controlled metadata and the Russian changelog, and update the English translation within the same change when required.
-5. Create a substantive, human-readable Russian commit. Work microversions may have tags according to the project's policy; **release tags are mandatory**.
-6. When the milestone is reached and the task is genuinely complete, prepare the `MAJOR.MINOR.0` or `MAJOR.0.0` release and run the real required build and tests.
-7. **MUST create an annotated Git tag for every successful release**, such as `v0.1.0`. Give it a specific Russian annotation. In shared repositories, use a namespaced tag like `<skill>/v0.1.0` when required. Verify that the Git ref points to a tag object with an annotation and resolves to the exact release commit.
-8. Run `python scripts/release_tag.py verify 0.1.0 --repo <project-root>` for verification. After tests and authorized Git writes, use `python scripts/release_tag.py create 0.1.0 --repo <project-root> --message "Релиз 0.1.0 — <actual result>"` to create it. This does **not** push. See [RELEASE_TAGS.en.md](RELEASE_TAGS.en.md).
-9. If the mandatory tag is missing or wrong, report **BLOCKED / RELEASE_NOT_TAGGED** instead of COMPLETE. If you claim remote publication, separately confirm that the remote contains the annotated tag targeting the same release commit.
-10. A local tag, a remote tag, a GitHub Release, and a build artifact are separate outcomes. Verify each independently.
-11. Before final reporting, verify versions, Git refs, tests, build results, both documentation languages, and limitations.
+## Scripts
 
-## Human-readable history
+Run from the installed skill directory.
 
-Use plain, specific **Russian** in commit subjects, tag annotations, changelogs, and release titles unless a particular project explicitly requires another language. Describe what actually changed, not the tooling action. Avoid vague “chore: bump version” titles or invented verification claims. See [STYLE.en.md](STYLE.en.md).
+| Script | Action | Boundary |
+| --- | --- | --- |
+| scripts/next_version.py | work / release | Calculation only |
+| scripts/release_tag.py | verify / create | create writes a local annotated tag after checks and authorization; no push |
+| scripts/install.py | --platform, --apply | DRY-RUN by default; no overwrite |
 
-## Multi-agent safety
+## Examples
 
-Use one canonical version source per project. Parallel agents require serialized release operations and repeated HEAD/tag checks. Never duplicate version numbers, force-move a tag, force-push, or delete history. If reliable locking or coordination is unavailable, block automatic release and explain why.
+- Unfinished task: python scripts/next_version.py 0.0.99 --mode work → 0.0.100.
+- Completion after .107: python scripts/next_version.py 0.0.107 --mode release → 0.1.0. Calculation does not establish readiness.
+- Verify: python scripts/release_tag.py verify 0.1.0 --repo <project-root>.
+- After successful checks and authorization: python scripts/release_tag.py create 0.1.0 --repo <project-root> --message "Релиз 0.1.0 — исправлен запуск".
+- Missing tag or wrong commit: BLOCKED / RELEASE_NOT_TAGGED. Do not automatically replace an incorrect tag.
+
+See [RELEASE_TAGS.en.md](RELEASE_TAGS.en.md), [STYLE.en.md](STYLE.en.md). Describe the outcome in commits, CHANGELOG, annotations and releases, not formal actions: a specific description of repaired recovery rather than "chore: bump version".
+
+## Troubleshooting
+
+Failed build/test: fix and rerun. Version or HEAD conflict: coordinate changes. Existing tag: verify the target, do not move it. Missing authorization or evidence: BLOCKED or NOT_VERIFIED. Missing automatic activation: verify instructions and independent enforcement for the actual agent.
 
 ## Final report
 
-Report COMPLETE, PARTIAL, BLOCKED, or NOT_VERIFIED; previous/new version; actual changes; test/build evidence; commit SHA and annotated tag SHA; local/remote publication status; whether a GitHub Release exists; and limitations. Without a verified tag, a release is not complete. Do not promise background execution.
-
-**Limit:** this skill specifies mandatory release tagging but a separate trusted Git/CI enforcement mechanism is needed to prevent an agent from bypassing the instructions.
+Report COMPLETE, PARTIAL, BLOCKED or NOT_VERIFIED; prior/new versions, actual changes, tests and build, commit SHA and annotated tag object SHA, local/remote publication, GitHub Release/artifact presence and limitations. A release without a verified tag is incomplete. Do not promise background execution.

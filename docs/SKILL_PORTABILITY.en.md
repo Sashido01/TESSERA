@@ -9,3 +9,5 @@ Fix: standalone LICENSE.txt with exact root MIT bytes, license: MIT in canonical
 No scanner rules disabled, no thresholds or weights changed. No score improvement is claimed before new CI. Real agent-client scenarios, full legal compatibility, MP3/RA1 risk and other findings remain separate tasks.
 
 Status: implementation prepared; actual CI acceptance required.
+
+Canonical SKILL.md shortened from 11279 to 8876 UTF-8 bytes, below the pinned static profile's 10000-byte custom-provider recommendation. The microversion rules, mandatory tag gate, explicit authorization, coordination and reporting remain; prerequisites, script table, examples and troubleshooting are explicit. Description begins with purpose, no experimental blanket tool permissions added. Regression checks byte limit and required markers; real client activation remains NOT_VERIFIED.

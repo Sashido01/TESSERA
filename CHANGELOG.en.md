@@ -6,7 +6,7 @@ This file tracks changes to the **shared catalog**. Individual skills may mainta
 
 ## 0.0.33 — Portable Microversion Release license and references (T12.03.01)
 
-- Standalone MIT license, portable references, corrected distribution guidance, ZIP and official local installation regressions. Actual CI acceptance required.
+- Standalone MIT license, portable references, corrected distribution guidance, ZIP and official local installation regressions. Canonical SKILL.md compacted to 8876 UTF-8 bytes; explicit authorization, script table and troubleshooting. Actual CI acceptance required.
 
 ## 0.0.32 — Dependency CVE and license metadata review (T12.02.02.04)
 
