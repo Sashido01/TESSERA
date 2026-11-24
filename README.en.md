@@ -54,7 +54,7 @@ These commands print `0.0.100` and `0.1.0`, respectively. **The second command o
 
 ## Safe official GitHub CLI local installation check
 
-CI tests actual `gh skill install --from-local --dir` followed by `gh skill list` on a temporary skill copy. **Direct local installation may overwrite existing files without `--force`**: only use a new empty directory, and prefer the safe offline installer for existing projects. Remote `--pin` installation remains NOT_VERIFIED. [Details](docs/GH_SKILL_INSTALL.en.md).
+CI tests actual `gh skill install --from-local --dir` followed by `gh skill list` on a temporary skill copy. **Low-level InstallLocal lacks an overwrite check; the CLI checks existing destinations.** Use a fresh directory and an independent guard. Remote `--pin` installation was verified in T10.02. [Details](docs/GH_SKILL_INSTALL.en.md).
 
 **T09.10 — COMPLETE:** the real v0.0.21 ZIP was signed and independently verified (SHA-256, manifest, Sigstore/SLSA). [Evidence](docs/TRUSTED_BUILD.en.md). Acceptance applies only to that file, not later versions. No GitHub Release was created.
 
@@ -150,3 +150,5 @@ Original project: [Sashido01/TESSERA](https://github.com/Sashido01/TESSERA).
 **T10.02 — COMPLETE:** isolated remote install with official `gh 2.105.0` using a fully qualified Git ref and SHA, file and metadata checks, pinned update --dry-run and duplicate refusal. [Live CI PASS](https://github.com/Sashido01/TESSERA/actions/runs/45351217500). [Details](docs/GH_SKILL_INSTALL.en.md). Agent-client activation remains unverified.
 
 **T10.03.01 — COMPLETE (harness):** actual update and guarded staged re-pin harness; local edits block the guarded transition. Native update is tested against synthetic edits. [Live CI PASS](https://github.com/Sashido01/TESSERA/actions/runs/45352932764); native local-edit removal confirmed. Do not apply this harness to user profiles. [Details](docs/GH_SKILL_INSTALL.en.md).
+
+**T10.03.02:** local fixture for independent skill tags and actual official gh installation/collisions; acceptance requires CI. Remote namespaced pin and T16 remain unverified. [Details](docs/GH_SKILL_INSTALL.en.md).
