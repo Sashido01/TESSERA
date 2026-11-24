@@ -122,6 +122,9 @@ jobs:
       - name: Проверить статические профили и русскоязычную оценку NVIDIA Tier 1
         run: python tools/check_nvidia_static_review.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/skillevaluator"
 
+      - name: Проверить безопасность Python прямым запуском Bandit
+        run: python tools/check_bandit_review.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/bandit"
+
   tag_microversion:
     name: Создать аннотированный тег проверенной версии
     needs: validate
