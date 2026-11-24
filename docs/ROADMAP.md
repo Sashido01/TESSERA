@@ -183,3 +183,5 @@ T12.03.08: CI 45391798766 — 513+29 PASS, GOVULN_CONTROL_VERSION BLOCKED; но�
 **T12.03.20:** unshare BLOCKED на GitHub Ubuntu 26.04 (CI 45427736161); без изменения AppArmor выбран отдельный обязательный Docker synthetic preflight с проверкой cgroup и границ доступа. CI обязателен; не изоляция сканеров. T12 PARTIAL.
 
 **T12.03.20:** CI 45428224320 PASS, 604 теста, Docker synthetic PASS. **T12.03.21 — кандидат:** Gitleaks tracked UTF-8 stdin в Docker, сравнение с host, TSG1, девять регрессий; CI обязателен, history/path не изолированы. T12 PARTIAL.
+
+**T12.03.21:** CI 45432568241 PASS, 613 тестов, 177 файлов и 1 404 601 байт, Docker Gitleaks parity PASS. **T12.03.22 — кандидат:** пакетная изоляция достижимых исторических blobs, проверка OID, snapshot, host parity, семь регрессий; CI обязателен. T12 PARTIAL.

@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.54 — Containerized history scanning (T12.03.22)
+
+- Batched blob transport, OID checks and host parity; seven regressions. CI required, T12 PARTIAL.
+
 ## 0.0.53 — Isolated Gitleaks (T12.03.21)
 
 - Tracked UTF-8 host/container parity, TSG1, pinned binary, nine regressions. CI required, T12 PARTIAL.

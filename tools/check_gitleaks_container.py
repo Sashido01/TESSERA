@@ -112,6 +112,18 @@ def accept(repo, cli, host_file):
     host = json.loads(raw[len(prefix):])
     require(host.get("execution") == "PASS" and host.get("snapshot_sha256") == snapshot_digest(before),
             "CONTAINER_HOST_SNAPSHOT_MISMATCH")
+    report, digest = run_records(cli, records_for(data))
+    verify(report, host, digest)
+    require(fingerprint(inventory(repo)) == before, "CONTAINER_SOURCE_MUTATED")
+    # Report only already validated counts; never emit frame digest or raw worker output.
+    return {"execution": "PASS", "scope": "TRACKED_UTF8_CONTENT_STDIN_DOCKER",
+            "version": VERSION, "files": report["files"], "bytes_scanned": report["bytes_scanned"],
+            "findings": report["findings"], "host_parity": "PASS", "frame_digest": "PASS",
+            "fixture_redaction": "PASS", "source_preserved": "PASS",
+            "history": "NOT_RUN", "path_specific_rules": "NOT_RUN"}
+
+
+def run_records(cli, records, timeout=300):
     with tempfile.TemporaryDirectory(prefix="tessera-isolated-") as folder:
         home = pathlib.Path(folder)
         stage = home / "stage"
@@ -127,7 +139,7 @@ def accept(repo, cli, host_file):
         stage.chmod(0o555)
         name = "tessera-gitleaks-" + uuid.uuid4().hex
         with tempfile.TemporaryFile() as frame, tempfile.TemporaryFile() as out, tempfile.TemporaryFile() as err:
-            digest = encode(records_for(data), frame)
+            digest = encode(records, frame)
             frame.seek(0)
             required(args_for(name, stage), home, "CONTAINER_CREATE_FAILED")
             try:
@@ -135,23 +147,18 @@ def accept(repo, cli, host_file):
                        "DOCKER_CONFIG": str(home / "docker-config")}
                 result = subprocess.run([*DOCKER, "start", "--attach", "--interactive", name],
                                         cwd=home, env=env, stdin=frame, stdout=out, stderr=err,
-                                        timeout=300, check=False)
+                                        timeout=timeout, check=False)
                 require(result.returncode == 0, "CONTAINER_WORKER_FAILED")
                 out.seek(0)
                 raw = out.read(LIMIT + 1)
                 require(len(raw) <= LIMIT and err.tell() == 0, "CONTAINER_REPORT_LIMIT_OR_STDERR")
                 report = json.loads(raw)
-                verify(report, host, digest)
+                require(isinstance(report, dict) and report.get("digest") == digest,
+                        "CONTAINER_FRAME_DIGEST")
             finally:
                 required(["rm", "--force", name], home, "CONTAINER_CLEANUP_FAILED")
                 stage.chmod(0o755)
-    require(fingerprint(inventory(repo)) == before, "CONTAINER_SOURCE_MUTATED")
-    # Report only already validated counts; never emit frame digest or raw worker output.
-    return {"execution": "PASS", "scope": "TRACKED_UTF8_CONTENT_STDIN_DOCKER",
-            "version": VERSION, "files": report["files"], "bytes_scanned": report["bytes_scanned"],
-            "findings": report["findings"], "host_parity": "PASS", "frame_digest": "PASS",
-            "fixture_redaction": "PASS", "source_preserved": "PASS",
-            "history": "NOT_RUN", "path_specific_rules": "NOT_RUN"}
+    return report, digest
 
 
 def snapshot_digest(mapping):
