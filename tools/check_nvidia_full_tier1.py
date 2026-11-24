@@ -68,10 +68,18 @@ def summary(report, rc):
         findings = row.get("findings")
         require(isinstance(findings, list) and len(findings) <= 10000, "FULL_TIER1_FINDINGS")
         counts = {s: 0 for s in ("critical", "high", "medium", "low", "info")}
+        high_attribution = {"aggregate_risk_gate": 0, "other_high": 0}
         for item in findings:
             require(isinstance(item, dict) and isinstance(item.get("severity"), str)
                     and item["severity"].lower() in counts, "FULL_TIER1_FINDING")
-            counts[item["severity"].lower()] += 1
+            severity = item["severity"].lower()
+            counts[severity] += 1
+            if name == "Security Scan" and severity == "high":
+                # Only the exact pinned upstream structured identifier denotes the
+                # aggregate gate. Unknown identifiers remain other HIGH findings.
+                is_gate = (item.get("category") == "SECURITY"
+                           and item.get("check_name") == "skillspector_risk_score")
+                high_attribution["aggregate_risk_gate" if is_gate else "other_high"] += 1
         scanners = row.get("scanners", {})
         require(isinstance(scanners, dict), "FULL_TIER1_SCANNERS")
         if name in SCANNERS:
@@ -81,6 +89,8 @@ def summary(report, rc):
                     and status in ("passed", "failed"), "FULL_TIER1_SCANNER_INCOMPLETE:" + scanner)
         states[name] = {"status": status.upper(), "skipped": row["skipped"],
                         "incomplete": bool(row["incomplete_scans"]), "findings": counts}
+        if name == "Security Scan":
+            states[name]["high_attribution"] = high_attribution
     overall = report.get("overall_passed")
     require(type(overall) is bool and (rc == 0) == overall, "FULL_TIER1_EXIT_MISMATCH")
     require(isinstance(report.get("incomplete_scans"), list), "FULL_TIER1_INCOMPLETE_FIELD")

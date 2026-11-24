@@ -29,3 +29,11 @@ Explicit 11 check groups and 13 validator rows including dependency. Pinned Skil
 ## T12.03.14 — live Gitleaks adapter control (candidate)
 
 The real pinned binary is invoked through the same private shim with the exact upstream argument contract in a separate temporary directory with a synthetic TOML rule. Clean file: exit 0, empty JSON; nonfunctional synthetic marker: exit 10, one finding of the expected rule and file, Secret=REDACTED, marker absent from stdout and stderr. Fixture/config bytes and fixture directory entries are checked. Five offline regressions. Do not emit the marker or raw report; live CI acceptance required. This is a shim control with a custom rule, not proof of upstream allowlist/detector completeness, network isolation, or NVIDIA certification. T12 PARTIAL.
+
+## T12.03.14 — PR result
+
+[CI 45405865725](https://github.com/Sashido01/TESSERA/actions/runs/45405865725) PASS: 548+29=577 tests; real shim clean/detection/stdout-stderr redaction/fixture entries PASS. Overall policy FAIL, 1 HIGH and 19 MEDIUM in Security Scan; Semgrep NOT_RUN. v0.0.45 main CI 45405654421 and annotated tag verified; v0.0.46 merged into main, its own acceptance separate.
+
+## T12.03.15 — aggregate HIGH finding attribution (candidate)
+
+[Pinned upstream](https://github.com/NVIDIA/SkillEvaluator/blob/5625c2534bf266f810aea489ffbe69da0bb2645e/src/skillevaluator/validators/security.py#L5693-L5703) adds a separate HIGH finding with category SECURITY and check_name skillspector_risk_score when effective_score > 50 and there are no individual CRITICAL/HIGH findings. The JSON reporter preserves structured check_name through Finding.to_dict(). Thus the integrated report's 1 HIGH alongside direct SkillSpector's 0 HIGH and 53/100 is consistent with the aggregate gate, but the previous integrated report did not publish the exact identifier. New high_attribution counts only the exact category/check_name combination for HIGH in Security Scan; all other HIGH findings count as other_high. No findings, severity, policy verdict, thresholds or scanner execution are changed. Messages, paths and arbitrary identifiers are not emitted. Three regressions; live CI must confirm actual counts. T12 PARTIAL; Semgrep and network sandbox remain open.

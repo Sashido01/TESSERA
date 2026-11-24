@@ -29,3 +29,11 @@
 ## T12.03.14 — живой контроль адаптера Gitleaks (кандидат)
 
 Реальный закреплённый бинарник вызывается через тот же частный shim с точным контрактом upstream, в отдельном временном каталоге с синтетическим TOML-правилом. Чистый файл: exit 0, пустой JSON; искусственный нерабочий маркер: exit 10, одна находка ожидаемого правила и файла, Secret=REDACTED, маркер отсутствует в stdout и stderr. Сверяются байты fixture/config и состав каталога fixture. Пять офлайн регрессий. Не выводить маркер или сырой отчёт; обязательна живая приёмка CI. Это контроль shim с собственным правилом, не доказательство upstream allowlist/полноты детектора, не тест сетевой изоляции и не сертификация NVIDIA. T12 PARTIAL.
+
+## T12.03.14 — результат PR
+
+[CI 45405865725](https://github.com/Sashido01/TESSERA/actions/runs/45405865725) PASS: 548+29=577 тестов, clean/detection/stdout-stderr redaction/fixture entries PASS реального shim. Общий policy FAIL, 1 HIGH и 19 MEDIUM в Security Scan; Semgrep NOT_RUN. v0.0.45 main CI 45405654421 и аннотированный тег подтверждены; v0.0.46 принят в main, его собственная приёмка отдельно.
+
+## T12.03.15 — происхождение агрегированной HIGH-находки (кандидат)
+
+[Закреплённый upstream](https://github.com/NVIDIA/SkillEvaluator/blob/5625c2534bf266f810aea489ffbe69da0bb2645e/src/skillevaluator/validators/security.py#L5693-L5703) добавляет отдельную HIGH-находку с category SECURITY и check_name skillspector_risk_score, если effective_score > 50 и нет отдельных CRITICAL/HIGH. JSON reporter сохраняет структурированный check_name через Finding.to_dict(). Поэтому 1 HIGH интегрированного отчёта при 0 HIGH прямого SkillSpector и 53/100 согласуется с агрегированным gate, но точный идентификатор предыдущего интегрированного отчёта не опубликован. Новый агрегат high_attribution различает только точное сочетание category/check_name для HIGH в Security Scan; остальные HIGH считаются other_high. Никакие findings, severity, policy verdict, пороги и scanner execution не изменены. Не выводятся сообщения, пути или произвольные идентификаторы. Три регрессии; живой CI должен подтвердить реальные счётчики. T12 PARTIAL, Semgrep и сетевой sandbox открыты.

@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.47 — Tier 1 aggregate HIGH finding attribution (T12.03.15)
+
+- Separate aggregate_risk_gate and other_high counts, original severity and policy unchanged; three regressions. Live CI acceptance required.
+
 ## 0.0.46 — Live Tier 1 Gitleaks redaction control (T12.03.14)
 
 - Real shim clean and synthetic finding controls, stdout/stderr redaction and fixture preservation; five regressions. CI required; upstream completeness and sandbox not verified.
