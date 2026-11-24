@@ -53,3 +53,11 @@ Use NVIDIA upstream lock 5625c2534bf266f810aea489ffbe69da0bb2645e, blob 11859086
 ## T12.03.17 — skill Git helper hardening (candidate)
 
 Based on the 19 MEDIUM review (PR 48, comment 7135272307): production AST4 corresponds to actual Git invocation; each call limited to 60 s, absolute executable from absolute PATH entries, closed stdin, shell=False, fixed errors without raw diagnostics, post-capture limit of 1,048,576 characters. Six regressions; memory/pipe risk, trusted PATH/config, Windows and races remain limitations. AST4 may remain as an expected subprocess finding; no suppressions. CI required, T12 PARTIAL.
+
+## T12.03.17 — PR result
+
+[CI 45421559705](https://github.com/Sashido01/TESSERA/actions/runs/45421559705) PASS: 556+35=591 tests, all six new regressions. SkillSpector 53/100, 19 MEDIUM, 0 suppressions, coverage 100% of inspected files, Code Risk Analysis PASSED; policy FAIL unchanged. v0.0.48 main CI 45421312225 and annotated tag verified; v0.0.49 merged into main, its acceptance separate.
+
+## T12.03.18 — static test imports (candidate)
+
+Three test modules replace fixed-file importlib loading with ordinary imports from scripts in the current trusted checkout: reject conflicting sys.modules cache, temporarily prepend the directory to sys.path, restore after import, verify __file__ against the expected source. Three module-origin checks; existing scenarios retained. This simplifies test code, not a sandbox; checkout and Python import hooks must remain trusted. No changes to scanners, thresholds, suppressions, production skill code or permissions. CI must confirm regressions and actual AST3 counts; score reduction is not promised. T12 PARTIAL.

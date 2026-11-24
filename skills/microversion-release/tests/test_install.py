@@ -1,16 +1,27 @@
-import importlib.util
 import pathlib
+import sys
 import tempfile
 import unittest
 from unittest import mock
 
 PATH = pathlib.Path(__file__).resolve().parents[1] / "scripts" / "install.py"
-spec = importlib.util.spec_from_file_location("skill_installer", PATH)
-module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(module)
+# A test must exercise this checkout, not an unrelated installed/cached module.
+cached = sys.modules.get("install")
+if cached is not None and pathlib.Path(getattr(cached, "__file__", "") or ".").resolve() != PATH:
+    raise RuntimeError("Unexpected cached test module")
+sys.path.insert(0, str(PATH.parent))
+try:
+    import install as module
+finally:
+    sys.path.pop(0)
+if pathlib.Path(module.__file__).resolve() != PATH:
+    raise RuntimeError("Unexpected test module origin")
 
 
 class InstallerTests(unittest.TestCase):
+    def test_import_origin(self):
+        self.assertEqual(pathlib.Path(module.__file__).resolve(), PATH)
+
     def test_platform_directory_mapping(self):
         with tempfile.TemporaryDirectory() as directory:
             root = pathlib.Path(directory)
