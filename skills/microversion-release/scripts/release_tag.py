@@ -11,6 +11,8 @@ import sys
 
 VERSION = re.compile(r"^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.0$")
 PREFIX = re.compile(r"^(?:[a-z0-9]+(?:-[a-z0-9]+)*/)*$")
+GIT_TIMEOUT = 60
+MAX_GIT_OUTPUT = 1024 * 1024
 
 
 class TagError(ValueError):
@@ -52,14 +54,39 @@ def child_environment() -> dict[str, str]:
     return result
 
 
+def git_executable(env: dict[str, str]) -> pathlib.Path:
+    # Only explicit absolute PATH entries; never search cwd or relative entries.
+    # The installation and absolute PATH directories still must be trusted.
+    name = "git.exe" if os.name == "nt" else "git"
+    for entry in env.get("PATH", "").split(os.pathsep):
+        directory = pathlib.Path(entry)
+        if not directory.is_absolute():
+            continue
+        candidate = directory / name
+        if candidate.is_file() and os.access(candidate, os.X_OK):
+            return candidate.resolve(strict=True)
+    raise TagError("GIT_EXECUTABLE_NOT_FOUND")
+
+
 def git(repo: pathlib.Path, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
     env = child_environment()
-    proc = subprocess.run(
-        ["git", "--no-replace-objects", "-C", str(repo), *args],
-        text=True, encoding="utf-8", capture_output=True, check=False, env=env,
-    )
+    try:
+        executable = git_executable(env)
+        proc = subprocess.run(
+            [str(executable), "--no-replace-objects", "-C", str(repo), *args],
+            text=True, encoding="utf-8", capture_output=True, check=False, env=env,
+            shell=False, stdin=subprocess.DEVNULL, timeout=GIT_TIMEOUT,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise TagError("GIT_TIMEOUT: проверьте состояние тега перед повторной операцией") from exc
+    except (OSError, UnicodeError) as exc:
+        raise TagError("GIT_EXECUTION_FAILED") from exc
+    # Post-capture limit, not a bound on process memory or pipe output.
+    if len(proc.stdout) + len(proc.stderr) > MAX_GIT_OUTPUT:
+        raise TagError("GIT_OUTPUT_LIMIT")
     if check and proc.returncode:
-        raise TagError(f"Git: {proc.stderr.strip() or proc.stdout.strip()}")
+        # Do not publish untrusted Git diagnostics, paths or signing-helper output.
+        raise TagError("GIT_EXECUTION_FAILED")
     return proc
 
 

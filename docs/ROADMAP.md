@@ -171,3 +171,5 @@ T12.03.08: CI 45391798766 — 513+29 PASS, GOVULN_CONTROL_VERSION BLOCKED; но�
 **T12.03.14:** [CI 45405865725](https://github.com/Sashido01/TESSERA/actions/runs/45405865725) PASS, 548+29 тестов; живой shim-контроль PASS, policy FAIL. **T12.03.15 — кандидат:** [атрибуция HIGH](NVIDIA_TIER1.md) по точному upstream category/check_name, без подавлений и изменения порогов; три регрессии, реальный CI обязателен. T12 PARTIAL.
 
 **T12.03.15:** [CI 45418208676](https://github.com/Sashido01/TESSERA/actions/runs/45418208676) PASS, 551+29, aggregate_risk_gate=1, other_high=0, policy FAIL. **T12.03.16 — кандидат:** [Semgrep 1.182.0](NVIDIA_TIER1.md), upstream lock, локальные правила и живые контроли, обязательная строка scanner, OSV/лицензии, пять регрессий; CI обязателен. T12 PARTIAL.
+
+**T12.03.16:** [CI 45419767513](https://github.com/Sashido01/TESSERA/actions/runs/45419767513) PASS, 585 тестов, Semgrep EXECUTED; 8 OSV ID в 3 пакетах и 3 UNKNOWN license metadata открыты. **T12.03.17 — кандидат:** усиление Git helper навыка, timeout, абсолютный executable, безопасные ошибки, шесть регрессий, без подавлений. T12 PARTIAL; CI обязателен.

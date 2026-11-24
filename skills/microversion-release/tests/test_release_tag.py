@@ -139,5 +139,47 @@ class ReleaseTagTests(unittest.TestCase):
                 self.assertEqual(os.getenv("TESSERA_PRIVATE_FIXTURE"), "synthetic marker")
 
 
+    def test_git_lookup_ignores_empty_and_relative_path(self):
+        with self.assertRaisesRegex(module.TagError, "GIT_EXECUTABLE_NOT_FOUND"):
+            module.git_executable({"PATH": os.pathsep.join(("", ".", "relative"))})
+
+    def test_git_invocation_uses_absolute_executable_and_timeout(self):
+        with mock.patch.object(module.subprocess, "run") as run:
+            run.return_value = subprocess.CompletedProcess([], 0, "", "")
+            module.git(self.repo, "rev-parse", "HEAD")
+            argv = run.call_args.args[0]
+            kwargs = run.call_args.kwargs
+            self.assertTrue(pathlib.Path(argv[0]).is_absolute())
+            self.assertEqual(kwargs["timeout"], module.GIT_TIMEOUT)
+            self.assertEqual(kwargs["stdin"], subprocess.DEVNULL)
+            self.assertIs(kwargs["shell"], False)
+
+    def test_git_timeout_does_not_expose_diagnostics(self):
+        with mock.patch.object(module.subprocess, "run", side_effect=subprocess.TimeoutExpired(
+                ["git"], 60, output=b"synthetic private stdout", stderr=b"synthetic private stderr")):
+            with self.assertRaisesRegex(module.TagError, "GIT_TIMEOUT") as caught:
+                module.git(self.repo, "rev-parse", "HEAD")
+            self.assertNotIn("synthetic private", str(caught.exception))
+
+    def test_git_failure_does_not_expose_diagnostics(self):
+        with mock.patch.object(module.subprocess, "run", return_value=subprocess.CompletedProcess(
+                [], 1, "synthetic private stdout", "synthetic private stderr")):
+            with self.assertRaisesRegex(module.TagError, "GIT_EXECUTION_FAILED") as caught:
+                module.git(self.repo, "rev-parse", "HEAD")
+            self.assertNotIn("synthetic private", str(caught.exception))
+
+    def test_git_output_limit_applies_even_if_failure_allowed(self):
+        with mock.patch.object(module, "MAX_GIT_OUTPUT", 10), mock.patch.object(
+                module.subprocess, "run", return_value=subprocess.CompletedProcess([], 1, "123456", "12345")):
+            with self.assertRaisesRegex(module.TagError, "GIT_OUTPUT_LIMIT"):
+                module.git(self.repo, "rev-parse", "HEAD", check=False)
+
+    def test_git_unavailable_fails_closed(self):
+        with mock.patch.object(module, "git_executable", side_effect=OSError("synthetic private path")):
+            with self.assertRaisesRegex(module.TagError, "GIT_EXECUTION_FAILED") as caught:
+                module.git(self.repo, "rev-parse", "HEAD")
+            self.assertNotIn("synthetic private", str(caught.exception))
+
+
 if __name__ == "__main__":
     unittest.main()
