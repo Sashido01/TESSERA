@@ -156,3 +156,5 @@ NVIDIA SkillEvaluator допускается **только на Tier 1**, по�
 **T12.01 — COMPLETE в пределах schema/quality:** ограниченная оценка NVIDIA SkillEvaluator 1.2.0 (schema/quality, --no-llm, advisory), [реальный CI PASS: 75/100](https://github.com/Sashido01/TESSERA/actions/runs/45358283596). [Границы и зависимости](docs/NVIDIA_TIER1.md). Полный Tier 1 не подтверждён; Tier 2/3 запрещены.
 
 **T12.02.01:** [локальные статические проверки и профили NVIDIA](docs/NVIDIA_STATIC_REVIEW.md), без LLM; исходная и локализованная оценка, PII/license/unicode/lint, шесть модельных профилей. [Реальный CI PASS](https://github.com/Sashido01/TESSERA/actions/runs/45360122208): 75.0/78.8, 18/16 замечаний; T12.02.01 COMPLETE в пределах стенда. Не равно запуску агента. T12.02 PARTIAL.
+
+**T12.02.02.01:** [прямой обзор Bandit](docs/BANDIT_REVIEW.md) добавлен в CI; реальный CI PASS необходим для приёмки. Полный NVIDIA code-integrity и остальные сканеры не подтверждены.

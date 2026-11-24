@@ -156,3 +156,5 @@ Original project: [Sashido01/TESSERA](https://github.com/Sashido01/TESSERA).
 **T12.01 — COMPLETE within schema/quality:** focused NVIDIA SkillEvaluator 1.2.0 evaluation (schema/quality, --no-llm, advisory), [live CI PASS: 75/100](https://github.com/Sashido01/TESSERA/actions/runs/45358283596). [Scope and dependencies](docs/NVIDIA_TIER1.en.md). Full Tier 1 unverified; Tier 2/3 forbidden.
 
 **T12.02.01:** [NVIDIA local static checks and profiles](docs/NVIDIA_STATIC_REVIEW.en.md), no LLM; default and localized quality, PII/license/unicode/lint, six simulated profiles. [Live CI PASS](https://github.com/Sashido01/TESSERA/actions/runs/45360122208): 75.0/78.8, 18/16 findings; T12.02.01 COMPLETE within fixture scope. Not actual agent execution. T12.02 PARTIAL.
+
+**T12.02.02.01:** [direct Bandit review](docs/BANDIT_REVIEW.en.md) added to CI; live CI PASS required for acceptance. Full NVIDIA code-integrity and other scanners remain unverified.
