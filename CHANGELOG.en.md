@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.27 — NVIDIA static review and language alternatives (T12.02.01)
+
+- Compare default and localized quality, sanitized finding codes and four dimensions. PII/license/unicode/lint, negative Unicode fixture, six static profiles and Codex scenarios. No LLM, Tier 2/3 or external scanners. Acceptance pending; T12 PARTIAL. Updated bilingual docs.
+
 ## 0.0.26 — Focused NVIDIA SkillEvaluator Tier 1 evaluation (T12.01)
 
 - Pinned official 1.2.0 wheel and 19 dependencies from uv.lock by SHA-256, separate Linux CPython 3.13 environment, schema/quality only without LLM or extras. Verify JSON, exit code and negative case. Findings advisory; execution failure blocks CI. Live acceptance [CI 45358283596](https://github.com/Sashido01/TESSERA/actions/runs/45358283596): schema/quality PASS, 75/100, 18 findings, 393+19 tests PASS; corrected first-run JSON validator name mismatch (QUALITY). T12.01 COMPLETE within stated scope.
