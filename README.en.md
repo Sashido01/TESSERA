@@ -164,3 +164,5 @@ Original project: [Sashido01/TESSERA](https://github.com/Sashido01/TESSERA).
 **0.0.30:** [CI 45368434188](https://github.com/Sashido01/TESSERA/actions/runs/45368434188) PASS: 437+19 tests; 585/585 distinct UTF-8 blobs, 5431003 bytes, zero findings, removed-marker fixture PASS, 128.81 s. Separate path-constrained rules review awaits live CI.
 
 **T12.02.02.03:** [direct static SkillSpector 2.13.6](docs/SKILLSPECTOR_REVIEW.en.md), live CI acceptance pending.
+
+**T12.02.02.04:** [dependency and license metadata review](docs/DEPENDENCY_REVIEW.en.md), live CI pending.

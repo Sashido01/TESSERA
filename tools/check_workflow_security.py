@@ -73,6 +73,11 @@ def validate_workflow(workflow: str) -> list[str]:
         errors.append("Нет обязательной проверки правил Gitleaks по пути")
     if 'e2674da339b0bddc6e565d059c0577c6d9cd25da' not in validate or 'e7b46c55e726405b2a068d375d1ee8e799e15d86f3fc05f84feb5ba962198b15' not in validate or 'run: python tools/check_skillspector_review.py --repo . --cli "$RUNNER_TEMP/skillspector/bin/skillspector"' not in validate:
         errors.append("Нет обязательной закреплённой проверки SkillSpector")
+    if ('tools/check_dependency_review.py --locked tools/skills-ref-requirements.txt' not in validate
+            or 'tools/check_dependency_review.py --root skillevaluator==1.2.0' not in validate
+            or 'tools/check_dependency_review.py --root skillspector==2.13.6' not in validate
+            or 'run: python tools/check_go_dependency_review.py' not in validate):
+        errors.append("Нет обязательного аудита CVE и лицензий")
     if "contents: write" in validate:
         errors.append("Право записи обнаружено в проверяющей задаче")
     if "needs: validate" not in tagging:
