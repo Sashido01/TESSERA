@@ -30,6 +30,20 @@ class BanditReviewTests(unittest.TestCase):
         self.assertEqual(result["by_rule"][0]["rule"], "B307")
         self.assertNotIn("raw", str(result))
 
+    def test_real_bandit_relative_prefix(self):
+        data = self.report()
+        data['metrics']['./fixture.py'] = data['metrics'].pop('fixture.py')
+        row = self.finding()
+        row['filename'] = './fixture.py'
+        data['results'] = [row]
+        self.assertEqual(b.summarize(data, 1, {'fixture.py'})['findings'], 1)
+
+    def test_duplicate_alias_blocked(self):
+        data = self.report()
+        data['metrics']['./fixture.py'] = {'loc': 1}
+        with self.assertRaisesRegex(b.InstallCheckError, 'COVERAGE'):
+            b.summarize(data, 0, {'fixture.py'})
+
     def test_incomplete_scan(self):
         data = self.report()
         data["errors"] = [{"reason": "syntax error"}]

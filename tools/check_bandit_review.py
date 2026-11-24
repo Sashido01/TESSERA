@@ -54,13 +54,20 @@ def fingerprint(data):
     return {name: hashlib.sha256(content).hexdigest() for name, content in data.items()}
 
 
+def reported_name(name):
+    # Bandit 1.9.4 prefixes explicit relative targets with './'.
+    return name[2:] if isinstance(name, str) and name.startswith('./') else name
+
+
 def summarize(report, rc, expected):
     require(isinstance(report, dict) and rc in (0, 1)
             and report.get("errors") == [], "BANDIT_SCAN_INCOMPLETE")
     metrics, rows = report.get("metrics"), report.get("results")
     require(isinstance(metrics, dict) and isinstance(rows, list)
             and len(rows) <= 10000, "BANDIT_REPORT_INVALID")
-    require(set(metrics) == set(expected) | {"_totals"},
+    names = [reported_name(name) for name in metrics if name != "_totals"]
+    require("_totals" in metrics and len(names) == len(expected)
+            and set(names) == set(expected),
             "BANDIT_COVERAGE_MISMATCH")
     require(all(isinstance(m, dict) and type(m.get("loc")) is int and m["loc"] >= 0
                 for m in metrics.values()), "BANDIT_METRICS_INVALID")
@@ -68,7 +75,7 @@ def summarize(report, rc, expected):
     counter = collections.Counter()
     for row in rows:
         require(isinstance(row, dict), "BANDIT_FINDING_INVALID")
-        name, rule = row.get("filename"), row.get("test_id")
+        name, rule = reported_name(row.get("filename")), row.get("test_id")
         severity, confidence = row.get("issue_severity"), row.get("issue_confidence")
         require(isinstance(name, str) and name in expected
                 and isinstance(rule, str) and re.fullmatch(r"B[0-9]{3}", rule)
