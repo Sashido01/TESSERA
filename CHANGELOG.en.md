@@ -4,6 +4,16 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.21 — Fix ZIP preparation before Sigstore attestation (T09.10)
+
+- Live signing run `45347443989` for `v0.0.19` failed: tag checks and 333+19 tests passed, but the source ZIP builder refused `PACKAGE_RUNTIME_FILE_INVALID`. Sigstore and artifact upload were SKIPPED; no downloadable artifacts exist.
+- Root cause: Python imports runtime modules from `skills/microversion-release/scripts/` during tests, creating `__pycache__` which the strict runtime ZIP allowlist correctly rejects.
+- Enabled `PYTHONDONTWRITEBYTECODE=1` in both signing and main CI validation jobs. Main CI now performs a mandatory **post-test** reproducible ZIP smoke into `dist/post-tests`, matching the signing order.
+- Added negative regression tests for missing bytecode isolation, missing post-test smoke and cache contamination. The strict ZIP allowlist remains unchanged.
+- Updated bilingual ROADMAP, TRUSTED_BUILD, README and AGENTS. A fresh live signing run on the newly confirmed annotated version is still required: no attestation has been verified.
+
+**T09.10 status:** PARTIAL / SIGNED_ARTIFACT_NOT_VERIFIED until a real successful signing workflow, downloaded ZIP and independent Sigstore verification.
+
 ## 0.0.20 — Safe local Agent Skill installation via official GitHub CLI (T10.01)
 
 - Added real `gh skill install --from-local --dir` and `gh skill list --dir` CI scenarios for `microversion-release`, confined to temporary directories with no access to user profiles.
