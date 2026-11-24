@@ -30,6 +30,8 @@ python skills/microversion-release/scripts/install.py --platform codex --project
 
 The default is `DRY-RUN`; no files are modified until `--apply`. Existing skill directories are **never overwritten**. For custom profiles use `--platform generic --target-root <skills-dir> --apply`, after verifying the actual destination.
 
+The installer rejects symbolic links and redirected components of the standard project path, as well as links and special files in the source skill. An explicit `--target-root` resolves to the user-selected directory; this does not authorize following links inside the skill. Checks assume a trusted filesystem without concurrent path substitution; TOCTOU race protection and native Windows junction tests remain NOT_VERIFIED.
+
 Hermes also supports installation via the GitHub skills catalog:
 
 ```bash
