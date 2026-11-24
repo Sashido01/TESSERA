@@ -23,6 +23,26 @@ MAX_REPORT = 16 * 1024 * 1024
 STATUS = {"complete", "complete_with_caveats", "partial"}
 LEVELS = {"CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO", "NONE"}
 ID = re.compile(r"[A-Za-z][A-Za-z0-9_.-]{0,79}\Z")
+PUBLIC_RELATIVE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]*(?:/[A-Za-z0-9][A-Za-z0-9_.-]*)*\Z")
+MAX_LOCATION_ROWS = 1000
+
+
+def finding_location(row, expected):
+    """Return a bounded primary location bound to the inspected source inventory."""
+    location = row.get("location")
+    if not isinstance(location, dict):
+        return None
+    name = location.get("file")
+    start = location.get("start_line")
+    end = location.get("end_line")
+    if (not isinstance(name, str) or len(name) > 240
+            or not PUBLIC_RELATIVE.fullmatch(name) or name not in expected
+            or type(start) is not int or not 1 <= start <= expected[name] + 1
+            or (end is not None and (type(end) is not int or not start <= end <= expected[name] + 1))):
+        return None
+    # Only approved inventory paths and bounded numeric coordinates leave the wrapper.
+    # Never echo scanner-provided snippets, context, URLs, occurrence metadata or messages.
+    return {"file": name, "start_line": start, "end_line": end}
 
 
 def summary(data, rc, expected):
@@ -72,12 +92,22 @@ def summary(data, rc, expected):
             and counts["findings_after_filtering"] <= counts["findings_before_filtering"],
             "SP_FINDINGS_INVALID")
     counter = collections.Counter()
+    locations = []
+    unresolved_locations = 0
+    omitted_locations = 0
     for row in rows:
         require(isinstance(row, dict), "SP_FINDING_INVALID")
         code, severity = row.get("id"), row.get("severity")
         require(isinstance(code, str) and ID.fullmatch(code)
                 and isinstance(severity, str) and severity in LEVELS, "SP_FINDING_INVALID")
         counter[code, severity] += 1
+        location = finding_location(row, expected)
+        if location is None:
+            unresolved_locations += 1
+        elif len(locations) >= MAX_LOCATION_ROWS:
+            omitted_locations += 1
+        else:
+            locations.append({"rule": code, "severity": severity, **location})
     reasons = collections.Counter()
     for key in ("ledger_exceptions", "scope_exclusions"):
         values = coverage.get(key)
@@ -102,6 +132,10 @@ def summary(data, rc, expected):
             "risk_score": score, "scanner_exit": rc, "risk_threshold_exceeded": score > 50,
             "severity": risk["severity"], "findings": len(rows),
             "suppressed_count": suppressed,
+            "primary_locations": sorted(locations, key=lambda x: (x["rule"], x["file"], x["start_line"], x["end_line"] or 0, x["severity"])),
+            "primary_locations_unresolved": unresolved_locations,
+            "primary_locations_omitted": omitted_locations,
+            "location_scope": "PRIMARY_ONLY_NOT_ALL_OCCURRENCES",
             "by_rule": [{"rule": rule, "severity": sev, "count": n}
                         for (rule, sev), n in sorted(counter.items())],
             "coverage_reasons": [{"source": src, "reason": code, "count": n}

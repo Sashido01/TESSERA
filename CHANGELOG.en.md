@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.37 — Evidence-bound SkillSpector finding locations (T12.03.05)
+
+- Candidate: primary locations only for known relative paths in the inspected skill inventory; bounded output with explicit unresolved and omitted counts. No snippets, raw messages or occurrence metadata; unchanged rules and thresholds. Three regressions; real CI acceptance required.
+
 ## 0.0.36 — Offline installer path hardening (T12.03.04)
 
 - Candidate: reject redirection of standard project paths and links/special files in the source; recheck destination after creating parent directories. Regressions for external links, dangling links and source links. CI not yet accepted; TOCTOU races and Windows junctions NOT_VERIFIED.
