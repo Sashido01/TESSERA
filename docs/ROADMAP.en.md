@@ -16,7 +16,7 @@
 - `NOT_STARTED`: implementation has not begun; this roadmap is not evidence of completion.
 - `BLOCKED`: a specific blocker and its cause have been recorded.
 
-The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.20`. They do **not** prove execution in installed agent clients or local Windows environments.
+The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.21`. They do **not** prove execution in installed agent clients or local Windows environments.
 
 ## Foundation stages T00–T07
 
