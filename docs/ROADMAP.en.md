@@ -71,7 +71,7 @@ Complete work as small verifiable changes, assigning a new microversion only to 
 
 ### T12 — Free NVIDIA SkillEvaluator assessment
 
-**Priority P1 · Requires T11 · Status PARTIAL.** T12.01: [focused NVIDIA 1.2.0 evaluation](NVIDIA_TIER1.en.md), schema/quality, no LLM, hash-locked wheels, live CI pending. Evaluate **Tier 1 only** in isolation, covering static quality and compatibility checks without mandatory LLM API usage. Measure dependencies, real runtime, output formats, exit codes, and false positives on TESSERA. Distinguish supported agent hosts; keep a separate DeepSeek Harness acceptance matrix.
+**Priority P1 · Requires T11 · Status PARTIAL.** T12.01: [focused NVIDIA 1.2.0 evaluation](NVIDIA_TIER1.en.md), schema/quality, no LLM, hash-locked wheels, [live CI PASS](https://github.com/Sashido01/TESSERA/actions/runs/45358283596), T12.01 COMPLETE within schema/quality (75/100, 18 findings). T12.02: evaluate keyless static security checks and harness-check, false positives and resource use. Evaluate **Tier 1 only** in isolation, covering static quality and compatibility checks without mandatory LLM API usage. Measure dependencies, real runtime, output formats, exit codes, and false positives on TESSERA. Distinguish supported agent hosts; keep a separate DeepSeek Harness acceptance matrix.
 
 **Acceptance:** reproducible Tier 1 reports including environment, findings, and measured CI costs. **Tier 2, Tier 3, and mandatory paid APIs are explicitly out of scope.**
 
