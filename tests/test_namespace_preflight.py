@@ -35,5 +35,17 @@ class NamespaceTests(unittest.TestCase):
             self.assertIn(f"--{key.lower()}={value}:{value}", argv)
 
 
+    def test_diagnostics_are_fixed_and_distinguish_tools(self):
+        for raw, expected in (
+            (b"unshare: unshare failed: Operation not permitted", "NAMESPACE_UNSHARE_PERMISSION_DENIED"),
+            (b"unshare: unknown failure synthetic private path", "NAMESPACE_UNSHARE_FAILED"),
+            (b"prlimit: failed: Permission denied", "NAMESPACE_PRLIMIT_PERMISSION_DENIED"),
+            (b"prlimit: bad argument synthetic private path", "NAMESPACE_PRLIMIT_FAILED"),
+            (b"synthetic private path", "NAMESPACE_EXECUTION_FAILED"),
+        ):
+            with self.subTest(expected=expected):
+                self.assertEqual(p.diagnostic_code(raw), expected)
+
+
 if __name__ == "__main__":
     unittest.main()
