@@ -8,7 +8,7 @@ This file tracks changes to the **shared catalog**. Individual skills may mainta
 
 - Actual gh 2.105.0 update --unpin --dry-run and --unpin --all harness against disposable synthetic local edits; verify new Git tree and directory replacement behavior.
 - Independently install two exact pins, refuse local edits or staged mutation, retain backup, test injected failure and explicit rollback. 12 offline scenario tests plus mandatory CI guard test.
-- T10.03.01 acceptance requires GH_SKILL_UPDATE_PASS; T10.03.02 (multi-skill collisions and independent tags), crash recovery, concurrent writes and client activation remain unverified. Updated bilingual docs.
+- T10.03.01 COMPLETE within the harness: [live CI 45352932764](https://github.com/Sashido01/TESSERA/actions/runs/45352932764), GH_SKILL_UPDATE_PASS, 375+19 tests passed; native removal of synthetic local edits confirmed; T10.03.02 (multi-skill collisions and independent tags), crash recovery, concurrent writes and client activation remain unverified. Updated bilingual docs.
 
 ## 0.0.23 — Verify remote skill installation at exact tag and SHA (T10.02)
 
