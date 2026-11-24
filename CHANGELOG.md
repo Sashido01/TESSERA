@@ -4,6 +4,12 @@
 
 Здесь фиксируются изменения **общего каталога**. Истории отдельных навыков могут вестись в их собственных папках.
 
+## 0.0.23 — Проверка удалённой установки навыка по точному тегу и SHA (T10.02)
+
+- Добавлен реальный CI-сценарий официального gh 2.105.0: установка из публичной TESSERA по refs/tags/v0.0.22 и полному commit SHA, проверка независимого Git tree, состава и байтов файлов, метаданных pin и обнаружения через gh skill list.
+- Проверяются отказ повторной установки без --force и пропуск закреплённого навыка при update --dry-run без изменения файлов. Изоляция HOME и GH_CONFIG_DIR, только read-only CI token, отрицательные автономные тесты.
+- T10.02 принимается только по живому GH_SKILL_REMOTE_PIN_PASS; T10 в целом PARTIAL. Реальные обновления, несколько навыков и клиентская активация не подтверждены. Обновлены RU/EN документация и ROADMAP.
+
 ## 0.0.22 — Зафиксирована реальная независимая приёмка подписанного ZIP (T09.10)
 
 - На аннотированном теге `v0.0.21` (commit `0c83ae9ef119a0cfc9d07c83dbae91e5d026e407`) [signing run 45348928593](https://github.com/Sashido01/TESSERA/actions/runs/45348928593) завершился SUCCESS; [Attestation 71489191](https://github.com/Sashido01/TESSERA/attestations/71489191), [Actions Artifact 14898798605](https://github.com/Sashido01/TESSERA/actions/runs/45348928593/artifacts/14898798605). Независимо проверены ZIP (105849 байт), SHA-256 `55db489f0219739e9296fc941fa51fa58d23c3277878fe5e3a352642947eeb73` и все 17 файлов манифеста. Владелец на Windows подтвердил этот хеш и предоставил вывод официального `gh 2.105.0`: `Verification succeeded!`, одна аттестация соответствует SLSA v1, точным repository, commit, tag, signer workflow, OIDC issuer и GitHub-hosted runner. T09.10 COMPLETE, `SIGNED_ARTIFACT=PASS` только для проверенного ZIP v0.0.21.
