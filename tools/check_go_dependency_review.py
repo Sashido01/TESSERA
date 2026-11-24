@@ -6,6 +6,8 @@ import argparse
 import collections
 import concurrent.futures
 import json
+import hashlib
+import tarfile
 import pathlib
 import re
 import subprocess
@@ -28,9 +30,51 @@ ROOTS = {
     "gitleaks": ("github.com/zricethezav/gitleaks/v8", "v8.30.1", "83d9cd684c87d95d656c1458ef04895a7f1cbd8e"),
 }
 MAX_RESPONSE = 1024 * 1024
+MAX_ARCHIVE = 64 * 1024 * 1024
+MAX_BINARY = 128 * 1024 * 1024
+ARCHIVES = {
+    "gh": ("79e7ab5db738c48777b696e374f8b428f0647debfb424f44d2f426370407fe2f",
+           "gh_2.105.0_linux_amd64/bin/gh"),
+    "gitleaks": ("551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb",
+                 "gitleaks"),
+}
 
 
-def parse_build(raw, root, release, commit):
+def sha256_stream(stream, limit):
+    size = 0
+    digest = hashlib.sha256()
+    while chunk := stream.read(1024 * 1024):
+        size += len(chunk)
+        require(size <= limit, "GO_INPUT_SIZE_LIMIT")
+        digest.update(chunk)
+    require(size > 0, "GO_INPUT_EMPTY")
+    return digest.hexdigest(), size
+
+
+def verify_binary(archive, binary, digest, member):
+    require(archive.is_file() and not archive.is_symlink()
+            and binary.is_file() and not binary.is_symlink(), "GO_ARCHIVE_INPUT_INVALID")
+    # Verify and inspect the same open archive. Never extract paths to disk.
+    with archive.open("rb") as stream:
+        observed, _ = sha256_stream(stream, MAX_ARCHIVE)
+        require(observed == digest, "GO_ARCHIVE_DIGEST_MISMATCH")
+        stream.seek(0)
+        with tarfile.open(fileobj=stream, mode="r:gz") as tar:
+            matches = [row for row in tar if row.name == member]
+            require(len(matches) == 1 and matches[0].isreg()
+                    and 0 < matches[0].size <= MAX_BINARY, "GO_ARCHIVE_MEMBER_INVALID")
+            source = tar.extractfile(matches[0])
+            require(source is not None, "GO_ARCHIVE_MEMBER_INVALID")
+            with source:
+                expected = sha256_stream(source, MAX_BINARY)
+            require(expected[1] == matches[0].size, "GO_ARCHIVE_MEMBER_INVALID")
+    with binary.open("rb") as stream:
+        actual = sha256_stream(stream, MAX_BINARY)
+    require(actual == expected, "GO_BINARY_DIGEST_MISMATCH")
+    return actual[0]
+
+
+def parse_build(raw, root, release, commit, *, verified_file_build=False):
     lines = raw.decode("utf-8", errors="strict").splitlines()
     require(1 < len(lines) <= 3000, "GO_BUILD_INFO_INVALID")
     header = lines[0].rsplit(": ", 1)
@@ -40,11 +84,16 @@ def parse_build(raw, root, release, commit):
     root_version = None
     source_revision = None
     previous = None
+    entrypoint = None
     for line in lines[1:]:
         fields = line.strip().split()
         if not fields:
             continue
-        if fields[0] == "mod":
+        if fields[0] == "path":
+            require(entrypoint is None and len(fields) == 2, "GO_ENTRYPOINT_INVALID")
+            entrypoint = fields[1]
+            previous = None
+        elif fields[0] == "mod":
             require(root_version is None and len(fields) in (3, 4) and fields[1] == root
                     and fields[2] in (release, "(devel)"), "GO_ROOT_MISMATCH")
             root_version = fields[2]
@@ -70,7 +119,19 @@ def parse_build(raw, root, release, commit):
             previous = None
             if fields[0] == "build" and len(fields) == 2 and fields[1].startswith("vcs.revision="):
                 source_revision = fields[1].split("=", 1)[1]
-    require(root_version is not None, "GO_ROOT_MODULE_NOT_RECORDED:" + root)
+    root_source = "BUILD_METADATA_AND_PINNED_RELEASE"
+    if root_version is None:
+        # v8.30.1 .goreleaser.yml builds main.go, not the package.
+        # This exact representation was reproduced using go build main.go.
+        require(verified_file_build and root == ROOTS["gitleaks"][0]
+                and entrypoint == "command-line-arguments"
+                and modules.get(root) == (root, "(devel)"),
+                "GO_ROOT_MODULE_NOT_RECORDED:" + root)
+        del modules[root]
+        root_version = "NOT_RECORDED"
+        root_source = "PINNED_ARCHIVE_RELEASE_METADATA_ONLY"
+    else:
+        require(root not in modules, "GO_DUPLICATE_ROOT")
     require(len(modules) > 0, "GO_NO_DEPENDENCIES:" + root)
     require(len(modules) <= 300, "GO_DEPENDENCY_LIMIT:" + root + ":" + str(len(modules)))
     require(source_revision is None or source_revision == commit, "GO_SOURCE_REVISION_MISMATCH")
@@ -78,6 +139,7 @@ def parse_build(raw, root, release, commit):
     result = {(name, version) for name, version in modules.values() if version != "(devel)"}
     result.add((root, release))
     return {"toolchain": toolchain, "root_build_version": root_version,
+            "root_version_source": root_source,
             "source_revision": "MATCH" if source_revision else "NOT_RECORDED",
             "modules": sorted(result), "unversioned_modules": unresolved,
             "dependency_coverage": "PARTIAL" if unresolved else "VERSIONED"}
@@ -112,7 +174,7 @@ def license_lookup(item):
         return {"status": "NOT_VERIFIED", "licenses": []}
 
 
-def accept(gh, gitleaks):
+def accept(gh, gitleaks, gh_archive, gitleaks_archive):
     started = time.monotonic()
     reports = {}
     all_modules = set()
@@ -124,9 +186,9 @@ def accept(gh, gitleaks):
                             capture_output=True, timeout=10, check=True)
         match = re.fullmatch(rb"go version (go[0-9A-Za-z.]+) [a-z0-9_/]+\s*", go.stdout)
         require(match is not None, "GO_PARSER_VERSION_INVALID")
-        for label, path in (("gh", gh), ("gitleaks", gitleaks)):
+        for label, path, archive in (("gh", gh, gh_archive), ("gitleaks", gitleaks, gitleaks_archive)):
+            digest = verify_binary(archive, path, *ARCHIVES[label])
             path = path.resolve(strict=True)
-            require(path.is_file(), "GO_BINARY_MISSING")
             root, release, commit = ROOTS[label]
             result = subprocess.run(["go", "version", "-m", str(path)], cwd=temp, env=env,
                                     capture_output=True, timeout=30, check=True)
@@ -137,7 +199,10 @@ def accept(gh, gitleaks):
                 "dep_rows": sum(bool(row) and row[0] == "dep" for row in rows),
                 "path_rows": sum(bool(row) and row[0] == "path" for row in rows),
                 "unversioned_dep_rows": sum(len(row) >= 3 and row[0] == "dep" and row[2] == "(devel)" for row in rows)}, sort_keys=True))
-            report = parse_build(result.stdout, root, release, commit)
+            report = parse_build(result.stdout, root, release, commit,
+                                 verified_file_build=(label == "gitleaks"))
+            report["archive_verification"] = "PASS"
+            report["binary_sha256"] = digest
             all_modules.update(report["modules"])
             queries = [{"package": {"ecosystem": "Go", "name": name}, "version": version}
                        for name, version in report["modules"]]
@@ -175,10 +240,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--gh", type=pathlib.Path, required=True)
     parser.add_argument("--gitleaks", type=pathlib.Path, required=True)
+    parser.add_argument("--gh-archive", type=pathlib.Path, required=True)
+    parser.add_argument("--gitleaks-archive", type=pathlib.Path, required=True)
     args = parser.parse_args()
     try:
-        result = accept(args.gh, args.gitleaks)
-    except (InstallCheckError, OSError, ValueError, UnicodeError, subprocess.SubprocessError) as exc:
+        result = accept(args.gh, args.gitleaks, args.gh_archive, args.gitleaks_archive)
+    except (InstallCheckError, OSError, ValueError, UnicodeError, subprocess.SubprocessError, tarfile.TarError) as exc:
         print("BLOCKED: " + (str(exc) if isinstance(exc, InstallCheckError)
                               else "GO_REVIEW_RUNTIME_FAILED"), file=sys.stderr)
         return 1
