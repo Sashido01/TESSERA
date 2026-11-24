@@ -146,11 +146,11 @@ jobs:
       - name: Проверить пять правил Gitleaks, зависящих от имени файла
         run: python tools/check_gitleaks_paths.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1"
 
-      - name: Получить закреплённый источник SkillSpector 2.13.6
+      - name: Получить закреплённый источник SkillSpector 2.13.7
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 (node24)
         with:
           repository: NVIDIA/SkillSpector
-          ref: e2674da339b0bddc6e565d059c0577c6d9cd25da
+          ref: c323ad4c43e3c8f2de051572cc25b2711d11e648
           path: .external/skillspector
           fetch-depth: 1
           persist-credentials: false
@@ -158,9 +158,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git -C .external/skillspector rev-parse HEAD)" = "e2674da339b0bddc6e565d059c0577c6d9cd25da"
+          test "$(git -C .external/skillspector rev-parse HEAD)" = "c323ad4c43e3c8f2de051572cc25b2711d11e648"
           "$RUNNER_TEMP/nvidia-tier1/bin/uv" export --project .external/skillspector --frozen --offline --no-default-groups --no-emit-project --format requirements-txt --output-file "$RUNNER_TEMP/skillspector-requirements.txt"
-          printf '\n%s\n' 'skillspector @ https://github.com/NVIDIA/SkillSpector/releases/download/v2.13.6/skillspector-2.13.6-py3-none-any.whl --hash=sha256:e7b46c55e726405b2a068d375d1ee8e799e15d86f3fc05f84feb5ba962198b15' >> "$RUNNER_TEMP/skillspector-requirements.txt"
+          printf '\n%s\n' 'skillspector @ https://github.com/NVIDIA/SkillSpector/releases/download/v2.13.7/skillspector-2.13.7-py3-none-any.whl --hash=sha256:e2356aa11f0d484f789543f25da6208fe2408641c8b16e7b59bc6600c5c39ffb' >> "$RUNNER_TEMP/skillspector-requirements.txt"
           python -m venv "$RUNNER_TEMP/skillspector"
           "$RUNNER_TEMP/skillspector/bin/python" -m pip --isolated install --disable-pip-version-check --no-cache-dir --only-binary=:all: --require-hashes -r "$RUNNER_TEMP/skillspector-requirements.txt"
           "$RUNNER_TEMP/skillspector/bin/python" -m pip check
@@ -172,7 +172,7 @@ jobs:
       - name: Проверить CVE и лицензии зависимостей NVIDIA Tier 1
         run: '"$RUNNER_TEMP/nvidia-tier1/bin/python" tools/check_dependency_review.py --root skillevaluator==1.2.0 --source-commit 5625c2534bf266f810aea489ffbe69da0bb2645e'
       - name: Проверить CVE и лицензии зависимостей SkillSpector
-        run: '"$RUNNER_TEMP/skillspector/bin/python" tools/check_dependency_review.py --root skillspector==2.13.6 --source-commit e2674da339b0bddc6e565d059c0577c6d9cd25da'
+        run: '"$RUNNER_TEMP/skillspector/bin/python" tools/check_dependency_review.py --root skillspector==2.13.7 --source-commit c323ad4c43e3c8f2de051572cc25b2711d11e648'
       - name: Проверить Go build metadata, CVE и лицензии gh и Gitleaks
         run: python tools/check_go_dependency_review.py --gh "$RUNNER_TEMP/gh_2.105.0_linux_amd64/bin/gh" --gitleaks "$RUNNER_TEMP/gitleaks-8.30.1" --gh-archive "$RUNNER_TEMP/gh_2.105.0_linux_amd64.tar.gz" --gitleaks-archive "$RUNNER_TEMP/gitleaks_8.30.1_linux_x64.tar.gz"
 

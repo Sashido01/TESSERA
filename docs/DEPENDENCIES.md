@@ -53,3 +53,7 @@
 **T12.02.02.03:** SkillSpector 2.13.6 ограничен изолированным статическим обзором, закреплёнными источником/wheel/lock hashes, без LLM; реальная приёмка необходима. [SKILLSPECTOR_REVIEW](SKILLSPECTOR_REVIEW.md).
 
 [CI 45370414762](https://github.com/Sashido01/TESSERA/actions/runs/45370414762) PASS: 454+19 тестов; 16/16 файлов, 100% покрытия, complete_with_caveats (4 reference_missing), риск 78/100 HIGH, код 1 (порог 50 превышен), 12 замечаний (10 MEDIUM, 2 HIGH), 0 подавлений, оба синтетических сценария PASS, 13,32 с. T12.02.02.03 COMPLETE в границах прямого статического выполнения; сами замечания и полная приёмка NVIDIA security остаются открытыми.
+
+**T12.03.03:** [обновление SkillSpector 2.13.7 по безопасности](SKILLSPECTOR_UPGRADE.md) — кандидат; необходим реальный CI. Исторические результаты 2.13.6 сохранены.
+
+[CI 45376675127](https://github.com/Sashido01/TESSERA/actions/runs/45376675127) PASS: 494+19 тестов; SkillSpector 2.13.7, 17/17 файлов, complete, 100%, 16 MEDIUM (AE4 6, AST3 6, AST4 3, LP3 1), HIGH 0, риск 53/100 HIGH, код 1, подавлений 0, оба fixture PASS, 11,37 с. OSV: 74 Python-дистрибутива, 0 пакетов с записями, 0 по исходному коммиту; cryptography 50.0.2, langgraph 1.2.20, pyasn1 0.6.5. T12.03.03 COMPLETE в границах обновления и повторного OSV; новые AST3 и превышение порога остаются открытыми. Выпуск ожидает последовательной приёмки.

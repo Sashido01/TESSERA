@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""T12.02.02.03: isolated SkillSpector 2.13.6 static-only acceptance."""
+"""T12.02.02.03: isolated SkillSpector 2.13.7 static-only acceptance."""
 from __future__ import annotations
 
 import argparse
@@ -18,7 +18,7 @@ import time
 from check_nvidia_tier1 import NAME, require
 from check_official_local_install import InstallCheckError, fixture_env, tree_fingerprint
 
-VERSION = "2.13.6"
+VERSION = "2.13.7"
 MAX_REPORT = 16 * 1024 * 1024
 STATUS = {"complete", "complete_with_caveats", "partial"}
 LEVELS = {"CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO", "NONE"}
@@ -96,7 +96,7 @@ def summary(data, rc, expected):
     # Exit 2 or execution_successful=False is an execution failure, not a finding.
     require(rc == int(score > 50), "SP_RISK_EXIT_MISMATCH")
     suppressed = data.get("suppressed_count")
-    require(type(suppressed) is int and 0 <= suppressed <= 100000, "SP_SUPPRESSION_INVALID")
+    require(type(suppressed) is int and suppressed == 0, "SP_SUPPRESSION_INVALID")
     return {"analysis_status": status, "coverage_percent": pct, "expected_files": len(expected),
             "reported_files": len(observed), "missing_files": missing, **counts,
             "risk_score": score, "scanner_exit": rc, "risk_threshold_exceeded": score > 50,

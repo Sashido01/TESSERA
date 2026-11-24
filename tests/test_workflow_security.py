@@ -91,11 +91,11 @@ class WorkflowSecurityTests(unittest.TestCase):
         self.assertTrue(any("SkillSpector" in e for e in module.validate_workflow(modified)))
 
     def test_skillspector_digest_is_required(self):
-        modified = WORKFLOW.replace("e7b46c55e726405b2a068d375d1ee8e799e15d86f3fc05f84feb5ba962198b15", "0" * 64)
+        modified = WORKFLOW.replace("e2356aa11f0d484f789543f25da6208fe2408641c8b16e7b59bc6600c5c39ffb", "0" * 64)
         self.assertTrue(any("SkillSpector" in e for e in module.validate_workflow(modified)))
 
     def test_dependency_review_is_required(self):
-        for value in ("--locked tools/skills-ref-requirements.txt", "--root skillevaluator==1.2.0", "--root skillspector==2.13.6"):
+        for value in ("--locked tools/skills-ref-requirements.txt", "--root skillevaluator==1.2.0", "--root skillspector==2.13.7"):
             modified = WORKFLOW.replace("tools/check_dependency_review.py " + value, "echo omitted")
             self.assertTrue(any("аудита CVE" in e for e in module.validate_workflow(modified)))
 
