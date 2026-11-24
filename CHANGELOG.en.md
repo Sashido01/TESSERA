@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.42 — Shared Gitleaks safe launch contract (T12.03.10)
+
+- Fixed stdout/redact and archive-depth options; bounded temporary-file invariants, four regressions. CI required; not an OS sandbox.
+
 ## 0.0.41 — Minimum tool scope and Go audit evidence (T12.03.09)
 
 - Explicit skill access boundaries without preapproved tools, independent Git/CI verification; actual v0.0.40 evidence and OSV/Govulncheck ID comparison. No LP3 suppression; CI required.
