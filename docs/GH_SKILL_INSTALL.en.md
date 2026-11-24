@@ -61,3 +61,13 @@ Example separate installation after passing CI (fresh empty directory; review th
 gh skill install Sashido01/TESSERA microversion-release --pin refs/tags/v0.0.22 --dir <new-empty-skills-dir>
 ~~~
 
+## T10.03.01 — actual update and guarded re-pin
+
+Reviewed [official gh 2.105.0 update.go](https://github.com/cli/cli/blob/v2.105.0/pkg/cmd/skills/update/update.go). `--unpin` allows update discovery without retaining the pin, but does not select a specific replacement tag. The CLI resolves the latest GitHub Release, falling back to the default branch when no release exists. Successful updates replace directory contents; local edits and extra files can disappear. Some restore errors are ignored in upstream rollback code, so recovery under all failures is not guaranteed.
+
+`tools/check_official_skill_update.py` uses disposable CI directories, a read-only token and fixed annotated tags v0.0.5 and v0.0.23 with distinct Git trees. Native update expectations come from the exact remote main SHA checked before/after the operation. A real `update --unpin --dry-run` is followed by `--unpin --all` against synthetic local edits only. Removal of the synthetic edits confirms a risk, not a feature. The actual updated tree, absence of pin and file inventory are checked.
+
+The guarded exact re-pin scenario never uses `--force` or directly updates a live skill. It independently installs both versions, snapshots all entries (including hidden/extra files, mode, size and SHA-256), refuses local edits or staged mutations, renames the old copy to backup and the new copy into the target on the same filesystem. It checks injected failure after moving the old copy, original byte restoration and explicit rollback after success while retaining the newer copy. Symlinks, hardlinks, nested/aliased paths and existing backups are rejected. The helper retains the backup on rollback failure; the CI harness uses disposable data.
+
+This is **an acceptance harness, not a production user-profile updater**. Exclusive directory access is required; crash recovery, concurrent writers, parent path substitution, Windows and live agent clients are not verified. Never silently merge local edits or apply this scenario to existing profiles. T10.03.02 separately covers multi-skill collisions and independent tags without publishing fictitious skills in TESSERA. T10.03.01 acceptance requires an actual CI `GH_SKILL_UPDATE_PASS`.
+
