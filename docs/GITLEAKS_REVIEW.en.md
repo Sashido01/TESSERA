@@ -24,3 +24,11 @@ GITLEAKS_REVIEW_EXECUTION_PASS confirms the execution contract, not absence of l
 [CI 45367459045](https://github.com/Sashido01/TESSERA/actions/runs/45367459045) PASS: 428+19 tests, 144/144 tracked UTF-8 files, 998544 bytes, zero findings, positive/negative and redaction fixtures PASS; 65.29 s. Snapshot acceptance COMPLETE; history/path-specific rules NOT_VERIFIED; T12.02.02.02 remains PARTIAL.
 
 First CI failed because the synthetic marker used digits outside the upstream AWS rule alphabet. Corrected the marker and added a regression test; no scanner rules disabled.
+
+## Reachable Git history (0.0.30)
+
+A second independent check, `python tools/check_gitleaks_history.py --repo . --cli <path-to-gitleaks>`, inventories all objects reachable from local refs and HEAD using Git with replacement objects disabled, rejects shallow repositories, checks distinct blob sizes and UTF-8, then scans each nonempty blob through stdin using a bounded worker pool. It validates the exact inventory before and after, counts bytes, and verifies a synthetic marker removed in a later commit is still detected. Binary and unsupported encoding block the check; reports remain aggregate-only. This is content scanning, not filename-specific rule validation, remote-unfetched refs, commit messages, unreachable objects or archived material. [CI 45368434188](https://github.com/Sashido01/TESSERA/actions/runs/45368434188) PASS: 437+19 tests; 585/585 distinct UTF-8 blobs, 5431003 bytes, zero findings, removed-marker fixture PASS, 128.81 s. Findings advisory, execution failures block CI.
+
+## Path-constrained rules
+
+Upstream v8.30.1 contains five rules with explicit path predicates: PHP/Freemius, Terraform, Kubernetes YAML, NuGet config, PKCS#12 filenames. A separate review enumerates matching current paths and distinct (rule, blob) pairs from all reachable commit trees. For each candidate, scan under a canonical filename preserving the rule predicate; use exact byte coverage, only the intended rule, and a synthetic positive detection for each of the five rules. This deliberately avoids the archive-like filename bug, but does not reproduce every path-specific allowlist. No original file paths or raw findings are logged. No scan of unreachable objects or unfetched remote refs. Live CI acceptance pending.

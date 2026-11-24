@@ -140,6 +140,12 @@ jobs:
       - name: Проверить отслеживаемые текстовые файлы Gitleaks
         run: python tools/check_gitleaks_review.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1"
 
+      - name: Проверить достижимые исторические Git-объекты Gitleaks
+        run: python tools/check_gitleaks_history.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1"
+
+      - name: Проверить пять правил Gitleaks, зависящих от имени файла
+        run: python tools/check_gitleaks_paths.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1"
+
   tag_microversion:
     name: Создать аннотированный тег проверенной версии
     needs: validate
