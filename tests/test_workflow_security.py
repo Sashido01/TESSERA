@@ -62,6 +62,10 @@ class WorkflowSecurityTests(unittest.TestCase):
         modified = WORKFLOW.replace("run: python tools/check_nvidia_tier1.py", "run: echo")
         self.assertTrue(any("NVIDIA Tier 1" in e for e in module.validate_workflow(modified)))
 
+    def test_nvidia_static_review_is_required(self):
+        modified = WORKFLOW.replace("run: python tools/check_nvidia_static_review.py", "run: echo")
+        self.assertTrue(any("статического обзора NVIDIA" in e for e in module.validate_workflow(modified)))
+
     def test_tag_job_needs_validation(self):
         modified = WORKFLOW.replace("    needs: validate", "    needs: unknown")
         self.assertTrue(any("validate" in e for e in module.validate_workflow(modified)))

@@ -1,0 +1,75 @@
+{
+  "expected_headers": [
+    {
+      "heading": "## Prerequisites",
+      "alternatives": [
+        "## Requirements",
+        "## Предварительные требования",
+        "## Требования"
+      ],
+      "points": 5,
+      "message": "No prerequisites/requirements documented",
+      "suggestion": "Document dependencies, API keys, or setup needed"
+    },
+    {
+      "heading": "## Limitations",
+      "alternatives": [
+        "## Ограничения",
+        "## Назначение и ограничения"
+      ],
+      "points": 5,
+      "message": "No limitations documented",
+      "suggestion": "Add a limitations section with known issues/constraints"
+    },
+    {
+      "heading": "## Troubleshooting",
+      "alternatives": [
+        "## Common Issues",
+        "## FAQ",
+        "## Устранение неполадок",
+        "## Типичные проблемы",
+        "## Частые вопросы"
+      ],
+      "points": 5,
+      "message": "No troubleshooting section documented",
+      "suggestion": "Document error/cause/solution patterns"
+    }
+  ],
+  "error_handling": {
+    "mentioned": {
+      "terms": [
+        "error",
+        "errors",
+        "exception",
+        "exceptions",
+        "invalid",
+        "fail",
+        "fails",
+        "failed",
+        "failure",
+        "failures",
+        "failing",
+        "validate",
+        "validates",
+        "validated",
+        "validating",
+        "validation",
+        "validations",
+        "ошибка",
+        "ошибки",
+        "ошибок",
+        "ошибке",
+        "сбой",
+        "сбоя",
+        "сбоев",
+        "проверка",
+        "проверки",
+        "проверок",
+        "проверить",
+        "невалидный",
+        "исключение",
+        "исключения"
+      ]
+    }
+  }
+}

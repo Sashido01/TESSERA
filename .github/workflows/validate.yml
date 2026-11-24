@@ -119,6 +119,9 @@ jobs:
       - name: Проверить базовые schema и quality NVIDIA Tier 1 без LLM
         run: python tools/check_nvidia_tier1.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/skillevaluator"
 
+      - name: Проверить статические профили и русскоязычную оценку NVIDIA Tier 1
+        run: python tools/check_nvidia_static_review.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/skillevaluator"
+
   tag_microversion:
     name: Создать аннотированный тег проверенной версии
     needs: validate
