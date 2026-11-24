@@ -82,7 +82,7 @@ def included_paths(root: pathlib.Path) -> list[pathlib.Path]:
             raise PackageError("PACKAGE_TOO_MANY_SKILLS")
         rel = pathlib.Path("skills") / child.name
         result.append(rel / "SKILL.md")
-        for name in ("README.md", "README.en.md"):
+        for name in ("README.md", "README.en.md", "LICENSE.txt"):
             if (child / name).exists():
                 result.append(rel / name)
         for dirname, suffix in (("references", ".md"), ("scripts", ".py")):

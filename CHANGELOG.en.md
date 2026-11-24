@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.33 — Portable Microversion Release license and references (T12.03.01)
+
+- Standalone MIT license, portable references, corrected distribution guidance, ZIP and official local installation regressions. Canonical SKILL.md compacted to 8876 UTF-8 bytes; explicit authorization, script table and troubleshooting. [CI 45373618225](https://github.com/Sashido01/TESSERA/actions/runs/45373618225): 486+19 tests PASS. SkillSpector 2.13.6: complete, 17/17 files, 100%, reference_missing 4→0, risk 78→36 (HIGH→MEDIUM), HIGH 2→0, MEDIUM 10, zero suppressions, both fixtures PASS, 19.40 s. NVIDIA: license allowed, RU quality 80.0 (65×0.35 + 80×0.25 + 95×0.25 + 90×0.15), Codex custom provider degraded→loads. Overall CI FAIL only at inherited Go review; release and real activation NOT_VERIFIED.
+
 ## 0.0.32 — Dependency CVE and license metadata review (T12.02.02.04)
 
 - Exact installed Python inventory, OSV queries with pagination and negative control, license metadata; Go binary build info for gh/Gitleaks, module and toolchain OSV queries, deps.dev license metadata. Advisory findings, fail-closed execution, no LLM. [CI 45375135316](https://github.com/Sashido01/TESSERA/actions/runs/45375135316) PASS: 477+19 tests; 97 Python package checks, 3 packages with OSV entries; 212 distinct Go modules (gh 155, Gitleaks 66), 8 affected modules across the binaries, Gitleaks stdlib/toolchain and one source-commit entry; 211 Go licenses reported by deps.dev, one NOT_INDEXED. T12.02.02.04 COMPLETE within inventory/query execution scope; CVE remediation, code reachability and legal compatibility remain open.

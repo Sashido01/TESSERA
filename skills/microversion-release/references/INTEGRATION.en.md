@@ -21,11 +21,11 @@ Without `--apply`, the installer **only previews** the destination. With `--appl
 
 Available choices: `--platform codex|harness|claude|hermes|shared`. The `shared` option installs into `<project-root>/.agents/skills/`, which Codex and Hermes can both discover. For custom profiles and other platforms, use `--platform generic --target-root <skills-dir> --apply`. Verify the actual active user-level skills directory before using that mode.
 
-## Planned native distribution
+## Native distribution
 
-The official **GitHub CLI 2.105.0** is now covered in CI for actual `gh skill publish --dry-run` and a separate isolated `gh skill install --from-local --dir`; see [GH_SKILL_INSTALL](../../../docs/GH_SKILL_INSTALL.en.md). Real installation from the public GitHub repository pinned to a tag or commit SHA is **NOT_VERIFIED**, so the CLI is not yet the fully accepted remote distribution method. Direct local `gh skill install` may overwrite existing files even without `--force`; use the minimal Python installer with explicit DRY-RUN and a no-overwrite guard for existing projects. It will remain as a minimal offline and custom-profile fallback.
+The official **GitHub CLI 2.105.0** has passed isolated CI checks for `gh skill publish --dry-run`, local installation, public remote installation pinned to a full tag/commit SHA, and staged re-pin/rollback. This is not evidence of installation or activation in a real agent profile. Local installation may replace files in an existing target; inspect the destination first and use an isolated staging directory for updates. The minimal Python installer remains the offline fallback and refuses an existing destination. Catalog-wide details are available in the public TESSERA repository: [GH_SKILL_INSTALL](https://github.com/Sashido01/TESSERA/blob/v0.0.30/docs/GH_SKILL_INSTALL.en.md).
 
-TESSERA does not require a third-party skill package manager. See the [TESSERA dependency policy](../../../docs/DEPENDENCIES.en.md). Planned `skills-ref` and NVIDIA SkillEvaluator Tier 1 checks are development-quality tools, not required skill runtime dependencies. Paid Tier 2/3 are excluded.
+TESSERA does not require a third-party skill manager. `skills-ref`, NVIDIA SkillEvaluator Tier 1 and static scanners are development-quality tools rather than runtime dependencies. No mandatory paid AI API or Tier 2/3 evaluation. The skill includes its own [MIT license](../LICENSE.txt); the [catalog dependency policy](https://github.com/Sashido01/TESSERA/blob/v0.0.30/docs/DEPENDENCIES.en.md) is optional reading, not a local installation prerequisite.
 
 ## Codex (OpenAI)
 
