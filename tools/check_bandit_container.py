@@ -24,7 +24,8 @@ MODULES = ("check_bandit_container.py", "check_bandit_review.py", "check_docker_
            "check_integrated_gitleaks.py", "check_gitleaks_container.py", "check_gitleaks_review.py",
            "gitleaks_frame.py",
            "check_official_local_install.py", "check_nvidia_tier1.py")
-ENTRY = "import sys;sys.path.insert(0,'/packages');from bandit.cli.main import main;main()"
+# Match the console-script argv[0]; upstream argparse uses %(prog)s in --version.
+ENTRY = "import sys;sys.path.insert(0,'/packages');sys.argv[0]='bandit';from bandit.cli.main import main;main()"
 
 
 def packages(root):
@@ -78,8 +79,9 @@ def worker():
                                   cwd=cwd, env=env, stdin=subprocess.DEVNULL, capture_output=True,
                                   encoding="utf-8", timeout=90, check=False)
         ver = run(["--version"], temp)
-        require(ver.returncode == 0 and re.search(r"(?m)^bandit 1\.9\.4(?:\s|$)",
-                ver.stdout + "\n" + ver.stderr), "BANDIT_CONTAINER_VERSION")
+        require(ver.returncode == 0, "BANDIT_CONTAINER_VERSION_EXEC")
+        require(re.search(r"(?m)^bandit 1\.9\.4(?:\s|$)", ver.stdout + "\n" + ver.stderr),
+                "BANDIT_CONTAINER_VERSION")
         def scan(label, root, data):
             report = temp / (label + ".json")
             result = run(["-q", "--ignore-nosec", "-f", "json", "-o", str(report),
@@ -109,7 +111,7 @@ ERROR_CODES = frozenset({
     "BANDIT_PACKAGE_ROOT", "BANDIT_DUPLICATE_DIST", "BANDIT_PACKAGE_INVENTORY",
     "BANDIT_PACKAGE_LINK", "BANDIT_PACKAGE_LIMIT", "BANDIT_PACKAGE_EMPTY",
     "BANDIT_LOCK_MISMATCH", "BANDIT_LOCK_DUPLICATE", "BANDIT_LOCK_COVERAGE",
-    "BANDIT_SOURCE_TYPE", "BANDIT_CONTAINER_VERSION", "BANDIT_CONTAINER_REPORT",
+    "BANDIT_SOURCE_TYPE", "BANDIT_CONTAINER_VERSION", "BANDIT_CONTAINER_VERSION_EXEC", "BANDIT_CONTAINER_REPORT",
     "BANDIT_CONTAINER_SOURCE_MUTATED", "BANDIT_CONTAINER_FIXTURE", "BANDIT_PACKAGE_MUTATED",
     "BANDIT_CONTAINER_PARITY", "BANDIT_CONTAINER_RUNNER", "BANDIT_CONTAINER_HOST_REPORT",
     "BANDIT_CONTAINER_STAGE", "BANDIT_CONTAINER_CREATE", "BANDIT_CONTAINER_WORKER",

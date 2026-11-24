@@ -59,5 +59,26 @@ class BanditContainerTests(unittest.TestCase):
             self.assertEqual(c.worker_error(raw), "BANDIT_CONTAINER_WORKER")
 
 
+    def test_console_entry_version_contract(self):
+        # Reproduce upstream 1.9.4 argparse %(prog)s behavior without installing Bandit.
+        with tempfile.TemporaryDirectory() as folder:
+            root = pathlib.Path(folder).resolve()
+            package = root / "bandit" / "cli"
+            package.mkdir(parents=True)
+            (root / "bandit" / "__init__.py").touch()
+            (package / "__init__.py").touch()
+            (package / "main.py").write_text(
+                "import argparse\n"
+                "def main():\n"
+                "    parser = argparse.ArgumentParser()\n"
+                "    parser.add_argument('--version', action='version', version='%(prog)s 1.9.4')\n"
+                "    parser.parse_args()\n", encoding="utf-8")
+            entry = c.ENTRY.replace("'/packages'", repr(str(root)))
+            result = subprocess.run([sys.executable, "-I", "-B", "-c", entry, "--version"],
+                                    cwd=root, capture_output=True, timeout=15)
+            self.assertEqual(result.returncode, 0)
+            self.assertEqual(result.stdout.strip(), b"bandit 1.9.4")
+
+
 if __name__ == "__main__":
     unittest.main()
