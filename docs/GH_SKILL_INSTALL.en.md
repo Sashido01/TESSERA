@@ -71,3 +71,5 @@ The guarded exact re-pin scenario never uses `--force` or directly updates a liv
 
 This is **an acceptance harness, not a production user-profile updater**. Exclusive directory access is required; crash recovery, concurrent writers, parent path substitution, Windows and live agent clients are not verified. Never silently merge local edits or apply this scenario to existing profiles. T10.03.02 separately covers multi-skill collisions and independent tags without publishing fictitious skills in TESSERA. T10.03.01 acceptance requires an actual CI `GH_SKILL_UPDATE_PASS`.
 
+**T10.03.01 — COMPLETE within the acceptance harness (24 November 2026).** [CI 45352932764](https://github.com/Sashido01/TESSERA/actions/runs/45352932764) confirmed `GH_SKILL_UPDATE_PASS`: native_unpin_dry_run, native_unpin_apply, local_edit_refusal, staged_repin, injected_rename_rollback, explicit_restore — PASS; native_local_edits_removed — CONFIRMED. Old tree `54c2f075ac9212e428198071bd0e1ed3a04ac142`, new tree `4ed1f6095092b51cfd80d12f68865eecc6f86398`. 375 catalog tests + 19 skill tests PASS. Crash recovery, concurrent writers, Windows and client activation remain unverified.
+
