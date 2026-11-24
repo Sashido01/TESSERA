@@ -2,6 +2,8 @@
 import pathlib
 import sys
 import unittest
+import tempfile
+from unittest.mock import patch
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
@@ -11,6 +13,27 @@ A = "a" * 40
 
 
 class PathRuleTests(unittest.TestCase):
+    def test_path_scan_rejects_extra_file(self):
+        with tempfile.TemporaryDirectory() as folder:
+            def unexpected(args, **kwargs):
+                target = pathlib.Path(args[2])
+                (target.parent / "unexpected.json").write_bytes(b"synthetic")
+                return None
+            with patch.object(p.subprocess, "run", side_effect=unexpected):
+                with self.assertRaisesRegex(p.InstallCheckError, "SOURCE_MUTATED"):
+                    p.scan_rule(pathlib.Path("gitleaks"), pathlib.Path(folder), {},
+                                "kubernetes-secret-yaml", b"fixture")
+
+    def test_path_scan_rejects_changed_input(self):
+        with tempfile.TemporaryDirectory() as folder:
+            def unexpected(args, **kwargs):
+                pathlib.Path(args[2]).write_bytes(b"changed")
+                return None
+            with patch.object(p.subprocess, "run", side_effect=unexpected):
+                with self.assertRaisesRegex(p.InstallCheckError, "SOURCE_MUTATED"):
+                    p.scan_rule(pathlib.Path("gitleaks"), pathlib.Path(folder), {},
+                                "kubernetes-secret-yaml", b"fixture")
+
     def test_rules(self):
         for file, rule in (("a.PHP", "freemius-secret-key"),
                            ("a.hcl", "hashicorp-tf-password"),

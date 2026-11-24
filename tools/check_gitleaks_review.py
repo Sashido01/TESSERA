@@ -81,11 +81,27 @@ def parse_scan(stdout, stderr, rc, size):
     return rules
 
 
+def scan_arguments(cli, *, path=None, rule=None):
+    """One fixed report contract; no caller-supplied flags or report filename."""
+    require((path is None) == (rule is None), "GITLEAKS_ARGUMENT_SCOPE")
+    if path is None:
+        args = [str(cli), "stdin"]
+    else:
+        require(isinstance(path, pathlib.Path) and path.is_absolute()
+                and isinstance(rule, str) and re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,99}", rule),
+                "GITLEAKS_ARGUMENT_SCOPE")
+        args = [str(cli), "dir", str(path), "--enable-rule", rule]
+    return args + [
+        "--no-banner", "--no-color", "--log-level", "info",
+        "--redact=100", "--ignore-gitleaks-allow", "--exit-code", str(FINDINGS_EXIT),
+        "--report-format", "json", "--report-path", "-", "--max-archive-depth", "0",
+        "--timeout", "15",
+    ]
+
+
 def scan(cli, cwd, env, content):
     result = subprocess.run(
-        [str(cli), "stdin", "--no-banner", "--no-color", "--log-level", "info",
-         "--redact=100", "--ignore-gitleaks-allow", "--exit-code", str(FINDINGS_EXIT),
-         "--report-format", "json", "--report-path", "-", "--timeout", "15"],
+        scan_arguments(cli),
         cwd=cwd, env=env, input=content, capture_output=True, timeout=20, check=False)
     rules = parse_scan(result.stdout, result.stderr, result.returncode, len(content))
     return rules, result.stdout, result.stderr
@@ -114,6 +130,7 @@ def accept(repo, cli):
                                  timeout=10, check=False)
         require(version.returncode == 0 and version.stdout.strip() == VERSION.encode(),
                 "GITLEAKS_VERSION_MISMATCH")
+        fixture_entries = set(temp.iterdir())
         clean, _, _ = scan(cli, temp, env, b"plain text fixture\n")
         require(not clean, "GITLEAKS_CLEAN_FIXTURE_FAILED")
         # Fabricated, nonfunctional key-shaped marker, built in memory only.
@@ -122,6 +139,7 @@ def accept(repo, cli):
             cli, temp, env, b"fixture " + marker + b" # gitleaks:allow\n")
         require(negative.get("aws-access-token", 0) > 0, "GITLEAKS_NEGATIVE_NOT_DETECTED")
         require(marker not in stdout and marker not in stderr, "GITLEAKS_REDACTION_FAILED")
+        require(set(temp.iterdir()) == fixture_entries, "GITLEAKS_FIXTURE_UNEXPECTED_FILE")
         counts = collections.Counter()
         scanned = 0
         empty = 0
@@ -149,7 +167,8 @@ def accept(repo, cli):
             "by_rule": [{"scope": s, "rule": r, "count": count}
                         for (s, r), count in sorted(counts.items())],
             "clean_fixture": "PASS", "negative_allow_fixture": "PASS",
-            "fixture_redaction": "PASS", "history": "NOT_RUN",
+            "fixture_redaction": "PASS", "fixture_top_level_entries_unchanged": "PASS",
+            "report_destination": "CAPTURED_STDOUT", "archive_depth": 0, "history": "NOT_RUN",
             "path_specific_rules": "NOT_VERIFIED", "binary_archives": "NOT_SUPPORTED",
             "elapsed_seconds": round(time.monotonic() - started, 2)}
 

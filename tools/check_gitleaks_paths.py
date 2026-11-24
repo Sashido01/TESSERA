@@ -14,7 +14,7 @@ import tempfile
 import time
 
 from check_gitleaks_history import OID, MAX_OBJECTS, git, inventory as history_inventory, checked_blob
-from check_gitleaks_review import VERSION, FINDINGS_EXIT, inventory, parse_scan
+from check_gitleaks_review import VERSION, inventory, parse_scan, scan_arguments
 from check_nvidia_tier1 import require
 from check_official_local_install import InstallCheckError, fixture_env
 
@@ -71,12 +71,11 @@ def scan_rule(cli, temp, env, rule, data):
         path = root / CANONICAL[rule]
         path.write_bytes(data)
         result = subprocess.run(
-            [str(cli), "dir", str(path), "--enable-rule", rule, "--no-banner",
-             "--no-color", "--log-level", "info", "--redact=100",
-             "--ignore-gitleaks-allow", "--exit-code", str(FINDINGS_EXIT),
-             "--report-format", "json", "--report-path", "-", "--timeout", "15"],
+            scan_arguments(cli, path=path, rule=rule),
             cwd=temp, env=env, stdin=subprocess.DEVNULL, capture_output=True,
             timeout=20, check=False)
+        require(set(root.iterdir()) == {path} and path.is_file() and not path.is_symlink()
+                and path.read_bytes() == data, "PATH_SCAN_SOURCE_MUTATED")
         counts = parse_scan(result.stdout, result.stderr, result.returncode, len(data))
         require(set(counts) <= {rule}, "PATH_UNEXPECTED_RULE")
         return counts[rule]
@@ -108,7 +107,9 @@ def accept(repo, cli):
                                  stdin=subprocess.DEVNULL, capture_output=True, timeout=10, check=False)
         require(version.returncode == 0 and version.stdout.strip() == VERSION.encode(),
                 "PATH_VERSION_MISMATCH")
+        fixture_entries = set(temp.iterdir())
         fixtures(cli, temp, env)
+        require(set(temp.iterdir()) == fixture_entries, "PATH_FIXTURE_UNEXPECTED_FILE")
         current = inventory(repo)
         blobs = history_inventory(repo, env)
         pairs, commits = historical_pairs(repo, env, blobs)
@@ -129,6 +130,8 @@ def accept(repo, cli):
     return {"execution": "PASS", "scanner": "gitleaks", "version": VERSION,
             "scope": "FIVE_PINNED_PATH_CONSTRAINED_RULES",
             "history_commits": commits, "negative_fixtures": len(RULES),
+            "report_destination": "CAPTURED_STDOUT", "archive_depth": 0,
+            "fixture_top_level_entries_unchanged": "PASS",
             "results": [{"scope": scope, "rule": rule, "targets": coverage[scope, rule],
                          "findings": counters[scope, rule]}
                         for scope in ("current", "history") for rule, _, _ in RULES],

@@ -16,6 +16,25 @@ class GitleaksReviewTests(unittest.TestCase):
     def parse(self, rows, rc=0, log=None, size=15):
         return g.parse_scan(json.dumps(rows).encode(), self.log if log is None else log, rc, size)
 
+    def test_fixed_scan_arguments(self):
+        cli = pathlib.Path("gitleaks")
+        for args in (g.scan_arguments(cli),
+                     g.scan_arguments(cli, path=ROOT / "input.yml", rule="kubernetes-secret-yaml")):
+            self.assertEqual(args.count("--report-path"), 1)
+            self.assertEqual(args[args.index("--report-path") + 1], "-")
+            self.assertEqual(args.count("--redact=100"), 1)
+            self.assertEqual(args[args.index("--max-archive-depth") + 1], "0")
+            self.assertNotIn("--config", args)
+        self.assertEqual(g.scan_arguments(cli)[1], "stdin")
+
+    def test_reject_incomplete_or_option_like_scope(self):
+        cli = pathlib.Path("gitleaks")
+        for kwargs in ({"rule": "aws-access-token"}, {"path": ROOT / "input.yml"},
+                       {"path": pathlib.Path("--report-path"), "rule": "aws-access-token"},
+                       {"path": ROOT / "input.yml", "rule": "--report-path"}):
+            with self.subTest(kwargs=kwargs), self.assertRaisesRegex(g.InstallCheckError, "SCOPE"):
+                g.scan_arguments(cli, **kwargs)
+
     def test_marker_matches_pinned_upstream_pattern(self):
         self.assertIsNotNone(re.fullmatch(rb'(?:A3T[A-Z0-9]|AKIA|ASIA|ABIA|ACCA)[A-Z2-7]{16}',
                                          g.synthetic_marker()))
