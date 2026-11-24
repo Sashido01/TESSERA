@@ -29,11 +29,31 @@ GIT_CONTEXT = frozenset({
 })
 
 
-def git(repo: pathlib.Path, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
-    env = dict(os.environ)
-    if any(key.upper() in GIT_CONTEXT or key.upper().startswith(("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_"))
-           for key in env):
+# Forward only explicit process, identity and local signing context.
+# Git config override keys require GIT_CONFIG_COUNT; neither is forwarded.
+CHILD_ENV_KEYS = (
+    "PATH", "HOME", "USERPROFILE", "HOMEDRIVE", "HOMEPATH", "SystemRoot",
+    "WINDIR", "COMSPEC", "PATHEXT", "TEMP", "TMP", "TMPDIR", "APPDATA", "LOCALAPPDATA",
+    "LANG", "LC_ALL", "LC_CTYPE", "LC_MESSAGES", "TZ", "TERM",
+    "GIT_AUTHOR_NAME", "GIT_AUTHOR_EMAIL", "GIT_AUTHOR_DATE",
+    "GIT_COMMITTER_NAME", "GIT_COMMITTER_EMAIL", "GIT_COMMITTER_DATE",
+    "GNUPGHOME", "GPG_TTY", "SSH_AUTH_SOCK",
+)
+
+
+def child_environment() -> dict[str, str]:
+    if any(os.getenv(key) is not None for key in GIT_CONTEXT):
         raise TagError("RELEASE_NOT_TAGGED: внешнее окружение Git может изменить выбранный репозиторий или конфигурацию")
+    result = {}
+    for key in CHILD_ENV_KEYS:
+        value = os.getenv(key)
+        if value is not None:
+            result[key] = value
+    return result
+
+
+def git(repo: pathlib.Path, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
+    env = child_environment()
     proc = subprocess.run(
         ["git", "--no-replace-objects", "-C", str(repo), *args],
         text=True, encoding="utf-8", capture_output=True, check=False, env=env,
