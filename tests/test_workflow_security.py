@@ -71,7 +71,7 @@ class WorkflowSecurityTests(unittest.TestCase):
         self.assertTrue(any("Bandit" in e for e in module.validate_workflow(modified)))
 
     def test_gitleaks_review_is_required(self):
-        modified = WORKFLOW.replace("run: python tools/check_gitleaks_review.py", "run: echo")
+        modified = WORKFLOW.replace("python tools/check_gitleaks_review.py", "echo")
         self.assertTrue(any("Gitleaks" in e for e in module.validate_workflow(modified)))
 
     def test_gitleaks_digest_required(self):
@@ -118,6 +118,11 @@ class WorkflowSecurityTests(unittest.TestCase):
     def test_docker_preflight_required(self):
         modified = WORKFLOW.replace("run: python tools/check_docker_preflight.py", "run: echo omitted")
         self.assertTrue(any("Docker preflight" in e for e in module.validate_workflow(modified)))
+
+
+    def test_gitleaks_container_required(self):
+        modified = WORKFLOW.replace("run: python tools/check_gitleaks_container.py", "run: echo")
+        self.assertTrue(any("контейнерной проверки Gitleaks" in e for e in module.validate_workflow(modified)))
 
 
 if __name__ == "__main__":

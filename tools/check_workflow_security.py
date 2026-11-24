@@ -73,8 +73,10 @@ def validate_workflow(workflow: str) -> list[str]:
         errors.append("Нет обязательного статического обзора NVIDIA Tier 1")
     if 'run: python tools/check_bandit_review.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/bandit"' not in validate:
         errors.append("Нет обязательной проверки Bandit")
-    if '551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb' not in validate or 'run: python tools/check_gitleaks_review.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1"' not in validate:
+    if '551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb' not in validate or 'python tools/check_gitleaks_review.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1" > "$RUNNER_TEMP/gitleaks-host-report.jsonl"' not in validate:
         errors.append("Нет обязательной закреплённой проверки Gitleaks")
+    if 'run: python tools/check_gitleaks_container.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1" --host-report "$RUNNER_TEMP/gitleaks-host-report.jsonl"' not in validate:
+        errors.append("Нет обязательной контейнерной проверки Gitleaks")
     if 'run: python tools/check_gitleaks_history.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1"' not in validate:
         errors.append("Нет обязательной проверки истории Gitleaks")
     if 'run: python tools/check_gitleaks_paths.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1"' not in validate:

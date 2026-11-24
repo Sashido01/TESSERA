@@ -181,3 +181,5 @@ T12.03.08: CI 45391798766 — 513+29 PASS, GOVULN_CONTROL_VERSION BLOCKED; но�
 **T12.03.19:** [CI 45425640926](https://github.com/Sashido01/TESSERA/actions/runs/45425640926) PASS, 594 теста, AE4=0, SkillSpector 22/100, 7 MEDIUM, policy PASS. **T12.03.20 — кандидат:** обязательный Linux namespace preflight, пять offline регрессий; живой локальный synthetic PASS, GitHub CI обязателен; scanner/file isolation и aggregate resources NOT_VERIFIED. T12 PARTIAL.
 
 **T12.03.20:** unshare BLOCKED на GitHub Ubuntu 26.04 (CI 45427736161); без изменения AppArmor выбран отдельный обязательный Docker synthetic preflight с проверкой cgroup и границ доступа. CI обязателен; не изоляция сканеров. T12 PARTIAL.
+
+**T12.03.20:** CI 45428224320 PASS, 604 теста, Docker synthetic PASS. **T12.03.21 — кандидат:** Gitleaks tracked UTF-8 stdin в Docker, сравнение с host, TSG1, девять регрессий; CI обязателен, history/path не изолированы. T12 PARTIAL.

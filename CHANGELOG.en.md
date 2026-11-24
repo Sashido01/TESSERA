@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.53 — Isolated Gitleaks (T12.03.21)
+
+- Tracked UTF-8 host/container parity, TSG1, pinned binary, nine regressions. CI required, T12 PARTIAL.
+
 ## 0.0.52 — Linux namespace preflight (T12.03.20)
 
 - Required synthetic network, PID, rlimits and timeout preflight; five offline regressions. Local unshare PASS, GitHub unshare BLOCKED; explicit required Docker synthetic preflight, CI required; not a complete sandbox.

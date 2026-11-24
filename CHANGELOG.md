@@ -4,6 +4,10 @@
 
 Здесь фиксируются изменения **общего каталога**. Истории отдельных навыков могут вестись в их собственных папках.
 
+## 0.0.53 — Изолированный Gitleaks (T12.03.21)
+
+- Сопоставление tracked UTF-8 host/container, TSG1, закреплённый бинарник, девять регрессий. CI обязателен, T12 PARTIAL.
+
 ## 0.0.52 — Проверка Linux namespace (T12.03.20)
 
 - Обязательный synthetic preflight сети, PID, rlimits и timeout; пять offline регрессий. Локальный unshare PASS, GitHub unshare BLOCKED; отдельный обязательный Docker synthetic preflight, CI обязателен; не полноценная песочница.
