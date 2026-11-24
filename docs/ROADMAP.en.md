@@ -123,3 +123,5 @@ Complete work as small verifiable changes, assigning a new microversion only to 
 - A SKILL.md file being present is not proof of automatic activation.
 - One microversioning core, not four independent implementations; keep host adapters thin.
 - Unknown or unverified behavior must be marked NOT_VERIFIED rather than guessed.
+
+**T12.03.02:** [CI evidence network restriction](RELEASE_CI_SECURITY.en.md) — implementation prepared, actual CI pending. Other Bandit findings open.

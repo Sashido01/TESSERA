@@ -171,6 +171,49 @@ class CIEvidenceTests(unittest.TestCase):
         self.assertEqual(len(urls), 2)
         self.assertTrue(all(x.startswith("https://api.github.com/repos/Sashido01/TESSERA/") for x in urls))
 
+    def test_api_redirect_handler_rejects_before_dispatch(self):
+        from urllib.request import Request
+        handler = release_ci.NoAPIRedirect()
+        request = Request("https://api.github.com/repos/owner/repo/actions/runs/1")
+        for code in (301, 302, 303, 307, 308):
+            for target in ("https://example.invalid/", "http://api.github.com/",
+                           "https://api.github.com/repos/other/repo/actions/runs/1"):
+                with self.subTest(code=code, target=target), self.assertRaisesRegex(
+                        release_ci.CIEvidenceError, "CI_API_REDIRECT_INVALID"):
+                    handler.redirect_request(request, None, code, "", {}, target)
+
+    def test_bad_api_url_never_opens_network(self):
+        with mock.patch.object(release_ci.urllib.request, "build_opener") as opener:
+            for url in ("https://api.github.com.evil.invalid/repos/owner/repo/actions/runs/1",
+                        "https://api.github.com/repos/owner/repo/actions/runs/1#fragment",
+                        "https://api.github.com/repos/owner/repo/actions/runs/1?other=1",
+                        "https://api.github.com/repos/../repo/actions/runs/1",
+                        "http://api.github.com/repos/owner/repo/actions/runs/1"):
+                with self.subTest(url=url), self.assertRaisesRegex(
+                        release_ci.CIEvidenceError, "CI_API_URL_INVALID"):
+                    release_ci.get_public_json(url)
+            opener.assert_not_called()
+
+    def test_api_open_uses_redirect_guard(self):
+        url = "https://api.github.com/repos/owner/repo/actions/runs/1/jobs?per_page=100"
+        with mock.patch.object(release_ci.urllib.request, "build_opener") as builder:
+            response = builder.return_value.open.return_value.__enter__.return_value
+            response.geturl.return_value = url
+            response.read.return_value = b'{"jobs":[]}'
+            self.assertEqual(release_ci.get_public_json(url), {"jobs": []})
+            self.assertIsInstance(builder.call_args.args[0], release_ci.NoAPIRedirect)
+            self.assertEqual(builder.return_value.open.call_args.kwargs["timeout"], 15)
+            self.assertEqual(builder.return_value.open.call_args.args[0].full_url, url)
+
+    def test_changed_response_url_rejected(self):
+        url = "https://api.github.com/repos/owner/repo/actions/runs/1"
+        with mock.patch.object(release_ci.urllib.request, "build_opener") as builder:
+            response = builder.return_value.open.return_value.__enter__.return_value
+            response.geturl.return_value = url + "/jobs"
+            with self.assertRaisesRegex(release_ci.CIEvidenceError, "CI_API_REDIRECT_INVALID"):
+                release_ci.get_public_json(url)
+            response.read.assert_not_called()
+
     def test_api_failure_does_not_become_pass(self):
         def failed(url):
             raise release_ci.CIEvidenceError("CI_API_UNAVAILABLE")

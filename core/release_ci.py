@@ -32,9 +32,19 @@ def parameters(repository: str, run_id: int, commit_sha: str) -> None:
         raise CIEvidenceError("CI_COMMIT_SHA_INVALID")
 
 
+class NoAPIRedirect(urllib.request.HTTPRedirectHandler):
+    """Never contact a redirect target when verifying public CI evidence."""
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise CIEvidenceError("CI_API_REDIRECT_INVALID")
+
+
 def get_public_json(url: str) -> dict[str, Any]:
-    """Get only HTTPS JSON from the fixed GitHub API host with bounded size."""
-    if not url.startswith("https://api.github.com/repos/"):
+    """Get only exact public CI API URLs; redirects are forbidden before dispatch."""
+    if not isinstance(url, str) or len(url) > 4096:
+        raise CIEvidenceError("CI_API_URL_INVALID")
+    match = re.fullmatch(r"https://api\.github\.com/repos/([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)"
+                         r"/actions/runs/([1-9][0-9]*)(?:/jobs\?per_page=100)?", url)
+    if match is None or not REPOSITORY.fullmatch(match.group(1)) or ".." in match.group(1):
         raise CIEvidenceError("CI_API_URL_INVALID")
     request = urllib.request.Request(
         url,
@@ -46,8 +56,9 @@ def get_public_json(url: str) -> dict[str, Any]:
         method="GET",
     )
     try:
-        with urllib.request.urlopen(request, timeout=15) as response:
-            if response.geturl().split("/")[2] != "api.github.com":
+        opener = urllib.request.build_opener(NoAPIRedirect())
+        with opener.open(request, timeout=15) as response:
+            if response.geturl() != url:
                 raise CIEvidenceError("CI_API_REDIRECT_INVALID")
             body = response.read(MAX_RESPONSE_BYTES + 1)
     except (OSError, urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as exc:
