@@ -99,6 +99,51 @@ def executable(path):
     return path
 
 
+CONTROL_RULE = "tessera-probe"
+
+def control_result(result, marker, *, detected):
+    """Validate the live shim output without exposing the marker or raw report."""
+    require(len(result.stdout) <= MAX_REPORT and len(result.stderr) <= MAX_REPORT,
+            "FULL_TIER1_CONTROL_OUTPUT_LIMIT")
+    require(marker not in result.stdout and marker not in result.stderr,
+            "FULL_TIER1_CONTROL_REDACTION")
+    require(result.returncode == (10 if detected else 0), "FULL_TIER1_CONTROL_EXIT")
+    rows = json.loads(result.stdout)
+    if not detected:
+        require(rows is None or rows == [], "FULL_TIER1_CONTROL_CLEAN")
+        return
+    require(isinstance(rows, list) and len(rows) == 1 and isinstance(rows[0], dict),
+            "FULL_TIER1_CONTROL_FINDING")
+    row = rows[0]
+    require(row.get("RuleID") == CONTROL_RULE and row.get("Secret") == "REDACTED"
+            and row.get("File") in ("probe.txt", "./probe.txt"),
+            "FULL_TIER1_CONTROL_FINDING")
+
+
+def live_shim_control(run, shim, temp):
+    """Exercise the exact upstream argument shape against the real pinned binary."""
+    fixture = temp / "redaction-control"
+    fixture.mkdir()
+    config = temp / "redaction-control.toml"
+    config_bytes = (b'[[rules]]\nid = "tessera-probe"\n'
+                    b'description = "Nonfunctional synthetic control"\n'
+                    b'regex = \'TESSERA_PROBE_[A-Z0-9]{12}\'\n')
+    config.write_bytes(config_bytes)
+    target = fixture / "probe.txt"
+    marker = b"TESSERA_" + b"PROBE_" + b"A7B4C9D2E6F8"
+    args = ["detect", "--source", ".", "--report-format", "json", "--report-path", "-",
+            "--exit-code", "10", "--config", str(config), "--no-git"]
+    for detected, content in ((False, b"plain control\n"), (True, marker + b"\n")):
+        target.write_bytes(content)
+        result = run(shim, args, cwd=fixture)
+        control_result(result, marker, detected=detected)
+        require(set(fixture.iterdir()) == {target} and not target.is_symlink()
+                and target.read_bytes() == content and not config.is_symlink()
+                and config.read_bytes() == config_bytes, "FULL_TIER1_CONTROL_MUTATION")
+    return {"clean": "PASS", "detection": "PASS", "stdout_stderr_redaction": "PASS",
+            "fixture_entries_unchanged": "PASS", "scope": "LIVE_PINNED_SHIM_CUSTOM_RULE"}
+
+
 def accept(repo, cli, skillspector, bandit, gitleaks):
     repo = repo.resolve(strict=True)
     cli, skillspector, bandit, gitleaks = map(executable, (cli, skillspector, bandit, gitleaks))
@@ -128,8 +173,8 @@ def accept(repo, cli, skillspector, bandit, gitleaks):
         require(shutil.which("gitleaks", path=env["PATH"]) == str(shim)
                 and shutil.which("semgrep", path=env["PATH"]) is None,
                 "FULL_TIER1_SCANNER_RESOLUTION")
-        def run(path, args, timeout=15):
-            return subprocess.run([str(path), *args], cwd=temp, env=env,
+        def run(path, args, timeout=15, *, cwd=temp):
+            return subprocess.run([str(path), *args], cwd=cwd, env=env,
                                   stdin=subprocess.DEVNULL, capture_output=True,
                                   timeout=timeout, check=False)
         version = run(cli, ["--version"])
@@ -146,6 +191,7 @@ def accept(repo, cli, skillspector, bandit, gitleaks):
                 "FULL_TIER1_GITLEAKS_VERSION")
         require(run(shim, ["detect", "--report-path", "unexpected.json"]).returncode == 2
                 and not (temp / "unexpected.json").exists(), "FULL_TIER1_SHIM_REJECT")
+        control = live_shim_control(run, shim, temp)
         source = temp / "skills"
         shutil.copytree(original, source)
         require(tree_fingerprint(source) == before, "FULL_TIER1_SNAPSHOT")
@@ -174,7 +220,8 @@ def accept(repo, cli, skillspector, bandit, gitleaks):
                 "FULL_TIER1_GITLEAKS_CHANGED")
     return {"execution": "PASS", "scope": "INTEGRATED_STATIC_TIER1", "checks": CHECKS.split(","),
             "llm": "DISABLED", "semgrep": "NOT_RUN", "skills": results,
-            "policy": "ADVISORY_FINDINGS", "certification": "NOT_VERIFIED"}
+            "policy": "ADVISORY_FINDINGS", "certification": "NOT_VERIFIED",
+            "live_shim_control": control}
 
 
 def main():

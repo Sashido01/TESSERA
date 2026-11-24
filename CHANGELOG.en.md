@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.46 — Live Tier 1 Gitleaks redaction control (T12.03.14)
+
+- Real shim clean and synthetic finding controls, stdout/stderr redaction and fixture preservation; five regressions. CI required; upstream completeness and sandbox not verified.
+
 ## 0.0.45 — Integrated static NVIDIA Tier 1 (T12.03.13)
 
 - Explicit complete check-group lineup, pinned scanners and bounded Gitleaks adapter, aggregate-only reports, seven regressions. CI required; Semgrep and certification not verified.
