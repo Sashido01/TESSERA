@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.57 — Bounded Gitleaks concurrency (T12.03.25)
+
+- Two TSG1 workers, unchanged limits, full coverage, three regression tests. CI required; T12 PARTIAL.
+
 ## 0.0.56 — Semgrep license evidence (T12.03.24)
 
 - Three pinned upstream LICENSE texts, existing wheel/RECORD verification, two regression tests. CI required; T12 PARTIAL.

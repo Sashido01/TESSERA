@@ -109,3 +109,11 @@ Separate TSP1 transport mode: 10 fixed categories (2 scopes x 5 existing rules),
 ## T12.03.24 — Semgrep licenses (candidate)
 
 Three exact upstream LICENSE texts fully read; Git blob SHA-1 recalculated and matched; SHA-256 pinned for comparison with installed wheel RECORD. face 26.0.1 BSD-3-Clause: commit 86ec4072580809cc3978f5d6bb40261eb60c3045, blob 50c51841a2efd87b46c053beeceff5617ad8cfa1, 1497 bytes (CRLF preserved); peewee 3.19.0 MIT: commit 45c166bce4630a55729f513a4b11fb95af23df5b, blob c752ab3ead2e7be324e5cafb5e1d53135c16af13, 1058 bytes; protobuf 6.33.6 BSD-3-Clause with generated-code clarification: commit 6e1998413a5bca7c058b85999667893f167434bc, blob 19b305b00060a774a9180fb916c14b49edb2008f, 1732 bytes. Existing evidence mechanism, no metadata override or text normalization; two new offline tests. Local PyPI DNS blocked; actual wheel/RECORD comparison awaits CI, mismatches remain open, legal compliance NOT_VERIFIED. Eight OSV IDs unresolved. T12 PARTIAL.
+
+## T12.03.24 — PR result
+
+[CI 45442813029](https://github.com/Sashido01/TESSERA/actions/runs/45442813029) PASS: 593+38=631 tests. face 26.0.1, peewee 3.19.0, protobuf 6.33.6 — UPSTREAM_TEXT_MATCH and RECORD MATCH for all three. UNKNOWN metadata retained, legal compliance NOT_VERIFIED, eight OSV IDs open. History Docker: 902 blobs/11,504,044 bytes/425.15s/4 batches/0 findings. v0.0.55 main CI 45442651348 and tag verified; v0.0.56 merged into main, tag separate.
+
+## T12.03.25 — bounded Gitleaks concurrency (candidate)
+
+TSG1 worker uses two concurrent stdin processes, GOMAXPROCS=1 per process, windows of at most two records; no new work submitted after a failed window. Retains 2 CPU/512 MiB/64 PID, all limits/deadlines, controls, host parity, separate scan of every nonempty object. TSP1 unchanged. Three offline regressions (actual synchronization of two mocked scanner calls, stop after failure, expired deadline). Actual speedup/peak memory and Docker workload require CI; unchanged 20-minute job cap. Compare against 425.15s on 902 blobs, no promised speedup. T12 PARTIAL.

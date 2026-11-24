@@ -1,4 +1,8 @@
+import collections
 import io
+import threading
+import time
+from unittest import mock
 import pathlib
 import sys
 import unittest
@@ -59,6 +63,37 @@ class FrameTests(unittest.TestCase):
         for change in ({"digest": "b"}, {"files": 2}, {"extra": "x"}):
             with self.assertRaisesRegex(RuntimeError, "PARITY"):
                 c.verify({**report, **change}, host, "a")
+
+
+    def test_parallel_scan_exact_coverage(self):
+        barrier = threading.Barrier(2, timeout=5)
+        visited = []
+        def scan(cli, temp, env, data):
+            visited.append(data)
+            if data in (b"a", b"b"):
+                barrier.wait()
+            return collections.Counter({"fixture-rule": 1}), b"", b""
+        with mock.patch.object(c, "scan", side_effect=scan):
+            result = c.scan_records(None, None, {}, [(0, b"a"), (1, b"b"), (0, b""),
+                                                   (0, b"c"), (1, b"d")], time.monotonic())
+        self.assertCountEqual(visited, [b"a", b"b", b"c", b"d"])
+        self.assertEqual(result, {("other", "fixture-rule"): 2, ("tests", "fixture-rule"): 2})
+
+    def test_parallel_scan_failure_stops_next_window(self):
+        visited = []
+        def scan(cli, temp, env, data):
+            visited.append(data)
+            if data == b"a":
+                raise RuntimeError("synthetic failure")
+            return collections.Counter(), b"", b""
+        with mock.patch.object(c, "scan", side_effect=scan), self.assertRaisesRegex(RuntimeError, "synthetic"):
+            c.scan_records(None, None, {}, [(0, b"a"), (0, b"b"), (0, b"c")], time.monotonic())
+        self.assertNotIn(b"c", visited)
+
+    def test_parallel_scan_expired_deadline(self):
+        with mock.patch.object(c, "scan") as scan, self.assertRaisesRegex(RuntimeError, "TIMEOUT"):
+            c.scan_records(None, None, {}, [(0, b"a")], time.monotonic() - c.SCAN_SECONDS - 1)
+        scan.assert_not_called()
 
 
 if __name__ == "__main__":
