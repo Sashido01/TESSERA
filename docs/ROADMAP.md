@@ -185,3 +185,5 @@ T12.03.08: CI 45391798766 — 513+29 PASS, GOVULN_CONTROL_VERSION BLOCKED; но�
 **T12.03.20:** CI 45428224320 PASS, 604 теста, Docker synthetic PASS. **T12.03.21 — кандидат:** Gitleaks tracked UTF-8 stdin в Docker, сравнение с host, TSG1, девять регрессий; CI обязателен, history/path не изолированы. T12 PARTIAL.
 
 **T12.03.21:** CI 45432568241 PASS, 613 тестов, 177 файлов и 1 404 601 байт, Docker Gitleaks parity PASS. **T12.03.22 — кандидат:** пакетная изоляция достижимых исторических blobs, проверка OID, snapshot, host parity, семь регрессий; CI обязателен. T12 PARTIAL.
+
+**T12.03.22:** CI 45434506035 PASS, 620 тестов, 878 blobs / 10 952 864 байта, 4 пакета, 316.56s. **T12.03.23 — кандидат:** TSP1 path rules, 10 категорий, host parity, девять регрессий. CI обязателен. T12 PARTIAL.

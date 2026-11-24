@@ -188,7 +188,13 @@ jobs:
         run: python tools/check_gitleaks_history_container.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1" --host-report "$RUNNER_TEMP/gitleaks-history-host.jsonl"
 
       - name: Проверить пять правил Gitleaks, зависящих от имени файла
-        run: python tools/check_gitleaks_paths.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1"
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          python tools/check_gitleaks_paths.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1" > "$RUNNER_TEMP/gitleaks-path-host.jsonl"
+      - name: Сопоставить изолированную проверку правил Gitleaks по пути
+        run: python tools/check_gitleaks_paths_container.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1" --host-report "$RUNNER_TEMP/gitleaks-path-host.jsonl"
 
       - name: Получить закреплённый источник SkillSpector 2.13.7
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 (node24)
