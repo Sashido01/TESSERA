@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import pathlib
 import re
 import subprocess
@@ -23,16 +24,51 @@ class InspectionError(ValueError):
     """Не удалось безопасно изучить запрошенные доказательства."""
 
 
+# Local inspection does not need identity, signing or authentication context.
+GIT_CONTEXT = frozenset({
+    "GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR", "GIT_INDEX_FILE",
+    "GIT_OBJECT_DIRECTORY", "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+    "GIT_NAMESPACE", "GIT_GRAFT_FILE", "GIT_SHALLOW_FILE",
+    "GIT_REPLACE_REF_BASE", "GIT_IMPLICIT_WORK_TREE", "GIT_PREFIX",
+    "GIT_INTERNAL_SUPER_PREFIX", "GIT_CONFIG", "GIT_CONFIG_PARAMETERS",
+    "GIT_CONFIG_COUNT", "GIT_CONFIG_SYSTEM", "GIT_CONFIG_GLOBAL",
+    "GIT_CONFIG_NOSYSTEM", "GIT_EXEC_PATH",
+})
+LOCAL_ENV_KEYS = (
+    "PATH", "HOME", "USERPROFILE", "HOMEDRIVE", "HOMEPATH", "SystemRoot",
+    "WINDIR", "COMSPEC", "PATHEXT", "TEMP", "TMP", "TMPDIR",
+    "APPDATA", "LOCALAPPDATA", "LANG", "LC_ALL", "LC_CTYPE", "LC_MESSAGES", "TZ",
+)
+GIT_TIMEOUT = 30
+
+
+def local_git_environment() -> dict[str, str]:
+    if any(os.getenv(key) is not None for key in GIT_CONTEXT):
+        raise InspectionError("GIT_CONTEXT_UNSAFE")
+    result = {}
+    for key in LOCAL_ENV_KEYS:
+        value = os.getenv(key)
+        if value is not None:
+            result[key] = value
+    result.update({"GIT_NO_LAZY_FETCH": "1", "GIT_TERMINAL_PROMPT": "0"})
+    return result
+
+
 def git(repo: pathlib.Path, *args: str, allow_failure: bool = False) -> subprocess.CompletedProcess[str]:
+    env = local_git_environment()
     try:
         result = subprocess.run(
-            ["git", "-C", str(repo), *args],
+            ["git", "--no-replace-objects", "--no-optional-locks",
+             "-c", "core.fsmonitor=false", "-C", str(repo), *args],
             text=True, encoding="utf-8", capture_output=True, check=False,
+            stdin=subprocess.DEVNULL, env=env, timeout=GIT_TIMEOUT,
         )
+    except subprocess.TimeoutExpired as exc:
+        raise InspectionError("GIT_INSPECTION_TIMEOUT") from exc
     except (OSError, UnicodeError) as exc:
-        raise InspectionError(f"Не удалось выполнить Git: {exc}") from exc
+        raise InspectionError("GIT_INSPECTION_FAILED") from exc
     if result.returncode and not allow_failure:
-        raise InspectionError(f"Git завершился с ошибкой: {result.stderr.strip() or result.stdout.strip()}")
+        raise InspectionError("GIT_INSPECTION_FAILED")
     return result
 
 
@@ -57,6 +93,8 @@ def resolve_commit(root: pathlib.Path, commit: str | None) -> str:
     sha = result.stdout.strip()
     if not COMMIT_SHA.fullmatch(sha):
         raise InspectionError("Git вернул некорректный commit SHA")
+    if commit is not None and sha.lower() != commit.lower():
+        raise InspectionError("COMMIT_SHA_NOT_DIRECT")
     return sha.lower()
 
 
@@ -92,22 +130,42 @@ def inspect(repo: pathlib.Path, version: str, prefix: str = "", commit: str | No
         problems.append("RELEASE_NOT_TAGGED")
     else:
         tag_object_sha = tag_obj.stdout.strip()
-        kind = git(root, "cat-file", "-t", ref).stdout.strip()
+        if not COMMIT_SHA.fullmatch(tag_object_sha):
+            raise InspectionError("TAG_OBJECT_SHA_INVALID")
+        kind = git(root, "cat-file", "-t", tag_object_sha).stdout.strip()
         annotated = kind == "tag"
         if not annotated:
             problems.append("TAG_NOT_ANNOTATED")
+            if kind == "commit":
+                tag_commit_sha = tag_object_sha.lower()
+            else:
+                problems.append("TAG_TARGET_NOT_COMMIT")
         else:
-            data = git(root, "cat-file", "-p", ref).stdout
-            annotation_present = bool(data.partition("\n\n")[2].strip())
+            data = git(root, "cat-file", "-p", tag_object_sha).stdout
+            header, separator, message = data.partition("\n\n")
+            annotation_present = bool(separator and message.strip())
             if not annotation_present:
                 problems.append("TAG_ANNOTATION_MISSING")
-        tagged = git(root, "rev-parse", "--verify", f"{ref}^{{commit}}", allow_failure=True)
-        if tagged.returncode != 0:
-            problems.append("TAG_TARGET_NOT_COMMIT")
-        else:
-            tag_commit_sha = tagged.stdout.strip().lower()
-            if tag_commit_sha != wanted:
-                problems.append("TAG_WRONG_COMMIT")
+            fields = header.splitlines()
+            if len(fields) < 3 or fields[2] != f"tag {ref.removeprefix('refs/tags/')}":
+                problems.append("TAG_NAME_MISMATCH")
+            target = fields[0].removeprefix("object ") if fields else ""
+            if (len(fields) < 2 or not fields[0].startswith("object ")
+                    or not COMMIT_SHA.fullmatch(target) or fields[1] != "type commit"):
+                problems.append("TAG_TARGET_NOT_COMMIT")
+            elif git(root, "cat-file", "-t", target, allow_failure=True).stdout.strip() != "commit":
+                problems.append("TAG_TARGET_NOT_COMMIT")
+            else:
+                tag_commit_sha = target.lower()
+        if tag_commit_sha is not None and tag_commit_sha != wanted:
+            problems.append("TAG_WRONG_COMMIT")
+
+    final_ref = git(root, "rev-parse", "--verify", ref, allow_failure=True)
+    if ((final_ref.returncode == 0) != (tag_obj.returncode == 0)
+            or (final_ref.returncode == 0 and final_ref.stdout.strip() != tag_object_sha)):
+        problems.append("TAG_REF_CHANGED")
+    if commit is None and resolve_commit(root, None) != wanted:
+        problems.append("HEAD_CHANGED")
 
     return {
         "schema_version": 1,
