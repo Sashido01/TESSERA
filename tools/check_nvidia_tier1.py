@@ -20,7 +20,7 @@ import tempfile
 from check_official_local_install import fixture_env, tree_fingerprint, InstallCheckError
 
 VERSION = "1.2.0"
-CHECKS = ("Schema & Repository Governance", "Quality Score (4-Dimension Analysis)")
+CHECKS = ("Schema & Repository Governance", "QUALITY")
 REPORT = "skillevaluator-tier1.json"
 NAME = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*\Z")
 MAX_REPORT = 4 * 1024 * 1024
