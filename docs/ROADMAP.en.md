@@ -143,3 +143,8 @@ Complete work as small verifiable changes, assigning a new microversion only to 
 Within the same T12.03.07 candidate: `git -C` does not isolate inherited GIT_DIR/GIT_WORK_TREE and other context variables. Reject these before executing Git; two regressions (two repositories and config/namespace/object overrides). Do not alter the owner's environment or disable local signing policies or hooks. Trusted configuration, PATH and lack of full concurrent locking remain limitations.
 
 [CI 45387991659](https://github.com/Sashido01/TESSERA/actions/runs/45387991659): 504+28 tests PASS, but SkillSpector 81/100 CRITICAL (21 findings including HIGH E2 for full environment copying and MEDIUM EA2 for wording of the prohibition on tag changes). Candidate not accepted. Replace full copying with fixed variable allowlist, retain context rejection and local identity/signing context, add arbitrary-marker exclusion test. Clarify explicit requirement to leave the tag unchanged. Seven regressions in current candidate, CI rerun required; no presumed risk score.
+
+
+**T12.03.08 — candidate:** Govulncheck v1.10.0 exact SHA, CI build with lock and isolated environment. Extract + binary, archive/config/SBOM checks and explicit fallback when symbols are absent. Five regressions. Network sandbox, live positive control, symbol completeness, scanner vulnerabilities and call reachability remain open. Not a runtime dependency. CI 45386658684: 504+22 PASS, both Python license records matched upstream.
+
+T12.03.08 extended with Govulncheck self-audit (OSV of exact modules/toolchain/commit and before/after SHA-256); two additional tests, seven total. Live acceptance remains open.
