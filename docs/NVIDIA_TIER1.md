@@ -109,3 +109,11 @@ T12.03.20: [CI 45428224320](https://github.com/Sashido01/TESSERA/actions/runs/45
 ## T12.03.24 — лицензии Semgrep (кандидат)
 
 Три точных upstream LICENSE полностью прочитаны; Git blob SHA-1 пересчитан и совпал; SHA-256 закреплён для сравнения с установленным wheel RECORD. face 26.0.1 BSD-3-Clause: commit 86ec4072580809cc3978f5d6bb40261eb60c3045, blob 50c51841a2efd87b46c053beeceff5617ad8cfa1, 1497 bytes (CRLF сохранены); peewee 3.19.0 MIT: commit 45c166bce4630a55729f513a4b11fb95af23df5b, blob c752ab3ead2e7be324e5cafb5e1d53135c16af13, 1058 bytes; protobuf 6.33.6 BSD-3-Clause с пояснением generated code: commit 6e1998413a5bca7c058b85999667893f167434bc, blob 19b305b00060a774a9180fb916c14b49edb2008f, 1732 bytes. Существующий проверяющий механизм, без подмены metadata или нормализации текста; два новых offline теста. Локальный DNS PyPI заблокирован; реальное соответствие wheel/RECORD ожидает CI, несовпадение остаётся открытым, юридическая совместимость NOT_VERIFIED. Восемь OSV IDs не устранены. T12 PARTIAL.
+
+## T12.03.24 — результат PR
+
+[CI 45442813029](https://github.com/Sashido01/TESSERA/actions/runs/45442813029) PASS: 593+38=631 тест. face 26.0.1, peewee 3.19.0, protobuf 6.33.6 — UPSTREAM_TEXT_MATCH и RECORD MATCH для всех трёх. Metadata UNKNOWN сохранена, legal compliance NOT_VERIFIED, восемь OSV IDs открыты. History Docker: 902 blobs/11 504 044 байта/425.15s/4 пакета/0 findings. v0.0.55 main CI 45442651348 и тег проверены; v0.0.56 принят в main, тег отдельно.
+
+## T12.03.25 — ограниченная параллельность Gitleaks (кандидат)
+
+В TSG1 worker два одновременных stdin-процесса, GOMAXPROCS=1 на процесс, окна ровно до двух записей; нет новых заданий после ошибки окна. Сохраняются 2 CPU/512 MiB/64 PID, все лимиты/дедлайны, контрольные сценарии, host parity, каждый непустой объект проверяется отдельно. TSP1 не меняется. Три offline регрессии (реальная синхронизация двух mocked scanner calls, прекращение после ошибки, просроченный deadline). Фактические ускорение/пиковая память и Docker workload требуют CI; 20-minute job cap неизменён. Сравнить с 425.15s на 902 blobs, не обещать ускорение. T12 PARTIAL.

@@ -3,6 +3,7 @@
 from __future__ import annotations
 import argparse
 import collections
+import concurrent.futures
 import hashlib
 import json
 import os
@@ -27,6 +28,8 @@ MODULES = ("check_gitleaks_container.py", "gitleaks_frame.py", "check_docker_pre
            "check_gitleaks_review.py", "check_bandit_review.py",
            "check_nvidia_tier1.py", "check_official_local_install.py")
 LIMIT = 1024 * 1024
+WORKERS = 2
+SCAN_SECONDS = 240
 
 
 def binary_ok(cli):
@@ -40,6 +43,28 @@ def records_for(data):
             for name, content in sorted(data.items())]
 
 
+def scan_records(cli, temp, env, records, started):
+    """Two bounded workers, one independent Gitleaks stdin process per nonempty record."""
+    def one(item):
+        category, data = item
+        if not data:
+            return collections.Counter()
+        require(time.monotonic() - started < SCAN_SECONDS, "CONTAINER_SCAN_TIMEOUT")
+        rules, _, _ = scan(cli, temp, env, data)
+        return collections.Counter({("tests" if category else "other", rule): count
+                                    for rule, count in rules.items()})
+
+    counts = collections.Counter()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as pool:
+        # Python 3.13 has no executor.map buffersize; each input window is bounded
+        # so no unbounded queue and no further submission after a failed window.
+        for offset in range(0, len(records), WORKERS):
+            for result in pool.map(one, records[offset:offset + WORKERS]):
+                counts.update(result)
+    require(time.monotonic() - started < SCAN_SECONDS, "CONTAINER_SCAN_TIMEOUT")
+    return counts
+
+
 def worker():
     cli = pathlib.Path("/stage/gitleaks")
     binary_ok(cli)
@@ -48,7 +73,7 @@ def worker():
     with tempfile.TemporaryDirectory(dir="/tmp") as folder:
         temp = pathlib.Path(folder)
         env = fixture_env(temp)
-        env.update({"PATH": "/usr/local/bin:/usr/bin:/bin", "CI": "true", "GOMAXPROCS": "2"})
+        env.update({"PATH": "/usr/local/bin:/usr/bin:/bin", "CI": "true", "GOMAXPROCS": "1"})
         version = subprocess.run([str(cli), "version"], cwd=temp, env=env,
                                  stdin=subprocess.DEVNULL, capture_output=True, timeout=10)
         require(version.returncode == 0 and version.stdout.strip() == VERSION.encode(), "CONTAINER_VERSION")
@@ -59,13 +84,7 @@ def worker():
         negative, stdout, stderr = scan(cli, temp, env, b"fixture " + marker + b" # gitleaks:allow\n")
         require(negative.get("aws-access-token", 0) > 0 and marker not in stdout and marker not in stderr,
                 "CONTAINER_DETECTION_REDACTION")
-        counts = collections.Counter()
-        for category, data in records:
-            if data:
-                require(time.monotonic() - started < 240, "CONTAINER_SCAN_TIMEOUT")
-                rules, _, _ = scan(cli, temp, env, data)
-                for rule, count in rules.items():
-                    counts["tests" if category else "other", rule] += count
+        counts = scan_records(cli, temp, env, records, started)
         require(set(temp.iterdir()) == entries, "CONTAINER_FIXTURE_MUTATED")
     return {"digest": digest, "version": VERSION, "files": len(records),
             "scanned_nonempty": sum(bool(data) for _, data in records),
