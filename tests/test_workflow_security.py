@@ -50,6 +50,10 @@ class WorkflowSecurityTests(unittest.TestCase):
         modified = WORKFLOW.replace("GH_TOKEN: ${{ github.token }}", "GH_TOKEN: ${{ secrets.PAT }}")
         self.assertTrue(any("read-only токеном" in e for e in module.validate_workflow(modified)))
 
+    def test_skill_update_check_is_required(self):
+        modified = WORKFLOW.replace("run: python tools/check_official_skill_update.py", "run: echo")
+        self.assertTrue(any("проверки обновления" in e for e in module.validate_workflow(modified)))
+
     def test_tag_job_needs_validation(self):
         modified = WORKFLOW.replace("    needs: validate", "    needs: unknown")
         self.assertTrue(any("validate" in e for e in module.validate_workflow(modified)))
