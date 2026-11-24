@@ -1,6 +1,7 @@
 """Offline checks for Gitleaks' bounded, redacted report contract."""
 import json
 import pathlib
+import re
 import sys
 import unittest
 
@@ -14,6 +15,10 @@ class GitleaksReviewTests(unittest.TestCase):
 
     def parse(self, rows, rc=0, log=None, size=15):
         return g.parse_scan(json.dumps(rows).encode(), self.log if log is None else log, rc, size)
+
+    def test_marker_matches_pinned_upstream_pattern(self):
+        self.assertIsNotNone(re.fullmatch(rb'(?:A3T[A-Z0-9]|AKIA|ASIA|ABIA|ACCA)[A-Z2-7]{16}',
+                                         g.synthetic_marker()))
 
     def test_clean(self):
         self.assertEqual(self.parse([]), {})

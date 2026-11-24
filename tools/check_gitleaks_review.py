@@ -91,6 +91,11 @@ def scan(cli, cwd, env, content):
     return rules, result.stdout, result.stderr
 
 
+def synthetic_marker():
+    # Upstream AWS rule accepts only A-Z and 2-7 after the prefix.
+    return b"AK" + b"IA" + b"Q7M4T6X2P3R5V7Z5"
+
+
 def accept(repo, cli):
     repo, cli = repo.resolve(strict=True), cli.resolve(strict=True)
     require(cli.is_file() and os.access(cli, os.X_OK), "GITLEAKS_CLI_MISSING")
@@ -112,7 +117,7 @@ def accept(repo, cli):
         clean, _, _ = scan(cli, temp, env, b"plain text fixture\n")
         require(not clean, "GITLEAKS_CLEAN_FIXTURE_FAILED")
         # Fabricated, nonfunctional key-shaped marker, built in memory only.
-        marker = b"AK" + b"IA" + b"Q7M4T8X2P9R6V3Z5"
+        marker = synthetic_marker()
         negative, stdout, stderr = scan(
             cli, temp, env, b"fixture " + marker + b" # gitleaks:allow\n")
         require(negative.get("aws-access-token", 0) > 0, "GITLEAKS_NEGATIVE_NOT_DETECTED")
