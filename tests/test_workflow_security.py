@@ -108,5 +108,12 @@ class WorkflowSecurityTests(unittest.TestCase):
         self.assertTrue(any("validate" in e for e in module.validate_workflow(modified)))
 
 
+    def test_semgrep_lock_and_dependency_review_required(self):
+        for value in ("11859086088d6720e5f4f303de0740a4830b065b",
+                      'tools/check_dependency_review.py --root semgrep==1.182.0'):
+            modified = WORKFLOW.replace(value, "omitted")
+            self.assertTrue(any("Semgrep" in e for e in module.validate_workflow(modified)))
+
+
 if __name__ == "__main__":
     unittest.main()

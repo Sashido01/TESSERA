@@ -169,3 +169,5 @@ T12.03.08: CI 45391798766 — 513+29 PASS, GOVULN_CONTROL_VERSION BLOCKED; но�
 **T12.03.13:** [CI 45403712350](https://github.com/Sashido01/TESSERA/actions/runs/45403712350) PASS, 543+29, execution PASS, policy FAIL (1 HIGH, 19 MEDIUM). **T12.03.14 — кандидат:** [живой контроль Gitleaks shim](NVIDIA_TIER1.md) с собственным синтетическим правилом, чистым и положительным сценариями, проверкой stdout/stderr и пяти офлайн регрессий; реальный CI обязателен. T12 PARTIAL.
 
 **T12.03.14:** [CI 45405865725](https://github.com/Sashido01/TESSERA/actions/runs/45405865725) PASS, 548+29 тестов; живой shim-контроль PASS, policy FAIL. **T12.03.15 — кандидат:** [атрибуция HIGH](NVIDIA_TIER1.md) по точному upstream category/check_name, без подавлений и изменения порогов; три регрессии, реальный CI обязателен. T12 PARTIAL.
+
+**T12.03.15:** [CI 45418208676](https://github.com/Sashido01/TESSERA/actions/runs/45418208676) PASS, 551+29, aggregate_risk_gate=1, other_high=0, policy FAIL. **T12.03.16 — кандидат:** [Semgrep 1.182.0](NVIDIA_TIER1.md), upstream lock, локальные правила и живые контроли, обязательная строка scanner, OSV/лицензии, пять регрессий; CI обязателен. T12 PARTIAL.

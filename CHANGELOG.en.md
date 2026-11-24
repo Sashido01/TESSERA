@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.48 — Pinned Semgrep in NVIDIA Tier 1 (T12.03.16)
+
+- Upstream lock, local rules, live controls and required scanner report, OSV/licenses; five regressions. CI required, sandbox and certification open.
+
 ## 0.0.47 — Tier 1 aggregate HIGH finding attribution (T12.03.15)
 
 - Separate aggregate_risk_gate and other_high counts, original severity and policy unchanged; three regressions. Live CI acceptance required.

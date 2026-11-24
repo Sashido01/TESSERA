@@ -27,6 +27,9 @@ SCANNERS = {"Security Scan": ("skillspector", "2.13.7"),
             "Secrets Detection": ("gitleaks", "8.30.1")}
 GITLEAKS_SHA = "88f91962aa2f93ac6ab281d553b9e125f5197bbbce38f9f2437f7299c32e5509"
 MAX_REPORT = 16 * 1024 * 1024
+SEMGREP_VERSION = "1.182.0"
+SEMGREP_RULES_BLOB = "3ef2067b69ef50f09b39c933771f751bc227b3db"
+SEMGREP_CONTROL_RULE = "skillevaluator.python.dynamic-code-execution"
 
 # Explicitly support the pinned upstream SecretsValidator argument contract only.
 # No arbitrary flags, reports on disk, or silent fallback to an older scanner.
@@ -87,6 +90,8 @@ def summary(report, rc):
             require(scanners.get(scanner) == version, "FULL_TIER1_SCANNER_VERSION:" + scanner)
             require(not row["skipped"] and not row["incomplete_scans"]
                     and status in ("passed", "failed"), "FULL_TIER1_SCANNER_INCOMPLETE:" + scanner)
+        if name == "Code Risk Analysis":
+            require(scanners.get("semgrep") == SEMGREP_VERSION, "FULL_TIER1_SCANNER_VERSION:semgrep")
         states[name] = {"status": status.upper(), "skipped": row["skipped"],
                         "incomplete": bool(row["incomplete_scans"]), "findings": counts}
         if name == "Security Scan":
@@ -99,8 +104,8 @@ def summary(report, rc):
         for r in states.values())
     return {"validators": states, "policy_verdict": "PASS" if overall else "FAIL",
             "coverage": "PARTIAL" if incomplete else "ALL_VALIDATOR_ROWS",
-            "scanner_versions": {s: v for s, v in SCANNERS.values()},
-            "semgrep": "NOT_RUN", "certification": "NOT_VERIFIED"}
+            "scanner_versions": {**{s: v for s, v in SCANNERS.values()}, "semgrep": SEMGREP_VERSION},
+            "semgrep": "EXECUTED", "certification": "NOT_VERIFIED"}
 
 
 def executable(path):
@@ -154,9 +159,57 @@ def live_shim_control(run, shim, temp):
             "fixture_entries_unchanged": "PASS", "scope": "LIVE_PINNED_SHIM_CUSTOM_RULE"}
 
 
-def accept(repo, cli, skillspector, bandit, gitleaks):
+def semgrep_control_result(result, target, *, detected):
+    require(len(result.stdout) <= MAX_REPORT and len(result.stderr) <= MAX_REPORT,
+            "FULL_TIER1_SEMGREP_OUTPUT")
+    require(result.returncode == (1 if detected else 0), "FULL_TIER1_SEMGREP_EXIT")
+    report = json.loads(result.stdout)
+    require(isinstance(report, dict) and report.get("errors") == []
+            and isinstance(report.get("results"), list), "FULL_TIER1_SEMGREP_REPORT")
+    paths = report.get("paths")
+    require(isinstance(paths, dict) and isinstance(paths.get("scanned"), list)
+            and len(paths["scanned"]) == 1, "FULL_TIER1_SEMGREP_COVERAGE")
+
+    def same_path(value):
+        return isinstance(value, str) and (target.parent / value).resolve() == target
+
+    require(same_path(paths["scanned"][0]), "FULL_TIER1_SEMGREP_COVERAGE")
+    rows = report["results"]
+    require(len(rows) == int(detected), "FULL_TIER1_SEMGREP_FINDINGS")
+    if detected:
+        row = rows[0]
+        require(isinstance(row, dict) and row.get("check_id") == SEMGREP_CONTROL_RULE
+                and same_path(row.get("path")), "FULL_TIER1_SEMGREP_FINDINGS")
+
+
+def semgrep_control(run, semgrep, rules, temp):
+    # Match exact upstream Git blob; this is not a signature of the wheel.
+    raw = rules.read_bytes()
+    require(len(raw) == 3376 and hashlib.sha1(
+        b"blob " + str(len(raw)).encode() + b"\0" + raw).hexdigest() == SEMGREP_RULES_BLOB,
+        "FULL_TIER1_SEMGREP_RULES")
+    fixture = temp / "semgrep-control"
+    fixture.mkdir()
+    target = fixture / "probe.py"
+    args = ["scan", "--config", str(rules), "--json", "--quiet", "--metrics", "off",
+            "--disable-version-check", "--no-rewrite-rule-ids", "--error", str(target)]
+    # These are scanned as text, never executed.
+    for detected, content in ((False, b"def probe(value):\n    return str(value)\n"),
+                              (True, b"def probe(value):\n    return eval(value)\n")):
+        target.write_bytes(content)
+        result = run(semgrep, args, 90, cwd=fixture)
+        semgrep_control_result(result, target, detected=detected)
+        require(set(fixture.iterdir()) == {target} and not target.is_symlink()
+                and target.read_bytes() == content and rules.read_bytes() == raw,
+                "FULL_TIER1_SEMGREP_MUTATION")
+    return {"clean": "PASS", "detection": "PASS", "coverage": "PASS",
+            "rules_blob": SEMGREP_RULES_BLOB, "fixture_preserved": "PASS"}
+
+
+def accept(repo, cli, skillspector, bandit, gitleaks, semgrep, semgrep_rules):
     repo = repo.resolve(strict=True)
-    cli, skillspector, bandit, gitleaks = map(executable, (cli, skillspector, bandit, gitleaks))
+    cli, skillspector, bandit, gitleaks, semgrep = map(executable, (cli, skillspector, bandit, gitleaks, semgrep))
+    semgrep_rules = semgrep_rules.resolve(strict=True)
     require(hashlib.sha256(gitleaks.read_bytes()).hexdigest() == GITLEAKS_SHA,
             "FULL_TIER1_GITLEAKS_HASH")
     original = repo / "skills"
@@ -176,6 +229,10 @@ def accept(repo, cli, skillspector, bandit, gitleaks):
         env.update({"PATH": os.pathsep.join((str(private_bin), str(cli.parent), "/usr/bin", "/bin")),
                     "SKILLEVALUATOR_SKILLSPECTOR_PATH": str(skillspector),
                     "SKILLEVALUATOR_BANDIT_PATH": str(bandit),
+                    "SKILLEVALUATOR_SEMGREP_PATH": str(semgrep),
+                    "SKILLEVALUATOR_REQUIRE_SEMGREP": "1",
+                    "SEMGREP_SEND_METRICS": "off",
+                    "SEMGREP_ENABLE_VERSION_CHECK": "0",
                     "SKILLEVALUATOR_RUNTIME_DIR": str(temp / "runtime"),
                     "TMPDIR": str(private_tmp), "PYTHONNOUSERSITE": "1",
                     "PYTHONDONTWRITEBYTECODE": "1", "PYTHONSAFEPATH": "1",
@@ -196,6 +253,10 @@ def accept(repo, cli, skillspector, bandit, gitleaks):
         version = run(bandit, ["--version"])
         require(version.returncode == 0 and re.search(rb"\bbandit 1\.9\.4\b", version.stdout),
                 "FULL_TIER1_BANDIT_VERSION")
+        version = run(semgrep, ["--version"], 30)
+        require(version.returncode == 0 and version.stdout.strip() == SEMGREP_VERSION.encode(),
+                "FULL_TIER1_SEMGREP_VERSION")
+        semgrep_probe = semgrep_control(run, semgrep, semgrep_rules, temp)
         version = run(shim, ["version"])
         require(version.returncode == 0 and version.stdout.strip() == b"8.30.1",
                 "FULL_TIER1_GITLEAKS_VERSION")
@@ -229,18 +290,20 @@ def accept(repo, cli, skillspector, bandit, gitleaks):
         require(hashlib.sha256(gitleaks.read_bytes()).hexdigest() == GITLEAKS_SHA,
                 "FULL_TIER1_GITLEAKS_CHANGED")
     return {"execution": "PASS", "scope": "INTEGRATED_STATIC_TIER1", "checks": CHECKS.split(","),
-            "llm": "DISABLED", "semgrep": "NOT_RUN", "skills": results,
+            "llm": "DISABLED", "semgrep": "EXECUTED", "skills": results,
+            "semgrep_control": semgrep_probe,
             "policy": "ADVISORY_FINDINGS", "certification": "NOT_VERIFIED",
             "live_shim_control": control}
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    for name in ("repo", "cli", "skillspector", "bandit", "gitleaks"):
+    for name in ("repo", "cli", "skillspector", "bandit", "gitleaks", "semgrep", "semgrep-rules"):
         parser.add_argument("--" + name, type=pathlib.Path, required=True)
     args = parser.parse_args()
     try:
-        result = accept(args.repo, args.cli, args.skillspector, args.bandit, args.gitleaks)
+        result = accept(args.repo, args.cli, args.skillspector, args.bandit, args.gitleaks,
+                        args.semgrep, args.semgrep_rules)
     except (InstallCheckError, OSError, ValueError, UnicodeError, subprocess.SubprocessError) as exc:
         print("BLOCKED: " + (str(exc) if isinstance(exc, InstallCheckError)
                               else "FULL_TIER1_RUNTIME_FAILED"), file=sys.stderr)

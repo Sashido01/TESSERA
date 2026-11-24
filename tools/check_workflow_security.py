@@ -61,8 +61,12 @@ def validate_workflow(workflow: str) -> list[str]:
         errors.append("Нет обязательной проверки нескольких навыков")
     if '--require-hashes -r tools/nvidia-tier1-requirements.txt' not in validate or 'run: python tools/check_nvidia_tier1.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/skillevaluator"' not in validate:
         errors.append("Нет обязательной ограниченной проверки NVIDIA Tier 1")
-    if 'run: python tools/check_nvidia_full_tier1.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/skillevaluator" --skillspector "$RUNNER_TEMP/skillspector/bin/skillspector" --bandit "$RUNNER_TEMP/nvidia-tier1/bin/bandit" --gitleaks "$RUNNER_TEMP/gitleaks-8.30.1"' not in validate:
+    if 'run: python tools/check_nvidia_full_tier1.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/skillevaluator" --skillspector "$RUNNER_TEMP/skillspector/bin/skillspector" --bandit "$RUNNER_TEMP/nvidia-tier1/bin/bandit" --gitleaks "$RUNNER_TEMP/gitleaks-8.30.1" --semgrep "$RUNNER_TEMP/semgrep/bin/semgrep" --semgrep-rules "$RUNNER_TEMP/nvidia-tier1/lib/python3.13/site-packages/skillevaluator/config/semgrep_rules.yaml"' not in validate:
         errors.append("Нет обязательной интегрированной проверки NVIDIA Tier 1")
+    if ('11859086088d6720e5f4f303de0740a4830b065b' not in validate
+            or '--require-hashes -r "$RUNNER_TEMP/semgrep-requirements.txt"' not in validate
+            or 'tools/check_dependency_review.py --root semgrep==1.182.0' not in validate):
+        errors.append("Нет обязательной закреплённой проверки Semgrep")
     if 'run: python tools/check_nvidia_static_review.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/skillevaluator"' not in validate:
         errors.append("Нет обязательного статического обзора NVIDIA Tier 1")
     if 'run: python tools/check_bandit_review.py --repo . --cli "$RUNNER_TEMP/nvidia-tier1/bin/bandit"' not in validate:
