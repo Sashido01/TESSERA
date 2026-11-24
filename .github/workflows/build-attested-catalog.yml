@@ -12,6 +12,10 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && github.ref_type == 'tag' && github.repository == 'Sashido01/TESSERA'
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Python tests import runtime scripts; bytecode caches must not contaminate
+    # the strictly allowlisted signed ZIP input.
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
     concurrency:
       group: tessera-attested-${{ github.ref }}
       cancel-in-progress: false

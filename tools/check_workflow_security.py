@@ -29,6 +29,17 @@ def validate_workflow(workflow: str) -> list[str]:
     validate, tagging = workflow.split("\n  tag_microversion:", 1)
     if "persist-credentials: false" not in validate:
         errors.append("Проверка не отключает сохранение Git credentials")
+    if "    env:\n      PYTHONDONTWRITEBYTECODE: '1'\n" not in validate:
+        errors.append("Python bytecode caches не отключены в CI")
+    try:
+        tests = validate.index("run: python -m unittest discover -s skills/microversion-release/tests -v")
+        post_test_build = validate.index(
+            "run: python tools/build_catalog_package.py --repo . --output-dir dist/post-tests --check-reproducible"
+        )
+        if post_test_build <= tests:
+            errors.append("Post-test ZIP smoke должен выполняться после тестов навыка")
+    except ValueError:
+        errors.append("Нет обязательной проверки ZIP после тестов")
     if "contents: write" in validate:
         errors.append("Право записи обнаружено в проверяющей задаче")
     if "needs: validate" not in tagging:

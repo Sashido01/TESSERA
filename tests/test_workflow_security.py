@@ -31,6 +31,17 @@ class WorkflowSecurityTests(unittest.TestCase):
         modified = WORKFLOW.replace("persist-credentials: false", "persist-credentials: true")
         self.assertTrue(any("credentials" in e for e in module.validate_workflow(modified)))
 
+    def test_missing_bytecode_isolation_rejected(self):
+        modified = WORKFLOW.replace("PYTHONDONTWRITEBYTECODE: '1'", "PYTHONDONTWRITEBYTECODE: '0'")
+        self.assertTrue(any("bytecode" in e for e in module.validate_workflow(modified)))
+
+    def test_post_test_archive_smoke_is_required(self):
+        modified = WORKFLOW.replace(
+            "run: python tools/build_catalog_package.py --repo . --output-dir dist/post-tests --check-reproducible",
+            "run: echo omitted"
+        )
+        self.assertTrue(any("ZIP после тестов" in e for e in module.validate_workflow(modified)))
+
     def test_tag_job_needs_validation(self):
         modified = WORKFLOW.replace("    needs: validate", "    needs: unknown")
         self.assertTrue(any("validate" in e for e in module.validate_workflow(modified)))

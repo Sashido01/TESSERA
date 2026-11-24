@@ -53,6 +53,10 @@ def validate(text: str) -> list[str]:
             errors.append("ATTEST_FORBIDDEN_OPERATION")
     if "cancel-in-progress: false" not in text:
         errors.append("ATTEST_CONCURRENCY_UNSAFE")
+    # Python imports from skills/*/scripts produce __pycache__ by default.
+    # The runtime-file allowlist must stay strict rather than ignoring these files.
+    if "    env:\n      PYTHONDONTWRITEBYTECODE: '1'\n" not in text:
+        errors.append("ATTEST_PYCACHE_ISOLATION_MISSING")
     return sorted(set(errors))
 
 
