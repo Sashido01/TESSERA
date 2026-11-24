@@ -1,8 +1,10 @@
 import importlib.util
+import os
 import pathlib
 import subprocess
 import tempfile
 import unittest
+from unittest import mock
 
 PATH = pathlib.Path(__file__).resolve().parents[1] / "scripts" / "release_tag.py"
 spec = importlib.util.spec_from_file_location("release_tag", PATH)
@@ -63,6 +65,78 @@ class ReleaseTagTests(unittest.TestCase):
         with self.assertRaisesRegex(module.TagError, "не аннотирован"):
             module.create(self.repo, "0.1.0", "Релиз 0.1.0 — всё готово")
         self.assertEqual(self.cmd("cat-file", "-t", "refs/tags/v0.1.0"), "commit")
+
+    def test_expected_head_mismatch_refuses_before_tagging(self):
+        previous = self.cmd("rev-parse", "HEAD")
+        self.cmd("commit", "--allow-empty", "-qm", "Новый коммит")
+        with self.assertRaisesRegex(module.TagError, "проверенным коммитом"):
+            module.create(self.repo, "0.1.0", "Релиз — проверка SHA", expected_head=previous)
+        self.assertEqual(self.cmd("tag", "--list", "v0.1.0"), "")
+
+    def test_moved_head_does_not_tag_unverified_commit(self):
+        previous = self.cmd("rev-parse", "HEAD")
+        original = module.git
+
+        def move_head(repo, *args, **kwargs):
+            if args[0] == "tag":
+                self.cmd("commit", "--allow-empty", "-qm", "Конкурентное изменение")
+            return original(repo, *args, **kwargs)
+
+        with mock.patch.object(module, "git", side_effect=move_head):
+            with self.assertRaisesRegex(module.TagError, "проверенным коммитом"):
+                module.create(self.repo, "0.1.0", "Релиз — проверка гонки")
+        self.assertEqual(self.cmd("rev-parse", "refs/tags/v0.1.0^{commit}"), previous)
+        self.assertNotEqual(self.cmd("rev-parse", "HEAD"), previous)
+
+    def test_nested_tag_rejected(self):
+        self.cmd("tag", "-a", "inner", "-m", "Внутренний тег")
+        self.cmd("tag", "-a", "v0.1.0", "-m", "Внешний тег", "inner")
+        with self.assertRaisesRegex(module.TagError, "не на HEAD напрямую"):
+            module.verify(self.repo, "0.1.0")
+
+    def test_alias_of_different_annotated_tag_rejected(self):
+        self.cmd("tag", "-a", "other", "-m", "Другой тег")
+        self.cmd("update-ref", "refs/tags/v0.1.0", self.cmd("rev-parse", "refs/tags/other"))
+        with self.assertRaisesRegex(module.TagError, "имя объекта"):
+            module.verify(self.repo, "0.1.0")
+
+    def test_inherited_git_dir_and_worktree_cannot_redirect_tag(self):
+        with tempfile.TemporaryDirectory() as folder:
+            other = pathlib.Path(folder).resolve()
+            subprocess.run(["git", "-C", str(other), "init", "-q"], check=True)
+            subprocess.run(["git", "-C", str(other), "-c", "user.name=Test User",
+                            "-c", "user.email=example@example.invalid", "commit",
+                            "--allow-empty", "-qm", "Other fixture"], check=True)
+            with mock.patch.dict(os.environ, {"GIT_DIR": str(other / ".git"),
+                                              "GIT_WORK_TREE": str(self.repo.resolve())}):
+                with self.assertRaisesRegex(module.TagError, "внешнее окружение"):
+                    module.create(self.repo, "0.1.0", "Релиз — проверка окружения")
+            self.assertEqual(self.cmd("tag", "--list"), "")
+            result = subprocess.run(["git", "-C", str(other), "tag", "--list"],
+                                    check=True, capture_output=True, text=True)
+            self.assertEqual(result.stdout.strip(), "")
+
+    def test_inherited_git_config_override_rejected(self):
+        for overrides in ({"GIT_CONFIG_COUNT": "1", "GIT_CONFIG_KEY_0": "core.worktree",
+                           "GIT_CONFIG_VALUE_0": str(self.repo)},
+                          {"GIT_NAMESPACE": "fixture"}, {"GIT_OBJECT_DIRECTORY": "fixture"}):
+            with self.subTest(overrides=tuple(overrides)), mock.patch.dict(os.environ, overrides):
+                with self.assertRaisesRegex(module.TagError, "внешнее окружение"):
+                    module.verify(self.repo, "0.1.0")
+
+    def test_git_child_receives_only_required_environment(self):
+        with mock.patch.dict(os.environ, {"TESSERA_PRIVATE_FIXTURE": "synthetic marker",
+                                          "GIT_COMMITTER_NAME": "Test Identity",
+                                          "GIT_CONFIG_KEY_0": "core.worktree"}):
+            with mock.patch.object(module.subprocess, "run") as run:
+                run.return_value = subprocess.CompletedProcess([], 0, "", "")
+                module.git(self.repo, "rev-parse", "HEAD")
+                env = run.call_args.kwargs["env"]
+                self.assertNotIn("TESSERA_PRIVATE_FIXTURE", env)
+                self.assertNotIn("GIT_CONFIG_KEY_0", env)
+                self.assertEqual(env["GIT_COMMITTER_NAME"], "Test Identity")
+                self.assertEqual(set(env) - set(module.CHILD_ENV_KEYS), set())
+                self.assertEqual(os.getenv("TESSERA_PRIVATE_FIXTURE"), "synthetic marker")
 
 
 if __name__ == "__main__":
