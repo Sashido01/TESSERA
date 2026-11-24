@@ -69,3 +69,11 @@ Three test modules replace fixed-file importlib loading with ordinary imports fr
 ## T12.03.19 — Russian terminology clarity (candidate)
 
 22 editorial substitutions in six skill files: ordinary phrases instead of mixed hyphenated tokens. Preliminary review of 17 files; independent ASCII Latin + Cyrillic/Greek token count in modified files 22→0. Five Russian documents and two release_tag.py exception messages; English translation retains its existing meaning, executable commands, error codes, access policy and algorithms unchanged. Not a full Unicode audit or proof of AE4 removal; live CI required. No rules disabled or suppressions used. AST4 and LP3 remain subject to review; T12 PARTIAL.
+
+## T12.03.19 — PR result
+
+[CI 45425640926](https://github.com/Sashido01/TESSERA/actions/runs/45425640926) PASS, 556+38=594 tests, AE4 6→0, MEDIUM 13→7 (AST4 6, LP3 1), SkillSpector 36→22/100, 0 suppressions, integrated policy PASS. v0.0.50 main CI 45425408841 and annotated tag verified; v0.0.51 merged into main, its acceptance separate.
+
+## T12.03.20 — Linux namespace preflight (candidate)
+
+Required synthetic control, separate from scanners: positive parent connection to IPv4 loopback listener, negative inside separate network namespace, distinct net namespace inodes, PID=1, exact soft/hard rlimits CPU 10 s, AS 1 GiB, FSIZE 16 MiB, NOFILE 256, CORE 0; closed stdin/inherited FDs, minimal environment, output to temporary files, timeout and PID namespace termination (descendant created separate setsid session, did not write marker). Prototype actually passed in separate Linux x86_64 container UID=0, util-linux 2.41.5, not GitHub Runner. Five offline regressions. CI blocks on failure, no sudo/fallback. Test limits are not scanner profiles; filesystem isolation, AF_UNIX, aggregate cgroup budget, real scanner workloads and Windows NOT_VERIFIED. Not a sandbox, T12 PARTIAL. Semgrep 8 OSV IDs remain open.

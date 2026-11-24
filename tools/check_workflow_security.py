@@ -27,6 +27,8 @@ def validate_workflow(workflow: str) -> list[str]:
         errors.append("Отсутствует отдельная задача публикации тега")
         return errors
     validate, tagging = workflow.split("\n  tag_microversion:", 1)
+    if '      - name: Проверить живой Linux namespace preflight\n        run: python tools/check_namespace_preflight.py\n' not in validate:
+        errors.append("Нет обязательного Linux namespace preflight")
     if "persist-credentials: false" not in validate:
         errors.append("Проверка не отключает сохранение Git credentials")
     if "    env:\n      PYTHONDONTWRITEBYTECODE: '1'\n" not in validate:

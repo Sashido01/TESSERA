@@ -115,5 +115,10 @@ class WorkflowSecurityTests(unittest.TestCase):
             self.assertTrue(any("Semgrep" in e for e in module.validate_workflow(modified)))
 
 
+    def test_namespace_preflight_required(self):
+        modified = WORKFLOW.replace("run: python tools/check_namespace_preflight.py", "run: echo omitted")
+        self.assertTrue(any("namespace preflight" in e for e in module.validate_workflow(modified)))
+
+
 if __name__ == "__main__":
     unittest.main()
