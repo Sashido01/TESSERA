@@ -4,6 +4,11 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.80 — Reconcile the accepted 0.0.79 release
+
+- Updated the bilingual catalog status after PR #86: local and GitHub `main` matched by full SHA and version 0.0.79; main CI 45663571704 completed successfully.
+- Confirmed annotated `v0.0.79` and `repository-workflow/v0.0.2` at the exact commit. The separate local post-run `--verify-ci` stopped with `GIT_CONTEXT_UNSAFE`; #81 tracks this limit.
+
 ## 0.0.79 — Harden the Repository Workflow planner
 
 - The planner now normalizes Unicode scopes, rejects reserved Windows names and duplicate JSON keys, and validates the DAG in O(V+E); regressions cover long chains, cycles and path conflicts.
