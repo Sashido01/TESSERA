@@ -50,6 +50,22 @@ def fixtures():
 
 
 class CIEvidenceTests(unittest.TestCase):
+    def test_parallel_job_evidence_requires_both(self):
+        run, jobs = fixtures()
+        template = dict(jobs["jobs"][0])
+        jobs["jobs"].extend({**template, "name": name} for name in release_ci.PARALLEL_JOBS)
+        jobs["total_count"] = len(jobs["jobs"])
+        def verify():
+            return release_ci.validate_ci_evidence(run, jobs, repository=REPO, run_id=RUN_ID, commit_sha=SHA)
+        result = verify()
+        self.assertEqual(result["ci_status"], "PASS")
+        self.assertIn("history_checks", result["required_jobs"])
+        jobs["jobs"][-1]["conclusion"] = "skipped"
+        self.assertIn("CI_REQUIRED_JOB_NOT_SUCCESSFUL", verify()["problems"])
+        jobs["jobs"].pop()
+        jobs["total_count"] = len(jobs["jobs"])
+        self.assertIn("CI_REQUIRED_JOB_MISSING", verify()["problems"])
+
     def setUp(self):
         self.run, self.jobs = fixtures()
 

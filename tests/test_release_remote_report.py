@@ -68,6 +68,55 @@ class RemoteReleaseTests(unittest.TestCase):
     def push_tag(self, name="v0.0.9"):
         self.git("push", "origin", f"refs/tags/{name}")
 
+    def independent_fixture(self):
+        folder = self.repo / "skills" / "project-audit"
+        folder.mkdir(parents=True)
+        (folder / "SKILL.md").write_text("# Fixture\n", encoding="utf-8")
+        (folder / "VERSION").write_text("0.0.1\n", encoding="utf-8")
+        for name in ("CHANGELOG.md", "CHANGELOG.en.md"):
+            (folder / name).write_text("## 0.0.1 — Fixture\n", encoding="utf-8")
+        cfg = json.loads((self.repo / "release-checks.json").read_text(encoding="utf-8"))
+        cfg["version_file"] = "skills/project-audit/VERSION"
+        cfg["release_notes"] = ["skills/project-audit/CHANGELOG.md", "skills/project-audit/CHANGELOG.en.md"]
+        (self.repo / "skill-checks.json").write_text(json.dumps(cfg), encoding="utf-8")
+        self.git("add", ".")
+        self.git("commit", "-qm", "Independent fixture")
+        self.make_tag("project-audit/v0.0.1")
+
+    def test_independent_remote_tag_exact_object(self):
+        self.independent_fixture()
+        self.push_tag("project-audit/v0.0.1")
+        result = release_remote.verify_remote_tag(self.repo, "0.0.1", skill="project-audit")
+        self.assertEqual(result["tag"], "project-audit/v0.0.1")
+        self.assertEqual(result["remote_tag_status"], "PASS")
+        self.assertEqual(result["local_tag_object_sha"], result["remote_tag_object_sha"])
+
+    def test_independent_report_local_plan_and_remote(self):
+        self.independent_fixture()
+        self.push_tag("project-audit/v0.0.1")
+        result = release_report.build_report(self.repo, "0.0.1", skill="project-audit",
+                                              config="skill-checks.json", verify_remote=True)
+        self.assertEqual(result["skill"], "project-audit")
+        self.assertEqual(result["version_path"], "skills/project-audit/VERSION")
+        self.assertEqual(result["preflight_status"], "PASS")
+        self.assertEqual(result["remote_tag_status"], "PASS")
+        self.assertEqual(result["checks_status"], "NOT_RUN")
+        self.assertEqual(result["release_readiness"], "NOT_VERIFIED")
+
+    def test_independent_report_rejects_root_plan(self):
+        self.independent_fixture()
+        result = release_report.build_report(self.repo, "0.0.1", skill="project-audit", execute_checks=True)
+        self.assertEqual(result["evidence_status"], "BLOCKED")
+        self.assertEqual(result["preflight_status"], "BLOCKED")
+        self.assertEqual(result["executed_checks"], [])
+
+    def test_independent_report_explicit_execution(self):
+        self.independent_fixture()
+        result = release_report.build_report(self.repo, "0.0.1", skill="project-audit",
+                                              config="skill-checks.json", execute_checks=True)
+        self.assertEqual(result["checks_status"], "PASS")
+        self.assertEqual(result["release_readiness"], "NOT_VERIFIED")
+
     def test_local_tag_missing_blocks_remote(self):
         report = release_remote.verify_remote_tag(self.repo, "0.0.9")
         self.assertEqual(report["remote_tag_status"], "BLOCKED")

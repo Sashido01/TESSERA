@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "version_file": "skills/microversion-release/VERSION",
+  "release_notes": [
+    "skills/microversion-release/CHANGELOG.md",
+    "skills/microversion-release/CHANGELOG.en.md"
+  ],
+  "build": {
+    "not_applicable_reason": "Source-only portable skill; no separate binary build. Catalog packaging and publication are separate checks."
+  },
+  "tests": [
+    {
+      "id": "microversion-release-tests",
+      "argv": [
+        "python",
+        "-B",
+        "tools/run_skill_tests.py",
+        "--skill",
+        "microversion-release"
+      ],
+      "cwd": ".",
+      "timeout_seconds": 300
+    }
+  ]
+}

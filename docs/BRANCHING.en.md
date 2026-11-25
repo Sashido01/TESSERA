@@ -25,3 +25,7 @@ With the current Squash and merge policy, a long-lived `develop` would require a
 Never bypass protected `main`, disable Rulesets for convenience, force-push published tags, or claim working commits as releases. PR checks must not run untrusted build commands with elevated permissions. Automated tag publication after Squash merge verifies the current `main` SHA and rejects tag rewriting.
 
 **Note:** a working branch is a mechanism for complying with server-side protections, not a product version. See [VERSIONING](VERSIONING.en.md) for version rules and [GITHUB_SECURITY](GITHUB_SECURITY.en.md) for access restrictions.
+
+## Parallel streams
+
+Independent short-lived draft branches without shared microversion assignment are permitted; assign only in one integration slot from current main. Fix CI failure in the same branch. Do not create conflicting release PRs or reuse PASS for stale SHAs. Preserve active work branches; after squash verify accepted results, not ancestry alone. See [PARALLEL_WORKFLOW](PARALLEL_WORKFLOW.en.md).

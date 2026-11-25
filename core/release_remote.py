@@ -11,9 +11,9 @@ import urllib.parse
 from typing import Any
 
 try:
-    from .release_inspect import InspectionError, canonical_repo, inspect, tag_name, git, local_git_environment
+    from .release_inspect import InspectionError, canonical_repo, inspect, git, local_git_environment
 except ImportError:
-    from release_inspect import InspectionError, canonical_repo, inspect, tag_name, git, local_git_environment
+    from release_inspect import InspectionError, canonical_repo, inspect, git, local_git_environment
 
 REMOTE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}\Z")
 OBJECT_SHA = re.compile(r"(?:[0-9a-f]{40}|[0-9a-f]{64})\Z")
@@ -92,6 +92,7 @@ def verify_remote_tag(
     version: str,
     *,
     prefix: str = "",
+    skill: str | None = None,
     commit: str | None = None,
     remote: str = "origin",
     timeout_seconds: int = 15,
@@ -103,8 +104,8 @@ def verify_remote_tag(
     if type(timeout_seconds) is not int or not 1 <= timeout_seconds <= 60:
         raise InspectionError("REMOTE_TIMEOUT_INVALID")
     root = canonical_repo(repo)
-    local = inspect(root, version, prefix=prefix, commit=commit)
-    tag = tag_name(version, prefix)
+    local = inspect(root, version, prefix=prefix, commit=commit, skill=skill)
+    tag = local["requested_tag"]
     result: dict[str, Any] = {
         "schema_version": 1,
         "remote": remote,
@@ -154,7 +155,7 @@ def verify_remote_tag(
         result["problems"] = ["REMOTE_TAG_OBJECT_MISMATCH"]
         return result
     try:
-        current = inspect(root, version, prefix=prefix, commit=commit)
+        current = inspect(root, version, prefix=prefix, commit=commit, skill=skill)
         if (current["inspection_status"] != "PASS"
                 or current["expected_commit_sha"] != local["expected_commit_sha"]
                 or current["tag_object_sha"] != local["tag_object_sha"]

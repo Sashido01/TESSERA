@@ -4,6 +4,22 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.71 — Local Project Audit Inventory Engine
+
+- Project Audit 0.0.2: bounded metadata-only traversal, counters, markers, exclusions, metadata SHA-256, refusal of known redirects and cross-device traversal; separate local test/preflight plan. 17/17 Linux tests of original helper; new structural regression requires CI. Git Inspector prepared separately (13/13 Linux), not included in this release. Windows, agent acceptance and independent tags remain open.
+
+## 0.0.70 — Independent skill checks and test time bounds
+
+- Release Core: explicit --skill for committed VERSION, exact annotated tag, preflight and remote report; separate trusted Microversion Release plan. Shared runner bounds each immediate skill test process and continues independent checks after timeout. 13/13 local runner tests, additional Release Core regressions await CI. Independent tags and protection TD03 WAIT_OWNER; descendant/output limits and Windows TD12 PARTIAL. Full CI required.
+
+## 0.0.69 — Repository Workflow and continuous development protocol
+
+- Third skill 0.0.1: LOCAL/GITHUB, optional independent task planner, 20 acceptance scenarios, 13 local regressions. Bilingual research materials, T18–T20, technical debt register, late version assignment, native tools and CI speed priority. Actual activation and independent release remain open; full CI required.
+
+## 0.0.68 — Parallel required CI groups
+
+- Separate Gitleaks history host/Docker pair from remaining catalog checks; same SHA, pinned tools, fail-closed required validate and unchanged tag gate. Independent CI evidence checks both parallel jobs when present, preserving historical reports. Local Bash truth-table control 16/16, missing results 2/2 rejected; full GitHub CI and measured speedup required.
+
 ## 0.0.67 — Project Audit level I
 
 - Correct restricted Bandit adapter for a tests-only skill: real recursive scan of zero eligible runtime targets, exact result validation, live control and regressions; full CI required.

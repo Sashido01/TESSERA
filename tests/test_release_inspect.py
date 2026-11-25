@@ -86,6 +86,69 @@ class ReleaseInspectionTests(unittest.TestCase):
         r = inspect_module.inspect(self.repo, "0.1.0", prefix="microversion-release/")
         self.assertEqual(r["inspection_status"], "PASS")
 
+    def add_skill_version(self, name="project-audit", version="0.0.1"):
+        skill = self.repo / "skills" / name
+        skill.mkdir(parents=True, exist_ok=True)
+        (skill / "SKILL.md").write_text("# Fixture\n", encoding="utf-8")
+        (skill / "VERSION").write_text(version + "\n", encoding="utf-8")
+        self.git("add", "skills")
+        self.git("commit", "-qm", "Independent skill fixture")
+        return self.git("rev-parse", "HEAD")
+
+    def test_independent_skill_scope_uses_committed_nested_version(self):
+        sha = self.add_skill_version()
+        self.git("tag", "-a", "project-audit/v0.0.1", "-m", "Independent skill fixture")
+        result = inspect_module.inspect(self.repo, "0.0.1", skill="project-audit")
+        self.assertEqual(result["inspection_status"], "PASS")
+        self.assertEqual(result["version_in_commit"], "0.0.1")
+        self.assertEqual(result["version_path"], "skills/project-audit/VERSION")
+        self.assertEqual(result["tag_target_commit_sha"], sha)
+        self.assertEqual(result["release_readiness"], "NOT_VERIFIED")
+        self.assertIn("VERSION_MISMATCH",
+                      inspect_module.inspect(self.repo, "0.0.1", prefix="project-audit/")["problems"])
+
+    def test_independent_skill_wrong_version_is_rejected(self):
+        self.add_skill_version()
+        self.git("tag", "-a", "project-audit/v0.0.2", "-m", "Wrong version fixture")
+        result = inspect_module.inspect(self.repo, "0.0.2", skill="project-audit")
+        self.assertIn("VERSION_MISMATCH", result["problems"])
+
+    def test_independent_skill_missing_directory_is_rejected(self):
+        self.git("tag", "-a", "project-audit/v0.1.0", "-m", "Missing skill fixture")
+        result = inspect_module.inspect(self.repo, "0.1.0", skill="project-audit")
+        self.assertIn("SKILL_DEFINITION_MISSING_OR_INVALID", result["problems"])
+        self.assertIn("SKILL_VERSION_FILE_MISSING_OR_INVALID", result["problems"])
+
+    def test_independent_skill_historical_version(self):
+        first = self.add_skill_version()
+        self.git("tag", "-a", "project-audit/v0.0.1", "-m", "First version fixture")
+        self.add_skill_version(version="0.0.2")
+        self.assertEqual(inspect_module.inspect(self.repo, "0.0.1", commit=first,
+                                                skill="project-audit")["inspection_status"], "PASS")
+        self.assertIn("VERSION_MISMATCH",
+                      inspect_module.inspect(self.repo, "0.0.1", skill="project-audit")["problems"])
+
+    def test_independent_skill_rejects_invalid_or_ambiguous_scope(self):
+        for name in ("", "../escape", "alpha/beta", "Alpha"):
+            with self.subTest(name=name), self.assertRaisesRegex(inspect_module.InspectionError, "SKILL_SCOPE_INVALID"):
+                inspect_module.inspect(self.repo, "0.0.1", skill=name)
+        with self.assertRaisesRegex(inspect_module.InspectionError, "SKILL_SCOPE_INVALID"):
+            inspect_module.inspect(self.repo, "0.0.1", prefix="legacy/", skill="project-audit")
+
+    def test_independent_skill_version_symlink_rejected(self):
+        self.add_skill_version()
+        file = self.repo / "skills/project-audit/VERSION"
+        file.unlink()
+        try:
+            file.symlink_to("../../VERSION")
+        except (OSError, NotImplementedError):
+            self.skipTest("symlink unavailable")
+        self.git("add", "skills/project-audit/VERSION")
+        self.git("commit", "-qm", "Symlink fixture")
+        self.git("tag", "-a", "project-audit/v0.1.0", "-m", "Symlink fixture")
+        result = inspect_module.inspect(self.repo, "0.1.0", skill="project-audit")
+        self.assertIn("SKILL_VERSION_FILE_MISSING_OR_INVALID", result["problems"])
+
     def test_dirty_worktree_does_not_fake_release_readiness(self):
         self.git("tag", "-a", "v0.1.0", "-m", "Релиз 0.1.0 — проверка")
         (self.repo / "UNTRACKED").write_text("changed", encoding="utf-8")
