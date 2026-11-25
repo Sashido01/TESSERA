@@ -6,6 +6,8 @@ This file tracks changes to the **shared catalog**. Individual skills may mainta
 
 ## 0.0.67 — Project Audit level I
 
+- Correct restricted Bandit adapter for a tests-only skill: real recursive scan of zero eligible runtime targets, exact result validation, live control and regressions; full CI required.
+
 - Second independent skill 0.0.1: bilingual methodology, 30 directions, 20 behavioral scenarios and structural tests. Behavioral trials and independent tags remain open; full CI required.
 
 ## 0.0.66 — Independent skill version accounting

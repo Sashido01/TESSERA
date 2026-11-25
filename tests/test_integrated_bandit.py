@@ -39,6 +39,33 @@ class IntegratedBanditTests(unittest.TestCase):
                     with self.assertRaises(RuntimeError):
                         b.contract(bad, root, ini)
 
+    def test_tests_only_recursive_scope(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = pathlib.Path(folder).resolve()
+            skill = root / "bandit-control"
+            (skill / "tests").mkdir(parents=True)
+            (skill / "tests" / "test_example.py").write_text("answer = 42\n")
+            ini = root / "bandit.ini"
+            ini.write_bytes(b"fixture")
+            args = ["-r", str(skill), "-f", "json", "-q", "-ll", "--exclude",
+                    b.exclusions(skill), "--ini", str(ini), "--ignore-nosec"]
+            with mock.patch.object(b, "ini_ok"):
+                actual = b.contract(args, root, ini)
+                self.assertEqual(actual[2], set())
+                self.assertEqual(actual[1][:2], ["-r", b.TARGET])
+
+    def test_empty_runtime_report_does_not_hide_findings(self):
+        skill = pathlib.Path("/tmp/skill")
+        report = {"errors": [], "results": [], "metrics": {"_totals": {"loc": 0}}}
+        self.assertEqual(json.loads(b.sanitize(0, json.dumps(report).encode(), set(),
+                                              skill, {}))["results"], [])
+        for bad in ({**report, "errors": [{}]},
+                    {**report, "metrics": {"_totals": {"loc": 1},
+                                          b.TARGET + "/unexpected.py": {"loc": 1}}},
+                    {**report, "results": [{"filename": b.TARGET + "/unexpected.py"}]}):
+            with self.assertRaises(RuntimeError):
+                b.sanitize(0, json.dumps(bad).encode(), set(), skill, {})
+
     def test_ini(self):
         with self.assertRaises(RuntimeError):
             b.ini_ok(b"[bandit]\nskips=B307\n")
