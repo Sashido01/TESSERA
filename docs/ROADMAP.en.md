@@ -26,6 +26,8 @@ v0.0.64: main CI 45489532663 PASS, annotated tag verified (commit `2e09871bf1829
 
 T16 candidate: independent Microversion Release VERSION/changelogs, first-parent transitions, metadata packaging and verification. CI still required; namespaced tags, actual updates and activation remain open. Project Audit is developed separately.
 
+Project Audit 0.0.1: level I sources, its own [roadmap](../skills/project-audit/references/ROADMAP.en.md). Actual agent and independent release NOT_VERIFIED; tooling is a separate stage. CI required.
+
 ## Foundation stages T00–T07
 
 | Stage | Goal | Verified status |

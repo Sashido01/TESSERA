@@ -11,6 +11,7 @@ TESSERA is not a fork of Harness or Codex. It stores portable [Agent Skills](htt
 | Skill | Purpose | Status |
 | --- | --- | --- |
 | [Microversion Release](skills/microversion-release/README.en.md) | Microversions, mandatory annotated release tags, portable use across agents | Standard skill and local helpers prepared; individual agent clients are not yet verified |
+| [Project Audit](skills/project-audit/README.en.md) | Evidence-based audit, requirements, architecture, tests and remaining work | 0.0.1, level I sources; agent behavior and independent release NOT_VERIFIED |
 
 ## Repository layout
 
