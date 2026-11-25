@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.74 — Recover independent skill tag publication
+
+- Required checks and exact catalog v0.0.73 tag passed; independent publication failed twice. Safe operation/exit/category diagnostics, single remote identity, dry-run atomic capability probe, verified sequential new-tag fallback only for explicit unsupported capability. No change to existing tags or required gates. 19/19 local Linux tests; live recovery required.
+
 ## 0.0.73 — Protected independent skill tag publication
 
 - TD03 configuration verified. Add read-only first-parent tag planner and explicit publication in existing main tag job; exact historical backfill, current verified changes only, atomic non-force push and remote object verification. 13/13 local Linux controls; live main publication remains pending.
