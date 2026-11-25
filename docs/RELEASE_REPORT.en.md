@@ -83,3 +83,7 @@ See [RELEASE_PROVENANCE](RELEASE_PROVENANCE.en.md). Explicit `--verify-provenanc
 - Remote tests use temporary local bare Git repositories, never TESSERA's published history.
 
 **Limits:** T09 remains PARTIAL. Independent external CI proof, concurrency serialization, artifact signatures, and a final `RELEASED` controller are not implemented. The T09.02 build-plan check does not prove the adequacy of a project's test suite.
+
+## Independent skill — T16 candidate
+
+`--skill <skill-name>` selects `skills/<skill-name>/VERSION` and annotated tag `<skill-name>/vX.Y.Z`. For current HEAD supply a separate trusted `--config` whose version_file and both release_notes refer to that skill's VERSION and CHANGELOG. Root plan is rejected. Historical reports do not execute checks. `--skill` and `--prefix` are mutually exclusive; legacy `--prefix` reads the root VERSION. Remote checks the exact tag object. Plans and tests do not prove publication or activation. Live CI and independent tags remain open.
