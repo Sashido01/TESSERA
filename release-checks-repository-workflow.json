@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "version_file": "skills/repository-workflow/VERSION",
+  "release_notes": [
+    "skills/repository-workflow/CHANGELOG.md",
+    "skills/repository-workflow/CHANGELOG.en.md"
+  ],
+  "build": {
+    "not_applicable_reason": "Source-only portable skill; no separate binary build. Catalog ZIP and publication are separate checks."
+  },
+  "tests": [
+    {
+      "id": "repository-workflow-tests",
+      "argv": [
+        "python",
+        "-B",
+        "tools/run_skill_tests.py",
+        "--skill",
+        "repository-workflow"
+      ],
+      "cwd": ".",
+      "timeout_seconds": 300
+    }
+  ]
+}

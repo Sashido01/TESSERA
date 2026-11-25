@@ -5,7 +5,7 @@
 | Stage | Scope | Status |
 |---|---|---|
 | RW00 | Research Git/GitHub, worktrees, CI, coordination | PARTIAL — sources and local probes |
-| RW01 | Portable method, local planner, debt review | PARTIAL — source and local tests; full CI and agent open |
+| RW01 | Portable method, local planner, debt review | PARTIAL — planner 0.0.2 and tests accepted; actual agents remain open |
 | RW02 | Local Windows/Linux acceptance, actual agents | NOT_VERIFIED |
 | RW03 | Native GitHub profile, PR/CI/Rulesets, Issue dependencies | NOT_STARTED |
 | RW04 | Simple non-overwriting bootstrap, local/GitHub profiles | NOT_STARTED |
