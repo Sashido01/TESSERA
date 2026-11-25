@@ -228,7 +228,16 @@ def bandit_control(run, shim, temp, ini):
                      len(report["results"]) == 1 and report["results"][0]["test_id"] == "B307"
                      and report["results"][0]["filename"] == str(target)), "FULL_TIER1_BANDIT_CONTROL")
         require(target.read_bytes() == content, "FULL_TIER1_BANDIT_CONTROL_MUTATION")
-    return {"clean": "PASS", "detection": "PASS", "ignored_nosec_and_skill_ini": "PASS",
+    target.unlink()
+    empty = run(shim, args, 115)
+    require(empty.returncode == 0, "FULL_TIER1_BANDIT_EMPTY_EXIT")
+    report = json.loads(empty.stdout)
+    require(report.get("errors") == [] and report.get("results") == []
+            and not target.exists() and (ignored / "test_probe.py").read_bytes() == b"eval('1 + 1')\n",
+            "FULL_TIER1_BANDIT_EMPTY_CONTROL")
+    # The restricted adapter verifies the real zero-target metrics before returning.
+    return {"clean": "PASS", "detection": "PASS", "empty_runtime": "PASS",
+            "ignored_nosec_and_skill_ini": "PASS",
             "excluded_test": "PASS", "fixture_preserved": "PASS",
             "ini_blob": INI_BLOB, "ini_sha256": INI_SHA256}
 

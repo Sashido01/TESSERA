@@ -24,7 +24,7 @@ def parallel_gate_errors(section: str) -> list[str]:
     if len(jobs) != 2:
         return ["PARALLEL_JOB_LAYOUT_INVALID"]
     body = jobs[1]
-    if re.findall(r"(?m)^  ([a-z][a-z0-9_]*):[ \\t]*$", body) != [
+    if re.findall(r"(?m)^  ([a-z][a-z0-9_]*):$", body) != [
             "catalog_checks", "history_checks", "validate"]:
         return ["PARALLEL_JOB_LAYOUT_INVALID"]
     catalog, history_and_gate = body.split("\n  history_checks:\n", 1)
