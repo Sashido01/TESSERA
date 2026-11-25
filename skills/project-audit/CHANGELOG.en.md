@@ -2,6 +2,10 @@
 
 [Русский — оригинал](CHANGELOG.md) | **English — translation**
 
+## 0.0.3 — Local Git state observation
+
+Git Inspector: HEAD (including unborn/detached), status/ref/remote counts, repeated observations, explicit STALE. Local Linux tests 13/13; no file names or remote URLs emitted; not an atomic snapshot or content check. Updated instructions, documentation and structural regression. Windows and full acceptance open.
+
 ## 0.0.2 — Bounded metadata inventory
 
 Optional local tool, relative paths, counters, markers, limits, visible exclusions, metadata SHA-256 (not contents), no known redirects or device traversal. 17 local Linux tests; Windows, full CI and independent release unverified. Level II PARTIAL.
