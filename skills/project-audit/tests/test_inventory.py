@@ -1,19 +1,29 @@
 """Deterministic helper checks; not agent behavioral evals."""
 from __future__ import annotations
-import importlib.util
+import sys
 import os
 from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
 
-path = Path(__file__).resolve().parents[1] / 'scripts' / 'inventory.py'
-spec = importlib.util.spec_from_file_location('audit_inventory', path)
-module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(module)
+PATH = Path(__file__).resolve().parents[1] / 'scripts' / 'inventory.py'
+cached = sys.modules.get('inventory')
+if cached is not None and Path(getattr(cached, '__file__', '') or '.').resolve() != PATH:
+    raise RuntimeError('Unexpected cached test module')
+sys.path.insert(0, str(PATH.parent))
+try:
+    import inventory as module
+finally:
+    sys.path.pop(0)
+if Path(module.__file__).resolve() != PATH:
+    raise RuntimeError('Unexpected test module origin')
 
 
 class InventoryTests(unittest.TestCase):
+    def test_import_origin(self):
+        self.assertEqual(Path(module.__file__).resolve(), PATH)
+
     def setUp(self):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
@@ -82,33 +92,78 @@ class InventoryTests(unittest.TestCase):
         self.assertEqual(result['examined_entries'], 2)
         self.assertEqual(result['pending_directories'], 0)
 
-    def test_other_device_is_not_traversed(self):
+    def test_windows_zero_cached_directory_identity(self):
+        from contextlib import contextmanager
         from types import SimpleNamespace
-        self.put('mounted/child.py')
+        self.put('nested/deeper/child.py')
         real_scandir = os.scandir
 
-        class OtherDeviceEntry:
+        class CachedEntry:
             def __init__(self, entry):
                 self.name, self.path = entry.name, entry.path
                 self.entry = entry
+
             def stat(self, **kwargs):
                 info = self.entry.stat(**kwargs)
-                return SimpleNamespace(st_mode=info.st_mode, st_dev=info.st_dev + 1)
+                if self.entry.is_dir(follow_symlinks=False):
+                    return SimpleNamespace(st_mode=info.st_mode, st_dev=0, st_ino=0,
+                                           st_file_attributes=getattr(info, 'st_file_attributes', 0))
+                return info
 
-        class Scan:
-            def __init__(self, directory):
-                self.directory = directory
-            def __enter__(self):
-                self.it = real_scandir(self.directory)
-                return (OtherDeviceEntry(entry) for entry in self.it)
-            def __exit__(self, *args):
-                self.it.close()
+        @contextmanager
+        def scan(directory):
+            with real_scandir(directory) as entries:
+                yield (CachedEntry(entry) for entry in entries)
 
-        with patch.object(module.os, 'scandir', side_effect=Scan) as scan:
+        with patch.object(module.os, 'scandir', side_effect=scan):
+            result = module.inventory(self.root)
+        self.assertEqual(result['status'], 'SCOPED_COMPLETE')
+        self.assertEqual(result['regular_files'], 1)
+        self.assertEqual(result['directories'], ['nested', 'nested/deeper'])
+        self.assertEqual(result['gaps'], [])
+
+    def test_other_device_is_not_traversed(self):
+        from types import SimpleNamespace
+        self.put('mounted/child.py')
+        actual = (self.root / 'mounted').lstat()
+        other = SimpleNamespace(st_mode=actual.st_mode, st_dev=self.root.lstat().st_dev + 1,
+                                st_ino=actual.st_ino)
+        with patch.object(module, 'directory_stat', return_value=other), \
+                patch.object(module.os, 'scandir', wraps=os.scandir) as scan:
             result = module.inventory(self.root)
         self.assertEqual(scan.call_count, 1)
         self.assertEqual(result['regular_files'], 0)
         self.assertEqual(result['gaps'], [{'path': 'mounted', 'reason': 'DEVICE_BOUNDARY'}])
+
+    def test_refreshed_directory_redirect_is_not_traversed(self):
+        from types import SimpleNamespace
+        import stat
+        self.put('nested/child.py')
+        redirect = SimpleNamespace(st_mode=stat.S_IFDIR, st_file_attributes=0x400)
+        with patch.object(module, 'directory_stat', return_value=redirect), \
+                patch.object(module.os, 'scandir', wraps=os.scandir) as scan:
+            result = module.inventory(self.root)
+        self.assertEqual(scan.call_count, 1)
+        self.assertEqual(result['regular_files'], 0)
+        self.assertEqual(result['gaps'], [{'path': 'nested', 'reason': 'REDIRECTION_NOT_FOLLOWED'}])
+
+    def test_refreshed_directory_stat_failure_is_reported(self):
+        self.put('nested/child.py')
+        with patch.object(module, 'directory_stat', side_effect=PermissionError):
+            result = module.inventory(self.root)
+        self.assertEqual(result['status'], 'PARTIAL')
+        self.assertEqual(result['regular_files'], 0)
+        self.assertEqual(result['gaps'], [{'path': 'nested', 'reason': 'STAT_UNAVAILABLE'}])
+
+    def test_refreshed_directory_replaced_by_file_is_reported(self):
+        import stat
+        from types import SimpleNamespace
+        self.put('nested/child.py')
+        with patch.object(module, 'directory_stat', return_value=SimpleNamespace(st_mode=stat.S_IFREG)):
+            result = module.inventory(self.root)
+        self.assertEqual(result['status'], 'PARTIAL')
+        self.assertEqual(result['regular_files'], 0)
+        self.assertEqual(result['gaps'], [{'path': 'nested', 'reason': 'DIRECTORY_CHANGED'}])
 
     def test_depth_limit_visible(self):
         self.put('a/b/c.py')
@@ -143,11 +198,23 @@ class InventoryTests(unittest.TestCase):
         self.assertEqual(r['gaps'], [{'path': 'pipe', 'reason': 'SPECIAL_FILE_NOT_READ'}])
 
     def test_no_file_content_read(self):
-        self.put('secret.txt', b'SECRET_PLACEHOLDER')
-        with patch.object(Path, 'open', side_effect=AssertionError('content read')):
+        text_payload = b'INVENTORY_TEXT_PAYLOAD'
+        binary_payload = b'\x00\xffINVENTORY_BINARY_PAYLOAD'
+        self.put('payload.txt', text_payload)
+        self.put('nested/input.bin', binary_payload)
+        with (
+            patch.object(Path, 'open', side_effect=AssertionError('content read')),
+            patch('builtins.open', side_effect=AssertionError('content read')),
+            patch('io.open', side_effect=AssertionError('content read')),
+            patch.object(os, 'open', side_effect=AssertionError('content read')),
+        ):
             r = module.inventory(self.root)
-        self.assertEqual(r['regular_files'], 1)
-        self.assertNotIn('SECRET_PLACEHOLDER', str(r))
+        self.assertEqual(r['regular_files'], 2)
+        self.assertEqual(r['regular_file_bytes'], len(text_payload) + len(binary_payload))
+        self.assertEqual(r['content_integrity'], 'NOT_VERIFIED')
+        self.assertEqual([f['path'] for f in r['files']], ['nested/input.bin', 'payload.txt'])
+        self.assertNotIn('INVENTORY_TEXT_PAYLOAD', str(r))
+        self.assertNotIn('INVENTORY_BINARY_PAYLOAD', str(r))
         self.assertNotIn(str(self.root), str(r))
 
     def test_unreadable_directory_reported(self):

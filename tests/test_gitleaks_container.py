@@ -47,7 +47,7 @@ class FrameTests(unittest.TestCase):
         self.assertNotEqual(f.encode([(0, b"x")], a), f.encode([(1, b"x")], b))
 
     def test_profile(self):
-        args = c.args_for("fixture", pathlib.Path("/tmp/stage"))
+        args = c.args_for("fixture", pathlib.PurePosixPath("/tmp/stage"))
         for x in ("--network=none", "--read-only", "--user=65534:65534",
                   "--cap-drop=ALL", "--log-driver=none", "--memory=512m", "--pids-limit=64"):
             self.assertIn(x, args)

@@ -329,9 +329,38 @@ jobs:
       - name: Сопоставить изолированную проверку правил Gitleaks по пути
         run: python tools/check_gitleaks_paths_container.py --repo . --cli "$RUNNER_TEMP/gitleaks-8.30.1" --host-report "$RUNNER_TEMP/gitleaks-path-host.jsonl"
 
+  windows_skill_checks:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Получить исходники для Windows
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 (node24)
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Настроить Python 3.14
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0 (node24)
+        with:
+          python-version: '3.14'
+      - name: Проверить точный SHA и среду Windows
+        shell: pwsh
+        env:
+          CHECKED_SHA: ${{ github.sha }}
+        run: |
+          $actual = git rev-parse HEAD
+          if ($LASTEXITCODE -ne 0 -or $actual -ne $env:CHECKED_SHA) { throw 'SHA mismatch' }
+          python -B -c "import sys; assert sys.platform == 'win32' and sys.version_info[:2] == (3,14); print(sys.version)"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Запустить тесты всех навыков на Windows
+        run: python -B tools/run_skill_tests.py
+      - name: Запустить полный unit suite каталога на Windows
+        run: python -B -m unittest discover -s tests -v
+
   validate:
     name: validate
-    needs: [catalog_checks, history_checks, source_secret_checks]
+    needs: [catalog_checks, history_checks, source_secret_checks, windows_skill_checks]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 2
@@ -341,12 +370,14 @@ jobs:
           CATALOG_RESULT: ${{ needs.catalog_checks.result }}
           HISTORY_RESULT: ${{ needs.history_checks.result }}
           SOURCE_RESULT: ${{ needs.source_secret_checks.result }}
+          WINDOWS_RESULT: ${{ needs.windows_skill_checks.result }}
         shell: bash
         run: |
           set -euo pipefail
           test "$CATALOG_RESULT" = success
           test "$HISTORY_RESULT" = success
           test "$SOURCE_RESULT" = success
+          test "$WINDOWS_RESULT" = success
 
   tag_microversion:
     name: Создать аннотированный тег проверенной версии

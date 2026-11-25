@@ -58,6 +58,16 @@ def destination(platform: str, project_root: pathlib.Path | None, target_root: p
     return parent / SKILL_NAME
 
 
+def display(message: str, *, stream=None) -> None:
+    # Redirected Windows streams may use a legacy code page.
+    # Escape only characters the actual stream cannot represent.
+    stream = sys.stdout if stream is None else stream
+    encoding = getattr(stream, "encoding", None)
+    if encoding:
+        message = message.encode(encoding, errors="backslashreplace").decode(encoding)
+    print(message, file=stream)
+
+
 def run(platform: str, project_root: pathlib.Path | None, target_root: pathlib.Path | None, apply: bool) -> pathlib.Path:
     src = pathlib.Path(__file__).resolve().parents[1]
     if not (src / "SKILL.md").is_file():
@@ -70,7 +80,7 @@ def run(platform: str, project_root: pathlib.Path | None, target_root: pathlib.P
     if dst == src or src in dst.parents:
         raise InstallError("Нельзя устанавливать навык внутрь исходного каталога")
     if not apply:
-        print(f"DRY-RUN: {src} -> {dst} (без изменений)")
+        display(f"DRY-RUN: {src} -> {dst} (без изменений)")
         return dst
     dst.parent.mkdir(parents=True, exist_ok=True)
     if destination(platform, project_root, target_root) != dst:
@@ -80,8 +90,8 @@ def run(platform: str, project_root: pathlib.Path | None, target_root: pathlib.P
         src, dst, symlinks=False,
         ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache"),
     )
-    print(f"Установлен каталог навыка: {dst}")
-    print("Обнаружение и автоматическая активация должны быть проверены в самой агентной среде.")
+    display(f"Установлен каталог навыка: {dst}")
+    display("Обнаружение и автоматическая активация должны быть проверены в самой агентной среде.")
     return dst
 
 
@@ -95,7 +105,7 @@ def main() -> int:
     try:
         run(args.platform, args.project_root, args.target_root, args.apply)
     except (OSError, InstallError) as exc:
-        print(f"ОШИБКА: {exc}", file=sys.stderr)
+        display(f"ОШИБКА: {exc}", stream=sys.stderr)
         return 1
     return 0
 

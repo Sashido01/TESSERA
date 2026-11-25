@@ -16,6 +16,7 @@ class IntegratedBanditTests(unittest.TestCase):
                                     "scripts/a_test.py", ".venv/x.py", "file.md", "test_tools/x.py")}
         self.assertEqual(b.eligible(files), {"a.py", "b.pyw", "test_tools/x.py"})
 
+    @unittest.skipUnless(sys.platform == "linux", "Linux secure-open Bandit integration")
     def test_contract_recursive_and_named(self):
         with tempfile.TemporaryDirectory() as folder:
             root = pathlib.Path(folder).resolve()
@@ -39,6 +40,7 @@ class IntegratedBanditTests(unittest.TestCase):
                     with self.assertRaises(RuntimeError):
                         b.contract(bad, root, ini)
 
+    @unittest.skipUnless(sys.platform == "linux", "Linux secure-open Bandit integration")
     def test_tests_only_recursive_scope(self):
         with tempfile.TemporaryDirectory() as folder:
             root = pathlib.Path(folder).resolve()
@@ -53,6 +55,22 @@ class IntegratedBanditTests(unittest.TestCase):
                 actual = b.contract(args, root, ini)
                 self.assertEqual(actual[2], set())
                 self.assertEqual(actual[1][:2], ["-r", b.TARGET])
+
+    @unittest.skipIf(sys.platform == "linux", "Non-Linux refusal control")
+    def test_contract_refuses_unsupported_secure_open(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = pathlib.Path(folder).resolve()
+            skill = root / "bandit-control"
+            skill.mkdir()
+            (skill / "probe.py").write_text("answer=42\n")
+            ini = root / "bandit.ini"
+            ini.write_bytes(b"fixture")
+            args = ["-r", str(skill), "-f", "json", "-q", "-ll", "--exclude",
+                    b.exclusions(skill), "--ini", str(ini), "--ignore-nosec"]
+            with mock.patch("check_integrated_gitleaks.os.open") as opened:
+                with self.assertRaisesRegex(RuntimeError, "INTEGRATED_SECURE_OPEN_UNSUPPORTED"):
+                    b.contract(args, root, ini)
+                opened.assert_not_called()
 
     def test_empty_runtime_report_does_not_hide_findings(self):
         skill = pathlib.Path("/tmp/skill")

@@ -28,6 +28,7 @@ class IntegratedGitleaksTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 g.arguments(args, root, root)
 
+    @unittest.skipUnless(sys.platform == "linux", "Linux secure-open snapshot")
     def test_snapshot_and_empty_dir(self):
         with tempfile.TemporaryDirectory() as folder:
             root = pathlib.Path(folder).resolve()
@@ -35,6 +36,7 @@ class IntegratedGitleaksTests(unittest.TestCase):
             (root / "file").write_bytes(b"x")
             self.assertEqual(g.snapshot(root), ({"file": b"x"}, {"empty"}))
 
+    @unittest.skipUnless(sys.platform == "linux", "Linux secure-open snapshot")
     def test_snapshot_rejects_link_and_git(self):
         with tempfile.TemporaryDirectory() as folder:
             root = pathlib.Path(folder).resolve()
@@ -46,6 +48,19 @@ class IntegratedGitleaksTests(unittest.TestCase):
             (root / ".git").mkdir()
             with self.assertRaises(RuntimeError):
                 g.snapshot(root)
+
+    @unittest.skipIf(sys.platform == "linux", "Non-Linux refusal control")
+    def test_secure_open_refuses_unsupported_platform(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = pathlib.Path(folder).resolve()
+            path = root / "fixture"
+            path.write_bytes(b"fixture")
+            with mock.patch.object(g.os, "open") as opened:
+                with self.assertRaisesRegex(RuntimeError, "INTEGRATED_SECURE_OPEN_UNSUPPORTED"):
+                    g.read_file(path, 100)
+                with self.assertRaisesRegex(RuntimeError, "INTEGRATED_SECURE_OPEN_UNSUPPORTED"):
+                    g.snapshot(root)
+                opened.assert_not_called()
 
     def test_config(self):
         g.config_ok(b'[extend]\nuseDefault=true\n[[rules]]\nid="fixture"\ndescription="fixture"\nregex="x"\n')

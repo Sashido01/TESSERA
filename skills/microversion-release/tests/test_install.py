@@ -19,12 +19,20 @@ if pathlib.Path(module.__file__).resolve() != PATH:
 
 
 class InstallerTests(unittest.TestCase):
+    def test_legacy_console_encoding(self):
+        import io
+        buffer = io.BytesIO()
+        stream = io.TextIOWrapper(buffer, encoding="cp1252")
+        module.display("Проверка", stream=stream)
+        stream.flush()
+        self.assertIn(b"\\u", buffer.getvalue())
+
     def test_import_origin(self):
         self.assertEqual(pathlib.Path(module.__file__).resolve(), PATH)
 
     def test_platform_directory_mapping(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = pathlib.Path(directory)
+            root = pathlib.Path(directory).resolve()
             for platform, expected in (
                 ("codex", ".agents/skills"), ("harness", ".dsh/skills"),
                 ("claude", ".claude/skills"), ("hermes", ".hermes/skills"),
@@ -36,13 +44,13 @@ class InstallerTests(unittest.TestCase):
 
     def test_dry_run_does_not_write(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = pathlib.Path(directory)
+            root = pathlib.Path(directory).resolve()
             target = module.run("codex", root, None, False)
             self.assertFalse(target.exists())
 
     def test_real_install_is_explicit_and_no_overwrite(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = pathlib.Path(directory)
+            root = pathlib.Path(directory).resolve()
             target = module.run("claude", root, None, True)
             self.assertTrue((target / "SKILL.md").is_file())
             with self.assertRaises(module.InstallError):
@@ -50,14 +58,14 @@ class InstallerTests(unittest.TestCase):
 
     def test_generic_requires_explicit_target(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = pathlib.Path(directory)
+            root = pathlib.Path(directory).resolve()
             with self.assertRaises(module.InstallError):
                 module.destination("generic", root, None)
             self.assertEqual(module.destination("generic", None, root), root / "microversion-release")
 
     def test_ambiguous_target_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = pathlib.Path(directory)
+            root = pathlib.Path(directory).resolve()
             with self.assertRaises(module.InstallError):
                 module.destination("codex", root, root)
 

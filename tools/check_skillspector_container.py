@@ -31,6 +31,8 @@ ENTRY = "import sys;sys.path.insert(0,'/packages');sys.argv[0]='skillspector';fr
 
 
 def file_digest(path, maximum):
+    require(sys.platform == "linux" and hasattr(os, "O_NOFOLLOW") and hasattr(os, "O_NONBLOCK"),
+            "SP_DOCKER_RUNNER")
     require(path.is_absolute() and path.resolve(strict=True) == path and not path.is_symlink(),
             "SP_DOCKER_PATH")
     fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)

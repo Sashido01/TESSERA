@@ -32,11 +32,11 @@ class PathsContainerTests(unittest.TestCase):
                 f.encode([(n, b"x")], io.BytesIO(), mode="paths")
 
     def test_distinct_fixed_entrypoint(self):
-        args = transport.args_for("fixture", pathlib.Path("/tmp/stage"), mode="paths")
+        args = transport.args_for("fixture", pathlib.PurePosixPath("/tmp/stage"), mode="paths")
         self.assertIn("check_gitleaks_paths_container", args[-1])
         self.assertIn("--network=none", args)
         with self.assertRaises(RuntimeError):
-            transport.args_for("fixture", pathlib.Path("/tmp/stage"), mode="unknown")
+            transport.args_for("fixture", pathlib.PurePosixPath("/tmp/stage"), mode="unknown")
 
     def test_batch_limits(self):
         with mock.patch.object(c, "BATCH_COUNT", 3), mock.patch.object(c, "BATCH_BYTES", 4):
