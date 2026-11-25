@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.70 — Independent skill checks and test time bounds
+
+- Release Core: explicit --skill for committed VERSION, exact annotated tag, preflight and remote report; separate trusted Microversion Release plan. Shared runner bounds each immediate skill test process and continues independent checks after timeout. 13/13 local runner tests, additional Release Core regressions await CI. Independent tags and protection TD03 WAIT_OWNER; descendant/output limits and Windows TD12 PARTIAL. Full CI required.
+
 ## 0.0.69 — Repository Workflow and continuous development protocol
 
 - Third skill 0.0.1: LOCAL/GITHUB, optional independent task planner, 20 acceptance scenarios, 13 local regressions. Bilingual research materials, T18–T20, technical debt register, late version assignment, native tools and CI speed priority. Actual activation and independent release remain open; full CI required.

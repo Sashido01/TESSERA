@@ -16,9 +16,9 @@ import time
 from typing import Any
 
 try:
-    from .release_inspect import InspectionError, VERSION, canonical_repo, git, resolve_commit
+    from .release_inspect import InspectionError, VERSION, SKILL_NAME, regular_commit_file, canonical_repo, git, resolve_commit
 except ImportError:  # Запуск как отдельного Python-скрипта
-    from release_inspect import InspectionError, VERSION, canonical_repo, git, resolve_commit
+    from release_inspect import InspectionError, VERSION, SKILL_NAME, regular_commit_file, canonical_repo, git, resolve_commit
 
 MAX_CONFIG_BYTES = 65536
 MAX_STEPS = 12
@@ -153,6 +153,7 @@ def run_step(root: pathlib.Path, step: dict[str, Any]) -> dict[str, Any]:
 def preflight(
     repo: pathlib.Path, version: str, config: str = "release-checks.json",
     *, execute: bool = False, expected_commit: str | None = None,
+    skill: str | None = None,
 ) -> dict[str, Any]:
     if not isinstance(version, str) or VERSION.fullmatch(version) is None:
         raise PreflightError("VERSION_INVALID")
@@ -161,6 +162,16 @@ def preflight(
     wanted = resolve_commit(root, expected_commit) if expected_commit else head
     plan = load_plan(root, config)
     problems: list[str] = []
+    if skill is not None:
+        if not isinstance(skill, str) or not SKILL_NAME.fullmatch(skill):
+            raise PreflightError("SKILL_SCOPE_INVALID")
+        base = f"skills/{skill}/"
+        notes = {base + "CHANGELOG.md", base + "CHANGELOG.en.md"}
+        if plan["version_file"] != base + "VERSION" or set(plan["release_notes"]) != notes:
+            raise PreflightError("SKILL_PLAN_SCOPE_MISMATCH")
+        if not all(regular_commit_file(root, wanted, p) for p in
+                   (base + "SKILL.md", base + "VERSION", *sorted(notes), config)):
+            raise PreflightError("SKILL_PLAN_COMMITTED_FILES_INVALID")
     status = git(root, "status", "--porcelain=v1", "--untracked-files=all").stdout
     clean_before = not bool(status.strip())
     if not clean_before:
@@ -247,6 +258,7 @@ def main() -> int:
     parser.add_argument("--repo", type=pathlib.Path, required=True, help="Корень целевого Git-проекта")
     parser.add_argument("--version", required=True, help="Проверяемая версия MAJOR.MINOR.PATCH")
     parser.add_argument("--config", default="release-checks.json", help="Файл доверенного плана внутри проекта")
+    parser.add_argument("--skill", help="Независимый навык; требует явного плана с его VERSION и CHANGELOG")
     parser.add_argument("--expected-commit", help="Полный SHA целевого коммита")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--plan", action="store_true", help="Только проверка плана (по умолчанию)")
@@ -255,7 +267,7 @@ def main() -> int:
     try:
         result = preflight(
             args.repo, args.version, args.config,
-            execute=args.execute, expected_commit=args.expected_commit,
+            execute=args.execute, expected_commit=args.expected_commit, skill=args.skill,
         )
     except (InspectionError, OSError) as exc:
         print(f"BLOCKED: {exc}", file=sys.stderr)

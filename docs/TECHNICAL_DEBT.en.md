@@ -37,3 +37,11 @@ Rule: retain closed or corrected historical CI. Do not delete workflow runs, log
 ## Third snapshot — 25 November 2026
 
 TD01: COMPLETE in scoped CI — corrected PR #67 and main v0.0.67 CI 45579382735 PASS, exact tag d4697fa65ca77a687d8dea66e80a71089303b961 points directly to 9700c0f0a2dab9180cbb442538541242dcb5d5d7. TD04: PR #68 PASS and merged as a8d54510b06d47da2b0d872cb067caee99ad598d; main CI and tag pending, repeat timing required. TD08: audit level I accepted in catalog, independent release/runtime not verified; inventory branch pending. TD09: candidate integrated for PR checks, not yet accepted. Historical observations above retained as evidence, not current state.
+
+## Fourth snapshot — 25 November 2026
+
+TD04: main v0.0.68 CI 45582720006 PASS; exact annotated tag 561e32bedd42fb520997d2e7af13f8add77d8b34 → a8d54510b06d47da2b0d872cb067caee99ad598d. Both groups and validate passed. Group start 09:09:31Z to validate completion 09:18:46Z — 555 s, compared with 1004 s main v0.0.67 (08:47:33Z–09:04:17Z). Observed reduction 44.7%, not a controlled benchmark. CI split accepted; further optimization and p50/p95 remain open.
+
+TD09: PR #69 CI 45583029569 PASS, accepted into main 7fd8f698f818cbfabd7986d7c5e536d711f158b7. Repository Workflow 0.0.1 in catalog; main v0.0.69 CI and tag pending, actual activation and independent release NOT_VERIFIED.
+
+TD02: v0.0.70 candidate includes independent inspect/preflight/remote/report, separate Microversion Release plan; tests for these changes still require CI. TD03 WAIT_OWNER: existing Ruleset does not cover one-level skill tags; procedure in VERSIONING. TD12: 13/13 Linux runner tests (three new), tested Git blobs 935a7321f10adf7de28092594be715978fbac4a4 and f790e0e31943d886687ac164b6277b3f59f7f7af; immediate process timeout, independent skills continue. Descendants, output volume and Windows remain open. TD08: Inventory Engine 0.0.2 on separate work branch, next integration slot after this candidate is verified.

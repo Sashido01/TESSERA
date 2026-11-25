@@ -39,6 +39,7 @@ def build_report(
     version: str,
     *,
     prefix: str = "",
+    skill: str | None = None,
     commit: str | None = None,
     config: str = "release-checks.json",
     remote: str = "origin",
@@ -65,7 +66,7 @@ def build_report(
     if verify_provenance and (artifact_file is None or not signer_workflow):
         raise InspectionError("PROVENANCE_REQUIRES_FILE_AND_SIGNER")
     root = canonical_repo(repo)
-    local = inspect(root, version, prefix=prefix, commit=commit)
+    local = inspect(root, version, prefix=prefix, commit=commit, skill=skill)
     target_sha = local["expected_commit_sha"]
     head_sha = resolve_commit(root, None)
     problems: list[str] = list(local["problems"])
@@ -80,7 +81,7 @@ def build_report(
         try:
             checks = preflight(
                 root, version, config=config, expected_commit=target_sha,
-                execute=execute_checks and local["inspection_status"] == "PASS",
+                execute=execute_checks and local["inspection_status"] == "PASS", skill=skill,
             )
             preflight_status = checks["preflight_status"]
             checks_status = checks["checks_status"]
@@ -99,7 +100,7 @@ def build_report(
             remote_status = "SKIPPED_LOCAL_TAG_INVALID"
         else:
             remote_info = verify_remote_tag(
-                root, version, prefix=prefix, commit=commit, remote=remote,
+                root, version, prefix=prefix, commit=commit, remote=remote, skill=skill,
                 expected_repository=github_repo if verify_publication else None,
             )
             remote_status = remote_info["remote_tag_status"]
@@ -219,6 +220,7 @@ def build_report(
         "schema_version": 1,
         "requested_version": version,
         "requested_tag": local["requested_tag"],
+        **({"skill": skill, "version_path": local["version_path"]} if skill is not None else {}),
         "target_commit_sha": target_sha,
         "is_historical_commit": target_sha != head_sha,
         "local_tag_status": local["inspection_status"],
@@ -318,7 +320,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", type=pathlib.Path, required=True)
     parser.add_argument("--version", required=True)
-    parser.add_argument("--prefix", default="")
+    scope = parser.add_mutually_exclusive_group()
+    scope.add_argument("--prefix", default="")
+    scope.add_argument("--skill", help="Независимый навык; требует явного плана --config для текущего HEAD")
     parser.add_argument("--commit", help="Полный SHA; для исторического релиза проверки не выполняются")
     parser.add_argument("--config", default="release-checks.json")
     parser.add_argument("--remote", default="origin", help="Имя доверенного Git remote")
@@ -338,7 +342,7 @@ def main() -> int:
     args = parser.parse_args()
     try:
         result = build_report(
-            args.repo, args.version, prefix=args.prefix, commit=args.commit,
+            args.repo, args.version, prefix=args.prefix, commit=args.commit, skill=args.skill,
             config=args.config, remote=args.remote,
             verify_remote=args.verify_remote, execute_checks=args.execute_checks,
             verify_ci=args.verify_ci, github_repo=args.github_repo, run_id=args.run_id,
