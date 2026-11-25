@@ -9,13 +9,15 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
-# Required status check keeps its existing public name. Only the two explicit
+# Required status check keeps its existing public name. Only the three explicit
 # successful job results can satisfy it; no source or artifact is executed here.
-PARALLEL_GATE = "  validate:\n    name: validate\n    needs: [catalog_checks, history_checks]\n    if: ${{ always() }}\n    runs-on: ubuntu-latest\n    timeout-minutes: 2\n    steps:\n      - name: Подтвердить все обязательные группы\n        env:\n          CATALOG_RESULT: ${{ needs.catalog_checks.result }}\n          HISTORY_RESULT: ${{ needs.history_checks.result }}\n        shell: bash\n        run: |\n          set -euo pipefail\n          test \"$CATALOG_RESULT\" = success\n          test \"$HISTORY_RESULT\" = success\n"
+PARALLEL_GATE = "  validate:\n    name: validate\n    needs: [catalog_checks, history_checks, source_secret_checks]\n    if: ${{ always() }}\n    runs-on: ubuntu-latest\n    timeout-minutes: 2\n    steps:\n      - name: Подтвердить все обязательные группы\n        env:\n          CATALOG_RESULT: ${{ needs.catalog_checks.result }}\n          HISTORY_RESULT: ${{ needs.history_checks.result }}\n          SOURCE_RESULT: ${{ needs.source_secret_checks.result }}\n        shell: bash\n        run: |\n          set -euo pipefail\n          test \"$CATALOG_RESULT\" = success\n          test \"$HISTORY_RESULT\" = success\n          test \"$SOURCE_RESULT\" = success\n"
 CHECKED_SHA_STEP = "      - name: Проверить точный SHA кандидата\n        env:\n          CHECKED_SHA: ${{ github.sha }}\n        run: test \"$(git rev-parse HEAD)\" = \"$CHECKED_SHA\"\n"
 DOCKER_STEP = "      - name: Проверить живой Linux Docker preflight\n        run: python tools/check_docker_preflight.py\n"
 GITLEAKS_DOWNLOAD = "      - name: Скачать и проверить официальный Gitleaks 8.30.1\n        shell: bash\n        run: |\n          set -euo pipefail\n          umask 077\n          archive=\"$RUNNER_TEMP/gitleaks_8.30.1_linux_x64.tar.gz\"\n          curl --fail --location --silent --show-error --retry 2 --connect-timeout 10 --max-time 120 \\\n            --proto '=https' --tlsv1.2 --output \"$archive\" \\\n            https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz\n          echo \"551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  $archive\" | sha256sum --check --\n          tar --extract --gzip --to-stdout --file \"$archive\" gitleaks > \"$RUNNER_TEMP/gitleaks-8.30.1\"\n          chmod 700 \"$RUNNER_TEMP/gitleaks-8.30.1\"\n"
 HISTORY_STEPS = "      - name: Проверить достижимые исторические Git-объекты Gitleaks\n        shell: bash\n        run: |\n          set -euo pipefail\n          umask 077\n          python tools/check_gitleaks_history.py --repo . --cli \"$RUNNER_TEMP/gitleaks-8.30.1\" > \"$RUNNER_TEMP/gitleaks-history-host.jsonl\"\n      - name: Сопоставить изолированную проверку истории Gitleaks\n        run: python tools/check_gitleaks_history_container.py --repo . --cli \"$RUNNER_TEMP/gitleaks-8.30.1\" --host-report \"$RUNNER_TEMP/gitleaks-history-host.jsonl\"\n"
+
+SOURCE_STEPS = "      - name: Проверить отслеживаемые текстовые файлы Gitleaks\n        shell: bash\n        run: |\n          set -euo pipefail\n          umask 077\n          python tools/check_gitleaks_review.py --repo . --cli \"$RUNNER_TEMP/gitleaks-8.30.1\" > \"$RUNNER_TEMP/gitleaks-host-report.jsonl\"\n      - name: Сопоставить изолированный Gitleaks с проверкой хоста\n        run: python tools/check_gitleaks_container.py --repo . --cli \"$RUNNER_TEMP/gitleaks-8.30.1\" --host-report \"$RUNNER_TEMP/gitleaks-host-report.jsonl\"\n\n      - name: Проверить пять правил Gitleaks, зависящих от имени файла\n        shell: bash\n        run: |\n          set -euo pipefail\n          umask 077\n          python tools/check_gitleaks_paths.py --repo . --cli \"$RUNNER_TEMP/gitleaks-8.30.1\" > \"$RUNNER_TEMP/gitleaks-path-host.jsonl\"\n      - name: Сопоставить изолированную проверку правил Gitleaks по пути\n        run: python tools/check_gitleaks_paths_container.py --repo . --cli \"$RUNNER_TEMP/gitleaks-8.30.1\" --host-report \"$RUNNER_TEMP/gitleaks-path-host.jsonl\"\n"
 
 
 def parallel_gate_errors(section: str) -> list[str]:
@@ -25,13 +27,14 @@ def parallel_gate_errors(section: str) -> list[str]:
         return ["PARALLEL_JOB_LAYOUT_INVALID"]
     body = jobs[1]
     if re.findall(r"(?m)^  ([a-z][a-z0-9_]*):$", body) != [
-            "catalog_checks", "history_checks", "validate"]:
+            "catalog_checks", "history_checks", "source_secret_checks", "validate"]:
         return ["PARALLEL_JOB_LAYOUT_INVALID"]
     catalog, history_and_gate = body.split("\n  history_checks:\n", 1)
-    history, gate = history_and_gate.split("\n  validate:\n", 1)
+    history, source_and_gate = history_and_gate.split("\n  source_secret_checks:\n", 1)
+    source, gate = source_and_gate.split("\n  validate:\n", 1)
     if ("  validate:\n" + gate).strip() != PARALLEL_GATE.strip():
         errors.append("PARALLEL_REQUIRED_GATE_INVALID")
-    for group in (catalog, history):
+    for group in (catalog, history, source):
         if (CHECKED_SHA_STEP not in group or DOCKER_STEP not in group
                 or GITLEAKS_DOWNLOAD not in group or "fetch-depth: 0" not in group
                 or "persist-credentials: false" not in group
@@ -39,8 +42,14 @@ def parallel_gate_errors(section: str) -> list[str]:
                 or re.search(r"(?m)^ +(?:if|continue-on-error|permissions|needs|concurrency):", group)
                 or "persist-credentials: true" in group):
             errors.append("PARALLEL_CHECK_GROUP_UNSAFE")
-    if HISTORY_STEPS not in history or "tools/check_gitleaks_history.py" in catalog or "tools/check_gitleaks_history_container.py" in catalog:
+    if HISTORY_STEPS not in history or any(
+            name in catalog or name in source for name in
+            ("tools/check_gitleaks_history.py", "tools/check_gitleaks_history_container.py")):
         errors.append("PARALLEL_HISTORY_SCOPE_INVALID")
+    source_scripts = ("tools/check_gitleaks_review.py", "tools/check_gitleaks_container.py",
+                      "tools/check_gitleaks_paths.py", "tools/check_gitleaks_paths_container.py")
+    if SOURCE_STEPS not in source or any(name in catalog or name in history for name in source_scripts):
+        errors.append("PARALLEL_SOURCE_SCOPE_INVALID")
     if "tools/run_skill_tests.py" not in catalog or "tools/check_nvidia_full_tier1.py" not in catalog:
         errors.append("PARALLEL_CATALOG_SCOPE_INVALID")
     return errors

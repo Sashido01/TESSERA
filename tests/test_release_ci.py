@@ -50,6 +50,23 @@ def fixtures():
 
 
 class CIEvidenceTests(unittest.TestCase):
+    def test_three_group_evidence_requires_source_and_original_groups(self):
+        run, jobs = fixtures()
+        template = dict(jobs["jobs"][0])
+        jobs["jobs"].extend({**template, "name": name} for name in
+                            (*release_ci.PARALLEL_JOBS, release_ci.SOURCE_JOB))
+        jobs["total_count"] = len(jobs["jobs"])
+        def verify():
+            return release_ci.validate_ci_evidence(run, jobs, repository=REPO,
+                                                   run_id=RUN_ID, commit_sha=SHA)
+        self.assertEqual(verify()["ci_status"], "PASS")
+        jobs["jobs"][-1]["conclusion"] = "cancelled"
+        self.assertIn("CI_REQUIRED_JOB_NOT_SUCCESSFUL", verify()["problems"])
+        jobs["jobs"][-1]["conclusion"] = "success"
+        jobs["jobs"].pop(-2)
+        jobs["total_count"] = len(jobs["jobs"])
+        self.assertIn("CI_REQUIRED_JOB_MISSING", verify()["problems"])
+
     def test_parallel_job_evidence_requires_both(self):
         run, jobs = fixtures()
         template = dict(jobs["jobs"][0])
