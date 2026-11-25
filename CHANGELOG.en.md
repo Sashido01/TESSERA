@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.72 — Third independent required CI group
+
+- T19.03: move four Gitleaks source/path checks into source_secret_checks; retain full checkout, SHA, pinned tools and host/container pairs. History and tag jobs unchanged; validate requires all three groups. Gate, scope and independent report regressions added; live CI and timing required.
+
 ## 0.0.71 — Local Project Audit Inventory Engine
 
 - Project Audit 0.0.2: bounded metadata-only traversal, counters, markers, exclusions, metadata SHA-256, refusal of known redirects and cross-device traversal; separate local test/preflight plan. 17/17 Linux tests of original helper; new structural regression requires CI. Git Inspector prepared separately (13/13 Linux), not included in this release. Windows, agent acceptance and independent tags remain open.
