@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.71 — Local Project Audit Inventory Engine
+
+- Project Audit 0.0.2: bounded metadata-only traversal, counters, markers, exclusions, metadata SHA-256, refusal of known redirects and cross-device traversal; separate local test/preflight plan. 17/17 Linux tests of original helper; new structural regression requires CI. Git Inspector prepared separately (13/13 Linux), not included in this release. Windows, agent acceptance and independent tags remain open.
+
 ## 0.0.70 — Independent skill checks and test time bounds
 
 - Release Core: explicit --skill for committed VERSION, exact annotated tag, preflight and remote report; separate trusted Microversion Release plan. Shared runner bounds each immediate skill test process and continues independent checks after timeout. 13/13 local runner tests, additional Release Core regressions await CI. Independent tags and protection TD03 WAIT_OWNER; descendant/output limits and Windows TD12 PARTIAL. Full CI required.
