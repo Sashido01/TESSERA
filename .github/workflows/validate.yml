@@ -413,3 +413,7 @@ jobs:
           python-version: '3.13'
       - name: Проверить удалённый объект тега и сформировать отчёт
         run: python core/release_report.py --repo . --version "$(cat VERSION)" --verify-remote --remote origin --format json
+      - name: Опубликовать и проверить независимые аннотированные теги навыков
+        env:
+          CHECKED_SHA: ${{ github.sha }}
+        run: python -B tools/publish_skill_tags.py --repo . --expected-commit "$CHECKED_SHA" --publish

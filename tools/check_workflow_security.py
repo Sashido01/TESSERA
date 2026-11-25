@@ -161,6 +161,11 @@ def validate_workflow(workflow: str) -> list[str]:
         errors.append("Нет безопасной проверки существования удалённого тега")
     if 'git push origin "refs/tags/' not in tagging:
         errors.append("Нет публикации строго одного нового тега")
+    skill_publish = "      - name: Опубликовать и проверить независимые аннотированные теги навыков\n        env:\n          CHECKED_SHA: ${{ github.sha }}\n        run: python -B tools/publish_skill_tags.py --repo . --expected-commit \"$CHECKED_SHA\" --publish\n"
+    if (skill_publish not in tagging or "tools/publish_skill_tags.py --repo . --expected-commit" in validate
+            or not tagging.strip().endswith(skill_publish.strip())
+            or "github.repository == 'Sashido01/TESSERA'" not in tagging):
+        errors.append("SKILL_TAG_PUBLICATION_GATE_INVALID")
     if "git ls-remote --exit-code --tags" in tagging:
         errors.append("Сетевая ошибка не должна интерпретироваться как отсутствие тега")
     return errors
