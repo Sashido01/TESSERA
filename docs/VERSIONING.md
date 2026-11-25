@@ -49,3 +49,7 @@
 ## Ограничение
 
 Эта политика — особый выпускной процесс TESSERA, а не утверждение о стандартной практике SemVer: внешние пакеты и API могут требовать иной схемы. Не изменяйте задним числом историю существующих проектов и опубликованные теги.
+
+## Защита независимых тегов — TD03
+
+Проверка GitHub API 25.11.2026: активный tag Ruleset `27932769` (release tags), include `refs/tags/v*`, exclude пуст, правила deletion/non_fast_forward/update, bypass пуст. Эта маска не покрывает `refs/tags/<skill>/vX.Y.Z`. До независимого выпуска требуется расширение. Минимальное изменение владельцем: Settings → Rules → Rulesets → release tags → добавить шаблон `*/v*` (в REST API `refs/tags/*/v*`) к существующему `v*`; не удалять прежнее правило, не добавлять bypass, сохранить active и три запрета. GitHub fnmatch с разделителем `/` покрывает одноуровневое имя навыка; не утверждать защиту произвольных вложенных пространств имён. Перед сохранением сверить live правила. После — проверить GET `gh api repos/Sashido01/TESSERA/rulesets/27932769` и отсутствие ослабления. Неразрушающие проверки реального применения выполнить в отдельном тестовом репозитории; не пытаться перемещать существующие теги TESSERA. Изменение Ruleset в этой итерации не выполнено, TD03 WAIT_OWNER. Источники: [GitHub Rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository), [REST API](https://docs.github.com/en/rest/repos/rules?apiVersion=2022-11-28).

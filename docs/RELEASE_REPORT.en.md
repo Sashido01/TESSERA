@@ -87,3 +87,7 @@ See [RELEASE_PROVENANCE](RELEASE_PROVENANCE.en.md). Explicit `--verify-provenanc
 ## Independent skill — T16 candidate
 
 `--skill <skill-name>` selects `skills/<skill-name>/VERSION` and annotated tag `<skill-name>/vX.Y.Z`. For current HEAD supply a separate trusted `--config` whose version_file and both release_notes refer to that skill's VERSION and CHANGELOG. Root plan is rejected. Historical reports do not execute checks. `--skill` and `--prefix` are mutually exclusive; legacy `--prefix` reads the root VERSION. Remote checks the exact tag object. Plans and tests do not prove publication or activation. Live CI and independent tags remain open.
+
+### Local Microversion Release plan
+
+`python core/release_preflight.py --repo . --skill microversion-release --version 0.0.1 --config release-checks-microversion-release.json --plan` checks the plan without execution. Use `--execute` only on an authorized trusted clean checkout. Uses the shared runner for one skill; zero ordinary successful tests fails. No separate binary build; catalog ZIP, publication and activation remain separate. This plan still requires CI; adding it does not establish a namespaced tag.

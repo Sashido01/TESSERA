@@ -49,3 +49,7 @@ A commit title describes *what changed*, not which tool was run. Example in the 
 ## Limitation
 
 This is TESSERA's special release workflow, **not** a claim that the workflow follows standard SemVer rules. Public packages and APIs may require different policies. Never rewrite existing projects' published history or tags.
+
+## Independent tag protection — TD03
+
+GitHub API observation 25 November 2026: active tag Ruleset `27932769` (release tags), include `refs/tags/v*`, empty exclusions, deletion/non_fast_forward/update rules, no bypass actors. This pattern does not cover `refs/tags/<skill>/vX.Y.Z`. Extend it before independent release. Minimal owner change: Settings → Rules → Rulesets → release tags → add `*/v*` (REST API `refs/tags/*/v*`) alongside existing `v*`; keep the existing rule, no bypass, active and all three restrictions. GitHub slash-aware fnmatch covers one-level skill names; do not claim protection of arbitrary nested namespaces. Reconcile live rules before saving. Afterwards check GET `gh api repos/Sashido01/TESSERA/rulesets/27932769` and ensure no weakening. Verify enforcement in a disposable test repository, never attempt to move existing TESSERA tags. Ruleset update not performed in this iteration, TD03 WAIT_OWNER. Sources: [GitHub Rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository), [REST API](https://docs.github.com/en/rest/repos/rules?apiVersion=2022-11-28).

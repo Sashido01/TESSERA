@@ -87,3 +87,7 @@ JSON содержит `local_tag_status`, `preflight_status`, `checks_status`, `
 ## Независимый навык — кандидат T16
 
 `--skill <skill-name>` выбирает `skills/<skill-name>/VERSION` и аннотированный тег `<skill-name>/vX.Y.Z`. Для текущего HEAD передай отдельный доверенный `--config`, чей version_file и обе release_notes указывают именно на VERSION и CHANGELOG этого навыка. Корневой план не принимается. Исторические отчёты не запускают проверки. `--skill` и `--prefix` взаимоисключающие; прежний `--prefix` читает корневой VERSION. Remote проверяет точный объект тега. План и тесты не доказывают публикацию или активацию. Реальный CI и независимые теги ещё открыты.
+
+### Локальный план Microversion Release
+
+`python core/release_preflight.py --repo . --skill microversion-release --version 0.0.1 --config release-checks-microversion-release.json --plan` проверяет план без исполнения. `--execute` допустим только для доверенного чистого checkout и с разрешением. Используется общий runner для одного навыка; ноль обычных успешных тестов — отказ. Отдельного бинарного build нет; проверка каталожного ZIP, публикация и активация остаются отдельными. Этот план ещё требует CI; добавление его не означает наличие namespaced-тега.
