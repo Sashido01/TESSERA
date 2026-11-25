@@ -17,7 +17,7 @@ class ReferenceRunnerTests(unittest.TestCase):
     def setUp(self):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
-        base = pathlib.Path(tmp.name)
+        base = pathlib.Path(tmp.name).resolve()
         self.root = base / "project"
         self.source = base / "upstream" / "skills-ref" / "src"
         self.root.mkdir()

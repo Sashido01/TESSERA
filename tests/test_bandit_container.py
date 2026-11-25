@@ -21,7 +21,7 @@ class BanditContainerTests(unittest.TestCase):
                 c.validate_lock(bad, full)
 
     def test_profile(self):
-        args = c.args_for("fixture", pathlib.Path("/tmp/stage"), pathlib.Path("/tmp/packages"))
+        args = c.args_for("fixture", pathlib.PurePosixPath("/tmp/stage"), pathlib.PurePosixPath("/tmp/packages"))
         for flag in ("--network=none", "--read-only", "--cap-drop=ALL", "--user=65534:65534"):
             self.assertIn(flag, args)
         self.assertEqual(args.count("--mount"), 2)

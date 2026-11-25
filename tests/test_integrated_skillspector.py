@@ -35,13 +35,13 @@ class IntegratedSkillSpectorTests(unittest.TestCase):
                 s.contract(["scan", str(link), "--format", "json", "--no-llm"], root)
 
     def test_docker_profile(self):
-        args = s.docker_args("fixture", pathlib.Path("/fixture-stage"), pathlib.Path("/fixture-packages"), "fixture")
+        args = s.docker_args("fixture", pathlib.PurePosixPath("/fixture-stage"), pathlib.PurePosixPath("/fixture-packages"), "fixture")
         self.assertEqual(args[-5:], ["scan", "/stage/fixture", "--format", "json", "--no-llm"])
         for flag in ("--network=none", "--read-only", "--cap-drop=ALL", "--memory=1g"):
             self.assertIn(flag, args)
         self.assertEqual(args.count("--mount"), 2)
         with self.assertRaises(RuntimeError):
-            s.docker_args("fixture", pathlib.Path("/fixture"), pathlib.Path("/fixture/packages"), None)
+            s.docker_args("fixture", pathlib.PurePosixPath("/fixture"), pathlib.PurePosixPath("/fixture/packages"), None)
 
     def test_report_coverage(self):
         good = {"analysis_status": "complete", "missing_files": 0, "coverage_percent": 100}
@@ -55,8 +55,8 @@ class IntegratedSkillSpectorTests(unittest.TestCase):
     def test_cleanup_timeout(self):
         with mock.patch.object(s, "invoke", side_effect=[(0, b""), TimeoutError(), (0, b"")]) as run:
             with self.assertRaises(TimeoutError):
-                s.run_container(pathlib.Path("/fixture-stage"), pathlib.Path("/fixture-home"),
-                                pathlib.Path("/fixture-packages"), None)
+                s.run_container(pathlib.PurePosixPath("/fixture-stage"), pathlib.PurePosixPath("/fixture-home"),
+                                pathlib.PurePosixPath("/fixture-packages"), None)
             self.assertEqual(run.call_args_list[-1].args[0][:2], ["rm", "--force"])
 
 

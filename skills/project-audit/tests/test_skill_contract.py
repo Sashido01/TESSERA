@@ -55,6 +55,16 @@ class ContractTests(unittest.TestCase):
             self.assertIn("SCOPED_COMPLETE", text)
         self.assertTrue((ROOT / "scripts" / "inventory.py").is_file())
 
+    def test_optional_git_inspector_contract(self):
+        for file, reference in (("SKILL.md", "references/GIT_INSPECTOR.md"),
+                                ("references/SKILL.en.md", "GIT_INSPECTOR.en.md")):
+            text = (ROOT / file).read_text(encoding="utf-8")
+            self.assertIn("scripts/git_inspector.py", text)
+            self.assertIn(reference, text)
+            self.assertIn("OBSERVED", text)
+            self.assertIn("STALE", text)
+        self.assertTrue((ROOT / "scripts" / "git_inspector.py").is_file())
+
     def test_roadmap(self):
         for file in ("ROADMAP.md", "ROADMAP.en.md"):
             body = (ROOT / "references" / file).read_text(encoding="utf-8")

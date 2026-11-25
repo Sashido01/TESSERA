@@ -52,7 +52,13 @@ def arguments(args, cwd, root):
     return config
 
 
+def require_secure_open():
+    require(sys.platform == "linux" and hasattr(os, "O_NOFOLLOW") and hasattr(os, "O_NONBLOCK"),
+            "INTEGRATED_SECURE_OPEN_UNSUPPORTED")
+
+
 def read_file(path, maximum):
+    require_secure_open()
     exact(path)
     fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
     with os.fdopen(fd, "rb") as stream:
@@ -68,6 +74,7 @@ def read_file(path, maximum):
 
 
 def snapshot(root):
+    require_secure_open()
     exact(root)
     require(root.is_dir(), "INTEGRATED_SOURCE")
     files, dirs = {}, set()
