@@ -46,10 +46,17 @@ def operation_name(args):
 def failure_category(stderr):
     if b'the receiving end does not support --atomic push' in stderr:
         return 'ATOMIC_UNSUPPORTED'
-    if b'GH013:' in stderr or b'repository rule violations' in stderr.lower():
+    if (b'GH013:' in stderr or b'GH006:' in stderr
+            or b'repository rule violations' in stderr.lower()):
         return 'REMOTE_RULE_REJECTED'
     if b'authentication failed' in stderr.lower() or b'permission denied' in stderr.lower():
         return 'AUTH_OR_PERMISSION'
+    if b'atomic push failure' in stderr.lower():
+        return 'ATOMIC_PUSH_REJECTED'
+    if b'[remote rejected]' in stderr.lower():
+        return 'REMOTE_REJECTED'
+    if b'[remote failure]' in stderr.lower():
+        return 'REMOTE_FAILURE'
     return 'UNCLASSIFIED'
 
 
@@ -155,10 +162,28 @@ def require_single_remote(root):
     require(len(fetch) == 1 and fetch == push, 'SKILL_TAG_REMOTE_URL_MISMATCH')
 
 
-def publish_pending(root, expected, refs, pending):
-    """Atomic preferred; fallback only on explicit unsupported capability in dry-run."""
+def publish_sequential(root, expected, refs, pending):
+    """Create one absent ref at a time; stop on any failure or remote change."""
+    observed = dict(refs)
+    for row in pending:
+        ref = 'refs/tags/' + row['name']
+        require(ref not in observed and remote_refs(root) == observed
+                and git(root, 'rev-parse', 'HEAD') == expected,
+                'SKILL_TAG_REMOTE_CHANGED')
+        print('SKILL_TAG_CREATE_PENDING:' + row['name'], file=sys.stderr)
+        git(root, 'push', '--no-atomic', '--no-follow-tags', '--no-signed', 'origin', ref)
+        observed[ref] = row['local_object']
+        require(remote_refs(root) == observed, 'SKILL_TAG_REMOTE_CHANGED_AFTER_PUSH')
+        print('SKILL_TAG_VERIFIED:' + row['name'], file=sys.stderr)
+
+
+def publish_pending(root, expected, refs, pending, *, strategy='atomic'):
+    """Strategy is chosen before writing; never retry an ambiguous real push."""
     names = ['refs/tags/' + row['name'] for row in pending]
     if not names:
+        return
+    if strategy == 'sequential':
+        publish_sequential(root, expected, refs, pending)
         return
     # A dry-run cannot publish tags. A failure of the real push is never retried
     # automatically: a network or rule error is not proof that no ref was written.
@@ -168,19 +193,14 @@ def publish_pending(root, expected, refs, pending):
         if exc.operation != 'PUSH_PROBE' or exc.category != 'ATOMIC_UNSUPPORTED':
             raise
         print('SKILL_TAG_ATOMIC_UNSUPPORTED:SEQUENTIAL_VERIFIED_CREATION', file=sys.stderr)
-        observed = dict(refs)
-        for row, ref in zip(pending, names):
-            require(remote_refs(root) == observed and git(root, 'rev-parse', 'HEAD') == expected,
-                    'SKILL_TAG_REMOTE_CHANGED')
-            git(root, 'push', '--no-atomic', '--no-follow-tags', '--no-signed', 'origin', ref)
-            observed[ref] = row['local_object']
-            require(remote_refs(root) == observed, 'SKILL_TAG_REMOTE_CHANGED_AFTER_PUSH')
+        publish_sequential(root, expected, refs, pending)
         return
     require(remote_refs(root) == refs and git(root, 'rev-parse', 'HEAD') == expected, 'SKILL_TAG_REMOTE_CHANGED')
     git(root, 'push', '--atomic', '--no-follow-tags', '--no-signed', 'origin', *names)
 
 
-def publish(root, expected, *, backfill=BACKFILL):
+def publish(root, expected, *, backfill=BACKFILL, strategy='atomic'):
+    require(strategy in {'atomic', 'sequential'}, 'SKILL_TAG_STRATEGY_INVALID')
     rows = plan(root, expected, backfill=backfill)
     require_single_remote(root)
     refs = remote_refs(root)
@@ -202,7 +222,7 @@ def publish(root, expected, *, backfill=BACKFILL):
         row['local_object'] = local_object(root, row['name'])
         verify_tag(root, row['name'], row['commit'], row['local_object'])
     require(remote_refs(root) == refs and git(root, 'rev-parse', 'HEAD') == expected, 'SKILL_TAG_REMOTE_CHANGED')
-    publish_pending(root, expected, refs, pending)
+    publish_pending(root, expected, refs, pending, strategy=strategy)
     after = remote_refs(root)
     require(after.get('refs/heads/main') == expected, 'SKILL_TAG_REMOTE_MAIN_CHANGED')
     for row in rows:
@@ -216,9 +236,14 @@ def main():
     parser.add_argument('--repo', required=True, type=Path)
     parser.add_argument('--expected-commit', required=True)
     parser.add_argument('--publish', action='store_true', help='Explicitly publish from trusted, verified main to origin')
+    parser.add_argument('--strategy', choices=('atomic', 'sequential'), default='atomic',
+                        help='Choose publication strategy before any writes')
     args = parser.parse_args()
+    if args.strategy == 'sequential' and not args.publish:
+        parser.error('--strategy sequential requires --publish')
     try:
-        rows = (publish if args.publish else plan)(args.repo.resolve(), args.expected_commit)
+        rows = (publish(args.repo.resolve(), args.expected_commit, strategy=args.strategy)
+                if args.publish else plan(args.repo.resolve(), args.expected_commit))
     except (TagError, OSError, UnicodeError) as exc:
         print(str(exc) if isinstance(exc, TagError) else 'SKILL_TAG_INPUT_INVALID', file=sys.stderr)
         return 1

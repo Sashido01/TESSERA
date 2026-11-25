@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.75 — Verified sequential tag publication
+
+- T16/TD02: v0.0.74 main validate and exact catalog tag PASS, actual atomic push FAIL (PUSH:1:UNCLASSIFIED), zero independent refs. New strategy explicitly selected before writes: one new tag at a time, exact full ref reconciliation before/after, stop on rejection without bypassing Rulesets. Preserve atomic mode and no automatic retry after ambiguous failure. 23/23 local Linux tests; GitHub CI and actual tags required.
+
 ## 0.0.74 — Recover independent skill tag publication
 
 - Required checks and exact catalog v0.0.73 tag passed; independent publication failed twice. Safe operation/exit/category diagnostics, single remote identity, dry-run atomic capability probe, verified sequential new-tag fallback only for explicit unsupported capability. No change to existing tags or required gates. 19/19 local Linux tests; live recovery required.

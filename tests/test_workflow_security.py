@@ -72,6 +72,10 @@ class WorkflowSecurityTests(unittest.TestCase):
         changed = WORKFLOW.replace(" && github.repository == 'Sashido01/TESSERA'", "")
         self.assertIn("SKILL_TAG_PUBLICATION_GATE_INVALID", module.validate_workflow(changed))
 
+    def test_skill_tag_publication_requires_explicit_recovery_strategy(self):
+        changed = WORKFLOW.replace("--publish --strategy sequential", "--publish")
+        self.assertIn("SKILL_TAG_PUBLICATION_GATE_INVALID", module.validate_workflow(changed))
+
     def test_current_workflow(self):
         self.assertEqual(module.validate_workflow(WORKFLOW), [])
 
