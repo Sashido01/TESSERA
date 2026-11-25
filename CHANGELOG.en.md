@@ -4,6 +4,12 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.79 — Harden the Repository Workflow planner
+
+- The planner now normalizes Unicode scopes, rejects reserved Windows names and duplicate JSON keys, and validates the DAG in O(V+E); regressions cover long chains, cycles and path conflicts.
+- Repository Workflow tests passed 17/17 on Windows 11 / Python 3.14.3. The full suite and mandatory static checks govern catalog acceptance; tests do not prove actual skill use by agent hosts.
+- Reconciled the debt snapshot after accepted TESSERA `0.0.78`: main `be6a126f08ffbb49b721b50e030b2a6d82c7d4f3`, CI 45658775191 SUCCESS, exact annotated `v0.0.78` and `project-audit/v0.0.4`.
+
 ## 0.0.78 — Project Audit evidence register
 
 - Added a local Evidence Core for an explicit JSON register: strict schema and references, exact scopes, snapshot/fingerprint binding, preserved PASS/FAIL conflicts, and STALE/UNBOUND/INDIRECT classifications.

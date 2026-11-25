@@ -72,7 +72,7 @@ CI additionally runs the [pinned upstream `skills-ref` validator](docs/AGENT_SKI
 
 **Current catalog version:** see [`VERSION`](VERSION). From this point forward, every independently verified change to TESSERA must increment the catalog microversion, update both changelogs, and use a clear, human-readable Russian commit title. After successful GitHub Actions checks, an annotated `vX.Y.Z` Git tag is created. GitHub Releases are not published automatically.
 
-The latest verified main version as of 25 November 2026 is `0.0.77`, SHA `ff4cb9ee12ce0fdf4923670c3d81f31718ebd287`; local and remote VERSION files were compared, and CI plus the exact annotated tag were confirmed. The current candidate is `0.0.78`; it is not accepted until full CI and tag verification.
+The verified release preceding the current work is TESSERA `0.0.78`, SHA `be6a126f08ffbb49b721b50e030b2a6d82c7d4f3`; CI 45658775191 completed SUCCESS, and exact tags `v0.0.78` and `project-audit/v0.0.4` were verified. See [`VERSION`](VERSION) for the current catalog version.
 
 - **The TESSERA catalog** and **each skill** have independent version histories.
 - Work microversions increase PATCH by one. After `.99`, work may continue with `.100`, `.101`, and so on if the task is unfinished.
