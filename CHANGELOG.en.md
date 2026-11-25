@@ -9,6 +9,8 @@ This file tracks changes to the **shared catalog**. Individual skills may mainta
 - Added current RU/EN criteria for disposable Codex and DeepSeek Harness pilots with separate skill tags `microversion-release/v0.0.2`, `project-audit/v0.0.4` and `repository-workflow/v0.0.2`.
 - Pinned the catalog snapshot to `v0.0.80`; installation, discovery, explicit use, automatic use and enforcement are tracked separately. Actual client trials remain NOT_VERIFIED until observed in each client.
 
+- TD04: raised bounded host history review deadline from 300 to 480 s; added deadline checks before/after reads/scans and final inventory, five regressions. Full coverage and container parity remain mandatory.
+
 ## 0.0.80 — Reconcile the accepted 0.0.79 release
 
 - Updated the bilingual catalog status after PR #86: local and GitHub `main` matched by full SHA and version 0.0.79; main CI 45663571704 completed successfully.
