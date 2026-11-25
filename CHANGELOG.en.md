@@ -4,9 +4,17 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
-## 0.0.74 — Local Project Audit Git Inspector
+## 0.0.76 — Project Audit and mandatory Windows skill checks
 
-- Project Audit 0.0.3: observations of HEAD, file status, local branches, tags and remote count; explicit STALE when mismatch is detected. 13/13 local Linux tests, four exact Git blobs, structural regression. Not an atomic snapshot, content integrity proof or remote ref check. Full CI, Windows and actual agent acceptance open.
+- Project Audit 0.0.3 candidate: Git Inspector, false DEVICE_BOUNDARY correction (#80), stronger metadata-only regression (#77), native Windows Python 3.14 CI for all three skills, retained fail-closed validate and evidence checks. Previous report: 21/21 Linux Inventory Engine tests; full acceptance of current SHA and Windows still required. Version provisional until integration slot; T16 BLOCKED, ordinary merge prohibited until independent tags recover.
+
+## 0.0.75 — Verified sequential tag publication
+
+- T16/TD02: v0.0.74 main validate and exact catalog tag PASS, actual atomic push FAIL (PUSH:1:UNCLASSIFIED), zero independent refs. New strategy explicitly selected before writes: one new tag at a time, exact full ref reconciliation before/after, stop on rejection without bypassing Rulesets. Preserve atomic mode and no automatic retry after ambiguous failure. 23/23 local Linux tests; GitHub CI and actual tags required.
+
+## 0.0.74 — Recover independent skill tag publication
+
+- Required checks and exact catalog v0.0.73 tag passed; independent publication failed twice. Safe operation/exit/category diagnostics, single remote identity, dry-run atomic capability probe, verified sequential new-tag fallback only for explicit unsupported capability. No change to existing tags or required gates. 19/19 local Linux tests; live recovery required.
 
 ## 0.0.73 — Protected independent skill tag publication
 

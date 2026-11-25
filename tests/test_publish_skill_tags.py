@@ -115,6 +115,119 @@ class SkillTagsTests(unittest.TestCase):
         rows = m.publish(self.root, third, backfill=self.backfill)
         self.assertEqual(rows[-1]['commit'], self.second)
 
+    def test_diagnostic_does_not_leak_raw_stderr(self):
+        proc = subprocess.CompletedProcess([], 128, b'', b'private path: authentication failed')
+        with patch.object(m.subprocess, 'run', return_value=proc):
+            with self.assertRaisesRegex(m.GitFailure, 'PUSH:128:AUTH_OR_PERMISSION') as ctx:
+                m.git(self.root, 'push', 'origin', 'refs/tags/audit/v0.0.1')
+        self.assertNotIn('private path', str(ctx.exception))
+
+    def test_actual_remote_without_atomic_support(self):
+        subprocess.run(['git', '-C', str(self.remote), 'config', 'receive.advertiseAtomic', 'false'], check=True)
+        rows = m.publish(self.root, self.second, backfill=self.backfill)
+        for row in rows:
+            self.assertEqual(m.remote_refs(self.root)['refs/tags/' + row['name']], row['local_object'])
+        self.assertEqual(rows, m.publish(self.root, self.second, backfill=self.backfill))
+
+    def test_failed_probe_does_not_fallback(self):
+        real = m.git
+        pushes = []
+        def git(root, *args, **kwargs):
+            if args[0] == 'push':
+                pushes.append(args)
+                raise m.GitFailure('PUSH_PROBE', 1, 'REMOTE_RULE_REJECTED')
+            return real(root, *args, **kwargs)
+        with patch.object(m, 'git', side_effect=git), self.assertRaisesRegex(m.GitFailure, 'REMOTE_RULE_REJECTED'):
+            m.publish(self.root, self.second, backfill=self.backfill)
+        self.assertEqual(len(pushes), 1)
+        self.assertIn('--dry-run', pushes[0])
+        self.assertNotIn('refs/tags/audit/v0.0.1', m.remote_refs(self.root))
+
+    def test_real_atomic_failure_does_not_fallback(self):
+        real = m.git
+        pushes = []
+        def git(root, *args, **kwargs):
+            if args[0] == 'push':
+                pushes.append(args)
+                if '--dry-run' not in args:
+                    raise m.GitFailure('PUSH', 1, 'UNCLASSIFIED')
+            return real(root, *args, **kwargs)
+        with patch.object(m, 'git', side_effect=git), self.assertRaisesRegex(m.GitFailure, 'UNCLASSIFIED'):
+            m.publish(self.root, self.second, backfill=self.backfill)
+        self.assertEqual(len(pushes), 2)
+        self.assertTrue(all('--atomic' in args for args in pushes))
+        self.assertNotIn('refs/tags/audit/v0.0.1', m.remote_refs(self.root))
+
+    def test_partial_sequential_publication_resumes(self):
+        subprocess.run(['git', '-C', str(self.remote), 'config', 'receive.advertiseAtomic', 'false'], check=True)
+        real = m.git
+        def git(root, *args, **kwargs):
+            if args[0] == 'push' and '--no-atomic' in args and args[-1].endswith('v0.0.2'):
+                raise m.GitFailure('PUSH', 1, 'UNCLASSIFIED')
+            return real(root, *args, **kwargs)
+        with patch.object(m, 'git', side_effect=git), self.assertRaisesRegex(m.GitFailure, 'UNCLASSIFIED'):
+            m.publish(self.root, self.second, backfill=self.backfill)
+        before = m.remote_refs(self.root)
+        self.assertIn('refs/tags/audit/v0.0.1', before)
+        self.assertNotIn('refs/tags/audit/v0.0.2', before)
+        m.publish(self.root, self.second, backfill=self.backfill)
+        self.assertEqual(before['refs/tags/audit/v0.0.1'], m.remote_refs(self.root)['refs/tags/audit/v0.0.1'])
+        self.assertIn('refs/tags/audit/v0.0.2', m.remote_refs(self.root))
+
+    def test_explicit_sequential_on_atomic_capable_remote(self):
+        real = m.git
+        pushes = []
+        def git(root, *args, **kwargs):
+            if args[0] == 'push':
+                pushes.append(args)
+            return real(root, *args, **kwargs)
+        with patch.object(m, 'git', side_effect=git):
+            rows = m.publish(self.root, self.second, backfill=self.backfill, strategy='sequential')
+            self.assertEqual(rows, m.publish(self.root, self.second, backfill=self.backfill, strategy='sequential'))
+        self.assertEqual(pushes, [
+            ('push', '--no-atomic', '--no-follow-tags', '--no-signed', 'origin', 'refs/tags/audit/v0.0.1'),
+            ('push', '--no-atomic', '--no-follow-tags', '--no-signed', 'origin', 'refs/tags/audit/v0.0.2'),
+        ])
+        for row in rows:
+            self.assertEqual(m.remote_refs(self.root)['refs/tags/' + row['name']], row['local_object'])
+
+    def test_explicit_sequential_stops_at_remote_rejection(self):
+        real = m.git
+        pushes = []
+        def git(root, *args, **kwargs):
+            if args[0] == 'push':
+                pushes.append(args)
+                raise m.GitFailure('PUSH', 1, 'REMOTE_RULE_REJECTED')
+            return real(root, *args, **kwargs)
+        with patch.object(m, 'git', side_effect=git), self.assertRaisesRegex(m.GitFailure, 'REMOTE_RULE_REJECTED'):
+            m.publish(self.root, self.second, backfill=self.backfill, strategy='sequential')
+        self.assertEqual(len(pushes), 1)
+        self.assertNotIn('refs/tags/audit/v0.0.1', m.remote_refs(self.root))
+        self.assertNotIn('refs/tags/audit/v0.0.2', m.remote_refs(self.root))
+
+    def test_invalid_strategy_does_not_create_refs(self):
+        before = self.git('show-ref')
+        with self.assertRaisesRegex(m.TagError, 'STRATEGY_INVALID'):
+            m.publish(self.root, self.second, backfill=self.backfill, strategy='invalid')
+        self.assertEqual(before, self.git('show-ref'))
+
+    def test_remote_rejection_diagnostics_are_bounded(self):
+        cases = [(b'private path [remote rejected] (atomic push failure)', 'ATOMIC_PUSH_REJECTED'),
+                 (b'private path [remote rejected]', 'REMOTE_REJECTED'),
+                 (b'private path [remote failure]', 'REMOTE_FAILURE'),
+                 (b'private path GH006: protected ref', 'REMOTE_RULE_REJECTED')]
+        for stderr, category in cases:
+            with self.subTest(category=category), patch.object(m.subprocess, 'run', return_value=subprocess.CompletedProcess([], 1, b'', stderr)):
+                with self.assertRaisesRegex(m.GitFailure, category) as ctx:
+                    m.git(self.root, 'push', 'origin', 'refs/tags/audit/v0.0.1')
+                self.assertNotIn('private path', str(ctx.exception))
+
+    def test_different_push_url_rejected(self):
+        self.git('remote', 'set-url', '--push', 'origin', str(self.root.parent / 'other.git'))
+        with self.assertRaisesRegex(m.TagError, 'REMOTE_URL_MISMATCH'):
+            m.publish(self.root, self.second, backfill=self.backfill)
+        self.assertIsNone(m.local_object(self.root, 'audit/v0.0.1'))
+
     def test_remote_race_before_push(self):
         refs = m.remote_refs(self.root)
         with patch.object(m, 'remote_refs', side_effect=[refs, {**refs, 'refs/heads/main': self.first}]):
