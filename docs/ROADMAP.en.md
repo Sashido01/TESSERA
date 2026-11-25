@@ -24,6 +24,8 @@ The owner approved the staged evolution of Project Audit: I — usable skill; II
 
 v0.0.64: main CI 45489532663 PASS, annotated tag verified (commit `2e09871bf1829d70cf314f05f5d0cbbf081aff20`). T02/T16 candidate: shared test runner for all skills, CI and signing; acceptance still requires CI. Independent skill versions and real activation remain open.
 
+T16 candidate: independent Microversion Release VERSION/changelogs, first-parent transitions, metadata packaging and verification. CI still required; namespaced tags, actual updates and activation remain open. Project Audit is developed separately.
+
 ## Foundation stages T00–T07
 
 | Stage | Goal | Verified status |

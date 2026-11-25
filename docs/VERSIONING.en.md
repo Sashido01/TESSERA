@@ -8,6 +8,10 @@ The TESSERA catalog has its own version. Each skill may also have an independent
 
 A new project starts at `0.0.0`. Namespaced skill tags may look like `microversion-release/v0.1.0`. Catalog-wide tags may use `v0.1.0` when there is no conflict.
 
+## Independent skill versions
+
+Each skill directory contains its own `VERSION`, `CHANGELOG.md` and `CHANGELOG.en.md`. The first working version is `0.0.1`; historical commits are not rewritten. Validation compares substantive skill changes against the first Git parent; unrelated catalog changes leave the skill version unchanged. Changes to only the three metadata files are not a new substantive result, except initial migration. Removing a previously versioned skill requires a separate retirement policy. ZIP archives include independent metadata; legacy archives without it remain verifiable. Metadata validation does not create tags or prove independent release or activation.
+
 ## Applying these rules to TESSERA itself
 
 **TESSERA must follow these rules**, independently of the versions of its individual skills. Its historical baseline is `0.0.0`; the already published history without a mandatory `VERSION` file remains unchanged. The new policy begins with `0.0.1`.

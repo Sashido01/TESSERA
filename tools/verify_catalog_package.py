@@ -109,6 +109,7 @@ def verify(archive_path: pathlib.Path, *, version: str, source_commit: str) -> d
             if not records or len(records) != len(indexed) - 1:
                 raise VerificationError("CATALOG_FILE_SET_MISMATCH")
             names: list[str] = []
+            version_metadata: dict[str, dict[str, bytes]] = {}
             total = 0
             for record in records:
                 if not isinstance(record, dict) or set(record) != {"path", "bytes", "sha256"}:
@@ -132,6 +133,9 @@ def verify(archive_path: pathlib.Path, *, version: str, source_commit: str) -> d
                     raise VerificationError("CATALOG_CONTENT_DIGEST_MISMATCH")
                 if name == "VERSION" and data.decode("utf-8", errors="replace").strip() != version:
                     raise VerificationError("CATALOG_VERSION_MISMATCH")
+                match = re.fullmatch(r"skills/([a-z0-9]+(?:-[a-z0-9]+)*)/(VERSION|CHANGELOG\.md|CHANGELOG\.en\.md)", name)
+                if match:
+                    version_metadata.setdefault(match[1], {})[match[2]] = data
                 names.append(name)
             if names != sorted(set(names)) or set(indexed) != {manifest_name} | {prefix + n for n in names}:
                 raise VerificationError("CATALOG_FILE_SET_MISMATCH")
@@ -139,6 +143,20 @@ def verify(archive_path: pathlib.Path, *, version: str, source_commit: str) -> d
                 re.fullmatch(r"skills/[a-z0-9]+(?:-[a-z0-9]+)*/SKILL\.md", n) for n in names
             ):
                 raise VerificationError("CATALOG_REQUIRED_FILES_MISSING")
+            for skill, metadata in version_metadata.items():
+                if (set(metadata) != {"VERSION", "CHANGELOG.md", "CHANGELOG.en.md"}
+                        or f"skills/{skill}/SKILL.md" not in names):
+                    raise VerificationError("CATALOG_SKILL_VERSION_METADATA_INCOMPLETE")
+                try:
+                    skill_version = metadata["VERSION"].decode("utf-8").strip()
+                    if not VERSION_RE.fullmatch(skill_version) or int(skill_version.split(".")[1]) > 99:
+                        raise VerificationError("CATALOG_SKILL_VERSION_INVALID")
+                    for key in ("CHANGELOG.md", "CHANGELOG.en.md"):
+                        if not re.search(r"(?m)^## " + re.escape(skill_version) + r"(?:\s|$)",
+                                         metadata[key].decode("utf-8")):
+                            raise VerificationError("CATALOG_SKILL_CHANGELOG_INVALID")
+                except UnicodeError:
+                    raise VerificationError("CATALOG_SKILL_VERSION_ENCODING_INVALID") from None
         sha = hashlib.sha256()
         with path.open("rb") as stream:
             while chunk := stream.read(64 * 1024):
