@@ -26,6 +26,8 @@ v0.0.64: main CI 45489532663 PASS, annotated tag verified (commit `2e09871bf1829
 
 T16 candidate: independent Microversion Release VERSION/changelogs, first-parent transitions, metadata packaging and verification. CI still required; namespaced tags, actual updates and activation remain open. Project Audit is developed separately.
 
+Project Audit 0.0.1: level I sources, its own [roadmap](../skills/project-audit/references/ROADMAP.en.md). Actual agent and independent release NOT_VERIFIED; tooling is a separate stage. CI required.
+
 ## Foundation stages T00–T07
 
 | Stage | Goal | Verified status |
@@ -213,3 +215,28 @@ T12.03.08: CI 45391798766 — 513+29 PASS, GOVULN_CONTROL_VERSION BLOCKED; new c
 **T12.03.30:** CI 45470763020 PASS, 663 tests, all 173 coordinates. **T12.03.31 — candidate:** standalone SkillSpector Docker, 74 packages, exact parity, eight regressions; CI required. T12 PARTIAL.
 
 **T12.03.31:** CI 45475253034 PASS, 671 tests, standalone SkillSpector Docker exact parity. **T12.03.32 — candidate:** NVIDIA SkillSpector Docker, exact contract and receipts, five regressions; CI required. T12 PARTIAL.
+
+## T19 — Speed up required checks
+
+T19.02 candidate: [parallel CI checks](CI_PERFORMANCE.en.md), required validate retained. Assess speed from actual wall-clock, queue and runner-minutes; no existing required checks removed. Full CI and measured result still required. Accept only after v0.0.67 and its exact tag are verified.
+
+## T18–T20 — continuous work, speed and the third skill
+
+Owner decision 25 November 2026: develop catalog and all approved skills in parallel, continue independent tasks while waiting, prioritize GitHub speed, native tools and simplicity; all skills support local mode. Repository Workflow approved. See [PARALLEL_WORKFLOW](PARALLEL_WORKFLOW.en.md), [TECHNICAL_DEBT](TECHNICAL_DEBT.en.md), [RESEARCH_REGISTER](RESEARCH_REGISTER.en.md).
+
+| Stage | Goal and acceptance | Candidate status |
+|---|---|---|
+| T18.01 | Independent tasks, one integration queue; exact SHA, late VERSION, worktree preservation | PARTIAL — local probes; GitHub in progress |
+| T18.02 | Debt register, review tasks/PR/branches/CI/tags each cycle; evidence-based closure | PARTIAL — protocol and snapshot |
+| T18.03 | Native Issue dependencies and GitHub profile without duplication; local register | NOT_VERIFIED |
+| T19.01 | GitHub Actions timing baseline, critical path and queues | PARTIAL — two measured runs |
+| T19.02 | Parallel history and other check jobs; fail-closed validate, preserve full acceptance | PARTIAL — PR #68 PASS and merged; main CI pending |
+| T19.03 | Measure p50/p95, first feedback, runner-minutes, cache/affected checks only with evidenced equivalence | NOT_STARTED |
+| T20.01 | Repository Workflow 0.0.1, bilingual method, local planner and tests | PARTIAL — candidate sources |
+| T20.02 | Bootstrap, actual Codex/Harness, Windows/Linux, GitHub/LOCAL, evals and independent release | NOT_VERIFIED |
+
+T06: pin/update checked in bounded T10 scenarios; actual hosts and independent tags remain open. T07: source ZIP and independent verification implemented in T09; live attestation applies to v0.0.21, later packages and platforms are not automatically verified. T12 PARTIAL. T16: independent VERSION/changelogs and CI v0.0.66 confirmed; namespaced tags, protection and independent release open. Project Audit PR #67 being corrected; not accepted until full CI. Do not preassign future microversions.
+
+**Reconciliation 25 November 2026:** v0.0.67 main CI 45579382735 PASS and exact annotated tag; PR #68 CI 45580026868 PASS, merged as a8d54510b06d47da2b0d872cb067caee99ad598d. v0.0.68 main CI and tag still required. Project Audit 0.0.1 already in main; actual agent and separate tag NOT_VERIFIED. Repository Workflow 0.0.1 is a candidate, not an independent release.
+
+**T16/T19/T20 reconciliation:** main v0.0.68 CI and exact tag PASS; PR #69 PASS and merged. Repository Workflow accepted in catalog, main v0.0.69 CI pending. v0.0.70 candidate: independent skill preflight/report, bounded test process (13/13 locally). T16 PARTIAL: namespaced tag protection WAIT_OWNER, actual independent tagging and publication not performed. T19.02 accepted and verified; T19.03 open. TD12 PARTIAL, see [register](TECHNICAL_DEBT.en.md). Project Audit inventory 0.0.2 is next candidate.

@@ -96,7 +96,10 @@ def contract(args, root, ini):
         require(len(expected) == len(selected) and expected <= eligible(files),
                 "INTEGRATED_BANDIT_TARGET")
         translated = [TARGET + "/" + x for x in selected] + ["-f", "json", "-q", "-ll", "--exclude", ""]
-    require(0 < len(expected) <= MAX_TARGETS, "INTEGRATED_BANDIT_COVERAGE")
+    # A recursive scan may have zero eligible runtime files (tests-only skill).
+    # Still run real Bandit and demand exact empty metrics and zero findings.
+    require(len(expected) <= MAX_TARGETS and (expected or targets[0] == "-r"),
+            "INTEGRATED_BANDIT_COVERAGE")
     return skill, translated + ["--ini", "/stage/bandit.ini", "--ignore-nosec"], expected, raw_ini
 
 
@@ -183,7 +186,9 @@ def accept(args, root, package_root, ini):
     skill, translated, expected, raw_ini = contract(args, root, ini)
     package_digest = packages(package_root)
     files, dirs = snapshot(skill) if skill else ({}, set())
-    require(expected <= eligible(files), "INTEGRATED_BANDIT_COVERAGE")
+    require(expected <= eligible(files) and
+            (not skill or args[0] != "-r" or expected == eligible(files)),
+            "INTEGRATED_BANDIT_COVERAGE")
     with tempfile.TemporaryDirectory(prefix="tessera-bandit-adapter-", dir=root) as folder:
         home = pathlib.Path(folder)
         stage = home / "stage"

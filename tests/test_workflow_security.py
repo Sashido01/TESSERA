@@ -1,4 +1,9 @@
 import importlib.util
+import itertools
+import os
+import subprocess
+import sys
+import textwrap
 import pathlib
 import unittest
 
@@ -11,6 +16,47 @@ WORKFLOW = (ROOT / ".github" / "workflows" / "validate.yml").read_text(encoding=
 
 
 class WorkflowSecurityTests(unittest.TestCase):
+    def test_parallel_gate_requires_both_jobs(self):
+        for old, new in (
+                ("needs: [catalog_checks, history_checks]", "needs: [catalog_checks]"),
+                ("if: ${{ always() }}", "if: ${{ success() }}"),
+                ('test "$HISTORY_RESULT" = success', 'echo ignored'),
+                ("HISTORY_RESULT: ${{ needs.history_checks.result }}", "HISTORY_RESULT: success")):
+            changed = WORKFLOW.replace(old, new)
+            self.assertNotEqual(changed, WORKFLOW)
+            self.assertIn("PARALLEL_REQUIRED_GATE_INVALID", module.validate_workflow(changed))
+
+    def test_parallel_group_rejects_skipping_and_wrong_sha(self):
+        for old, new in (
+                ("  history_checks:\n", "  history_checks:\n    if: false\n"),
+                ("  catalog_checks:\n", "  catalog_checks:\n    continue-on-error: true\n"),
+                ('run: test "$(git rev-parse HEAD)" = "$CHECKED_SHA"', "run: echo skipped"),
+                ("fetch-depth: 0", "fetch-depth: 1")):
+            changed = WORKFLOW.replace(old, new)
+            self.assertNotEqual(changed, WORKFLOW)
+            self.assertIn("PARALLEL_CHECK_GROUP_UNSAFE", module.validate_workflow(changed))
+
+    def test_parallel_history_scope_is_mandatory(self):
+        changed = WORKFLOW.replace("python tools/check_gitleaks_history.py", "echo omitted")
+        self.assertIn("PARALLEL_HISTORY_SCOPE_INVALID", module.validate_workflow(changed))
+
+    @unittest.skipUnless(sys.platform.startswith("linux"), "Linux Bash gate control")
+    def test_live_gate_accepts_only_two_successes(self):
+        self.assertEqual(module.parallel_gate_errors(WORKFLOW.split("\n  tag_microversion:", 1)[0]), [])
+        gate = WORKFLOW.split("\n  validate:\n", 1)[1].split("\n  tag_microversion:", 1)[0]
+        script = textwrap.dedent(gate.split("        run: |\n", 1)[1])
+        states = ("success", "failure", "cancelled", "skipped")
+        for catalog, history in itertools.product(states, repeat=2):
+            with self.subTest(catalog=catalog, history=history):
+                env = {**os.environ, "CATALOG_RESULT": catalog, "HISTORY_RESULT": history}
+                result = subprocess.run(["bash", "-c", script], env=env, capture_output=True, timeout=10)
+                self.assertEqual(result.returncode == 0, catalog == history == "success")
+        for missing in ("CATALOG_RESULT", "HISTORY_RESULT"):
+            env = {**os.environ, "CATALOG_RESULT": "success", "HISTORY_RESULT": "success"}
+            del env[missing]
+            result = subprocess.run(["bash", "-c", script], env=env, capture_output=True, timeout=10)
+            self.assertNotEqual(result.returncode, 0)
+
     def test_current_workflow(self):
         self.assertEqual(module.validate_workflow(WORKFLOW), [])
 
