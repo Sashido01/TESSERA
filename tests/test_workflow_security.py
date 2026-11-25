@@ -66,6 +66,12 @@ class WorkflowSecurityTests(unittest.TestCase):
             changed = WORKFLOW.replace("tools/" + script, "tools/omitted.py")
             self.assertIn("PARALLEL_SOURCE_SCOPE_INVALID", module.validate_workflow(changed))
 
+    def test_skill_tag_publication_requires_protected_job(self):
+        changed = WORKFLOW.replace("python -B tools/publish_skill_tags.py", "echo omitted")
+        self.assertIn("SKILL_TAG_PUBLICATION_GATE_INVALID", module.validate_workflow(changed))
+        changed = WORKFLOW.replace(" && github.repository == 'Sashido01/TESSERA'", "")
+        self.assertIn("SKILL_TAG_PUBLICATION_GATE_INVALID", module.validate_workflow(changed))
+
     def test_current_workflow(self):
         self.assertEqual(module.validate_workflow(WORKFLOW), [])
 

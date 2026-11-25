@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.73 — Protected independent skill tag publication
+
+- TD03 configuration verified. Add read-only first-parent tag planner and explicit publication in existing main tag job; exact historical backfill, current verified changes only, atomic non-force push and remote object verification. 13/13 local Linux controls; live main publication remains pending.
+
 ## 0.0.72 — Third independent required CI group
 
 - T19.03: move four Gitleaks source/path checks into source_secret_checks; retain full checkout, SHA, pinned tools and host/container pairs. History and tag jobs unchanged; validate requires all three groups. Gate, scope and independent report regressions added; live CI and timing required.
