@@ -46,6 +46,15 @@ class ContractTests(unittest.TestCase):
         for file in ("CHANGELOG.md", "CHANGELOG.en.md"):
             self.assertRegex((ROOT / file).read_text(encoding="utf-8"), r"(?m)^## " + re.escape(version) + r"(?:\s|$)")
 
+    def test_optional_inventory_contract(self):
+        for file, reference in (("SKILL.md", "references/INVENTORY.md"),
+                                ("references/SKILL.en.md", "INVENTORY.en.md")):
+            text = (ROOT / file).read_text(encoding="utf-8")
+            self.assertIn("scripts/inventory.py", text)
+            self.assertIn(reference, text)
+            self.assertIn("SCOPED_COMPLETE", text)
+        self.assertTrue((ROOT / "scripts" / "inventory.py").is_file())
+
     def test_roadmap(self):
         for file in ("ROADMAP.md", "ROADMAP.en.md"):
             body = (ROOT / "references" / file).read_text(encoding="utf-8")
