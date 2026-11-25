@@ -16,11 +16,12 @@ WORKFLOW = (ROOT / ".github" / "workflows" / "validate.yml").read_text(encoding=
 
 
 class WorkflowSecurityTests(unittest.TestCase):
-    def test_parallel_gate_requires_both_jobs(self):
+    def test_parallel_gate_requires_all_jobs(self):
         for old, new in (
-                ("needs: [catalog_checks, history_checks]", "needs: [catalog_checks]"),
+                ("needs: [catalog_checks, history_checks, source_secret_checks]", "needs: [catalog_checks, history_checks]"),
                 ("if: ${{ always() }}", "if: ${{ success() }}"),
                 ('test "$HISTORY_RESULT" = success', 'echo ignored'),
+                ('test "$SOURCE_RESULT" = success', 'echo ignored'),
                 ("HISTORY_RESULT: ${{ needs.history_checks.result }}", "HISTORY_RESULT: success")):
             changed = WORKFLOW.replace(old, new)
             self.assertNotEqual(changed, WORKFLOW)
@@ -41,21 +42,35 @@ class WorkflowSecurityTests(unittest.TestCase):
         self.assertIn("PARALLEL_HISTORY_SCOPE_INVALID", module.validate_workflow(changed))
 
     @unittest.skipUnless(sys.platform.startswith("linux"), "Linux Bash gate control")
-    def test_live_gate_accepts_only_two_successes(self):
+    def test_live_gate_accepts_only_three_successes(self):
         self.assertEqual(module.parallel_gate_errors(WORKFLOW.split("\n  tag_microversion:", 1)[0]), [])
         gate = WORKFLOW.split("\n  validate:\n", 1)[1].split("\n  tag_microversion:", 1)[0]
         script = textwrap.dedent(gate.split("        run: |\n", 1)[1])
         states = ("success", "failure", "cancelled", "skipped")
-        for catalog, history in itertools.product(states, repeat=2):
-            with self.subTest(catalog=catalog, history=history):
-                env = {**os.environ, "CATALOG_RESULT": catalog, "HISTORY_RESULT": history}
+        for catalog, history, source in itertools.product(states, repeat=3):
+            with self.subTest(catalog=catalog, history=history, source=source):
+                env = {**os.environ, "CATALOG_RESULT": catalog, "HISTORY_RESULT": history,
+                       "SOURCE_RESULT": source}
                 result = subprocess.run(["bash", "-c", script], env=env, capture_output=True, timeout=10)
-                self.assertEqual(result.returncode == 0, catalog == history == "success")
-        for missing in ("CATALOG_RESULT", "HISTORY_RESULT"):
-            env = {**os.environ, "CATALOG_RESULT": "success", "HISTORY_RESULT": "success"}
+                self.assertEqual(result.returncode == 0, catalog == history == source == "success")
+        for missing in ("CATALOG_RESULT", "HISTORY_RESULT", "SOURCE_RESULT"):
+            env = {**os.environ, "CATALOG_RESULT": "success", "HISTORY_RESULT": "success",
+                   "SOURCE_RESULT": "success"}
             del env[missing]
             result = subprocess.run(["bash", "-c", script], env=env, capture_output=True, timeout=10)
             self.assertNotEqual(result.returncode, 0)
+
+    def test_parallel_source_scope_mandatory(self):
+        for script in ("check_gitleaks_review.py", "check_gitleaks_container.py",
+                       "check_gitleaks_paths.py", "check_gitleaks_paths_container.py"):
+            changed = WORKFLOW.replace("tools/" + script, "tools/omitted.py")
+            self.assertIn("PARALLEL_SOURCE_SCOPE_INVALID", module.validate_workflow(changed))
+
+    def test_skill_tag_publication_requires_protected_job(self):
+        changed = WORKFLOW.replace("python -B tools/publish_skill_tags.py", "echo omitted")
+        self.assertIn("SKILL_TAG_PUBLICATION_GATE_INVALID", module.validate_workflow(changed))
+        changed = WORKFLOW.replace(" && github.repository == 'Sashido01/TESSERA'", "")
+        self.assertIn("SKILL_TAG_PUBLICATION_GATE_INVALID", module.validate_workflow(changed))
 
     def test_current_workflow(self):
         self.assertEqual(module.validate_workflow(WORKFLOW), [])
