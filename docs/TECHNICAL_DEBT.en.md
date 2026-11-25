@@ -2,7 +2,7 @@
 
 [Русский — оригинал](TECHNICAL_DEBT.md) | **English — translation**
 
-Observation snapshot 25 November 2026: main v0.0.66, SHA a550e0e638ca51a8a9b034773930da7ba5c25796, CI 45572387469 PASS and exact annotated tag verified. Branch/CI status changes; reconcile API and local Git rather than treating this snapshot as live. Close records only with fact, SHA, check and residual limits. Active branches are not abandoned branches. Do not delete work to reach a zero Issues/PR count.
+The table below is the original historical snapshot; the latest reconciliation is appended at the end. Branch and CI state changes: reconcile GitHub API and local Git rather than treating historical snapshots as live. Close records only with a fact, SHA, check and residual limits. Active branches are not abandoned branches. Do not delete work to reach a zero Issues/PR count.
 
 | ID | Priority | Debt and closure criterion | Snapshot state |
 |---|---|---|---|
@@ -71,3 +71,11 @@ TD02 BLOCKED: main v0.0.73 run 45597537888, attempts 1 and 2, validate PASS, exa
 TD02/T16: independent tag publication is restored. Four historical tags were confirmed annotated and pointed to their expected source commits; main v0.0.76, run 45645609722 and the root tag were verified. #83 is closed. PR #74 was accepted and its branch deleted. Local Windows acceptance: 715 PASS, 7 platform skips; the full main CI Windows job succeeded. #80 and #82 can be closed with the evidence already recorded.
 
 TD13/#76 PARTIAL: the wheel and official source were checked without installation or execution; the new CI preflight is on a separate working branch and awaits PR verification. TD14/#77: the Security Policy Verdict criterion in the initial task was attested by the owner, but the exact report for the accepted main SHA still needs independent verification before closure. TD15/#78: this snapshot synchronizes the documentation; close after the update is accepted. TD17/#81 remains open: this local invocation inherits 22 GIT_* variables, which makes the full suite outside a cleaned child process return GIT_CONTEXT_UNSAFE and causes errors in fixture Git repositories; the user's global environment was not changed. Historical failed runs remain preserved.
+
+
+## Current status — 25 November 2026
+
+- Catalog: local and GitHub `main` match at version `0.0.77`, SHA `ff4cb9ee12ce0fdf4923670c3d81f31718ebd287`; run 45651340205 SUCCESS, annotated `v0.0.77` points to the exact commit. GitHub has no open PRs.
+- TD02/T16: historical independent refs and commits were restored and reconciled; issue #83 is closed. TD13/#76 closed within its stated scope after the pre-install wheel gate, full CI and installation of the same locally verified wheel; provenance for future wheels is not implied. TD14/#77 closed against the exact main SHA, full CI and Security Policy Verdict PASS without lowering the threshold.
+- TD15/#78 remains open until this bilingual update is accepted. TD17/#81 remains open: local `release_report.py` rejected the inherited context with `GIT_CONTEXT_UNSAFE`; no environment variables or global configuration were stripped or changed. Isolated Codex CLI rejected a downgrade, but file reads were blocked by policy; actual activation and enforcement/update/rollback remain NOT_VERIFIED.
+- Next integration: Evidence Core in Project Audit 0.0.4 and catalog 0.0.78. The source candidate's 15 Windows tests passed; full CI, main tag and independent skill tag are not yet confirmed. Codex/Harness acceptance, T13, T20.02 and public skill activation remain separate items.

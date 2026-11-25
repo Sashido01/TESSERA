@@ -72,6 +72,8 @@ CI additionally runs the [pinned upstream `skills-ref` validator](docs/AGENT_SKI
 
 **Current catalog version:** see [`VERSION`](VERSION). From this point forward, every independently verified change to TESSERA must increment the catalog microversion, update both changelogs, and use a clear, human-readable Russian commit title. After successful GitHub Actions checks, an annotated `vX.Y.Z` Git tag is created. GitHub Releases are not published automatically.
 
+The latest verified main version as of 25 November 2026 is `0.0.77`, SHA `ff4cb9ee12ce0fdf4923670c3d81f31718ebd287`; local and remote VERSION files were compared, and CI plus the exact annotated tag were confirmed. The current candidate is `0.0.78`; it is not accepted until full CI and tag verification.
+
 - **The TESSERA catalog** and **each skill** have independent version histories.
 - Work microversions increase PATCH by one. After `.99`, work may continue with `.100`, `.101`, and so on if the task is unfinished.
 - After completion and successful mandatory checks, planned milestones are `0.0.99 → 0.1.0`, `0.1.99 → 0.2.0`, and `0.99.99 → 1.0.0`.
@@ -88,7 +90,7 @@ An application release **is not complete without a verified annotated Git tag**.
 
 ## Roadmap and constraints
 
-The [complete T00–T17 roadmap](docs/ROADMAP.en.md) sets out verifiable steps for Git protection, one shared Release Core, skill distribution, and agent integration. The [dependency policy](docs/DEPENDENCIES.en.md) defines the approved stack: official GitHub CLI as the **planned preferred distribution mechanism after real-world verification**, plus a minimal Python installer for offline use and custom profiles.
+The [complete T00–T20 roadmap](docs/ROADMAP.en.md) sets out verifiable steps for Git protection, one shared Release Core, skill distribution, and agent integration. The [dependency policy](docs/DEPENDENCIES.en.md) defines the approved stack: official GitHub CLI as the **planned preferred distribution mechanism after real-world verification**, plus a minimal Python installer for offline use and custom profiles.
 
 NVIDIA SkillEvaluator is permitted **only at Tier 1**, after compatibility and resource evaluation without paid AI APIs. Tier 2 and Tier 3 must not be used. The reference `skills-ref` validator is planned for standard-format checks; TESSERA's own microversion and tagging tests remain mandatory.
 
