@@ -139,6 +139,20 @@ def validate_workflow(workflow: str) -> list[str]:
         errors.append("Нет обязательной контейнерной проверки правил Gitleaks по пути")
     if 'c323ad4c43e3c8f2de051572cc25b2711d11e648' not in validate or 'e2356aa11f0d484f789543f25da6208fe2408641c8b16e7b59bc6600c5c39ffb' not in validate or 'python tools/check_skillspector_review.py --repo . --cli "$RUNNER_TEMP/skillspector/bin/skillspector" > "$RUNNER_TEMP/skillspector-host.jsonl"' not in validate:
         errors.append("Нет обязательной закреплённой проверки SkillSpector")
+    wheel_url = 'https://github.com/NVIDIA/SkillSpector/releases/download/v2.13.7/skillspector-2.13.7-py3-none-any.whl'
+    wheel_path = '$RUNNER_TEMP/skillspector-2.13.7-py3-none-any.whl'
+    wheel_download = (
+        'curl --fail --location --silent --show-error --retry 2 --connect-timeout 10 --max-time 120 \\\n'
+        '            --proto \'=https\' --proto-redir \'=https\' --output "$RUNNER_TEMP/skillspector-2.13.7-py3-none-any.whl" \\\n'
+        '            ' + wheel_url
+    )
+    wheel_preflight = f'python -B tools/check_skillspector_wheel.py --wheel "$RUNNER_TEMP/skillspector-2.13.7-py3-none-any.whl" --source .external/skillspector'
+    wheel_requirement = f'skillspector @ file://{wheel_path} --hash=sha256:e2356aa11f0d484f789543f25da6208fe2408641c8b16e7b59bc6600c5c39ffb'
+    wheel_steps = (validate.find(wheel_download), validate.find(wheel_preflight), validate.find(wheel_requirement))
+    if (any(position < 0 for position in wheel_steps)
+            or tuple(sorted(wheel_steps)) != wheel_steps
+            or 'skillspector @ https://' in validate):
+        errors.append("SkillSpector wheel должен пройти preflight до установки, затем устанавливаться из того же локального файла")
     if 'run: python tools/check_skillspector_container.py --repo . --packages "$RUNNER_TEMP/skillspector/lib/python3.13/site-packages" --host-report "$RUNNER_TEMP/skillspector-host.jsonl"' not in validate:
         errors.append("Нет обязательной контейнерной проверки SkillSpector")
     if ('tools/check_dependency_review.py --locked tools/skills-ref-requirements.txt' not in validate

@@ -168,6 +168,26 @@ class WorkflowSecurityTests(unittest.TestCase):
         modified = WORKFLOW.replace("python tools/check_skillspector_review.py", "echo")
         self.assertTrue(any("SkillSpector" in e for e in module.validate_workflow(modified)))
 
+    def test_skillspector_wheel_preflight_before_install_is_required(self):
+        preflight = 'python -B tools/check_skillspector_wheel.py --wheel "$RUNNER_TEMP/skillspector-2.13.7-py3-none-any.whl" --source .external/skillspector'
+        step = (
+            "      - name: Сверить SkillSpector wheel с исходниками до установки\n"
+            f"        run: {preflight}\n"
+        )
+        self.assertIn(step, WORKFLOW)
+        missing = WORKFLOW.replace(preflight, "echo omitted")
+        late = WORKFLOW.replace(step, "").replace(
+            "      - name: Проверить навыки через SkillSpector без LLM\n",
+            step + "      - name: Проверить навыки через SkillSpector без LLM\n")
+        wrong_source = WORKFLOW.replace(
+            "skillspector @ file://$RUNNER_TEMP/skillspector-2.13.7-py3-none-any.whl",
+            "skillspector @ https://pypi.org/packages/skillspector-2.13.7-py3-none-any.whl")
+        unsafe_redirect = WORKFLOW.replace("--proto-redir '=https'", "--proto-redir '=all'")
+        for modified in (missing, late, wrong_source, unsafe_redirect):
+            with self.subTest(workflow_variant=modified != WORKFLOW):
+                self.assertNotEqual(modified, WORKFLOW)
+                self.assertTrue(any("SkillSpector wheel" in e for e in module.validate_workflow(modified)))
+
     def test_skillspector_digest_is_required(self):
         modified = WORKFLOW.replace("e2356aa11f0d484f789543f25da6208fe2408641c8b16e7b59bc6600c5c39ffb", "0" * 64)
         self.assertTrue(any("SkillSpector" in e for e in module.validate_workflow(modified)))

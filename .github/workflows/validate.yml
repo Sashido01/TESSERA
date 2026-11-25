@@ -192,13 +192,23 @@ jobs:
           path: .external/skillspector
           fetch-depth: 1
           persist-credentials: false
+      - name: Скачать официальный SkillSpector wheel без установки
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          curl --fail --location --silent --show-error --retry 2 --connect-timeout 10 --max-time 120 \
+            --proto '=https' --proto-redir '=https' --output "$RUNNER_TEMP/skillspector-2.13.7-py3-none-any.whl" \
+            https://github.com/NVIDIA/SkillSpector/releases/download/v2.13.7/skillspector-2.13.7-py3-none-any.whl
+      - name: Сверить SkillSpector wheel с исходниками до установки
+        run: python -B tools/check_skillspector_wheel.py --wheel "$RUNNER_TEMP/skillspector-2.13.7-py3-none-any.whl" --source .external/skillspector
       - name: Установить SkillSpector из закреплённых wheel в отдельное окружение
         shell: bash
         run: |
           set -euo pipefail
           test "$(git -C .external/skillspector rev-parse HEAD)" = "c323ad4c43e3c8f2de051572cc25b2711d11e648"
           "$RUNNER_TEMP/nvidia-tier1/bin/uv" export --project .external/skillspector --frozen --offline --no-default-groups --no-emit-project --format requirements-txt --output-file "$RUNNER_TEMP/skillspector-requirements.txt"
-          printf '\n%s\n' 'skillspector @ https://github.com/NVIDIA/SkillSpector/releases/download/v2.13.7/skillspector-2.13.7-py3-none-any.whl --hash=sha256:e2356aa11f0d484f789543f25da6208fe2408641c8b16e7b59bc6600c5c39ffb' >> "$RUNNER_TEMP/skillspector-requirements.txt"
+          printf '\n%s\n' "skillspector @ file://$RUNNER_TEMP/skillspector-2.13.7-py3-none-any.whl --hash=sha256:e2356aa11f0d484f789543f25da6208fe2408641c8b16e7b59bc6600c5c39ffb" >> "$RUNNER_TEMP/skillspector-requirements.txt"
           python -m venv "$RUNNER_TEMP/skillspector"
           "$RUNNER_TEMP/skillspector/bin/python" -m pip --isolated install --disable-pip-version-check --no-cache-dir --only-binary=:all: --require-hashes -r "$RUNNER_TEMP/skillspector-requirements.txt"
           "$RUNNER_TEMP/skillspector/bin/python" -m pip check

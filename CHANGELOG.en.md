@@ -4,6 +4,12 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.77 — Pre-install SkillSpector provenance check
+
+- Added a pre-install comparison of the official SkillSpector 2.13.7 wheel against the pinned upstream Git tree; installation uses that same verified local file.
+- Exact release asset, RECORD, metadata and entry point checks passed on Windows 11 / Python 3.14.3; nine wheel-checker tests and 39 workflow-security tests passed, with one Linux-only test skipped.
+- Full PR/main CI and an annotated tag for this version remain required; this does not establish general safety or runtime acceptance of SkillSpector.
+
 ## 0.0.76 — Project Audit and mandatory Windows skill checks
 
 - Project Audit 0.0.3 candidate: Git Inspector, false DEVICE_BOUNDARY correction (#80), stronger metadata-only regression (#77), native Windows Python 3.14 CI for all three skills, retained fail-closed validate and evidence checks. Previous report: 21/21 Linux Inventory Engine tests; full acceptance of current SHA and Windows still required. Version provisional until integration slot; T16 BLOCKED, ordinary merge prohibited until independent tags recover.
