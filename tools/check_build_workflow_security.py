@@ -33,7 +33,7 @@ def validate(text: str) -> list[str]:
         "git merge-base --is-ancestor HEAD origin/main",
         "python tools/build_catalog_package.py --repo . --output-dir dist --require-tag --check-reproducible",
         "python -m unittest discover -s tests -q",
-        "python -m unittest discover -s skills/microversion-release/tests -q",
+        "python tools/run_skill_tests.py -q",
         "subject-path: dist/*.zip",
         "if-no-files-found: error",
     )

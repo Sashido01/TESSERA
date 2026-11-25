@@ -34,7 +34,7 @@ def validate_workflow(workflow: str) -> list[str]:
     if "    env:\n      PYTHONDONTWRITEBYTECODE: '1'\n" not in validate:
         errors.append("Python bytecode caches не отключены в CI")
     try:
-        tests = validate.index("run: python -m unittest discover -s skills/microversion-release/tests -v")
+        tests = validate.index("run: python tools/run_skill_tests.py")
         post_test_build = validate.index(
             "run: python tools/build_catalog_package.py --repo . --output-dir dist/post-tests --check-reproducible"
         )

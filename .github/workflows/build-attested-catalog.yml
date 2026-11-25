@@ -64,7 +64,7 @@ jobs:
           python tools/validate_skills.py
           python tools/check_translations.py
           python -m unittest discover -s tests -q
-          python -m unittest discover -s skills/microversion-release/tests -q
+          python tools/run_skill_tests.py -q
       - name: Собрать воспроизводимый исходный пакет
         run: |
           python tools/build_catalog_package.py --repo . --output-dir dist --require-tag --check-reproducible
