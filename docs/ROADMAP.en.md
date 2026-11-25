@@ -38,8 +38,8 @@ T16 candidate: independent Microversion Release VERSION/changelogs, first-parent
 | T05 | Installation guides and helper for Codex, Claude Code, Hermes, Harness | PARTIAL — prepared; real hosts NOT_VERIFIED |
 | T05.1 | Verify installed skills in Codex, Claude Code, Hermes | NOT_VERIFIED |
 | T05.2 | Verify a missing-tag release is blocked in a multi-agent environment | NOT_VERIFIED |
-| T06 | Safe skill update management | PARTIAL — local copying exists; pin/provenance/update absent |
-| T07 | Compatibility and reproducible release packages | NOT_STARTED |
+| T06 | Safe skill update management | PARTIAL — local copying and bounded pin/update checked in T10; actual activation and independent skill updates open |
+| T07 | Compatibility and reproducible release packages | PARTIAL — ZIP and artifact-specific v0.0.21 acceptance in T09; other platforms and releases not automatically verified |
 
 ## Priority stages T08–T17
 
@@ -213,3 +213,20 @@ T12.03.08: CI 45391798766 — 513+29 PASS, GOVULN_CONTROL_VERSION BLOCKED; new c
 **T12.03.30:** CI 45470763020 PASS, 663 tests, all 173 coordinates. **T12.03.31 — candidate:** standalone SkillSpector Docker, 74 packages, exact parity, eight regressions; CI required. T12 PARTIAL.
 
 **T12.03.31:** CI 45475253034 PASS, 671 tests, standalone SkillSpector Docker exact parity. **T12.03.32 — candidate:** NVIDIA SkillSpector Docker, exact contract and receipts, five regressions; CI required. T12 PARTIAL.
+
+## T18–T20 — continuous work, speed and the third skill
+
+Owner decision 25 November 2026: develop catalog and all approved skills in parallel, continue independent tasks while waiting, prioritize GitHub speed, native tools and simplicity; all skills support local mode. Repository Workflow approved. See [PARALLEL_WORKFLOW](PARALLEL_WORKFLOW.en.md), [TECHNICAL_DEBT](TECHNICAL_DEBT.en.md), [RESEARCH_REGISTER](RESEARCH_REGISTER.en.md).
+
+| Stage | Goal and acceptance | Candidate status |
+|---|---|---|
+| T18.01 | Independent tasks, one integration queue; exact SHA, late VERSION, worktree preservation | PARTIAL — local probes; GitHub in progress |
+| T18.02 | Debt register, review tasks/PR/branches/CI/tags each cycle; evidence-based closure | PARTIAL — protocol and snapshot |
+| T18.03 | Native Issue dependencies and GitHub profile without duplication; local register | NOT_VERIFIED |
+| T19.01 | GitHub Actions timing baseline, critical path and queues | PARTIAL — two measured runs |
+| T19.02 | Parallel history and other check jobs; fail-closed validate, preserve full acceptance | NOT_STARTED |
+| T19.03 | Measure p50/p95, first feedback, runner-minutes, cache/affected checks only with evidenced equivalence | NOT_STARTED |
+| T20.01 | Repository Workflow 0.0.1, bilingual method, local planner and tests | PARTIAL — candidate sources |
+| T20.02 | Bootstrap, actual Codex/Harness, Windows/Linux, GitHub/LOCAL, evals and independent release | NOT_VERIFIED |
+
+T06: pin/update checked in bounded T10 scenarios; actual hosts and independent tags remain open. T07: source ZIP and independent verification implemented in T09; live attestation applies to v0.0.21, later packages and platforms are not automatically verified. T12 PARTIAL. T16: independent VERSION/changelogs and CI v0.0.66 confirmed; namespaced tags, protection and independent release open. Project Audit PR #67 being corrected; not accepted until full CI. Do not preassign future microversions.
