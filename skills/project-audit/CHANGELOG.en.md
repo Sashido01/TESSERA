@@ -10,6 +10,8 @@ Correct false DEVICE_BOUNDARY on Windows (#80), strengthen metadata-only regress
 
 - Git Inspector: explicit child Git environment allowlist instead of forwarding arbitrary variables (HIGH E2); absolute git.exe/git. Strengthen hypothetical audit scope after actual Codex acceptance. Scanner and agent retest required.
 
+- Inventory and Git Inspector test loaders use ordinary imports with a scoped path and explicit module-origin checks; removed importlib loader execution, added import-origin tests. Scanner and repeat tests required.
+
 ## 0.0.2 — Bounded metadata inventory
 
 Optional local tool, relative paths, counters, markers, limits, visible exclusions, metadata SHA-256 (not contents), no known redirects or device traversal. 17 local Linux tests; Windows, full CI and independent release unverified. Level II PARTIAL.

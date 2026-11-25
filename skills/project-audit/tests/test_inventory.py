@@ -1,19 +1,29 @@
 """Deterministic helper checks; not agent behavioral evals."""
 from __future__ import annotations
-import importlib.util
+import sys
 import os
 from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
 
-path = Path(__file__).resolve().parents[1] / 'scripts' / 'inventory.py'
-spec = importlib.util.spec_from_file_location('audit_inventory', path)
-module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(module)
+PATH = Path(__file__).resolve().parents[1] / 'scripts' / 'inventory.py'
+cached = sys.modules.get('inventory')
+if cached is not None and Path(getattr(cached, '__file__', '') or '.').resolve() != PATH:
+    raise RuntimeError('Unexpected cached test module')
+sys.path.insert(0, str(PATH.parent))
+try:
+    import inventory as module
+finally:
+    sys.path.pop(0)
+if Path(module.__file__).resolve() != PATH:
+    raise RuntimeError('Unexpected test module origin')
 
 
 class InventoryTests(unittest.TestCase):
+    def test_import_origin(self):
+        self.assertEqual(Path(module.__file__).resolve(), PATH)
+
     def setUp(self):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)

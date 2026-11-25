@@ -5,10 +5,22 @@ import sys
 import tempfile
 import unittest
 from unittest.mock import patch
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-import git_inspector as m
+PATH = Path(__file__).resolve().parents[1] / 'scripts' / 'git_inspector.py'
+cached = sys.modules.get('git_inspector')
+if cached is not None and Path(getattr(cached, '__file__', '') or '.').resolve() != PATH:
+    raise RuntimeError('Unexpected cached test module')
+sys.path.insert(0, str(PATH.parent))
+try:
+    import git_inspector as m
+finally:
+    sys.path.pop(0)
+if Path(m.__file__).resolve() != PATH:
+    raise RuntimeError('Unexpected test module origin')
 
 class Tests(unittest.TestCase):
+    def test_import_origin(self):
+        self.assertEqual(Path(m.__file__).resolve(), PATH)
+
     def setUp(self):
         t = tempfile.TemporaryDirectory(); self.addCleanup(t.cleanup)
         self.root = Path(t.name).resolve() / 'repo'; self.root.mkdir()
