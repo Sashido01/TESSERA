@@ -59,6 +59,15 @@ class CatalogVerificationTests(unittest.TestCase):
                 zf.writestr(info, body)
         self.archive.write_bytes(output.getvalue())
 
+    def test_versioned_package_and_legacy_package(self):
+        self.assertEqual(self.check()["status"], "PASS")
+        skill = self.root / "source" / "skills" / "microversion-release"
+        (skill / "VERSION").write_text("0.0.1\n", encoding="utf-8")
+        for name in ("CHANGELOG.md", "CHANGELOG.en.md"):
+            (skill / name).write_text("## 0.0.1\n", encoding="utf-8")
+        self.archive.write_bytes(builder.package_bytes(self.root / "source", self.VERSION, self.SHA))
+        self.assertEqual(self.check()["status"], "PASS")
+
     def test_genuine_package_passes_without_provenance_claim(self):
         result = self.check()
         self.assertEqual(result["status"], "PASS")

@@ -29,6 +29,7 @@ def pairs(root: pathlib.Path) -> dict[pathlib.Path, pathlib.Path]:
             if not skill.is_dir():
                 continue
             result[skill / "README.md"] = skill / "README.en.md"
+            result[skill / "CHANGELOG.md"] = skill / "CHANGELOG.en.md"
             result[skill / "SKILL.md"] = skill / "references" / "SKILL.en.md"
             refs = skill / "references"
             if refs.is_dir():

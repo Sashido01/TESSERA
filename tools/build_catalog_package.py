@@ -85,6 +85,11 @@ def included_paths(root: pathlib.Path) -> list[pathlib.Path]:
         for name in ("README.md", "README.en.md", "LICENSE.txt"):
             if (child / name).exists():
                 result.append(rel / name)
+        metadata = ("VERSION", "CHANGELOG.md", "CHANGELOG.en.md")
+        if any((child / name).exists() or (child / name).is_symlink() for name in metadata):
+            if any(not (child / name).is_file() or (child / name).is_symlink() for name in metadata):
+                raise PackageError("PACKAGE_SKILL_VERSION_METADATA_INCOMPLETE")
+            result.extend(rel / name for name in metadata)
         for dirname, suffix in (("references", ".md"), ("scripts", ".py")):
             directory = child / dirname
             if directory.exists():
@@ -126,6 +131,16 @@ def package_bytes(root: pathlib.Path, version: str, commit_sha: str) -> bytes:
         files[relative.as_posix()] = file_bytes(root, relative)
     if files["VERSION"].decode("utf-8").strip() != version:
         raise PackageError("PACKAGE_VERSION_MISMATCH")
+    for name, data in files.items():
+        if re.fullmatch(r"skills/[a-z0-9]+(?:-[a-z0-9]+)*/VERSION", name):
+            skill_version = data.decode("utf-8").strip()
+            if not VERSION.fullmatch(skill_version) or int(skill_version.split(".")[1]) > 99:
+                raise PackageError("PACKAGE_SKILL_VERSION_INVALID")
+            prefix = name[:-len("VERSION")]
+            for changelog in ("CHANGELOG.md", "CHANGELOG.en.md"):
+                if not re.search(r"(?m)^## " + re.escape(skill_version) + r"(?:\s|$)",
+                                 files[prefix + changelog].decode("utf-8")):
+                    raise PackageError("PACKAGE_SKILL_CHANGELOG_INVALID")
     manifest = {
         "schema_version": 1,
         "artifact_kind": "TESSERA_AGENT_SKILLS_CATALOG_SOURCE",

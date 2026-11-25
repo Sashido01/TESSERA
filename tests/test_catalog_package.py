@@ -49,6 +49,27 @@ class PackageTests(unittest.TestCase):
         with zipfile.ZipFile(io.BytesIO(self.zip())) as z:
             return {name: z.read(name) for name in z.namelist()}
 
+    def test_independent_metadata_is_packaged(self):
+        skill = self.root / "skills" / "microversion-release"
+        (skill / "VERSION").write_text("0.0.1\n", encoding="utf-8")
+        for name in ("CHANGELOG.md", "CHANGELOG.en.md"):
+            (skill / name).write_text("## 0.0.1\n", encoding="utf-8")
+        for name in ("VERSION", "CHANGELOG.md", "CHANGELOG.en.md"):
+            self.assertIn("TESSERA-0.0.14/skills/microversion-release/" + name, self.entries())
+
+    def test_incomplete_skill_metadata_rejected(self):
+        (self.root / "skills" / "microversion-release" / "VERSION").write_text("0.0.1\n", encoding="utf-8")
+        with self.assertRaisesRegex(package.PackageError, "SKILL_VERSION_METADATA_INCOMPLETE"):
+            self.zip()
+
+    def test_wrong_skill_version_heading_rejected(self):
+        skill = self.root / "skills" / "microversion-release"
+        (skill / "VERSION").write_text("0.0.2\n", encoding="utf-8")
+        for name in ("CHANGELOG.md", "CHANGELOG.en.md"):
+            (skill / name).write_text("## 0.0.1\n", encoding="utf-8")
+        with self.assertRaisesRegex(package.PackageError, "SKILL_CHANGELOG_INVALID"):
+            self.zip()
+
     def test_deterministic_bytes(self):
         self.assertEqual(self.zip(), self.zip())
 

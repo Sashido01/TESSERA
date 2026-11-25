@@ -85,6 +85,61 @@ def git(root: pathlib.Path, *args: str, check: bool = True) -> subprocess.Comple
     )
 
 
+SKILL_NAME = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*\Z")
+SKILL_METADATA = {"VERSION", "CHANGELOG.md", "CHANGELOG.en.md"}
+
+
+def check_skill_versions(root: pathlib.Path, parent: str) -> list[str]:
+    """Check independent versions against the first parent of the audited commit."""
+    errors: list[str] = []
+    skills = root / "skills"
+    if skills.is_symlink() or not skills.is_dir():
+        return ["SKILL_VERSION_ROOT_INVALID"]
+    changed = set(git(root, "diff", "--name-only", "--no-renames", "-z",
+                      parent, "HEAD", "--", "skills/").stdout.split("\0")) - {""}
+    previous_paths = set(git(root, "ls-tree", "-r", "--name-only", "-z",
+                             parent, "--", "skills/").stdout.split("\0")) - {""}
+    current_versions: set[str] = set()
+    for skill in sorted(skills.iterdir()):
+        name = skill.name
+        if skill.is_symlink() or not skill.is_dir() or not SKILL_NAME.fullmatch(name):
+            errors.append("SKILL_VERSION_DIRECTORY_INVALID")
+            continue
+        prefix = f"skills/{name}/"
+        version_path = prefix + "VERSION"
+        current_versions.add(version_path)
+        if any((skill / x).is_symlink() or not (skill / x).is_file() for x in SKILL_METADATA):
+            errors.append(f"{name}: SKILL_VERSION_METADATA_MISSING")
+            continue
+        try:
+            current = (skill / "VERSION").read_text(encoding="utf-8").strip()
+            parse(current)
+            errors.extend(f"{name}: {e}" for e in check_changelogs(skill, current))
+            if version_path not in previous_paths:
+                errors.extend(f"{name}: {e}" for e in check_transition(None, current))
+                continue
+            previous = git(root, "show", f"{parent}:{version_path}").stdout.strip()
+            parse(previous)
+        except (ValueError, OSError, UnicodeError):
+            errors.append(f"{name}: SKILL_VERSION_METADATA_INVALID")
+            continue
+        delta = {p[len(prefix):] for p in changed if p.startswith(prefix)}
+        if not delta:
+            if current != previous:
+                errors.append(f"{name}: SKILL_VERSION_UNCOMMITTED")
+            continue
+        if not delta - SKILL_METADATA:
+            errors.append(f"{name}: SKILL_VERSION_METADATA_ONLY")
+            continue
+        errors.extend(f"{name}: {e}" for e in check_transition(previous, current))
+        if not SKILL_METADATA.issubset(delta):
+            errors.append(f"{name}: SKILL_VERSION_CHANGELOG_NOT_UPDATED")
+    for path in sorted(previous_paths - current_versions):
+        if re.fullmatch(r"skills/[a-z0-9]+(?:-[a-z0-9]+)*/VERSION", path):
+            errors.append(f"{path}: SKILL_VERSION_REMOVAL_REQUIRES_POLICY")
+    return errors
+
+
 def check_repository(root: pathlib.Path) -> list[str]:
     errors: list[str] = []
     version_file = root / "VERSION"
@@ -108,6 +163,7 @@ def check_repository(root: pathlib.Path) -> list[str]:
         else:
             previous = old.stdout.strip()
         errors.extend(check_transition(previous, current))
+        errors.extend(check_skill_versions(root, parent.stdout.strip()))
         subject_ref = "HEAD^2" if os.environ.get("GITHUB_EVENT_NAME") == "pull_request" else "HEAD"
         subject = git(root, "log", "-1", "--format=%s", subject_ref).stdout.strip()
         errors.extend(check_commit_title(subject))
