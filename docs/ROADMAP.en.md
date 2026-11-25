@@ -20,6 +20,8 @@ The current statuses below are based on GitHub source and a successful Linux Git
 
 ## Product priority (25 November 2026)
 
+**Practical adoption is a P0 priority (25 November 2026).** Start the [pilot of all three skills](AGENT_PILOT.en.md) in isolated Codex/Harness projects alongside T16 recovery and TD13/TD14 triage. Do not wait for all infrastructure; do not carry open risks into production profiles. T13: discovery and explicit use first, automatic activation next, and a separate mandatory gate. Historical snapshots below do not describe current client readiness. TD15 tracks status reconciliation.
+
 The owner approved the staged evolution of Project Audit: I — usable skill; II — deterministic helper; III — extended audit; IV — incremental audit; V — advanced verification. A separate skill roadmap will accompany its sources. T12 remains PARTIAL: Semgrep, advisory applicability, races and native environments remain open; critical risks block affected operations, other work does not delay skill development. Existing mandatory checks remain in force. T13 and T16 are the next parallel product directions.
 
 v0.0.64: main CI 45489532663 PASS, annotated tag verified (commit `2e09871bf1829d70cf314f05f5d0cbbf081aff20`). T02/T16 candidate: shared test runner for all skills, CI and signing; acceptance still requires CI. Independent skill versions and real activation remain open.

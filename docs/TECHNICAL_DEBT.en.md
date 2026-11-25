@@ -18,6 +18,9 @@ Observation snapshot 25 November 2026: main v0.0.66, SHA a550e0e638ca51a8a9b0347
 | TD10 | P1 | Late version assignment, DAG, resource isolation, base update and revalidation without force-push; live GitHub parallel branch trial | PARTIAL |
 | TD11 | P1 | T17: independent releases, current artifact-specific attestation, safe update/rollback; Git tag is not GitHub Release | OPEN |
 | TD12 | P1 | Runner: time/output/descendant bounds, error classification, no ordinary successful tests blocks PASS; Windows regression | PARTIAL |
+| TD13 | P0 | [#76](https://github.com/Sashido01/TESSERA/issues/76): MAL-2026-6561; verify official wheel bytes, sources and isolation without suppression | OPEN — digest and upstream tree confirmed, wheel NOT_VERIFIED |
+| TD14 | P0 | [#77](https://github.com/Sashido01/TESSERA/issues/77): Project Audit HIGH PE3, establish synthetic nature and repeat validation | OPEN — exact rule located |
+| TD15 | P1 | [#78](https://github.com/Sashido01/TESSERA/issues/78): unified current RU/EN state including practical pilot | IN_PROGRESS — candidate instructions |
 
 ## Hygiene each cycle
 Check open Issues separately from PRs, branches and worktrees, active tasks/dependencies, failed/cancelled/stale checks, missing tags, docs, TODOs/duplication, dependencies and risks. For each finding record source/priority/criterion; do not duplicate. Correction → relevant check → evidence → close original record. Owner action means WAIT_OWNER while independent work continues. After squash do not declare a branch redundant by ancestry alone; verify accepted diff/PR and local data. Remove only authorized merged branches, without force. Do not hide debt or close it formally. See [ROADMAP](ROADMAP.en.md), [parallel work](PARALLEL_WORKFLOW.en.md).

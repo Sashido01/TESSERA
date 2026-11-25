@@ -25,6 +25,8 @@ docs/                   Rules, architecture, and roadmap
 
 ## Getting started
 
+**Practical pilot:** [step-by-step acceptance of all three skills in Codex and DeepSeek Harness](docs/AGENT_PILOT.en.md). Fresh isolated projects only; actual activation, independent tags and mandatory enforcement remain NOT_VERIFIED.
+
 1. Open the skill you need under `skills/` and read its `README.en.md` or the canonical `README.md` in Russian.
 2. Install the **entire skill directory** into your agent's skills directory—not just its `SKILL.md`.
 3. Verify that your agent discovers the skill. Automatic activation depends on the agent's configuration.
