@@ -4,6 +4,20 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.69 — Repository Workflow and continuous development protocol
+
+- Third skill 0.0.1: LOCAL/GITHUB, optional independent task planner, 20 acceptance scenarios, 13 local regressions. Bilingual research materials, T18–T20, technical debt register, late version assignment, native tools and CI speed priority. Actual activation and independent release remain open; full CI required.
+
+## 0.0.68 — Parallel required CI groups
+
+- Separate Gitleaks history host/Docker pair from remaining catalog checks; same SHA, pinned tools, fail-closed required validate and unchanged tag gate. Independent CI evidence checks both parallel jobs when present, preserving historical reports. Local Bash truth-table control 16/16, missing results 2/2 rejected; full GitHub CI and measured speedup required.
+
+## 0.0.67 — Project Audit level I
+
+- Correct restricted Bandit adapter for a tests-only skill: real recursive scan of zero eligible runtime targets, exact result validation, live control and regressions; full CI required.
+
+- Second independent skill 0.0.1: bilingual methodology, 30 directions, 20 behavioral scenarios and structural tests. Behavioral trials and independent tags remain open; full CI required.
+
 ## 0.0.66 — Independent skill version accounting
 
 - VERSION and two changelogs per skill; compare against the first Git parent, reject skipped versions and metadata-only bumps. Include and validate metadata in ZIP; older archives without these files remain readable. Microversion Release starts independent accounting at 0.0.1; its own tag and actual clients remain unverified. T16 PARTIAL; full CI required.

@@ -33,3 +33,7 @@ Check open Issues separately from PRs, branches and worktrees, active tasks/depe
 - Zero ordinary open Issues; one open PR #68; main plus ci-parallel-history, repository-workflow-level-i, t16-skill-tag-inspection, project-audit-inventory. Merged project-audit-level-i absent. Do not delete four work branches before completion; reconcile live state again.
 
 Rule: retain closed or corrected historical CI. Do not delete workflow runs, logs, artifacts or Issues for cosmetic metrics. Cancel only demonstrably obsolete unfinished checks with permission and without breaking the gate; never cancel unique main/release checks.
+
+## Third snapshot — 25 November 2026
+
+TD01: COMPLETE in scoped CI — corrected PR #67 and main v0.0.67 CI 45579382735 PASS, exact tag d4697fa65ca77a687d8dea66e80a71089303b961 points directly to 9700c0f0a2dab9180cbb442538541242dcb5d5d7. TD04: PR #68 PASS and merged as a8d54510b06d47da2b0d872cb067caee99ad598d; main CI and tag pending, repeat timing required. TD08: audit level I accepted in catalog, independent release/runtime not verified; inventory branch pending. TD09: candidate integrated for PR checks, not yet accepted. Historical observations above retained as evidence, not current state.

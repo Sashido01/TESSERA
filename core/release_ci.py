@@ -17,6 +17,7 @@ SHA = re.compile(r"[0-9a-f]{40}\Z")
 MAX_RESPONSE_BYTES = 2 * 1024 * 1024
 EXPECTED_WORKFLOW = ".github/workflows/validate.yml"
 REQUIRED_JOBS = ("validate", "Создать аннотированный тег проверенной версии")
+PARALLEL_JOBS = ("catalog_checks", "history_checks")
 
 
 class CIEvidenceError(ValueError):
@@ -119,19 +120,24 @@ def validate_ci_evidence(
     if len(jobs) > 100:
         problems.append("CI_JOBS_INCOMPLETE")
         jobs = []
+    # Preserve historical two-job evidence; if a parallel-group job is present,
+    # require both groups for this run in addition to the mandatory gate and tag.
+    required_jobs = REQUIRED_JOBS + (PARALLEL_JOBS if any(
+        isinstance(item, dict) and item.get("name") in PARALLEL_JOBS for item in jobs
+    ) else ())
     relevant: dict[str, dict[str, Any]] = {}
     for item in jobs:
         if not isinstance(item, dict):
             problems.append("CI_JOB_INVALID")
             continue
         name = item.get("name")
-        if name not in REQUIRED_JOBS:
+        if name not in required_jobs:
             continue
         if name in relevant:
             problems.append("CI_JOB_DUPLICATE")
         else:
             relevant[name] = item
-    for name in REQUIRED_JOBS:
+    for name in required_jobs:
         item = relevant.get(name)
         if item is None:
             problems.append("CI_REQUIRED_JOB_MISSING")
@@ -151,7 +157,7 @@ def validate_ci_evidence(
         "expected_commit_sha": commit_sha,
         "observed_commit_sha": run.get("head_sha"),
         "run_attempt": attempt if type(attempt) is int else None,
-        "required_jobs": list(REQUIRED_JOBS),
+        "required_jobs": list(required_jobs),
         "ci_status": "PASS" if not problems else "BLOCKED",
         "release_readiness": "NOT_VERIFIED",
         "problems": list(dict.fromkeys(problems)),
