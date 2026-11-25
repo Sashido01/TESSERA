@@ -11,6 +11,30 @@ WORKFLOW = (ROOT / ".github" / "workflows" / "validate.yml").read_text(encoding=
 
 
 class WorkflowSecurityTests(unittest.TestCase):
+    def test_parallel_gate_requires_both_jobs(self):
+        for old, new in (
+                ("needs: [catalog_checks, history_checks]", "needs: [catalog_checks]"),
+                ("if: ${{ always() }}", "if: ${{ success() }}"),
+                ('test "$HISTORY_RESULT" = success', 'echo ignored'),
+                ("HISTORY_RESULT: ${{ needs.history_checks.result }}", "HISTORY_RESULT: success")):
+            changed = WORKFLOW.replace(old, new)
+            self.assertNotEqual(changed, WORKFLOW)
+            self.assertIn("PARALLEL_REQUIRED_GATE_INVALID", module.validate_workflow(changed))
+
+    def test_parallel_group_rejects_skipping_and_wrong_sha(self):
+        for old, new in (
+                ("  history_checks:\n", "  history_checks:\n    if: false\n"),
+                ("  catalog_checks:\n", "  catalog_checks:\n    continue-on-error: true\n"),
+                ('run: test "$(git rev-parse HEAD)" = "$CHECKED_SHA"', "run: echo skipped"),
+                ("fetch-depth: 0", "fetch-depth: 1")):
+            changed = WORKFLOW.replace(old, new)
+            self.assertNotEqual(changed, WORKFLOW)
+            self.assertIn("PARALLEL_CHECK_GROUP_UNSAFE", module.validate_workflow(changed))
+
+    def test_parallel_history_scope_is_mandatory(self):
+        changed = WORKFLOW.replace("python tools/check_gitleaks_history.py", "echo omitted")
+        self.assertIn("PARALLEL_HISTORY_SCOPE_INVALID", module.validate_workflow(changed))
+
     def test_current_workflow(self):
         self.assertEqual(module.validate_workflow(WORKFLOW), [])
 
