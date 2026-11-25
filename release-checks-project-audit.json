@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "version_file": "skills/project-audit/VERSION",
+  "release_notes": [
+    "skills/project-audit/CHANGELOG.md",
+    "skills/project-audit/CHANGELOG.en.md"
+  ],
+  "build": {
+    "not_applicable_reason": "Source-only portable skill; no separate binary build. Catalog ZIP and publication are separate checks."
+  },
+  "tests": [
+    {
+      "id": "project-audit-tests",
+      "argv": [
+        "python",
+        "-B",
+        "tools/run_skill_tests.py",
+        "--skill",
+        "project-audit"
+      ],
+      "cwd": ".",
+      "timeout_seconds": 300
+    }
+  ]
+}
