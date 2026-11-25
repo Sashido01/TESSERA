@@ -59,3 +59,15 @@ Write-Output $root
 Пилот разрешён в одноразовом проекте после просмотра исходников. Ограниченное проектное внедрение — после P01–P06 PASS на конкретном клиенте, при закрытых применимых рисках, с явным выбором навыков и без глобальных изменений. Для обязательной автоматизации нужны T13, позитивные/негативные P07/P08 и независимый Git/CI gate; сбои hook и отсутствие hook не должны приводить к ложному RELEASED. Для общего распространения нужны независимые теги, pin/update/rollback и приёмка конкретного клиента. Не ждать стабильной версии каталога для пилота; не объявлять продуктивную готовность до доказательств.
 
 Источники: [ROADMAP](ROADMAP.md), [контракт интеграции Microversion Release](../skills/microversion-release/references/INTEGRATION.md), [Project Audit acceptance](../skills/project-audit/references/ACCEPTANCE.md), [Repository Workflow acceptance](../skills/repository-workflow/references/ACCEPTANCE.md), [исследование T13 #40](https://github.com/Sashido01/TESSERA/issues/40).
+
+## Фактическая частичная приёмка Codex — 25.11.2026
+
+Источник: отчёт владельца о собственном сеансе, не результат CI. Пользовательский профиль, Windows, Python 3.14, официальный gh, три каталога закреплены на `refs/tags/v0.0.74` → `ddab826e5a17641e0f475ecc63193f412065e28e`. Отчёт подтверждает gh skill list, pinned=true и совпадение Git tree; сырые логи и точные версии клиента/модели/gh не получены. GitHub API независимо подтверждает tag и исходные деревья:
+
+| Навык | Дерево | Тесты / результат владельца |
+| --- | --- | --- |
+| Microversion Release 0.0.1 | `78d4645561a0b294e93b4a85b67e7cf51a339fd3` | 38/38 PASS после локальной очистки унаследованных GIT_CONFIG_* в процессе тестов |
+| Project Audit 0.0.2 | `cb9b6ed00e31b47ea4af09ec359483c7d2abbd1b` | FAIL: ложный DEVICE_BOUNDARY при вложенном файле, три провала, FIFO пропущен. Отчёт: 22 успешных, 3 неуспешных, 1 пропуск; точный знаменатель не согласован без сырого summary. [#80](https://github.com/Sashido01/TESSERA/issues/80) |
+| Repository Workflow 0.0.1 | `f0d2ef77fc40211b9f0bccd113c0b2e5857e6d68` | 13/13 PASS; планировщик READY_WORK |
+
+INSTALL=OWNER_REPORTED_PASS (3/3); DISCOVERY, EXPLICIT_USE, AUTO_USE, ENFORCEMENT=NOT_VERIFIED, Harness=NOT_VERIFIED. Проверка GitHub-коннектора подтверждает чтение VERSION, не вызов навыка. GIT_CONFIG_* fail-closed не менять ради тестов; выяснить точный контракт наследования в реальном Codex (не ослаблять защиту и не удалять настройки системы). Для повторного локального теста использовать `python -B` либо PYTHONDONTWRITEBYTECODE=1. Не удалять каталоги профиля и не переустанавливать без staged pin/rollback. Установку уже выполненного профиля не повторять. Новая сессия с точным pin и наблюдаемым вызовом навыков — следующая приёмка. Инвентаризацию Windows в рабочем проекте не считать полной до native retest. Остальные два навыка пригодны для контролируемого ручного использования; автоматическая активация не доказана.

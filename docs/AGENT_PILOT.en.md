@@ -59,3 +59,15 @@ For each row record client/version, model, OS, catalog commit, skill version, pr
 Pilot use is permitted in a disposable project after source review. Limited project adoption follows P01–P06 PASS on the specific client, resolution of applicable risks, explicit skill selection and no global changes. Mandatory automation needs T13, positive and negative P07/P08 and an independent Git/CI gate; missing or failed hooks must not yield a false RELEASED. Wider distribution requires independent tags, pin/update/rollback and client-specific acceptance. Do not wait for a stable catalog version to start piloting; do not claim production readiness without evidence.
 
 Sources: [ROADMAP](ROADMAP.en.md), [Microversion Release integration contract](../skills/microversion-release/references/INTEGRATION.en.md), [Project Audit acceptance](../skills/project-audit/references/ACCEPTANCE.en.md), [Repository Workflow acceptance](../skills/repository-workflow/references/ACCEPTANCE.en.md), [T13 research #40](https://github.com/Sashido01/TESSERA/issues/40).
+
+## Actual partial Codex acceptance — 25 November 2026
+
+Source: owner's own session report, not CI. User profile, Windows, Python 3.14, official gh, three directories pinned to `refs/tags/v0.0.74` → `ddab826e5a17641e0f475ecc63193f412065e28e`. Owner reports gh skill list, pinned=true and matching Git trees; raw logs and exact client/model/gh versions are not available. GitHub API independently confirms tag and source trees:
+
+| Skill | Tree | Owner-reported tests / result |
+| --- | --- | --- |
+| Microversion Release 0.0.1 | `78d4645561a0b294e93b4a85b67e7cf51a339fd3` | 38/38 PASS after clearing inherited GIT_CONFIG_* only in the test process |
+| Project Audit 0.0.2 | `cb9b6ed00e31b47ea4af09ec359483c7d2abbd1b` | FAIL: false DEVICE_BOUNDARY with nested file, three failures, FIFO skipped. Report: 22 passes, 3 failures, 1 skip; exact denominator unresolved without raw summary. [#80](https://github.com/Sashido01/TESSERA/issues/80) |
+| Repository Workflow 0.0.1 | `f0d2ef77fc40211b9f0bccd113c0b2e5857e6d68` | 13/13 PASS; planner READY_WORK |
+
+INSTALL=OWNER_REPORTED_PASS (3/3); DISCOVERY, EXPLICIT_USE, AUTO_USE, ENFORCEMENT=NOT_VERIFIED, Harness=NOT_VERIFIED. GitHub connector reading VERSION does not prove skill invocation. Do not weaken GIT_CONFIG_* fail-closed behavior for tests; establish the exact inheritance contract in actual Codex (no weakening or deleting system settings). Use `python -B` or PYTHONDONTWRITEBYTECODE=1 for repeated local tests. Do not delete profile directories or reinstall without staged pin/rollback. Do not repeat installation of an already installed profile. New session with exact pin and observed skill invocation is the next acceptance. Do not treat Windows inventory of a real project as complete until native retest. The other two skills are suitable for supervised manual use; automatic activation is unproved.
