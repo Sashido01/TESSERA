@@ -4,6 +4,12 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.78 — Project Audit evidence register
+
+- Added a local Evidence Core for an explicit JSON register: strict schema and references, exact scopes, snapshot/fingerprint binding, preserved PASS/FAIL conflicts, and STALE/UNBOUND/INDIRECT classifications.
+- The tool validates only the supplied register: it does not read a project, run checks, or authenticate source, integrity, or completeness. On Windows 11 / Python 3.14.3, the Project Audit suite ran 61 tests with 1 platform skip; the full catalog suite passed 725 with 7 skips. `GIT_*` was removed only from the test process for Git fixtures; the owner's environment was not changed.
+- Reconciled the debt snapshot: local and remote main both matched version 0.0.77 at `ff4cb9ee12ce0fdf4923670c3d81f31718ebd287`; CI 45651340205 and annotated tag `v0.0.77` were confirmed. Codex runtime acceptance remains NOT_VERIFIED.
+
 ## 0.0.77 — Pre-install SkillSpector provenance check
 
 - Added a pre-install comparison of the official SkillSpector 2.13.7 wheel against the pinned upstream Git tree; installation uses that same verified local file.

@@ -2,6 +2,10 @@
 
 [Русский — оригинал](CHANGELOG.md) | **English — translation**
 
+## 0.0.4 — Evidence register
+
+Added Evidence Core, a local validator for an explicitly supplied JSON evidence register. It strictly validates fields, references, scopes, snapshot and fingerprints; retains conflicting PASS/FAIL and labels STALE, UNBOUND and INDIRECT. It does not read projects, run checks, or authenticate facts. Windows 11 / Python 3.14.3: 15/15 tests. Full catalog CI and the independent skill tag require completed acceptance.
+
 ## 0.0.3 — Local Git state observation
 
 Git Inspector: HEAD (including unborn/detached), status/ref/remote counts, repeated observations, explicit STALE. Local Linux tests 13/13; no file names or remote URLs emitted; not an atomic snapshot or content check. Updated instructions, documentation and structural regression. Windows and full acceptance open.

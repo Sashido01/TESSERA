@@ -16,11 +16,11 @@
 - `NOT_STARTED`: implementation has not begun; this roadmap is not evidence of completion.
 - `BLOCKED`: a specific blocker and its cause have been recorded.
 
-The current statuses below are based on GitHub source and a successful Linux GitHub Actions run for TESSERA `v0.0.21`. They do **not** prove execution in installed agent clients or local Windows environments.
+Historical stages below retain the context of their original checks. The latest state was reconciled on 25 November 2026: TESSERA main `v0.0.77`, SHA `ff4cb9ee12ce0fdf4923670c3d81f31718ebd287`, CI run `45651340205` SUCCESS and exact annotated `v0.0.77`. Local main and GitHub main were compared by SHA and VERSION. This does not prove behavior in every agent client; current limits are summarized in the latest entry below.
 
 ## Product priority (25 November 2026)
 
-The owner approved the staged evolution of Project Audit: I — usable skill; II — deterministic helper; III — extended audit; IV — incremental audit; V — advanced verification. A separate skill roadmap will accompany its sources. T12 remains PARTIAL: Semgrep, advisory applicability, races and native environments remain open; critical risks block affected operations, other work does not delay skill development. Existing mandatory checks remain in force. T13 and T16 are the next parallel product directions.
+The owner approved the staged evolution of Project Audit: I — usable skill; II — deterministic local helpers; III — extended audit; IV — incremental audit; V — advanced verification. T12 remains PARTIAL: Semgrep, advisory applicability, races and native environments remain open; critical risks block affected operations, other work does not delay skill development. Existing mandatory checks remain in force. Select subsequent independent work from T03–T05/T13, T17 and approved skills; T16 tag publication has recovered, while remote installation of every namespaced version and actual host activation remain unverified.
 
 v0.0.64: main CI 45489532663 PASS, annotated tag verified (commit `2e09871bf1829d70cf314f05f5d0cbbf081aff20`). T02/T16 candidate: shared test runner for all skills, CI and signing; acceptance still requires CI. Independent skill versions and real activation remain open.
 
@@ -105,7 +105,7 @@ Complete work as small verifiable changes, assigning a new microversion only to 
 
 ### T16 — Independent versions for multiple skills
 
-**Priority P2 · Requires T09–T11 · Status NOT_STARTED.** Introduce per-skill version sources, namespaced tags like `<skill>/vX.Y.Z`, installed-revision detection, backward compatibility, and migration rules, independent of the TESSERA catalog version. Do not require one common runtime for every skill.
+**Priority P2 · Requires T09–T11 · Status PARTIAL.** Independent VERSION/CHANGELOG, annotated refs and sequential publication are restored and confirmed for accepted skills; see the [workflow](PARALLEL_WORKFLOW.en.md). Installation and update from a remote namespaced ref remain separate acceptance work. Do not require one common runtime for every skill.
 
 **Acceptance:** two skills can release and update independently without tag collisions, from the same repository.
 
@@ -232,7 +232,7 @@ Owner decision 25 November 2026: develop catalog and all approved skills in para
 | T19.01 | GitHub Actions timing baseline, critical path and queues | PARTIAL — two measured runs |
 | T19.02 | Parallel history and other check jobs; fail-closed validate, preserve full acceptance | PARTIAL — PR #68 PASS and merged; main CI pending |
 | T19.03 | Measure p50/p95, first feedback, runner-minutes, cache/affected checks only with evidenced equivalence | NOT_STARTED |
-| T20.01 | Repository Workflow 0.0.1, bilingual method, local planner and tests | PARTIAL — candidate sources |
+| T20.01 | Repository Workflow 0.0.1, bilingual method, local planner and tests | PARTIAL — catalog and tag accepted; actual host use remains open |
 | T20.02 | Bootstrap, actual Codex/Harness, Windows/Linux, GitHub/LOCAL, evals and independent release | NOT_VERIFIED |
 
 T06: pin/update checked in bounded T10 scenarios; actual hosts and independent tags remain open. T07: source ZIP and independent verification implemented in T09; live attestation applies to v0.0.21, later packages and platforms are not automatically verified. T12 PARTIAL. T16: independent VERSION/changelogs and CI v0.0.66 confirmed; namespaced tags, protection and independent release open. Project Audit PR #67 being corrected; not accepted until full CI. Do not preassign future microversions.
@@ -259,4 +259,10 @@ Main v0.0.76 was accepted from PR #74 at SHA `9599367afa1aad2f29f0640fc94da5ae8e
 
 T16/TD02: four missing historical independent tags were restored by the owner from an isolated clone after PLAN_ONLY; the publisher returned `TAG_REFS_VERIFIED`, and every ref and peeled commit was checked. The failed job in run 45610045044 was rerun successfully; #83 is closed. PR #74 was merged and its branch deleted. Candidate Windows acceptance passed 715 tests with 7 platform skips; run 45645609722 confirms the Windows job. #80 and #82 are ready to close with local and CI evidence.
 
-TD13/#76 remains PARTIAL: the official 2.13.7 wheel was compared with its signed source commit and GitHub Release asset; all 169 source files matched, RECORD/metadata/entry point were checked, and 9 tests plus the local preflight passed. The wheel was not executed. The new preinstall gate and installation from that same local wheel still require full PR/main CI. #77, #78 and #81 remain separate until their criteria are checked.
+## Latest reconciliation — 25 November 2026
+
+Local `main` and GitHub `main` match: version `0.0.77`, commit `ff4cb9ee12ce0fdf4923670c3d81f31718ebd287`. Main CI [45651340205](https://github.com/Sashido01/TESSERA/actions/runs/45651340205) completed successfully; annotated `v0.0.77` points to that exact commit. The local T09.03/T09.04 release report stopped fail-closed with `GIT_CONTEXT_UNSAFE`; no environment variables or global configuration were changed.
+
+TD02/T16: four historical skill refs and source commits were confirmed; #83 is closed. TD13/#76: the official wheel checker was accepted in v0.0.77 and CI installed the same verified local file; wheel provenance does not automatically carry to future versions. TD14/#77 is closed against the exact main SHA, completed CI and accepted Security Policy Verdict, with no threshold changes. TD15/#78 closes only after this bilingual snapshot is accepted. TD17/#81 remains open: an isolated Codex CLI test rejected a downgrade, but file reads were blocked by policy; file-backed activation, enforcement, update/rollback and real client acceptance remain NOT_VERIFIED. GitHub has no open PRs; Issues #78 and #81 remain open.
+
+Project Audit Evidence Core is added to candidate skill version 0.0.4 and catalog version 0.0.78. Its 15 Windows tests passed on the pre-integration candidate; full CI and an independent skill tag for this version remain unverified. T03–T05/T13 and T20.02 remain NOT_VERIFIED pending actual Codex and DeepSeek Harness checks.

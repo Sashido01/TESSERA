@@ -2,6 +2,10 @@
 
 [Русский — оригинал](EVIDENCE.md) | **English — translation**
 
+## Local register
+
+When useful, validate an explicitly supplied JSON file with [Evidence Core](EVIDENCE_CORE.en.md). This checks register structure, references and binding to the declared snapshot; it does not collect evidence from the project. `PASS_RECORDED` and `FAIL_RECORDED` mean only that such entries exist; conflicts are retained. Source authenticity, completeness, project integrity and actual execution remain `NOT_VERIFIED`.
+
 ## Sources
 Distinguish source observation, an actual check result, external/owner-reported evidence and auditor inference. Record ID, source, coordinates, audited snapshot, time, scope and limitations. For execution also record reviewed command, tool version, environment, exit code, result and digest of available output. Do not preserve secrets or private data.
 
