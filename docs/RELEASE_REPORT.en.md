@@ -91,3 +91,7 @@ See [RELEASE_PROVENANCE](RELEASE_PROVENANCE.en.md). Explicit `--verify-provenanc
 ### Local Microversion Release plan
 
 `python core/release_preflight.py --repo . --skill microversion-release --version 0.0.1 --config release-checks-microversion-release.json --plan` checks the plan without execution. Use `--execute` only on an authorized trusted clean checkout. Uses the shared runner for one skill; zero ordinary successful tests fails. No separate binary build; catalog ZIP, publication and activation remain separate. This plan still requires CI; adding it does not establish a namespaced tag.
+
+### Bounded skill test execution — TD12
+
+Shared runner `python tools/run_skill_tests.py` and selection `--skill microversion-release` use a separate process per skill with a default 120-second limit (`--timeout` 1–900 s). A timeout fails the result; independent skills continue. Local Linux checks: 13/13 (10 existing, three new), 21.170 s. This bounds the immediate test process, not a sandbox or a guarantee of descendant termination; output volume is unbounded. Trusted checkout, outer preflight and CI timeouts remain required. Windows and full candidate CI are unverified. TD12 PARTIAL.

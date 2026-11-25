@@ -21,7 +21,15 @@ class ExecutionResult(unittest.TextTestResult):
         self.passed += 1
 
 
-def run(root: pathlib.Path, *, quiet: bool = False, selected: str | None = None) -> int:
+DEFAULT_TIMEOUT = 120
+MAX_TIMEOUT = 900
+
+
+def run(root: pathlib.Path, *, quiet: bool = False, selected: str | None = None,
+        timeout: int = DEFAULT_TIMEOUT, worker: bool = False) -> int:
+    if not 1 <= timeout <= MAX_TIMEOUT or (worker and selected is None):
+        print("SKILL_TEST_ARGUMENT_INVALID", file=sys.stderr)
+        return 1
     skills = root / "skills"
     if skills.is_symlink() or not skills.is_dir():
         print("SKILL_TEST_ROOT_INVALID", file=sys.stderr)
@@ -54,9 +62,10 @@ def run(root: pathlib.Path, *, quiet: bool = False, selected: str | None = None)
         if not any(p.is_file() for p in directory.rglob("test*.py")):
             print(f"{skill.name}: EMPTY_TEST_DIRECTORY", file=sys.stderr)
             return 1
-        print(f"{skill.name}: RUN", flush=True)
+        if not worker:
+            print(f"{skill.name}: RUN", flush=True)
         tested += 1
-        if selected is not None:
+        if worker:
             suite = unittest.TestLoader().discover(str(directory))
             if not suite.countTestCases():
                 print("SKILL_TEST_NONE_DISCOVERED", file=sys.stderr)
@@ -66,10 +75,20 @@ def run(root: pathlib.Path, *, quiet: bool = False, selected: str | None = None)
                 print("SKILL_TEST_NO_ORDINARY_EXECUTION", file=sys.stderr)
                 return 1
             return int(not outcome.wasSuccessful())
-        result = subprocess.run(
-            [sys.executable, "-B", str(pathlib.Path(__file__).resolve()), "--repo", str(root),
-             "--skill", skill.name, *(["-q"] if quiet else [])], cwd=root, check=False,
-        )
+        try:
+            result = subprocess.run(
+                [sys.executable, "-B", str(pathlib.Path(__file__).resolve()), "--repo", str(root),
+                 "--skill", skill.name, "--worker", *(["-q"] if quiet else [])],
+                cwd=root, check=False, timeout=timeout,
+            )
+        except subprocess.TimeoutExpired:
+            print(f"{skill.name}: SKILL_TEST_TIMEOUT", file=sys.stderr, flush=True)
+            failed = True
+            continue
+        except OSError:
+            print(f"{skill.name}: SKILL_TEST_EXECUTION_FAILED", file=sys.stderr, flush=True)
+            failed = True
+            continue
         failed |= result.returncode != 0
     if not tested:
         print("SKILL_TEST_NONE_EXECUTED", file=sys.stderr)
@@ -82,8 +101,12 @@ def main() -> int:
     parser.add_argument("--repo", type=pathlib.Path, default=pathlib.Path(__file__).resolve().parents[1])
     parser.add_argument("-q", "--quiet", action="store_true")
     parser.add_argument("--skill", help="Run a single skill in a separate process")
+    parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT,
+                        help="Maximum seconds per skill (1–900; default 120)")
+    parser.add_argument("--worker", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
-    return run(args.repo.resolve(), quiet=args.quiet, selected=args.skill)
+    return run(args.repo.resolve(), quiet=args.quiet, selected=args.skill,
+               timeout=args.timeout, worker=args.worker)
 
 
 if __name__ == "__main__":

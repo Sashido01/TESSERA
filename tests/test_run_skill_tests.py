@@ -25,9 +25,9 @@ class RunnerTests(unittest.TestCase):
                 f"    def test_case(self): self.assertTrue({passing})\n", encoding="utf-8")
         return skill
 
-    def invoke(self):
-        return subprocess.run([sys.executable, "-B", str(RUNNER), "--repo", str(self.root), "-q"],
-                              capture_output=True, text=True, check=False)
+    def invoke(self, *args):
+        return subprocess.run([sys.executable, "-B", str(RUNNER), "--repo", str(self.root), "-q", *args],
+                              capture_output=True, text=True, check=False, timeout=25)
 
     def test_two_skills_same_test_filename(self):
         self.add("alpha")
@@ -90,6 +90,37 @@ class RunnerTests(unittest.TestCase):
         with (skill / "tests" / "test_example.py").open("a", encoding="utf-8") as f:
             f.write('    @unittest.skip("unavailable")\n    def test_optional(self): pass\n')
         self.assertEqual(self.invoke().returncode, 0)
+
+    def hanging(self):
+        skill = self.add("alpha")
+        (skill / "tests" / "test_example.py").write_text(
+            "import unittest, time\nclass Example(unittest.TestCase):\n"
+            "    def test_case(self): time.sleep(60)\n", encoding="utf-8")
+
+    def test_timeout_does_not_skip_independent_skill(self):
+        self.hanging()
+        self.add("beta")
+        result = self.invoke("--timeout", "3")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("alpha: SKILL_TEST_TIMEOUT", result.stderr)
+        self.assertIn("beta: RUN", result.stdout)
+        self.assertIn("Ran 1 test", result.stderr)
+        self.assertIn("OK", result.stderr)
+
+    def test_selected_skill_is_bounded(self):
+        self.hanging()
+        result = self.invoke("--skill", "alpha", "--timeout", "2")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("alpha: SKILL_TEST_TIMEOUT", result.stderr)
+
+    def test_invalid_timeout_fails_without_execution(self):
+        self.add("alpha")
+        for value in ("0", "901"):
+            with self.subTest(value=value):
+                result = self.invoke("--timeout", value)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("SKILL_TEST_ARGUMENT_INVALID", result.stderr)
+                self.assertNotIn("alpha: RUN", result.stdout)
 
     def test_symlink_tests_rejected(self):
         alpha = self.add("alpha")
