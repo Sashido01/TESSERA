@@ -21,3 +21,15 @@ Observation snapshot 25 November 2026: main v0.0.66, SHA a550e0e638ca51a8a9b0347
 
 ## Hygiene each cycle
 Check open Issues separately from PRs, branches and worktrees, active tasks/dependencies, failed/cancelled/stale checks, missing tags, docs, TODOs/duplication, dependencies and risks. For each finding record source/priority/criterion; do not duplicate. Correction → relevant check → evidence → close original record. Owner action means WAIT_OWNER while independent work continues. After squash do not declare a branch redundant by ancestry alone; verify accepted diff/PR and local data. Remove only authorized merged branches, without force. Do not hide debt or close it formally. See [ROADMAP](ROADMAP.en.md), [parallel work](PARALLEL_WORKFLOW.en.md).
+
+## Status review of 25 November 2026 — second snapshot
+
+- main v0.0.67, SHA 9700c0f0a2dab9180cbb442538541242dcb5d5d7, PR #67 merged; PR CI 45576826805 PASS, main CI 45579382735 IN_PROGRESS, v0.0.67 tag absent. Last fully verified catalog v0.0.66.
+- TD01: Bandit correction verified by PR CI 45576826805 and merged; main check still in progress. Do not retry resolved failure 45573171262 without reason; historical FAIL remains evidence, not an active run.
+- TD04: [PR #68](https://github.com/Sashido01/TESSERA/pull/68), SHA 1fa59f822ced9da2250a3e014b3dad32ad294b13, CI 45580026868 PASS. catalog_checks 366 s, history_checks 425 s, aggregate validate 4 s. Group start 08:51:50Z to validate completion 08:59:01Z — 431 s. Prior PR #66 700 s; observed reduction (700−431)/700=38.4%. Different snapshots, not a controlled comparison. Merge awaits exact v0.0.67 tag; sustained speedup NOT_VERIFIED.
+- TD02: independent preflight, report, remote and four additional regressions — commit ec114cebfd0d616bea080f788bc0c7f6a9c3ca27 on t16-skill-tag-inspection; tests of that exact commit not run. Independent tag publication and protection remain open.
+- TD08: Inventory Engine, 17/17 Linux unit tests; four Git blobs match locally tested bytes; commit 47f590f84780e0d3d274c703c4d19dff555c95d0 on project-audit-inventory. Version assignment and integration pending.
+- TD09: Repository Workflow 13/13 local planner tests; Git blobs match, full CI and agent acceptance open.
+- Zero ordinary open Issues; one open PR #68; main plus ci-parallel-history, repository-workflow-level-i, t16-skill-tag-inspection, project-audit-inventory. Merged project-audit-level-i absent. Do not delete four work branches before completion; reconcile live state again.
+
+Rule: retain closed or corrected historical CI. Do not delete workflow runs, logs, artifacts or Issues for cosmetic metrics. Cancel only demonstrably obsolete unfinished checks with permission and without breaking the gate; never cancel unique main/release checks.

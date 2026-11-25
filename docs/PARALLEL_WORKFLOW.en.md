@@ -21,3 +21,5 @@ The personal public repository does not support the organization-only Merge Queu
 
 ## Local project profiles
 Git without a remote, local branches/worktrees, native checks, VERSION/CHANGELOG under project policy, local task register and tags. Do not introduce GitHub, external services, telemetry or mandatory dependencies. Test Codex/Harness integration in actual environments. See [research](RESEARCH_REGISTER.en.md), [Repository Workflow](../skills/repository-workflow/README.en.md).
+
+First measured parallel PR CI 45580026868: PASS, 431 s from group start to validate. 38.4% less than the previous PR #66 700 s; not a controlled benchmark. See second [debt register](TECHNICAL_DEBT.en.md) snapshot. Main v0.0.67 still awaits full CI and tag; optimization not accepted until then.
