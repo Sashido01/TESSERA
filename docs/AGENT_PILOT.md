@@ -71,3 +71,15 @@ Write-Output $root
 | Repository Workflow 0.0.1 | `f0d2ef77fc40211b9f0bccd113c0b2e5857e6d68` | 13/13 PASS; планировщик READY_WORK |
 
 INSTALL=OWNER_REPORTED_PASS (3/3); DISCOVERY, EXPLICIT_USE, AUTO_USE, ENFORCEMENT=NOT_VERIFIED, Harness=NOT_VERIFIED. Проверка GitHub-коннектора подтверждает чтение VERSION, не вызов навыка. GIT_CONFIG_* fail-closed не менять ради тестов; выяснить точный контракт наследования в реальном Codex (не ослаблять защиту и не удалять настройки системы). Для повторного локального теста использовать `python -B` либо PYTHONDONTWRITEBYTECODE=1. Не удалять каталоги профиля и не переустанавливать без staged pin/rollback. Установку уже выполненного профиля не повторять. Новая сессия с точным pin и наблюдаемым вызовом навыков — следующая приёмка. Инвентаризацию Windows в рабочем проекте не считать полной до native retest. Остальные два навыка пригодны для контролируемого ручного использования; автоматическая активация не доказана.
+
+## Повторная приёмка Codex Desktop — 25.11.2026 (отчёт владельца)
+
+Снимок навыков v0.0.74; репозиторий main v0.0.75 / 115f79daae5886606261cb59c4d5ab2fd045f173, чистый. Windows 11 Pro build 26200, Python 3.14.3, Git 2.52.0.windows.1, gh 2.105.0, Codex 26.1123.915.0; модель в интерфейсе текущего чата GPT-6 Luna High. Источник — отчёт владельца; сырые transcript/логи не получены, private paths/session IDs не публикуются.
+
+| Навык | INSTALL / DISCOVERY / EXPLICIT_USE | AUTO_USE | ENFORCEMENT | Unit |
+|---|---|---|---|---|
+| Microversion Release | PASS / PASS / PASS (owner-reported) | PASS по поведению, не независимая трасса вызова | PARTIAL, локальный annotated tag и отрицательные пробы SHA/lightweight/GIT_CONFIG_* | 38/38 |
+| Project Audit | PASS / PASS / PASS (owner-reported) | PARTIAL, выход за гипотетический объект к несвязанному checkout | PARTIAL, read-only в наблюдаемом прогоне | 21 PASS, 3 FAIL, 1 SKIP = 25 |
+| Repository Workflow | PASS / PASS / PASS (owner-reported) | PASS по поведению | PARTIAL, нет конкурентного runtime CI/write | 13/13 |
+
+Исправление знаменателя: предыдущий отчёт по Project Audit был неоднозначен; новый точный summary 21+3+1=25. Полный unit suite каталога: 710, 9 errors, 1 skip, exit 1; TD18 #82. Release Inspect после очистки только дочернего тестового процесса 27/27, исходный безопасный отказ GIT_CONTEXT_UNSAFE; TD17 остаётся открыт для реального безопасного invocation. Candidate v0.0.76 по сети владельца NOT_VERIFIED (NETWORK_UNAVAILABLE); проверенный GitHub API: root v0.0.75, PR #74, commit 5a03fc7a7dd402287193108ddbb1f1ef168bb2d1, CI 45620060381 native Windows skill suite 39+42+13 PASS, 1 FIFO skip. Full catalog Windows пока не подтверждён. Новый кандидат 054154dc6fcc899e1a611227cf881f2fd01f47c0 включает scope guard, allowlist Git Inspector и full Windows unit gate; его CI не подтверждён. Повторить Project Audit AUTO_USE с явной областью и несвязанным checkout; наблюдать вызов и отсутствие обращений вне fixture. Не обновлять установленный профиль до безопасной приёмки кандидата; update/rollback и Harness открыты.

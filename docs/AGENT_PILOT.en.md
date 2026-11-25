@@ -71,3 +71,15 @@ Source: owner's own session report, not CI. User profile, Windows, Python 3.14, 
 | Repository Workflow 0.0.1 | `f0d2ef77fc40211b9f0bccd113c0b2e5857e6d68` | 13/13 PASS; planner READY_WORK |
 
 INSTALL=OWNER_REPORTED_PASS (3/3); DISCOVERY, EXPLICIT_USE, AUTO_USE, ENFORCEMENT=NOT_VERIFIED, Harness=NOT_VERIFIED. GitHub connector reading VERSION does not prove skill invocation. Do not weaken GIT_CONFIG_* fail-closed behavior for tests; establish the exact inheritance contract in actual Codex (no weakening or deleting system settings). Use `python -B` or PYTHONDONTWRITEBYTECODE=1 for repeated local tests. Do not delete profile directories or reinstall without staged pin/rollback. Do not repeat installation of an already installed profile. New session with exact pin and observed skill invocation is the next acceptance. Do not treat Windows inventory of a real project as complete until native retest. The other two skills are suitable for supervised manual use; automatic activation is unproved.
+
+## Repeat Codex Desktop acceptance — 25 November 2026 (owner report)
+
+Skills pinned to v0.0.74; clean repository main v0.0.75 / 115f79daae5886606261cb59c4d5ab2fd045f173. Windows 11 Pro build 26200, Python 3.14.3, Git 2.52.0.windows.1, gh 2.105.0, Codex 26.1123.915.0; current chat UI showed GPT-6 Luna High. Source: owner report; raw transcripts/logs not received; private paths/session IDs not published.
+
+| Skill | INSTALL / DISCOVERY / EXPLICIT_USE | AUTO_USE | ENFORCEMENT | Unit |
+|---|---|---|---|---|
+| Microversion Release | PASS / PASS / PASS (owner-reported) | Behavior PASS, no independent invocation trace | PARTIAL, local annotated tag and negative SHA/lightweight/GIT_CONFIG_* probes | 38/38 |
+| Project Audit | PASS / PASS / PASS (owner-reported) | PARTIAL, expanded hypothetical scope to unrelated checkout | PARTIAL, read-only in observed run | 21 PASS, 3 FAIL, 1 SKIP = 25 |
+| Repository Workflow | PASS / PASS / PASS (owner-reported) | Behavior PASS | PARTIAL, no concurrent runtime CI/write | 13/13 |
+
+Denominator correction: earlier Project Audit report was ambiguous; new exact summary 21+3+1=25. Full catalog unit suite: 710, 9 errors, 1 skip, exit 1; TD18 #82. Release Inspect 27/27 after cleaning only child test process, original safe refusal GIT_CONTEXT_UNSAFE; TD17 remains open for real safe invocation. Candidate v0.0.76 NOT_VERIFIED on owner's network (NETWORK_UNAVAILABLE); GitHub API confirms root v0.0.75, PR #74, commit 5a03fc7a7dd402287193108ddbb1f1ef168bb2d1, CI 45620060381 native Windows skill suite 39+42+13 PASS, 1 FIFO skip. Full catalog Windows not confirmed. New candidate 054154dc6fcc899e1a611227cf881f2fd01f47c0 includes scope guard, Git Inspector allowlist and full Windows unit gate; its CI unverified. Repeat Project Audit AUTO_USE with explicit scope and unrelated checkout; observe invocation and no accesses outside fixture. Do not update installed profile before safe acceptance; update/rollback and Harness open.
