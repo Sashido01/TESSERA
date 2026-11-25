@@ -7,7 +7,7 @@
 ## Входные условия
 
 - Только новый одноразовый локальный проект, без remote, рабочих данных, секретов, глобальных hooks и изменения настоящих проектов. Не выдавать агенту дополнительные полномочия. Не запускать сканеры безопасности в клиентском профиле.
-- Закреплённый снимок каталога: аннотированный `refs/tags/v0.0.80`, commit `6b9b4487f4d5938a179400de0a59dceb4f015c5b`, main CI 45669705980. Навыки устанавливаются по отдельным аннотированным тегам: `microversion-release/v0.0.2` → `9599367afa1aad2f29f0640fc94da5ae8e473cee`, `project-audit/v0.0.4` → `be6a126f08ffbb49b721b50e030b2a6d82c7d4f3`, `repository-workflow/v0.0.2` → `a2a6af6b66e9cd6e5b28ccb227245f3a13389098`. Перед установкой сверить каждый remote tag object и дерево навыка. Project Audit имеет открытое HIGH-замечание тестового файла (#77); не считать пилот разрешением на продуктивный запуск.
+- Закреплённый снимок каталога: аннотированный `refs/tags/v0.0.80`, commit `6b9b4487f4d5938a179400de0a59dceb4f015c5b`, main CI 45669705980. Навыки устанавливаются по отдельным аннотированным тегам: `microversion-release/v0.0.2` → `9599367afa1aad2f29f0640fc94da5ae8e473cee`, `project-audit/v0.0.4` → `be6a126f08ffbb49b721b50e030b2a6d82c7d4f3`, `repository-workflow/v0.0.2` → `a2a6af6b66e9cd6e5b28ccb227245f3a13389098`. Перед установкой сверить каждый remote tag object и дерево навыка. В main CI 45669705980, catalog_checks 139401346128, все три Security Policy Verdict PASS, 0 HIGH/CRITICAL; #77 закрыта. Это статическая advisory-проверка, не сертификация и не разрешение на продуктивный запуск.
 - Официальный gh 2.105.0 проверен для remote pin одного навыка; remote multi-skill и реальная загрузка хостом остаются испытаниями. Не применять --force, --all, обновление без pin или сторонние менеджеры. Сканеры NVIDIA не нужны для работы навыков.
 - Записать точные версии клиента, модели, gh, Git, Python и ОС. Сверить активный профиль и фактические проектные roots. Для Harness проверить включённые dsh-skill/dsh-skill-filesystem/dsh-tool-skill. Не менять глобальный профиль в ходе эксперимента.
 
@@ -65,6 +65,10 @@ Write-Output $root
 
 Источники: [ROADMAP](ROADMAP.md), [контракт интеграции Microversion Release](../skills/microversion-release/references/INTEGRATION.md), [Project Audit acceptance](../skills/project-audit/references/ACCEPTANCE.md), [Repository Workflow acceptance](../skills/repository-workflow/references/ACCEPTANCE.md), [исследование T13 #40](https://github.com/Sashido01/TESSERA/issues/40).
 
+## Исторические снимки (не текущая приёмка)
+
+Следующие записи отражают прежние состояния и не являются инструкцией для текущего релиза.
+
 ## Фактическая частичная приёмка Codex — 25.11.2026
 
 Источник: отчёт владельца о собственном сеансе, не результат CI. Пользовательский профиль, Windows, Python 3.14, официальный gh, три каталога закреплены на `refs/tags/v0.0.74` → `ddab826e5a17641e0f475ecc63193f412065e28e`. Отчёт подтверждает gh skill list, pinned=true и совпадение Git tree; сырые логи и точные версии клиента/модели/gh не получены. GitHub API независимо подтверждает tag и исходные деревья:
@@ -103,3 +107,6 @@ TD18 #82: 45627814264 Windows job 139252599141 exact 45eaeed021eb4fc36c805d2260a
 
 Исторический снимок ветки до принятия последовательных независимых тегов: PR #74 exact 892cdaca33bdeb9c679a674d672c700dbd2e11e6, CI 45628965053 SUCCESS всех обязательных групп. Windows catalog 715 = 708 PASS + 7 platform SKIP, skills 98 = 97 PASS + FIFO SKIP; всего 813 = 805 PASS + 8 SKIP. SkillSpector 2.13.7 risk: Microversion Release 30, Project Audit 38 (ранее 72→53; 7 MEDIUM + 1 LOW), Repository Workflow 14. FULL_TIER1 все policy verdict PASS; это advisory review, не certification. TD14/TD16/TD18: PR evidence PASS, принятие main и повторная агентная приёмка открыты на тот момент. TD02 #83: owner сообщил refresh GitHub CLI; публикация независимых тегов на тот момент ещё требовалась, сейчас три refs подтверждены в основном снимке `v0.0.80` выше. TD13 #76: 9db01ec3170a5a3c684fc82eb9d5bd54cd2c337a, отдельная ветка skillspector-provenance-preflight, static wheel verifier 9/9 synthetic Linux PASS; реальные release wheel bytes и подключение preinstall gate NOT_VERIFIED.
 
+## Актуальный снимок на момент подготовки PR #88
+
+v0.0.80: все восемь независимых тегов подтверждены; #76/#77/#80/#82/#83 закрыты. Установка точных новых pin, обнаружение, явный вызов, AUTO_USE, ENFORCEMENT, UPDATE, ROLLBACK в реальных клиентах требуют новой приёмки. #81 остаётся открытой; послепроверка 0.0.80 владельцем отклонена GIT_CONTEXT_UNSAFE. Не очищать производственный контекст молча и не переносить доказательства старого профиля на новый pin.

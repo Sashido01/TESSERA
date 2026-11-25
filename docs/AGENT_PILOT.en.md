@@ -7,7 +7,7 @@
 ## Entry conditions
 
 - Only a fresh disposable local project, without a remote, production data, secrets, global hooks or changes to real projects. Do not grant additional privileges to the agent. Do not execute security scanners in the client profile.
-- Pinned catalog snapshot: annotated `refs/tags/v0.0.80`, commit `6b9b4487f4d5938a179400de0a59dceb4f015c5b`, main CI 45669705980. Install skills using their separate annotated tags: `microversion-release/v0.0.2` → `9599367afa1aad2f29f0640fc94da5ae8e473cee`, `project-audit/v0.0.4` → `be6a126f08ffbb49b721b50e030b2a6d82c7d4f3`, `repository-workflow/v0.0.2` → `a2a6af6b66e9cd6e5b28ccb227245f3a13389098`. Verify each remote tag object and skill tree before installation. Project Audit has an open HIGH test-file finding (#77); do not interpret the pilot as production approval.
+- Pinned catalog snapshot: annotated `refs/tags/v0.0.80`, commit `6b9b4487f4d5938a179400de0a59dceb4f015c5b`, main CI 45669705980. Install skills using their separate annotated tags: `microversion-release/v0.0.2` → `9599367afa1aad2f29f0640fc94da5ae8e473cee`, `project-audit/v0.0.4` → `be6a126f08ffbb49b721b50e030b2a6d82c7d4f3`, `repository-workflow/v0.0.2` → `a2a6af6b66e9cd6e5b28ccb227245f3a13389098`. Verify each remote tag object and skill tree before installation. In main CI 45669705980, catalog_checks 139401346128, all three Security Policy Verdicts PASS, 0 HIGH/CRITICAL; #77 closed. Advisory static review is not certification or production approval.
 - Official gh 2.105.0 was verified for remote pin of one skill; remote multi-skill installation and actual host loading remain trials. Do not use --force, --all, unpinned updates or third-party managers. NVIDIA scanners are not runtime requirements.
 - Record exact client, model, gh, Git, Python and OS versions. Confirm the active profile and actual project roots. For Harness confirm dsh-skill/dsh-skill-filesystem/dsh-tool-skill are enabled. Do not modify the global profile during the trial.
 
@@ -65,6 +65,10 @@ Pilot use is permitted in a disposable project after source review. Limited proj
 
 Sources: [ROADMAP](ROADMAP.en.md), [Microversion Release integration contract](../skills/microversion-release/references/INTEGRATION.en.md), [Project Audit acceptance](../skills/project-audit/references/ACCEPTANCE.en.md), [Repository Workflow acceptance](../skills/repository-workflow/references/ACCEPTANCE.en.md), [T13 research #40](https://github.com/Sashido01/TESSERA/issues/40).
 
+## Historical snapshots (not current acceptance)
+
+The following records describe earlier states and are not instructions for the current release.
+
 ## Actual partial Codex acceptance — 25 November 2026
 
 Source: owner's own session report, not CI. User profile, Windows, Python 3.14, official gh, three directories pinned to `refs/tags/v0.0.74` → `ddab826e5a17641e0f475ecc63193f412065e28e`. Owner reports gh skill list, pinned=true and matching Git trees; raw logs and exact client/model/gh versions are not available. GitHub API independently confirms tag and source trees:
@@ -103,3 +107,6 @@ TD18 #82: 45627814264 Windows job 139252599141 exact 45eaeed021eb4fc36c805d2260a
 
 Historical branch snapshot before sequential independent tag acceptance: PR #74 exact 892cdaca33bdeb9c679a674d672c700dbd2e11e6, CI 45628965053 SUCCESS for all required groups. Windows catalog 715 = 708 PASS + 7 platform SKIP, skills 98 = 97 PASS + FIFO SKIP; total 813 = 805 PASS + 8 SKIP. SkillSpector 2.13.7 risk: Microversion Release 30, Project Audit 38 (previously 72→53; 7 MEDIUM + 1 LOW), Repository Workflow 14. FULL_TIER1 all policy verdicts PASS; advisory review, not certification. TD14/TD16/TD18: PR evidence PASS, main acceptance and repeat agent acceptance were open at that time. TD02 #83: owner reported GitHub CLI refresh; independent tag publication was still pending then, and the three refs are now confirmed in the `v0.0.80` snapshot above. TD13 #76: 9db01ec3170a5a3c684fc82eb9d5bd54cd2c337a, separate skillspector-provenance-preflight branch, static wheel verifier 9/9 synthetic Linux PASS; actual release wheel bytes and preinstall gate integration NOT_VERIFIED.
 
+## Current snapshot at PR #88 preparation
+
+v0.0.80: all eight independent tags verified; #76/#77/#80/#82/#83 closed. Actual client installation of new exact pins, discovery, explicit invocation, AUTO_USE, ENFORCEMENT, UPDATE and ROLLBACK require new acceptance. #81 remains open; owner post-check of 0.0.80 rejected GIT_CONTEXT_UNSAFE. Never silently clear production context or transfer old-profile evidence to a new pin.

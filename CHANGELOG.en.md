@@ -11,6 +11,8 @@ This file tracks changes to the **shared catalog**. Individual skills may mainta
 
 - TD04: raised bounded host history review deadline from 300 to 480 s; added deadline checks before/after reads/scans and final inventory, five regressions. Full coverage and container parity remain mandatory.
 
+- TD15: reconciled the skill table, pilot link, security status and last verified release in RU/EN; historical evidence is not current client acceptance.
+
 ## 0.0.80 — Reconcile the accepted 0.0.79 release
 
 - Updated the bilingual catalog status after PR #86: local and GitHub `main` matched by full SHA and version 0.0.79; main CI 45663571704 completed successfully.
