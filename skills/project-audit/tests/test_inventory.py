@@ -82,33 +82,78 @@ class InventoryTests(unittest.TestCase):
         self.assertEqual(result['examined_entries'], 2)
         self.assertEqual(result['pending_directories'], 0)
 
-    def test_other_device_is_not_traversed(self):
+    def test_windows_zero_cached_directory_identity(self):
+        from contextlib import contextmanager
         from types import SimpleNamespace
-        self.put('mounted/child.py')
+        self.put('nested/deeper/child.py')
         real_scandir = os.scandir
 
-        class OtherDeviceEntry:
+        class CachedEntry:
             def __init__(self, entry):
                 self.name, self.path = entry.name, entry.path
                 self.entry = entry
+
             def stat(self, **kwargs):
                 info = self.entry.stat(**kwargs)
-                return SimpleNamespace(st_mode=info.st_mode, st_dev=info.st_dev + 1)
+                if self.entry.is_dir(follow_symlinks=False):
+                    return SimpleNamespace(st_mode=info.st_mode, st_dev=0, st_ino=0,
+                                           st_file_attributes=getattr(info, 'st_file_attributes', 0))
+                return info
 
-        class Scan:
-            def __init__(self, directory):
-                self.directory = directory
-            def __enter__(self):
-                self.it = real_scandir(self.directory)
-                return (OtherDeviceEntry(entry) for entry in self.it)
-            def __exit__(self, *args):
-                self.it.close()
+        @contextmanager
+        def scan(directory):
+            with real_scandir(directory) as entries:
+                yield (CachedEntry(entry) for entry in entries)
 
-        with patch.object(module.os, 'scandir', side_effect=Scan) as scan:
+        with patch.object(module.os, 'scandir', side_effect=scan):
+            result = module.inventory(self.root)
+        self.assertEqual(result['status'], 'SCOPED_COMPLETE')
+        self.assertEqual(result['regular_files'], 1)
+        self.assertEqual(result['directories'], ['nested', 'nested/deeper'])
+        self.assertEqual(result['gaps'], [])
+
+    def test_other_device_is_not_traversed(self):
+        from types import SimpleNamespace
+        self.put('mounted/child.py')
+        actual = (self.root / 'mounted').lstat()
+        other = SimpleNamespace(st_mode=actual.st_mode, st_dev=self.root.lstat().st_dev + 1,
+                                st_ino=actual.st_ino)
+        with patch.object(module, 'directory_stat', return_value=other), \
+                patch.object(module.os, 'scandir', wraps=os.scandir) as scan:
             result = module.inventory(self.root)
         self.assertEqual(scan.call_count, 1)
         self.assertEqual(result['regular_files'], 0)
         self.assertEqual(result['gaps'], [{'path': 'mounted', 'reason': 'DEVICE_BOUNDARY'}])
+
+    def test_refreshed_directory_redirect_is_not_traversed(self):
+        from types import SimpleNamespace
+        import stat
+        self.put('nested/child.py')
+        redirect = SimpleNamespace(st_mode=stat.S_IFDIR, st_file_attributes=0x400)
+        with patch.object(module, 'directory_stat', return_value=redirect), \
+                patch.object(module.os, 'scandir', wraps=os.scandir) as scan:
+            result = module.inventory(self.root)
+        self.assertEqual(scan.call_count, 1)
+        self.assertEqual(result['regular_files'], 0)
+        self.assertEqual(result['gaps'], [{'path': 'nested', 'reason': 'REDIRECTION_NOT_FOLLOWED'}])
+
+    def test_refreshed_directory_stat_failure_is_reported(self):
+        self.put('nested/child.py')
+        with patch.object(module, 'directory_stat', side_effect=PermissionError):
+            result = module.inventory(self.root)
+        self.assertEqual(result['status'], 'PARTIAL')
+        self.assertEqual(result['regular_files'], 0)
+        self.assertEqual(result['gaps'], [{'path': 'nested', 'reason': 'STAT_UNAVAILABLE'}])
+
+    def test_refreshed_directory_replaced_by_file_is_reported(self):
+        import stat
+        from types import SimpleNamespace
+        self.put('nested/child.py')
+        with patch.object(module, 'directory_stat', return_value=SimpleNamespace(st_mode=stat.S_IFREG)):
+            result = module.inventory(self.root)
+        self.assertEqual(result['status'], 'PARTIAL')
+        self.assertEqual(result['regular_files'], 0)
+        self.assertEqual(result['gaps'], [{'path': 'nested', 'reason': 'DIRECTORY_CHANGED'}])
 
     def test_depth_limit_visible(self):
         self.put('a/b/c.py')

@@ -6,7 +6,7 @@ Independent version 0.0.3 candidate, level II in progress. Deep project audit em
 
 Install the entire skill directory according to your Agent Skills host. Activation, behavior and independent release remain NOT_VERIFIED; no mandatory third-party libraries.
 
-Optional [Inventory Engine](references/INVENTORY.en.md) works without network or Git. Local Linux unit tests 17/17 for original helper files; full candidate CI and Windows unverified. Do not substitute metadata for a content hash.
+Optional [Inventory Engine](references/INVENTORY.en.md) works without network or Git. Linux candidate Inventory Engine unit tests 21/21; Windows v0.0.74 FAIL (#80), fix awaits native acceptance. Do not substitute metadata for a content hash.
 
 From a trusted TESSERA checkout root: `python -B tools/run_skill_tests.py --skill project-audit` runs only Project Audit tests. For independent preflight with `--skill`: `python core/release_preflight.py --repo . --skill project-audit --version 0.0.3 --config release-checks-project-audit.json --plan`. Use `--execute` only with authorization. No GitHub required; this creates no tag and does not prove agent behavior. Release Core was accepted in v0.0.70; full candidate CI and the separate preflight for the new version still require verification.
 
