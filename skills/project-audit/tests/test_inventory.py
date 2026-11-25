@@ -143,11 +143,23 @@ class InventoryTests(unittest.TestCase):
         self.assertEqual(r['gaps'], [{'path': 'pipe', 'reason': 'SPECIAL_FILE_NOT_READ'}])
 
     def test_no_file_content_read(self):
-        self.put('secret.txt', b'SECRET_PLACEHOLDER')
-        with patch.object(Path, 'open', side_effect=AssertionError('content read')):
+        text_payload = b'INVENTORY_TEXT_PAYLOAD'
+        binary_payload = b'\x00\xffINVENTORY_BINARY_PAYLOAD'
+        self.put('payload.txt', text_payload)
+        self.put('nested/input.bin', binary_payload)
+        with (
+            patch.object(Path, 'open', side_effect=AssertionError('content read')),
+            patch('builtins.open', side_effect=AssertionError('content read')),
+            patch('io.open', side_effect=AssertionError('content read')),
+            patch.object(os, 'open', side_effect=AssertionError('content read')),
+        ):
             r = module.inventory(self.root)
-        self.assertEqual(r['regular_files'], 1)
-        self.assertNotIn('SECRET_PLACEHOLDER', str(r))
+        self.assertEqual(r['regular_files'], 2)
+        self.assertEqual(r['regular_file_bytes'], len(text_payload) + len(binary_payload))
+        self.assertEqual(r['content_integrity'], 'NOT_VERIFIED')
+        self.assertEqual([f['path'] for f in r['files']], ['nested/input.bin', 'payload.txt'])
+        self.assertNotIn('INVENTORY_TEXT_PAYLOAD', str(r))
+        self.assertNotIn('INVENTORY_BINARY_PAYLOAD', str(r))
         self.assertNotIn(str(self.root), str(r))
 
     def test_unreadable_directory_reported(self):
