@@ -38,6 +38,17 @@ class Tests(unittest.TestCase):
     def test_inherited_git_context_ignored(self):
         self.commit()
         with patch.dict(os.environ,{'GIT_DIR':'/invalid','GIT_WORK_TREE':'/invalid','GIT_CONFIG_COUNT':'1'}): self.assertTrue(m.observe(self.root)['worktree_clean'])
+    def test_child_environment_is_allowlisted(self):
+        with patch.dict(os.environ, {'TESSERA_SYNTHETIC': 'fixture',
+                                     'GIT_CONFIG_COUNT': '1',
+                                     'GIT_DIR': '/invalid',
+                                     'PYTHONPATH': '/invalid'}):
+            env = m.child_environment()
+            for name in ('TESSERA_SYNTHETIC', 'GIT_CONFIG_COUNT', 'GIT_DIR', 'PYTHONPATH'):
+                self.assertNotIn(name, env)
+            self.assertEqual(env['GIT_OPTIONAL_LOCKS'], '0')
+            self.assertEqual(env['GIT_CONFIG_GLOBAL'], os.devnull)
+            self.assertTrue(m.observe(self.root)['worktree_clean'])
     def test_no_index_write(self):
         self.commit(); index=self.root/'.git/index'; before=(index.read_bytes(),index.stat().st_mtime_ns); m.observe(self.root); self.assertEqual(before,(index.read_bytes(),index.stat().st_mtime_ns))
     def test_stale_observations(self):

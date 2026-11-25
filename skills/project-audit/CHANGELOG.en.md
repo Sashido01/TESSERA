@@ -8,6 +8,8 @@ Git Inspector: HEAD (including unborn/detached), status/ref/remote counts, repea
 
 Correct false DEVICE_BOUNDARY on Windows (#80), strengthen metadata-only regression (#77); 21/21 Linux Inventory Engine tests, simulated Windows RED→GREEN. Native Windows CI and scanner verdict still unverified.
 
+- Git Inspector: explicit child Git environment allowlist instead of forwarding arbitrary variables (HIGH E2); absolute git.exe/git. Strengthen hypothetical audit scope after actual Codex acceptance. Scanner and agent retest required.
+
 ## 0.0.2 — Bounded metadata inventory
 
 Optional local tool, relative paths, counters, markers, limits, visible exclusions, metadata SHA-256 (not contents), no known redirects or device traversal. 17 local Linux tests; Windows, full CI and independent release unverified. Level II PARTIAL.

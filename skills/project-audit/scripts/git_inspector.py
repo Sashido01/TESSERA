@@ -8,7 +8,6 @@ import json
 import os
 from pathlib import Path
 import re
-import shutil
 import subprocess
 import sys
 
@@ -24,18 +23,34 @@ def executable():
     for entry in os.environ.get('PATH', '').split(os.pathsep):
         if not Path(entry).is_absolute():
             continue
-        found = shutil.which('git', path=entry)
-        if found and Path(found).is_absolute():
-            return str(Path(found).resolve(strict=True))
+        candidate = Path(entry) / ('git.exe' if os.name == 'nt' else 'git')
+        if candidate.is_file() and os.access(candidate, os.X_OK):
+            return str(candidate.resolve(strict=True))
     raise InspectError('GIT_NOT_AVAILABLE')
 
 
-def query(root, exe, *args):
-    # Do not let inherited GIT_DIR, GIT_WORK_TREE, config injections or
-    # alternate object directories change the selected repository.
-    env = {k: v for k, v in os.environ.items() if not k.upper().startswith('GIT_')}
+# Only operating-system/process context needed by the local Git executable.
+# Never forward arbitrary application variables, credential helpers or Git overrides.
+CHILD_KEYS = (
+    'PATH', 'HOME', 'USERPROFILE', 'HOMEDRIVE', 'HOMEPATH', 'SystemRoot',
+    'WINDIR', 'COMSPEC', 'PATHEXT', 'TEMP', 'TMP', 'TMPDIR',
+    'APPDATA', 'LOCALAPPDATA', 'LANG', 'LC_ALL', 'LC_CTYPE', 'LC_MESSAGES', 'TZ',
+)
+
+
+def child_environment():
+    env = {}
+    for key in CHILD_KEYS:
+        value = os.getenv(key)
+        if value is not None:
+            env[key] = value
     env.update(GIT_OPTIONAL_LOCKS='0', GIT_TERMINAL_PROMPT='0',
                GIT_CONFIG_NOSYSTEM='1', GIT_CONFIG_GLOBAL=os.devnull, GIT_NO_LAZY_FETCH='1')
+    return env
+
+
+def query(root, exe, *args):
+    env = child_environment()
     try:
         result = subprocess.run([exe, '--no-replace-objects', '--no-optional-locks',
                                  '-C', str(root), '-c', 'core.fsmonitor=false',
