@@ -106,14 +106,44 @@ def tag_name(version: str, prefix: str = "") -> str:
     return f"{prefix}v{version}"
 
 
-def inspect(repo: pathlib.Path, version: str, prefix: str = "", commit: str | None = None) -> dict[str, Any]:
+SKILL_NAME = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*\Z")
+
+
+def regular_commit_file(root: pathlib.Path, commit: str, path: str) -> bool:
+    """Check the mode of an exact committed file, not a working-tree symlink."""
+    result = git(root, "ls-tree", "--full-tree", commit, "--", path, allow_failure=True)
+    if result.returncode != 0:
+        raise InspectionError("SKILL_TREE_UNAVAILABLE")
+    lines = result.stdout.splitlines()
+    if len(lines) != 1:
+        return False
+    header, separator, actual = lines[0].partition("\t")
+    fields = header.split()
+    return (bool(separator) and actual == path and len(fields) == 3
+            and fields[0] in {"100644", "100755"} and fields[1] == "blob"
+            and COMMIT_SHA.fullmatch(fields[2]) is not None)
+
+
+def inspect(repo: pathlib.Path, version: str, prefix: str = "", commit: str | None = None,
+            *, skill: str | None = None) -> dict[str, Any]:
     root = canonical_repo(repo)
     wanted = resolve_commit(root, commit)
-    ref = f"refs/tags/{tag_name(version, prefix)}"
+    version_path = "VERSION"
     problems: list[str] = []
-
-    version_file = git(root, "show", f"{wanted}:VERSION", allow_failure=True)
-    recorded_version = version_file.stdout.strip() if version_file.returncode == 0 else None
+    if skill is not None:
+        if not isinstance(skill, str) or not SKILL_NAME.fullmatch(skill) or prefix:
+            raise InspectionError("SKILL_SCOPE_INVALID")
+        prefix = skill + "/"
+        version_path = f"skills/{skill}/VERSION"
+        if not regular_commit_file(root, wanted, f"skills/{skill}/SKILL.md"):
+            problems.append("SKILL_DEFINITION_MISSING_OR_INVALID")
+    ref = f"refs/tags/{tag_name(version, prefix)}"
+    recorded_version = None
+    if skill is not None and not regular_commit_file(root, wanted, version_path):
+        problems.append("SKILL_VERSION_FILE_MISSING_OR_INVALID")
+    else:
+        version_file = git(root, "show", f"{wanted}:{version_path}", allow_failure=True)
+        recorded_version = version_file.stdout.strip() if version_file.returncode == 0 else None
     if recorded_version is None:
         problems.append("VERSION_MISSING_IN_COMMIT")
     elif recorded_version != version:
@@ -167,7 +197,7 @@ def inspect(repo: pathlib.Path, version: str, prefix: str = "", commit: str | No
     if commit is None and resolve_commit(root, None) != wanted:
         problems.append("HEAD_CHANGED")
 
-    return {
+    result = {
         "schema_version": 1,
         "requested_version": version,
         "requested_tag": ref.removeprefix("refs/tags/"),
@@ -184,17 +214,23 @@ def inspect(repo: pathlib.Path, version: str, prefix: str = "", commit: str | No
         "checks_not_performed": ["build", "tests", "remote_tag", "github_release"],
         "problems": problems,
     }
+    if skill is not None:
+        result["skill"] = skill
+        result["version_path"] = version_path
+    return result
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", required=True, type=pathlib.Path, help="Корень Git-репозитория")
     parser.add_argument("--version", required=True, help="Версия релиза, например 0.1.0")
-    parser.add_argument("--prefix", default="", help="Префикс тега для монорепозитория")
+    scope = parser.add_mutually_exclusive_group()
+    scope.add_argument("--prefix", default="", help="Префикс тега при корневом VERSION")
+    scope.add_argument("--skill", help="Имя независимого навыка TESSERA; читает skills/<name>/VERSION")
     parser.add_argument("--commit", help="Полный SHA исторического коммита; по умолчанию HEAD")
     args = parser.parse_args()
     try:
-        result = inspect(args.repo, args.version, args.prefix, args.commit)
+        result = inspect(args.repo, args.version, args.prefix, args.commit, skill=args.skill)
     except InspectionError as exc:
         print(f"BLOCKED: {exc}", file=sys.stderr)
         return 1
