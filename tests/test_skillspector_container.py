@@ -12,6 +12,7 @@ import check_skillspector_container as c
 
 
 class SkillSpectorContainerTests(unittest.TestCase):
+    @unittest.skipUnless(sys.platform == "linux", "Linux secure-open runtime")
     def test_inventory_exact_and_mutation(self):
         with tempfile.TemporaryDirectory() as folder:
             root = pathlib.Path(folder).resolve()
@@ -25,6 +26,7 @@ class SkillSpectorContainerTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 c.inventory(root, {"fixture": "1.0"})
 
+    @unittest.skipUnless(sys.platform == "linux", "Linux secure-open runtime")
     def test_link_and_limit(self):
         with tempfile.TemporaryDirectory() as folder:
             root = pathlib.Path(folder).resolve()
@@ -37,19 +39,29 @@ class SkillSpectorContainerTests(unittest.TestCase):
             with mock.patch.object(c, "MAX_FILE", 2), self.assertRaises(RuntimeError):
                 c.inventory(root)
 
+    @unittest.skipIf(sys.platform == "linux", "Non-Linux refusal control")
+    def test_secure_open_unsupported_platform(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = pathlib.Path(folder).resolve() / "fixture.txt"
+            path.write_bytes(b"fixture")
+            with mock.patch.object(c.os, "open") as opened:
+                with self.assertRaisesRegex(RuntimeError, "SP_DOCKER_RUNNER"):
+                    c.file_digest(path, 100)
+                opened.assert_not_called()
+
     def test_exact_inventory_count(self):
         self.assertEqual(len(c.VERSIONS), 74)
         self.assertEqual(c.VERSIONS["skillspector"], c.VERSION)
         self.assertEqual(c.VERSIONS["cryptography"], "50.0.2")
 
     def test_profile(self):
-        args = c.args_for("fixture", pathlib.Path("/fixture-stage"), pathlib.Path("/fixture-packages"))
+        args = c.args_for("fixture", pathlib.PurePosixPath("/fixture-stage"), pathlib.PurePosixPath("/fixture-packages"))
         for flag in ("--network=none", "--read-only", "--cap-drop=ALL", "--user=65534:65534", "--memory=1g"):
             self.assertIn(flag, args)
         self.assertEqual(args.count("--mount"), 2)
         self.assertIn("-S", args)
         with self.assertRaises(RuntimeError):
-            c.args_for("fixture", pathlib.Path("/fixture-stage"), pathlib.Path("/fixture-stage/sub"))
+            c.args_for("fixture", pathlib.PurePosixPath("/fixture-stage"), pathlib.PurePosixPath("/fixture-stage/sub"))
 
     def test_parity(self):
         host = {"execution": "PASS", "version": c.VERSION, "skills": {"fixture": {"risk_score": 22}},

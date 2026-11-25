@@ -355,6 +355,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Запустить тесты всех навыков на Windows
         run: python -B tools/run_skill_tests.py
+      - name: Запустить полный unit suite каталога на Windows
+        run: python -B -m unittest discover -s tests -v
 
   validate:
     name: validate

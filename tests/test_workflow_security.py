@@ -67,6 +67,7 @@ class WorkflowSecurityTests(unittest.TestCase):
                 ("runs-on: windows-latest", "runs-on: ubuntu-latest"),
                 ("python-version: '3.14'", "python-version: '3.13'"),
                 ("python -B tools/run_skill_tests.py", "echo omitted"),
+                ("python -B -m unittest discover -s tests -v", "echo omitted"),
                 ("  windows_skill_checks:\n", "  windows_skill_checks:\n    continue-on-error: true\n")):
             changed = WORKFLOW.replace(old, new)
             self.assertNotEqual(changed, WORKFLOW)
