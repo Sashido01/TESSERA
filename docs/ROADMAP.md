@@ -215,3 +215,7 @@ T12.03.08: CI 45391798766 — 513+29 PASS, GOVULN_CONTROL_VERSION BLOCKED; но�
 **T12.03.30:** CI 45470763020 PASS, 663 теста, все 173 coordinates. **T12.03.31 — кандидат:** standalone SkillSpector Docker, 74 packages, exact parity, восемь регрессий; CI обязателен. T12 PARTIAL.
 
 **T12.03.31:** CI 45475253034 PASS, 671 тест, standalone SkillSpector Docker exact parity. **T12.03.32 — кандидат:** NVIDIA SkillSpector Docker, exact contract и receipts, пять регрессий; CI обязателен. T12 PARTIAL.
+
+## T19 — Ускорение обязательных проверок
+
+T19.02 кандидат: [параллельные проверки CI](CI_PERFORMANCE.md), обязательный validate сохранён. Скорость оценивается по реальному wall-clock, очереди и runner-minutes; прежние обязательные проверки не сняты. Полный CI и измерение результата ещё обязательны. Новая версия принимается только после подтверждения v0.0.67 и его точного тега.
