@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import argparse
+from collections import deque
 import json
 import re
 import sys
+import unicodedata
 from pathlib import Path
 
 ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,63}\Z")
@@ -16,6 +18,7 @@ HELD = frozenset({"IN_PROGRESS", "WAIT_CI", "CI_FAILED", "READY_TO_INTEGRATE",
                   "WAIT_RELEASE", "WAIT_OWNER", "BLOCKED"})
 PRIORITIES = ("P0", "P1", "P2")
 MAX_BYTES = 2 * 1024 * 1024
+DEVICE = re.compile(r"(?:con|prn|aux|nul|com[1-9¹²³]|lpt[1-9¹²³]|conin\$|conout\$)\Z")
 
 
 class PlanError(ValueError):
@@ -38,10 +41,11 @@ def path_scope(value):
     require(isinstance(value, str) and 0 < len(value) <= 512, "PLAN_SCOPE")
     if value == ".":
         return value
-    parts = value.split("/")
+    parts = [unicodedata.normalize("NFC", p.casefold()) for p in value.split("/")]
     require(all(p not in ("", ".", "..") and not p.endswith((".", " ")) and
-                not any(ord(c) < 32 or c in '\\:*?"<>|' for c in p) for p in parts), "PLAN_SCOPE")
-    return "/".join(p.casefold() for p in parts)
+                not any(ord(c) < 32 or unicodedata.category(c) == "Cs" or c in '\\:*?"<>|' for c in p) for p in parts), "PLAN_SCOPE")
+    require(all(not DEVICE.fullmatch(p.split(".", 1)[0].rstrip(" ")) for p in parts), "PLAN_SCOPE")
+    return "/".join(parts)
 
 
 def overlaps(a, b):
@@ -79,12 +83,22 @@ def plan(data):
                        "status": row["status"], "deps": deps, "scope": scope, "resources": resources}
     for task in tasks.values():
         require(set(task["deps"]) <= tasks.keys(), "PLAN_UNKNOWN_DEPENDENCY")
-    # Bounded iterative DAG validation; no recursion on user-provided graphs.
-    pending = set(tasks)
-    while pending:
-        layer = {i for i in pending if not (set(tasks[i]["deps"]) & pending)}
-        require(layer, "PLAN_DEPENDENCY_CYCLE")
-        pending -= layer
+    # Kahn traversal: each node and each dependency edge is visited once.
+    remaining = {name: len(task["deps"]) for name, task in tasks.items()}
+    dependents = {name: [] for name in tasks}
+    for name, task in tasks.items():
+        for dep in task["deps"]:
+            dependents[dep].append(name)
+    ready = deque(name for name, degree in remaining.items() if degree == 0)
+    visited = 0
+    while ready:
+        name = ready.popleft()
+        visited += 1
+        for dependent in dependents[name]:
+            remaining[dependent] -= 1
+            if remaining[dependent] == 0:
+                ready.append(dependent)
+    require(visited == len(tasks), "PLAN_DEPENDENCY_CYCLE")
     for task in tasks.values():
         require(task["status"] != "COMPLETE" or all(tasks[d]["status"] == "COMPLETE" for d in task["deps"]),
                 "PLAN_COMPLETE_DEPENDENCY_OPEN")
@@ -111,6 +125,14 @@ def plan(data):
             "scope": "ADVISORY_SNAPSHOT_NOT_A_LOCK"}
 
 
+def unique_pairs(pairs):
+    result = {}
+    for key, value in pairs:
+        require(key not in result, "PLAN_DUPLICATE_KEY")
+        result[key] = value
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tasks", type=Path, required=True)
@@ -119,7 +141,7 @@ def main():
         with args.tasks.open("rb") as source:
             raw = source.read(MAX_BYTES + 1)
         require(len(raw) <= MAX_BYTES, "PLAN_SIZE")
-        result = plan(json.loads(raw))
+        result = plan(json.loads(raw, object_pairs_hook=unique_pairs))
     except (OSError, UnicodeError, ValueError, TypeError) as exc:
         print(str(exc) if isinstance(exc, PlanError) else "PLAN_INPUT_INVALID", file=sys.stderr)
         return 1

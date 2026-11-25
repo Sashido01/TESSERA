@@ -15,3 +15,5 @@
 | RW08 | Comparative evals, independent release and tag | NOT_STARTED |
 
 Do not build a server, mandatory database, replacement GitHub queue or paid API dependency without evidenced need.
+
+Candidate 0.0.2: four new planner regressions, Unicode NFC, Windows device names, JSON and linear DAG traversal. 17/17 local Linux tests. Catalog 0.0.1 was accepted in v0.0.69; this candidate's full CI, RW01–RW20 actual behavior and Windows require separate acceptance. Independent local preflight plan added.

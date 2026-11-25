@@ -1,5 +1,7 @@
 import pathlib
 import sys
+import subprocess
+import tempfile
 import unittest
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
@@ -75,6 +77,36 @@ class PlannerTests(unittest.TestCase):
                 run(task("a", scope=[value]))
         with self.assertRaisesRegex(PlanError, "SCOPE_UNKNOWN"):
             run(task("a", scope=[]))
+
+    def test_unicode_normalization_conflict(self):
+        result = run(task("a", status="IN_PROGRESS", scope=["src/Café"]),
+                     task("b", "skill-a", scope=["src/Cafe\u0301/file.py"]))
+        self.assertEqual(result["deferred"]["b"]["conflicts"], ["a"])
+
+    def test_reserved_windows_names_rejected(self):
+        for value in ("src/CON.txt", "AUX", "src/lpt¹.log", "src/COM1 .txt", "NUL", "CONOUT$", "a/\ud800"):
+            with self.subTest(value=repr(value)), self.assertRaisesRegex(PlanError, "PLAN_SCOPE"):
+                run(task("a", scope=[value]))
+        self.assertEqual(selected(run(task("a", scope=["src/com10.txt"]))), ["a"])
+
+    def test_long_dependency_chain(self):
+        rows = [task(f"t{i:04d}", status="COMPLETE", evidence=["receipt"],
+                     deps=[f"t{i-1:04d}"] if i else []) for i in range(999)]
+        rows.append(task("last", deps=["t0998"]))
+        self.assertEqual(selected(run(*rows)), ["last"])
+        rows[0]["depends_on"] = ["last"]
+        with self.assertRaisesRegex(PlanError, "DEPENDENCY_CYCLE"):
+            run(*rows)
+
+    def test_cli_duplicate_keys_rejected(self):
+        runner = pathlib.Path(__file__).resolve().parents[1] / "scripts" / "plan_tasks.py"
+        with tempfile.TemporaryDirectory() as temp:
+            data = pathlib.Path(temp) / "tasks.json"
+            data.write_text('{"streams":["core"],"tasks":[],"tasks":[]}', encoding="utf-8")
+            proc = subprocess.run([sys.executable, "-B", str(runner), "--tasks", str(data)],
+                                  capture_output=True, text=True, timeout=10, check=False)
+            self.assertNotEqual(proc.returncode, 0)
+            self.assertIn("PLAN_DUPLICATE_KEY", proc.stderr)
 
     def test_no_unsubstantiated_completion(self):
         with self.assertRaisesRegex(PlanError, "COMPLETE_WITHOUT_EVIDENCE"):
