@@ -9,9 +9,9 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
-# Required status check keeps its existing public name. Only the three explicit
-# successful job results can satisfy it; no source or artifact is executed here.
-PARALLEL_GATE = "  validate:\n    name: validate\n    needs: [catalog_checks, history_checks, source_secret_checks]\n    if: ${{ always() }}\n    runs-on: ubuntu-latest\n    timeout-minutes: 2\n    steps:\n      - name: Подтвердить все обязательные группы\n        env:\n          CATALOG_RESULT: ${{ needs.catalog_checks.result }}\n          HISTORY_RESULT: ${{ needs.history_checks.result }}\n          SOURCE_RESULT: ${{ needs.source_secret_checks.result }}\n        shell: bash\n        run: |\n          set -euo pipefail\n          test \"$CATALOG_RESULT\" = success\n          test \"$HISTORY_RESULT\" = success\n          test \"$SOURCE_RESULT\" = success\n"
+# Required status check retains its public name; every group must succeed.
+PARALLEL_GATE = "  validate:\n    name: validate\n    needs: [catalog_checks, history_checks, source_secret_checks, windows_skill_checks]\n    if: ${{ always() }}\n    runs-on: ubuntu-latest\n    timeout-minutes: 2\n    steps:\n      - name: Подтвердить все обязательные группы\n        env:\n          CATALOG_RESULT: ${{ needs.catalog_checks.result }}\n          HISTORY_RESULT: ${{ needs.history_checks.result }}\n          SOURCE_RESULT: ${{ needs.source_secret_checks.result }}\n          WINDOWS_RESULT: ${{ needs.windows_skill_checks.result }}\n        shell: bash\n        run: |\n          set -euo pipefail\n          test \"$CATALOG_RESULT\" = success\n          test \"$HISTORY_RESULT\" = success\n          test \"$SOURCE_RESULT\" = success\n          test \"$WINDOWS_RESULT\" = success\n"
+WINDOWS_GROUP = "  windows_skill_checks:\n    runs-on: windows-latest\n    timeout-minutes: 10\n    env:\n      PYTHONDONTWRITEBYTECODE: '1'\n    steps:\n      - name: Получить исходники для Windows\n        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 (node24)\n        with:\n          fetch-depth: 0\n          persist-credentials: false\n      - name: Настроить Python 3.14\n        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0 (node24)\n        with:\n          python-version: '3.14'\n      - name: Проверить точный SHA и среду Windows\n        shell: pwsh\n        env:\n          CHECKED_SHA: ${{ github.sha }}\n        run: |\n          $actual = git rev-parse HEAD\n          if ($LASTEXITCODE -ne 0 -or $actual -ne $env:CHECKED_SHA) { throw 'SHA mismatch' }\n          python -B -c \"import sys; assert sys.platform == 'win32' and sys.version_info[:2] == (3,14); print(sys.version)\"\n          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }\n      - name: Запустить тесты всех навыков на Windows\n        run: python -B tools/run_skill_tests.py\n"
 CHECKED_SHA_STEP = "      - name: Проверить точный SHA кандидата\n        env:\n          CHECKED_SHA: ${{ github.sha }}\n        run: test \"$(git rev-parse HEAD)\" = \"$CHECKED_SHA\"\n"
 DOCKER_STEP = "      - name: Проверить живой Linux Docker preflight\n        run: python tools/check_docker_preflight.py\n"
 GITLEAKS_DOWNLOAD = "      - name: Скачать и проверить официальный Gitleaks 8.30.1\n        shell: bash\n        run: |\n          set -euo pipefail\n          umask 077\n          archive=\"$RUNNER_TEMP/gitleaks_8.30.1_linux_x64.tar.gz\"\n          curl --fail --location --silent --show-error --retry 2 --connect-timeout 10 --max-time 120 \\\n            --proto '=https' --tlsv1.2 --output \"$archive\" \\\n            https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz\n          echo \"551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  $archive\" | sha256sum --check --\n          tar --extract --gzip --to-stdout --file \"$archive\" gitleaks > \"$RUNNER_TEMP/gitleaks-8.30.1\"\n          chmod 700 \"$RUNNER_TEMP/gitleaks-8.30.1\"\n"
@@ -27,11 +27,14 @@ def parallel_gate_errors(section: str) -> list[str]:
         return ["PARALLEL_JOB_LAYOUT_INVALID"]
     body = jobs[1]
     if re.findall(r"(?m)^  ([a-z][a-z0-9_]*):$", body) != [
-            "catalog_checks", "history_checks", "source_secret_checks", "validate"]:
+            "catalog_checks", "history_checks", "source_secret_checks", "windows_skill_checks", "validate"]:
         return ["PARALLEL_JOB_LAYOUT_INVALID"]
     catalog, history_and_gate = body.split("\n  history_checks:\n", 1)
     history, source_and_gate = history_and_gate.split("\n  source_secret_checks:\n", 1)
-    source, gate = source_and_gate.split("\n  validate:\n", 1)
+    source, windows_and_gate = source_and_gate.split("\n  windows_skill_checks:\n", 1)
+    windows, gate = windows_and_gate.split("\n  validate:\n", 1)
+    if ("  windows_skill_checks:\n" + windows).strip() != WINDOWS_GROUP.strip():
+        errors.append("PARALLEL_WINDOWS_SCOPE_INVALID")
     if ("  validate:\n" + gate).strip() != PARALLEL_GATE.strip():
         errors.append("PARALLEL_REQUIRED_GATE_INVALID")
     for group in (catalog, history, source):
@@ -161,7 +164,7 @@ def validate_workflow(workflow: str) -> list[str]:
         errors.append("Нет безопасной проверки существования удалённого тега")
     if 'git push origin "refs/tags/' not in tagging:
         errors.append("Нет публикации строго одного нового тега")
-    skill_publish = "      - name: Опубликовать и проверить независимые аннотированные теги навыков\n        env:\n          CHECKED_SHA: ${{ github.sha }}\n        run: python -B tools/publish_skill_tags.py --repo . --expected-commit \"$CHECKED_SHA\" --publish\n"
+    skill_publish = "      - name: Опубликовать и проверить независимые аннотированные теги навыков\n        env:\n          CHECKED_SHA: ${{ github.sha }}\n        run: python -B tools/publish_skill_tags.py --repo . --expected-commit \"$CHECKED_SHA\" --publish --strategy sequential\n"
     if (skill_publish not in tagging or "tools/publish_skill_tags.py --repo . --expected-commit" in validate
             or not tagging.strip().endswith(skill_publish.strip())
             or "github.repository == 'Sashido01/TESSERA'" not in tagging):

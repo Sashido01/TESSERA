@@ -19,6 +19,7 @@ EXPECTED_WORKFLOW = ".github/workflows/validate.yml"
 REQUIRED_JOBS = ("validate", "Создать аннотированный тег проверенной версии")
 PARALLEL_JOBS = ("catalog_checks", "history_checks")
 SOURCE_JOB = "source_secret_checks"
+WINDOWS_JOB = "windows_skill_checks"
 
 
 class CIEvidenceError(ValueError):
@@ -128,6 +129,8 @@ def validate_ci_evidence(
     ) else ())
     if any(isinstance(item, dict) and item.get("name") == SOURCE_JOB for item in jobs):
         required_jobs = REQUIRED_JOBS + PARALLEL_JOBS + (SOURCE_JOB,)
+    if any(isinstance(item, dict) and item.get("name") == WINDOWS_JOB for item in jobs):
+        required_jobs = REQUIRED_JOBS + PARALLEL_JOBS + (SOURCE_JOB, WINDOWS_JOB)
     relevant: dict[str, dict[str, Any]] = {}
     for item in jobs:
         if not isinstance(item, dict):
