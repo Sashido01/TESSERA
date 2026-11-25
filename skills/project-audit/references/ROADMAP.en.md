@@ -5,7 +5,7 @@
 | Level | Scope | Candidate status |
 |---|---|---|
 | I | Instructions, directions, evidence, report, scenarios | PARTIAL: source exists; actual agent not verified |
-| II | Deterministic inventory, Git, evidence register | NOT_STARTED |
+| II | Deterministic inventory, Git, evidence register | PARTIAL: inventory candidate; Git and evidence core open |
 | III | Pluggable analyzers, graphs, traceability | NOT_STARTED |
 | IV | Cross-session state, DELTA, freshness | NOT_STARTED |
 | V | Independent challenge, semantic indexes, formal methods | NOT_STARTED |
