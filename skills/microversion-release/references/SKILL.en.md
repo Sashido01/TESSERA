@@ -14,7 +14,7 @@ Work only in the explicitly selected project. Reading Git and calculating a vers
 
 Minimum access: read the selected project, calculate versions, run local checks; write only for authorized changes, commits and tags. Network, publication and secret access are outside ordinary verification. Do not request broader permissions to improve a scanner score. See [INTEGRATION.en.md](INTEGRATION.en.md).
 
-SKILL.md cannot enforce automatic activation. Mandatory execution requires project instructions and independent Git/CI checks; a lifecycle hook is an additional control.
+SKILL.md cannot enforce automatic activation. Mandatory execution requires project instructions and independent Git/CI checks; a lifecycle hook is an additional control. For an explicitly agreed basic Git profile use [Completion Gate](ENFORCEMENT.en.md) and independent Guarded Run; protocol exit 0 or STRUCTURE_VERIFIED is not a completed release. Never alter external context, baseline or marker.
 
 ## Microversion rules
 
