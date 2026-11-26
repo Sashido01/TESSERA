@@ -22,7 +22,7 @@ from check_official_local_install import InstallCheckError, fixture_env
 MAX_OBJECTS = 20000
 MAX_BLOBS = 2048
 MAX_TOTAL = 128 * 1024 * 1024
-MAX_SECONDS = 300
+MAX_SECONDS = 480  # 8 min host budget; container deadline remains 540 s, job limit 20 min.
 OID = re.compile(r"(?:[0-9a-f]{40}|[0-9a-f]{64})\Z")
 
 
@@ -96,15 +96,23 @@ def checked_blob(repo, env, oid, size):
 
 def review(repo, cli, temp, env):
     started = time.monotonic()
+    deadline = started + MAX_SECONDS
+
+    def check_deadline():
+        require(time.monotonic() < deadline, "HISTORY_TIMEOUT")
+
     before = inventory(repo, env)
+    check_deadline()
 
     def one(item):
-        require(time.monotonic() - started < MAX_SECONDS, "HISTORY_TIMEOUT")
+        check_deadline()
         oid, size = item
         content = checked_blob(repo, env, oid, size)
+        check_deadline()
         if size == 0:
             return oid, size, collections.Counter()
         rules, _, _ = scan(cli, temp, env, content)
+        check_deadline()
         return oid, size, rules
 
     seen = set()
@@ -114,6 +122,7 @@ def review(repo, cli, temp, env):
     # Bounded worker pool. Each scanner receives exactly one object via stdin.
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
         for oid, size, rules in pool.map(one, sorted(before.items())):
+            check_deadline()
             require(oid not in seen and before.get(oid) == size, "HISTORY_DUPLICATE_BLOB")
             seen.add(oid)
             bytes_scanned += size
@@ -121,7 +130,9 @@ def review(repo, cli, temp, env):
             counts.update(rules)
     require(seen == set(before) and bytes_scanned == sum(before.values()),
             "HISTORY_BLOB_COVERAGE_MISMATCH")
+    check_deadline()
     require(inventory(repo, env) == before, "HISTORY_REFS_CHANGED")
+    check_deadline()
     return {"snapshot_sha256": history_snapshot(before), "distinct_blobs": len(before), "empty": empty,
             "scanned_nonempty": len(before) - empty, "bytes_scanned": bytes_scanned,
             "findings": sum(counts.values()),
