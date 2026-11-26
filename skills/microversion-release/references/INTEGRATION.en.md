@@ -46,6 +46,16 @@ Project: `<project-root>/.agents/skills/microversion-release/SKILL.md`. User: `<
 
 Official docs: https://developers.openai.com/codex/skills
 
+### TD17 diagnostics (#81)
+
+In the original Codex session, **without changing its environment**, run:
+
+```bash
+python -B scripts/release_tag.py context
+```
+
+Run from the installed skill directory or specify the path to a verified copy. The command does not execute Git, needs no project root, and writes nothing. Record only the JSON, exit code, client version and OS. GIT_CONTEXT_UNSAFE (exit 1) means blocked; NO_BLOCKING_CONTEXT_OBSERVED (exit 0) means no known blocking names were observed, not proof of safety. Do not remove variables or bypass policy when blocked. Arrange a separate verification run in a trusted environment outside the agent with the owner while preserving applicable restrictions; that run does not prove Codex compatibility. The exact trusted-context adapter contract and real client acceptance remain open.
+
 ## DeepSeek Harness
 
 Project: `<project-root>/.dsh/skills/microversion-release/`. User: `<DSH_HOME>/skills/microversion-release/`, resolved from the actual runtime. Ensure that the `dsh-skill`, `dsh-skill-filesystem`, and `dsh-tool-skill` components are enabled. Verify that the skill appears in the session catalog. Strict completion checks require a separate tested Harness lifecycle hook.
