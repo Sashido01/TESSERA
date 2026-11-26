@@ -175,6 +175,44 @@ class SkillSpectorTests(unittest.TestCase):
                 self.assertNotIn("marker", str(result))
                 self.assertNotIn("unknown.md", str(result))
 
+    def test_high_occurrences_projected_without_private_data(self):
+        data = self.report()
+        data["issues"] = [
+            {"id": "E2", "severity": "HIGH",
+             "location": {"file": "SKILL.md", "start_line": 1},
+             "occurrences": [{"file": "SKILL.md", "start_line": 2, "end_line": 3,
+                              "source_url": "private source", "code_snippet": "private snippet"},
+                             {"file": "SKILL.md", "start_line": 4},
+                             {"file": "../private.txt", "start_line": 1},
+                             {"file": "SKILL.md", "start_line": True}]},
+            {"id": "P1", "severity": "CRITICAL"},
+            {"id": "AST3", "severity": "MEDIUM", "occurrences": [{"file": "SKILL.md", "start_line": 8}]},
+        ]
+        result = self.check(data)
+        self.assertEqual(result["high_occurrence_groups"], 2)
+        self.assertEqual(result["high_occurrence_groups_missing"], 1)
+        self.assertEqual(result["high_occurrences_reported"], 4)
+        self.assertEqual(result["high_occurrences_unresolved"], 2)
+        self.assertEqual(result["high_occurrence_locations"], [
+            {"rule": "E2", "severity": "HIGH", "file": "SKILL.md", "start_line": 2, "end_line": 3},
+            {"rule": "E2", "severity": "HIGH", "file": "SKILL.md", "start_line": 4, "end_line": None}])
+        self.assertNotIn("private", str(result))
+        self.assertEqual(result["findings"], 3)
+
+    def test_high_occurrence_output_limit_and_malformed_group(self):
+        data = self.report()
+        data["issues"] = [
+            {"id": "E2", "severity": "HIGH", "occurrences": [
+                {"file": "SKILL.md", "start_line": 1}] * (s.MAX_LOCATION_ROWS + 2)},
+            {"id": "AR3", "severity": "HIGH", "occurrences": "private data"},
+        ]
+        result = self.check(data)
+        self.assertEqual(len(result["high_occurrence_locations"]), s.MAX_LOCATION_ROWS)
+        self.assertEqual(result["high_occurrences_omitted"], 2)
+        self.assertEqual(result["high_occurrences_reported"], s.MAX_LOCATION_ROWS + 2)
+        self.assertEqual(result["high_occurrence_groups_missing"], 1)
+        self.assertNotIn("private data", str(result))
+
     def test_location_output_is_bounded_without_hiding_findings(self):
         data = self.report()
         data["issues"] = [{"id": "AST3", "severity": "MEDIUM",

@@ -12,7 +12,7 @@ Three standalone skills: Microversion Release, Project Audit, Repository Workflo
 
 | ID | Mandatory outcome | Evidence / status |
 |---|---|---|
-| G01 | Sequential VERSION, RU/EN changelogs, exact annotated tags | 0.0.85 verified, 0.0.86 main CI and tag require verification; 0.1.0 NOT_VERIFIED |
+| G01 | Sequential VERSION, RU/EN changelogs, exact annotated tags | 0.0.86 verified, 0.0.87 main CI and tag require verification; 0.1.0 NOT_VERIFIED |
 | G02 | All 6 main jobs on exact commit and attempt, full catalog, native Windows/Linux | fixed CI profile candidate; new CI required |
 | G03 | Safe install of each skill by separate pin into clean directory, duplicate refusal | historical single pin and local multi-skill PASS; current remote multi-skill open |
 | G04 | Safe update/rollback of individual skill, preservation of others and local edits | historical fixture PASS; current three independent refs and actual profile open |
@@ -63,3 +63,7 @@ PR #92, exact head 5e770ebf66af9d2758b9df026229794e2932c15b, run 45852127083: al
 ## Post-#93 reconciliation
 
 0.0.85 main CI 45859420735 SUCCESS 6/6; exact commit feaa3d211221ef0301edf45571f312d2637b0341, tag objects dc893d0ac9fc5291d53023f0dd5967a8e17d1222 (catalog) and 4cab74df967d2a6f8abd98737b67da84dd30fd4e (microversion-release/v0.0.4), both direct target. #93 run 45860767387 SUCCESS 5/5, squash 0b207f09bb9fca7cf5525d6b35a1919e1d316515. G09 remains OPEN: direct coverage 100% all three; Microversion 9 HIGH (was 11), Audit 1 direct HIGH (was aggregate gate), Workflow 0. No severity changes or exclusions. G12 owner setting ENABLED, publication NOT_RUN. Harness rc.5 CLI help executed (owner-reported), actual session and hook NOT_VERIFIED. TD04 integration candidate 0.0.87; live Gitleaks parity required. #81 OPEN.
+
+## Post-#94 reconciliation
+
+0.0.86 main CI 45864624507 SUCCESS 6/6, commit 0b207f09bb9fca7cf5525d6b35a1919e1d316515; exact tag objects c270a15e48552fbb7dbed47f46126c33c30a6aef (v0.0.86), 853133f0dd4b54ef72e6dda0cccce9b956bdb58a (microversion-release/v0.0.5), f1ab06d7abf4f1a1147df4217708fde079ec9953 (project-audit/v0.0.6). #94 run 45865200170 SUCCESS 5/5, squash 75f27ca40d90aa46c387c5c81d38f3ff064200c2. TD04 host/container parity PASS (1551/1551 distinct blobs, 24116257 bytes, zero findings; container 323.1s), main 0.0.87 still requires acceptance. Do not extrapolate local read-only benchmark to entire CI. Owner confirmed exact rc.5 headless help: --json, session-id, permission-mode, approval-policy ask/never, add-dir. PROFILE_HELP_PASS, model, actual execution, hook and #81 remain NOT_VERIFIED/OPEN. G09: next candidate exports bounded reported HIGH/CRITICAL occurrence coordinates, no verdict changes. Microversion Release 0.0.6 requires newly introduced changelog heading, not mere presence. RW05 and actual client acceptance open.

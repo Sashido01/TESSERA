@@ -22,3 +22,7 @@ Run: `python tools/check_skillspector_review.py --repo . --cli <path-to-skillspe
 | RA1 | HIGH | 1 |
 
 The pinned upstream CLI exits 1 if the risk score exceeds 50 even when execution is successful. The first CI interpreted this as an execution failure. The corrected wrapper distinguishes the documented risk exit from execution errors (exit 2) and checks agreement with the score. Findings are advisory, not confirmed vulnerabilities. Four missing references require portability review. No LLM calls are requested or reported; network isolation remains NOT_IMPLEMENTED.
+
+## Reported HIGH/CRITICAL occurrence coordinates — candidate
+
+Pinned [Finding model 2.13.7](https://github.com/NVIDIA/SkillSpector/blob/v2.13.7/src/skillspector/models.py) serializes occurrences as a list with file/start_line/end_line; an empty internal list gets the primary location. A finding can group multiple occurrences. Bounded high_occurrence_locations emits only approved observed component inventory paths, checked numeric coordinates, severity and rule; no snippets, raw URLs, fingerprints, messages, provenance or arbitrary metadata. Separately count missing groups, reported occurrences, unresolved and omitted; limit 1000 rows, remaining counted as omitted. Not proof of completeness of internal deduplication, not automated triage, no findings/score/suppression changes. Two regression methods; live CI required. G09: review each reported HIGH/CRITICAL occurrence against exact Git snapshot, never accept safety based on primary location alone.

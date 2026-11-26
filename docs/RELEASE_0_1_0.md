@@ -12,7 +12,7 @@
 
 | ID | Обязательный результат | Доказательство / состояние |
 |---|---|---|
-| G01 | Последовательный VERSION, changelog RU/EN, точные аннотированные теги | 0.0.85 подтверждён, 0.0.86 main CI и тег ожидают сверки; 0.1.0 NOT_VERIFIED |
+| G01 | Последовательный VERSION, changelog RU/EN, точные аннотированные теги | 0.0.86 подтверждён, 0.0.87 main CI и тег ожидают сверки; 0.1.0 NOT_VERIFIED |
 | G02 | Все 6 main jobs на точном commit и attempt, полный каталог, native Windows/Linux | кандидат фиксированного CI profile; новый CI требуется |
 | G03 | Безопасная установка каждого из трёх навыков по отдельному pin в чистый каталог, отказ дубликата | исторический single pin и локальный multi-skill PASS; актуальный remote multi-skill открыт |
 | G04 | Безопасное обновление/откат отдельного навыка, сохранность остальных и локальных изменений | исторические fixture PASS; текущие три независимые refs и реальный профиль открыты |
@@ -63,3 +63,7 @@ PR #92, exact head 5e770ebf66af9d2758b9df026229794e2932c15b, run 45852127083: в
 ## Сверка после #93
 
 0.0.85 main CI 45859420735 SUCCESS 6/6; exact commit feaa3d211221ef0301edf45571f312d2637b0341, tag objects dc893d0ac9fc5291d53023f0dd5967a8e17d1222 (catalog) и 4cab74df967d2a6f8abd98737b67da84dd30fd4e (microversion-release/v0.0.4), оба direct target. #93 run 45860767387 SUCCESS 5/5, squash 0b207f09bb9fca7cf5525d6b35a1919e1d316515. G09 остаётся OPEN: direct coverage 100% всех трёх; Microversion 9 HIGH (было 11), Audit 1 direct HIGH (был aggregate gate), Workflow 0. Не менять severity или исключения. G12 owner setting ENABLED, publication NOT_RUN. Harness rc.5 запустил CLI help (owner-reported), реальная сессия и hook NOT_VERIFIED. TD04 интеграционный кандидат 0.0.87; Gitleaks live parity ещё требуется. #81 OPEN.
+
+## Сверка после #94
+
+0.0.86 main CI 45864624507 SUCCESS 6/6, commit 0b207f09bb9fca7cf5525d6b35a1919e1d316515; exact tag objects c270a15e48552fbb7dbed47f46126c33c30a6aef (v0.0.86), 853133f0dd4b54ef72e6dda0cccce9b956bdb58a (microversion-release/v0.0.5), f1ab06d7abf4f1a1147df4217708fde079ec9953 (project-audit/v0.0.6). #94 run 45865200170 SUCCESS 5/5, squash 75f27ca40d90aa46c387c5c81d38f3ff064200c2. TD04 host/container parity PASS (1551/1551 distinct blobs, 24116257 bytes, 0 findings; container 323.1s), main 0.0.87 ещё требует приёмки. Не переносить локальный benchmark read-only на весь CI. Владелец подтвердил exact rc.5 headless help: --json, session-id, permission-mode, approval-policy ask/never, add-dir. PROFILE_HELP_PASS, модель, фактическое исполнение, hook и #81 остаются NOT_VERIFIED/OPEN. G09: следующий кандидат экспортирует ограниченные координаты сообщённых HIGH/CRITICAL occurrences, без verdict changes. Microversion Release 0.0.6 требует впервые добавленную запись changelog, не просто присутствие heading. RW05 и реальная клиентская приёмка открыты.

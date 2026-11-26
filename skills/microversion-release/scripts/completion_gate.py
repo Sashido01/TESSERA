@@ -48,6 +48,11 @@ def transition(previous, current):
     return 'RELEASE'
 
 
+def entry_count(body, version):
+    """Count exact structural version headings, not semantic changelog quality."""
+    return len(re.findall(r'(?m)^## ' + re.escape(version) + r'(?:[ \t]|\r?$)', body))
+
+
 def release_version(value):
     major, minor, patch = version_parts(value)
     return patch == 0 and (major != 0 or minor != 0)
@@ -136,6 +141,9 @@ class Inspector:
         changelogs = ['CHANGELOG.md'] + (['CHANGELOG.en.md'] if bilingual else [])
         metadata = {'VERSION', *changelogs}
         all_metadata = {'VERSION', 'CHANGELOG.md', 'CHANGELOG.en.md'}
+        previous_logs = {name: self.file(baseline, name) for name in changelogs}
+        for body in previous_logs.values():
+            require(entry_count(body, version) == 1, 'GATE_BASELINE_CHANGELOG_INVALID')
         tags = [self.tag(baseline, version)] if release_version(version) else []
         for row in rows:
             parts = row.split()
@@ -149,8 +157,11 @@ class Inspector:
             require(metadata <= changed and bool(changed - all_metadata), 'GATE_METADATA_ONLY_OR_MISSING')
             for name in changelogs:
                 body = self.file(commit, name)
-                require(re.search(r'(?m)^## ' + re.escape(current) + r'(?:\s|$)', body),
-                        'GATE_CHANGELOG_MISSING')
+                require(entry_count(previous_logs[name], current) == 0,
+                        'GATE_CHANGELOG_PREDECLARED')
+                require(entry_count(body, current) == 1, 'GATE_CHANGELOG_MISSING_OR_DUPLICATE')
+                require(entry_count(body, version) == 1, 'GATE_CHANGELOG_PREVIOUS_LOST')
+                previous_logs[name] = body
             if kind == 'RELEASE':
                 tags.append(self.tag(commit, current))
             previous, version = commit, current

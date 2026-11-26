@@ -4,6 +4,12 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.88 — Harden version history and static-finding evidence
+
+- Microversion Release 0.0.6: baseline CHANGELOG contains exactly one heading for baseline version; next commit introduces one heading for its version and preserves previous heading. Four Git regressions. Two old context CLI fixtures no longer copy all environment values, separate regression.
+- SkillSpector: bounded projection of all reported HIGH/CRITICAL occurrences with checked coordinates and omission counts, no raw evidence, two regression methods. Verdicts, thresholds and suppressions unchanged.
+- 0.0.86 main CI 45864624507 SUCCESS 6/6, three exact annotated tags. PR #94 45865200170 SUCCESS 5/5, host/container Gitleaks parity PASS (1551 blobs, 24116257 bytes, zero findings in scope). Main v0.0.87 acceptance required. Harness headless help owner-confirmed; actual session and #81 open. New tests require CI.
+
 ## 0.0.87 — Batch Git blob reads for Gitleaks (TD04)
 
 - Bounded host batch: up to 32 blobs / 4 MiB, exact order, type/size/OID, UTF-8 and framing, no trailing bytes. Preserve individual scans, coverage and repeated inventory. Independent container path unchanged.
