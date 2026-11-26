@@ -4,11 +4,26 @@
 
 **Статус:** инструкция приёмки, реальные клиентские испытания NOT_VERIFIED. Приоритет владельца 25.11.2026: начать пилот до окончания всей дорожной карты. T03–T05/T13, TD06/TD13–TD15. Пилот не равен независимому выпуску или обязательному исполнению.
 
+## Быстрый старт: не аудит репозитория
+
+Проверенный снимок каталога: `v0.0.88`, commit `015bed7f9eaf344b59e699a4b607c0e21b86f608`, main CI 45874463052 SUCCESS (6/6). Три независимых аннотированных тега и деревья сверены с этим снимком. GitHub Release не требуется для установки по тегу; отсутствие releases/latest не означает отсутствие навыков.
+
+| Навык | Pin | Commit | Дерево навыка |
+| --- | --- | --- | --- |
+| microversion-release | `refs/tags/microversion-release/v0.0.6` | `015bed7f9eaf344b59e699a4b607c0e21b86f608` | `12aebcae998b098a1e7d3c5f1fadd8bcd2b096e7` |
+| project-audit | `refs/tags/project-audit/v0.0.6` | `0b207f09bb9fca7cf5525d6b35a1919e1d316515` | `50d3f3dee94f1ceff9df343ef34689caf99ca184` |
+| repository-workflow | `refs/tags/repository-workflow/v0.0.2` | `a2a6af6b66e9cd6e5b28ccb227245f3a13389098` | `7bd8a54e7102a4bd83ae4b6c14e296a91c5b9f9c` |
+
+1. Сначала проверить только три уже установленные папки в активном профиле и версии. Если они совпадают с проверенными деревьями (с учётом метаданных установки gh), не переустанавливать.
+2. Если установка нужна, использовать новый пустой проект и три точных pin ниже; при недоступности API допустим проверенный локальный checkout точного тега и штатная установка --from-local в пустой каталог. Локальная копия не является remote pin. Не исследовать всю историю, не использовать latest/main, --all, --unpin или --force для пользовательского профиля.
+3. Открыть новый сеанс после установки и отдельно вызвать каждый навык: Codex через $имя (например, $microversion-release), Harness через штатный /name или skill tool. Проверить P01–P05 отдельными короткими запросами. Для P06 новый сеанс без названия; правильный ответ сам по себе не подтверждает загрузку. Отрицательный контроль — нерелевантная задача без ожидаемого вызова.
+4. Ограничить сетевые повторы двумя попытками на операцию; при отказе зафиксировать BLOCKED и продолжить независимые локальные read-only проверки. Не изменять разрешения и не чистить производственное окружение. P07/P08 и Stop-hook — отдельные испытания с разрешением, не условие начала P01–P06.
+
 ## Входные условия
 
 - Только новый одноразовый локальный проект, без remote, рабочих данных, секретов, глобальных hooks и изменения настоящих проектов. Не выдавать агенту дополнительные полномочия. Не запускать сканеры безопасности в клиентском профиле.
-- Закреплённый проверенный снимок: `refs/tags/v0.0.83`, commit `d830dc03c2c6575f69ae45a00fd6f7f22ef4feb4`, main CI 45778355203 SUCCESS. Независимые pin: `microversion-release/v0.0.3` → `10ad9905ef2e51e00f2a04723a94cf6b9f78522e`, `project-audit/v0.0.5` → `d830dc03c2c6575f69ae45a00fd6f7f22ef4feb4`, `repository-workflow/v0.0.2` → `a2a6af6b66e9cd6e5b28ccb227245f3a13389098`. Перед установкой проверить точные tag objects и деревья. Исторические статические проверки не заменяют приёмку.
-- Официальный gh 2.105.0 проверен для remote pin одного навыка; remote multi-skill и реальная загрузка хостом остаются испытаниями. Не применять --force, --all, обновление без pin или сторонние менеджеры. Сканеры NVIDIA не нужны для работы навыков.
+- Использовать только текущую таблицу pin выше; прежние снимки ниже — исторические доказательства, не инструкция установки.
+- gh 2.105.0: владелец подтвердил remote multi-skill install и явную загрузку в Harness; предупреждение записи metadata требует отдельной проверки. Не применять --force, --all, unpinned update или сторонние менеджеры.
 - Записать точные версии клиента, модели, gh, Git, Python и ОС. Сверить активный профиль и фактические проектные roots. Для Harness проверить включённые dsh-skill/dsh-skill-filesystem/dsh-tool-skill. Не менять глобальный профиль в ходе эксперимента.
 
 ## Установка: отдельный чистый проект на каждый клиент
@@ -28,8 +43,8 @@ gh --version
 foreach ($skill in @('microversion-release','project-audit','repository-workflow')) {
     if (Test-Path -LiteralPath (Join-Path $dest $skill)) { throw 'Skill already exists' }
     $pin = switch ($skill) {
-        'microversion-release' { 'refs/tags/microversion-release/v0.0.3' }
-        'project-audit' { 'refs/tags/project-audit/v0.0.5' }
+        'microversion-release' { 'refs/tags/microversion-release/v0.0.6' }
+        'project-audit' { 'refs/tags/project-audit/v0.0.6' }
         'repository-workflow' { 'refs/tags/repository-workflow/v0.0.2' }
     }
     gh skill install Sashido01/TESSERA $skill --pin $pin --dir $dest
@@ -128,3 +143,7 @@ OWNER_REPORTED: npm 12.0.2 / Node 24.18.0, @deepseek-ai/dsh@0.2.2-rc.5 dist.inte
 ## Headless help подтверждён владельцем
 
 26.11.2026: точный npm pin 0.2.2-rc.5 вывел справку dsh --profile headless --help. PROFILE_HELP_PASS; это не сессия модели. Следующий ограниченный пилот: новый одноразовый проект и отдельные DSH_HOME и DSH_AGENTS_HOME (оба нужны, см. [home-paths rc.5](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.5/packages/util/home-paths/README.md)); без глобальных навыков, дополнительных writable roots и full access. По [skill-filesystem rc.5](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.5/packages/skill/skill-filesystem/README.md) проектный .dsh/skills приоритет 100, shared .agents/skills приоритет 200. Использовать текущие опубликованные pins .5/.6/.2, после обновления повторить затронутые сценарии. Первый запуск модели — только P01/P02 discovery/explicit read-only calculation; не менять репозиторий. Проверить реальные NDJSON session, tool_call/tool_result загрузки навыка и CLI, final.reason.kind=completed, exit 0. Сырые события могут содержать prompts, tool args и приватные данные; сообщать только санитизированные факты. Отсутствие разрешённого model route или отказ песочницы — BLOCKED; не выдавать новые права. Не устанавливать bridge до подтверждения чистого запуска.
+
+## Приёмка владельца 27.11.2026 — v0.0.88
+
+OWNER_REPORTED: Harness 0.2.2-rc.1, 29 PASS / 1 FAIL / 4 NOT_VERIFIED. Все три дерева совпали с таблицей выше; наблюдались явные вызовы трёх навыков, отказ неизвестного имени и реальные headless P02/P04/P05. Предоставленный JSONL независимо подтверждает успешные native skill dispatch для всех трёх, но не все дочерние прогоны. Guarded Run positive и отрицательные fixtures, unit suites 78/78, 76 PASS + 1 FIFO SKIP, 17/17 — OWNER_REPORTED. AUTO_USE, GUI-live, Stop-hook NOT_VERIFIED; gh search недоступен. gh 2.105.0: предупреждение could not record install из-за отсутствующей переменной USERPROFILE (точная причина не воспроизведена независимо), файлы и frontmatter проверены владельцем. Не рекомендовать широкое --unpin --all; отдельный staging pin/rollback и проверка сохранности соседних навыков обязательны. Codex: сетевой timeout, установка/активация NOT_VERIFIED, #81 OPEN. Повторить узкие проверки локально; при unsafe Git контексте отказ обязателен, без удаления ограничений.

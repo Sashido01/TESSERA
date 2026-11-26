@@ -10,9 +10,9 @@ TESSERA is not a fork of Harness or Codex. It stores portable [Agent Skills](htt
 
 | Skill | Purpose | Status |
 | --- | --- | --- |
-| [Microversion Release](skills/microversion-release/README.en.md) | Microversions, mandatory annotated release tags, portable use across agents | 0.0.5 — exact-target and fixture-guard candidate; client acceptance open (#81) |
-| [Project Audit](skills/project-audit/README.en.md) | Evidence-based audit and metadata/Git inspection | 0.0.6 — fixture-guard candidate; agent acceptance NOT_VERIFIED |
-| [Repository Workflow](skills/repository-workflow/README.en.md) | Local Git and GitHub, independent tasks, CI, integration and technical debt | 0.0.2 — hardened planner accepted; agent acceptance NOT_VERIFIED |
+| [Microversion Release](skills/microversion-release/README.en.md) | Microversions, mandatory annotated release tags, portable use across agents | 0.0.6 — Harness explicit use observed; Codex and enforcement open (#81) |
+| [Project Audit](skills/project-audit/README.en.md) | Evidence-based audit and metadata/Git inspection | 0.0.6 — Harness explicit use observed; full acceptance open |
+| [Repository Workflow](skills/repository-workflow/README.en.md) | Local Git and GitHub, independent tasks, CI, integration and technical debt | 0.0.2 — Harness explicit use observed; full acceptance open |
 
 ## Repository layout
 
@@ -24,6 +24,8 @@ docs/                   Rules, architecture, and roadmap
 ```
 
 ## Getting started
+
+**For quick installation:** [exact verified pins and short pilot](docs/AGENT_PILOT.en.md#quick-start-not-a-repository-audit). A GitHub Release is not required; do not use floating main.
 
 1. Open the skill you need under `skills/` and read its `README.en.md` or the canonical `README.md` in Russian.
 2. Install the **entire skill directory** into your agent's skills directory—not just its `SKILL.md`.

@@ -10,9 +10,9 @@ TESSERA не является форком Harness или Codex. Здесь хр
 
 | Навык | Назначение | Состояние |
 | --- | --- | --- |
-| [Microversion Release](skills/microversion-release/README.md) | Микроверсии, обязательные аннотированные Git-теги релизов, переносимость между агентами | 0.0.5 — кандидат точной цели и защиты фикстур; клиентская приёмка открыта (#81) |
-| [Project Audit](skills/project-audit/README.md) | Доказательный аудит, инвентаризация метаданных и Git | 0.0.6 — кандидат защиты фикстур; агентная приёмка NOT_VERIFIED |
-| [Repository Workflow](skills/repository-workflow/README.md) | Локальный Git и GitHub, независимые задачи, CI, интеграция и технический долг | 0.0.2 — усиленный планировщик принят; агентная приёмка NOT_VERIFIED |
+| [Microversion Release](skills/microversion-release/README.md) | Микроверсии, обязательные аннотированные Git-теги релизов, переносимость между агентами | 0.0.6 — Harness explicit use подтверждён; Codex и enforcement открыты (#81) |
+| [Project Audit](skills/project-audit/README.md) | Доказательный аудит, инвентаризация метаданных и Git | 0.0.6 — Harness explicit use подтверждён; полная приёмка открыта |
+| [Repository Workflow](skills/repository-workflow/README.md) | Локальный Git и GitHub, независимые задачи, CI, интеграция и технический долг | 0.0.2 — Harness explicit use подтверждён; полная приёмка открыта |
 
 ## Как устроен репозиторий
 
@@ -24,6 +24,8 @@ docs/                   Правила, архитектура и дорожна
 ```
 
 ## Начало работы
+
+**Для быстрой установки:** [точные проверенные pins и короткий пилот](docs/AGENT_PILOT.md#быстрый-старт-не-аудит-репозитория). GitHub Release не требуется; не использовать плавающий main.
 
 1. Откройте папку нужного навыка в `skills/` и прочитайте его `README.md`.
 2. Установите **всю папку навыка** в каталог навыков своей агентной системы, а не один `SKILL.md`.
