@@ -7,7 +7,7 @@
 ## Entry conditions
 
 - Only a fresh disposable local project, without a remote, production data, secrets, global hooks or changes to real projects. Do not grant additional privileges to the agent. Do not execute security scanners in the client profile.
-- Pinned catalog snapshot: annotated `refs/tags/v0.0.80`, commit `6b9b4487f4d5938a179400de0a59dceb4f015c5b`, main CI 45669705980. Install skills using their separate annotated tags: `microversion-release/v0.0.2` → `9599367afa1aad2f29f0640fc94da5ae8e473cee`, `project-audit/v0.0.4` → `be6a126f08ffbb49b721b50e030b2a6d82c7d4f3`, `repository-workflow/v0.0.2` → `a2a6af6b66e9cd6e5b28ccb227245f3a13389098`. Verify each remote tag object and skill tree before installation. In main CI 45669705980, catalog_checks 139401346128, all three Security Policy Verdicts PASS, 0 HIGH/CRITICAL; #77 closed. Advisory static review is not certification or production approval.
+- Verified pinned catalog snapshot: `refs/tags/v0.0.82`, commit `10ad9905ef2e51e00f2a04723a94cf6b9f78522e`, main CI 45773757137 SUCCESS. Independent pins: `microversion-release/v0.0.3` → `10ad9905ef2e51e00f2a04723a94cf6b9f78522e`, `project-audit/v0.0.4` → `be6a126f08ffbb49b721b50e030b2a6d82c7d4f3`, `repository-workflow/v0.0.2` → `a2a6af6b66e9cd6e5b28ccb227245f3a13389098`. Verify each remote tag object and skill tree before installation; new Project Audit candidate excluded until its own tag is verified. Historical v0.0.80 static verdict is not certification or production approval.
 - Official gh 2.105.0 was verified for remote pin of one skill; remote multi-skill installation and actual host loading remain trials. Do not use --force, --all, unpinned updates or third-party managers. NVIDIA scanners are not runtime requirements.
 - Record exact client, model, gh, Git, Python and OS versions. Confirm the active profile and actual project roots. For Harness confirm dsh-skill/dsh-skill-filesystem/dsh-tool-skill are enabled. Do not modify the global profile during the trial.
 
@@ -28,7 +28,7 @@ gh --version
 foreach ($skill in @('microversion-release','project-audit','repository-workflow')) {
     if (Test-Path -LiteralPath (Join-Path $dest $skill)) { throw 'Skill already exists' }
     $pin = switch ($skill) {
-        'microversion-release' { 'refs/tags/microversion-release/v0.0.2' }
+        'microversion-release' { 'refs/tags/microversion-release/v0.0.3' }
         'project-audit' { 'refs/tags/project-audit/v0.0.4' }
         'repository-workflow' { 'refs/tags/repository-workflow/v0.0.2' }
     }
@@ -110,3 +110,5 @@ Historical branch snapshot before sequential independent tag acceptance: PR #74 
 ## Current snapshot at PR #88 preparation
 
 v0.0.80: all eight independent tags verified; #76/#77/#80/#82/#83 closed. Actual client installation of new exact pins, discovery, explicit invocation, AUTO_USE, ENFORCEMENT, UPDATE and ROLLBACK require new acceptance. #81 remains open; owner post-check of 0.0.80 rejected GIT_CONTEXT_UNSAFE. Never silently clear production context or transfer old-profile evidence to a new pin.
+
+26 November 2026: Microversion Release pin updated to accepted 0.0.3; P03 may use diagnostic `python scripts/release_tag.py context` from the installed skill (names only, no Git). Not authorization to run Git. #81 open. For paired evaluation record identical fixtures, model, permissions, tools, budget and fresh sessions; measure criterion PASS, skill invocation, false activation, violations and cost separately. Compare against no-skill controls; no statistical significance claim from one trial.
