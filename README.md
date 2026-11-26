@@ -10,8 +10,8 @@ TESSERA не является форком Harness или Codex. Здесь хр
 
 | Навык | Назначение | Состояние |
 | --- | --- | --- |
-| [Microversion Release](skills/microversion-release/README.md) | Микроверсии, обязательные аннотированные Git-теги релизов, переносимость между агентами | 0.0.3 — принят; 0.0.4 кандидат Completion Gate/Guarded Run; клиентская приёмка открыта (#81) |
-| [Project Audit](skills/project-audit/README.md) | Доказательный аудит, инвентаризация метаданных и Git | 0.0.5 — DELTA planner, независимый тег подтверждён; агентная приёмка NOT_VERIFIED |
+| [Microversion Release](skills/microversion-release/README.md) | Микроверсии, обязательные аннотированные Git-теги релизов, переносимость между агентами | 0.0.5 — кандидат точной цели и защиты фикстур; клиентская приёмка открыта (#81) |
+| [Project Audit](skills/project-audit/README.md) | Доказательный аудит, инвентаризация метаданных и Git | 0.0.6 — кандидат защиты фикстур; агентная приёмка NOT_VERIFIED |
 | [Repository Workflow](skills/repository-workflow/README.md) | Локальный Git и GitHub, независимые задачи, CI, интеграция и технический долг | 0.0.2 — усиленный планировщик принят; агентная приёмка NOT_VERIFIED |
 
 ## Как устроен репозиторий

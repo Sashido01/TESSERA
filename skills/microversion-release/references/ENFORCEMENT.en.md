@@ -25,6 +25,7 @@ Argument **schema** (replace paths, actual client flags and reviewed commands; f
 | Script | Absolute scripts/guarded_run.py path |
 | --repo | Selected Git root |
 | --baseline | Full SHA of existing baseline |
+| --expected-version | Required exact owner-approved target version |
 | --agent-exe | Reviewed absolute client executable |
 | --agent-arg | Repeat for each reviewed argument, e.g. exec and --json for Codex; prompt as a separate argument |
 | --test-exe | Reviewed absolute test executable |
@@ -45,3 +46,7 @@ Sources: [Codex Hooks](https://learn.chatgpt.com/docs/hooks), [Codex exec](https
 ## Acceptance
 
 Linux Git 2.47.3 / Python 3.13.5 — 26/26 methods: 16 Git/Stop fixture and 10 actual child-process wrapper fixture; verified Git blobs match tested files. Synthetic agents/tests do not establish actual Codex/Harness. Full catalog/Windows require candidate CI. Actual each-client acceptance: positive 0.0.99 → 0.1.0 with exact tag and approved tests; negative missing/lightweight/wrong tag, skip, dirty, no-op, missing/failing hook, unsafe Git context, test refusal and no infinite continuation. Observe client hook invocation and wrapper exit. Record client version/profile, exact tag/commit, JSON and test outcome without private data. Close #81 only after demonstrated least-privilege invocation and real native Windows/Codex trials. No production enablement before acceptance.
+
+## Exact target (0.0.5 candidate)
+
+Guarded Run schema_version 2 requires --expected-version even for PLAN_ONLY. Validates format, refuses target below baseline and requires change by default. If agent produces valid microversion 0.0.100 instead of requested 0.1.0, RUN_TARGET_VERSION_MISMATCH before tests; missing release tag yields RUN_STRUCTURE_FAILED. For read-only work specify baseline version and explicit --allow-no-change. ACCEPTANCE_CHECKS_PASSED does not establish test adequacy, Stop observation, remote or release readiness. Four new regression methods including actual Git release and negative tag check. Native CI required.

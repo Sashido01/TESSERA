@@ -19,11 +19,15 @@ if mode == 'noop':
 (root / 'code.txt').write_text('new content', encoding='utf-8')
 if mode == 'dirty':
     sys.exit(0)
-(root / 'VERSION').write_text('0.0.100\\n', encoding='utf-8')
+version = '0.1.0' if mode in ('release', 'missing-tag') else '0.0.100'
+(root / 'VERSION').write_text(version + '\\n', encoding='utf-8')
 with (root / 'CHANGELOG.md').open('a', encoding='utf-8') as stream:
-    stream.write('## 0.0.100 — fixture\\n')
+    stream.write('## ' + version + ' — fixture\\n')
 subprocess.run(['git', 'add', '.'], check=True)
 subprocess.run(['git', 'commit', '-qm', 'Fixture change'], check=True)
+if mode == 'release':
+    subprocess.run(['git', '-c', 'tag.gpgSign=false', 'tag', '-a', 'v0.1.0', '-m',
+                    'Fixture release'], check=True)
 '''
 TEST = '''import pathlib, sys
 mode = sys.argv[1]
@@ -45,7 +49,9 @@ class GuardedRunTests(unittest.TestCase):
         home.mkdir()
         hooks = self.root / 'empty-hooks'
         hooks.mkdir()
-        env = {k: v for k, v in os.environ.items() if not k.upper().startswith('GIT_')}
+        env = {k: os.environ[k] for k in ('PATH', 'SystemRoot', 'WINDIR', 'COMSPEC',
+                 'PATHEXT', 'TEMP', 'TMP', 'TMPDIR', 'APPDATA', 'LOCALAPPDATA',
+                 'HOMEDRIVE', 'HOMEPATH', 'LANG', 'LC_ALL', 'LC_CTYPE', 'TZ') if k in os.environ}
         env.update(HOME=str(home), USERPROFILE=str(home))
         patch = mock.patch.dict(os.environ, env, clear=True)
         patch.start()
@@ -70,10 +76,10 @@ class GuardedRunTests(unittest.TestCase):
         return subprocess.run(['git', '-C', str(self.repo), *args], check=True,
                               capture_output=True, text=True, timeout=15).stdout.strip()
 
-    def invoke(self, agent='valid', test='valid', execute=True, extra=()):
+    def invoke(self, agent='valid', test='valid', execute=True, extra=(), target='0.0.100'):
         python = str(Path(sys.executable).resolve())
         args = [python, '-B', str(SOURCE), '--repo', str(self.repo), '--baseline', self.base,
-                '--agent-exe', python, '--agent-arg=-B', '--agent-arg', str(self.agent),
+                '--expected-version', target, '--agent-exe', python, '--agent-arg=-B', '--agent-arg', str(self.agent),
                 '--agent-arg', agent, '--test-exe', python, '--test-arg=-B', '--test-arg',
                 str(self.tests), '--test-arg', test, *extra]
         if execute:
@@ -104,9 +110,38 @@ class GuardedRunTests(unittest.TestCase):
         self.assertEqual((code, result['reason']), (1, 'RUN_NO_CHANGE'))
 
     def test_read_only_explicitly_allowed(self):
-        code, result = self.invoke(agent='noop', extra=('--allow-no-change',))
+        code, result = self.invoke(agent='noop', extra=('--allow-no-change',), target='0.0.99')
         self.assertEqual((code, result['status']), (0, 'ACCEPTANCE_CHECKS_PASSED'))
         self.assertEqual(result['structure']['commits_checked'], 0)
+
+    def test_target_version_mismatch_blocks_before_tests(self):
+        code, result = self.invoke(target='0.1.0')
+        self.assertEqual((code, result['reason']), (1, 'RUN_TARGET_VERSION_MISMATCH'))
+        self.assertEqual(result['expected_version'], '0.1.0')
+        self.assertEqual(result['structure']['version'], '0.0.100')
+        self.assertIsNone(result['test_exit_code'])
+
+    def test_exact_release_target_with_tag(self):
+        code, result = self.invoke(agent='release', target='0.1.0')
+        self.assertEqual((code, result['status']), (0, 'ACCEPTANCE_CHECKS_PASSED'))
+        self.assertEqual(result['structure']['version'], '0.1.0')
+        self.assertEqual(result['structure']['tags_checked'], 1)
+        self.assertEqual(result['release_readiness'], 'NOT_VERIFIED')
+
+    def test_exact_release_target_without_tag(self):
+        code, result = self.invoke(agent='missing-tag', target='0.1.0')
+        self.assertEqual((code, result['reason']), (1, 'RUN_STRUCTURE_FAILED'))
+        self.assertIsNone(result['test_exit_code'])
+
+    def test_invalid_or_old_target_refused_before_agent(self):
+        for target, reason in [('v0.1.0', 'GATE_VERSION_INVALID'),
+                               ('0.0.98', 'RUN_TARGET_VERSION_BEHIND_BASELINE'),
+                               ('0.0.99', 'RUN_TARGET_VERSION_REQUIRES_CHANGE')]:
+            with self.subTest(target=target):
+                code, result = self.invoke(target=target)
+                self.assertEqual((code, result['reason']), (1, reason))
+                self.assertIsNone(result['agent_exit_code'])
+                self.assertEqual(self.git('rev-parse', 'HEAD'), self.base)
 
     def test_agent_failure_blocks(self):
         code, result = self.invoke(agent='fail')

@@ -4,6 +4,12 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.86 — Require exact target and protect Git fixtures
+
+- Microversion Release 0.0.5: required --expected-version in Guarded Run, schema 2; wrong target blocks before tests even if structurally valid. Four regression methods including actual release fixture with and without tag.
+- Microversion Release and Project Audit 0.0.6: old mutating Git test setup refuses inherited Git_* except pager before any writes, two regression methods. New isolated fixtures use explicit system environment allowlist. Production policy unchanged.
+- PR #92 CI 45852127083 5/5 PASS; SkillSpector 100% coverage, but Microversion 11 HIGH, Audit aggregate risk gate 1 HIGH, Workflow 0 HIGH. G09 open; advisory results do not establish clean security. Candidate native CI and actual client acceptance required.
+
 ## 0.0.85 — Independently enforce completion checks
 
 - Microversion Release 0.0.4: Completion Gate validates linear version transitions, changelogs, exact annotated tags, cleanliness and index flags; repeats HEAD/ref checks. Basic root VERSION/changelog profile. Stop adapter requests at most one continuation per owner-selected marker, no automatic tagging.

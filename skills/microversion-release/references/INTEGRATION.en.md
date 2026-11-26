@@ -109,3 +109,5 @@ For multi-agent repositories: maintain one canonical version source, serialize r
 - https://hermes-agent.nousresearch.com/docs/user-guide/features/skills
 
 T13 enforcement candidate: [Completion Gate and Guarded Run](ENFORCEMENT.en.md). External control mandatory, Stop provides additional feedback; actual Codex/Harness NOT_VERIFIED. No production enablement before acceptance.
+
+Native fixture context guard candidate: mutating Git unit-test setup refuses inherited Git_* names except GIT_PAGER before creating a temporary directory or executing Git. Production authorization and context policy unchanged. No environment stripping to obtain PASS. Run positive real-Git fixture tests from an ordinary trusted terminal with a naturally acceptable context; on FIXTURE_GIT_CONTEXT_UNSAFE report BLOCKED, never treat refusal as client acceptance. A synthetic Linux two-repository reproduction confirmed Git -C alone does not prevent GIT_DIR redirection of a local config write; a missing indexed config tuple returned exit 128. This demonstrates the fixture risk, not the cause of every owner-reported error. New regression test requires CI.
