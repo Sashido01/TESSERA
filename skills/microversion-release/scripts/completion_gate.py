@@ -135,7 +135,8 @@ class Inspector:
         require(len(rows) <= MAX_COMMITS, 'GATE_COMMIT_LIMIT')
         changelogs = ['CHANGELOG.md'] + (['CHANGELOG.en.md'] if bilingual else [])
         metadata = {'VERSION', *changelogs}
-        tags = []
+        all_metadata = {'VERSION', 'CHANGELOG.md', 'CHANGELOG.en.md'}
+        tags = [self.tag(baseline, version)] if release_version(version) else []
         for row in rows:
             parts = row.split()
             require(len(parts) == 2 and OID.fullmatch(parts[0]) and parts[1] == previous,
@@ -145,7 +146,7 @@ class Inspector:
             kind = transition(version, current)
             changed = set(self.git('diff-tree', '--no-commit-id', '--name-only', '-r', '-z',
                                    '--no-renames', previous, commit).split('\0')) - {''}
-            require(metadata <= changed and bool(changed - metadata), 'GATE_METADATA_ONLY_OR_MISSING')
+            require(metadata <= changed and bool(changed - all_metadata), 'GATE_METADATA_ONLY_OR_MISSING')
             for name in changelogs:
                 body = self.file(commit, name)
                 require(re.search(r'(?m)^## ' + re.escape(current) + r'(?:\s|$)', body),
@@ -154,14 +155,13 @@ class Inspector:
                 tags.append(self.tag(commit, current))
             previous, version = commit, current
         require(previous == head, 'GATE_BASELINE_MISMATCH')
-        if not rows and release_version(version):
-            tags.append(self.tag(head, version))
         self.clean()
         require(self.head() == head, 'GATE_STALE')
         for ref, oid in tags:
             require(self.git('rev-parse', '--verify', ref).strip() == oid, 'GATE_STALE')
         return {'status': 'STRUCTURE_VERIFIED', 'commit': head, 'baseline': baseline,
                 'version': version, 'commits_checked': len(rows), 'tags_checked': len(tags),
+                'tag_objects': [{'ref': ref, 'oid': oid} for ref, oid in tags],
                 'test_execution': 'NOT_RUN', 'release_readiness': 'NOT_VERIFIED'}
 
 
