@@ -12,7 +12,7 @@ Three standalone skills: Microversion Release, Project Audit, Repository Workflo
 
 | ID | Mandatory outcome | Evidence / status |
 |---|---|---|
-| G01 | Sequential VERSION, bilingual changelog, immutable annotated catalog and independent tags | v0.0.83 verified; future v0.1.0 NOT_VERIFIED |
+| G01 | Sequential VERSION, RU/EN changelogs, exact annotated tags | 0.0.85 verified, 0.0.86 main CI and tag require verification; 0.1.0 NOT_VERIFIED |
 | G02 | All 6 main jobs on exact commit and attempt, full catalog, native Windows/Linux | fixed CI profile candidate; new CI required |
 | G03 | Safe install of each skill by separate pin into clean directory, duplicate refusal | historical single pin and local multi-skill PASS; current remote multi-skill open |
 | G04 | Safe update/rollback of individual skill, preservation of others and local edits | historical fixture PASS; current three independent refs and actual profile open |
@@ -23,7 +23,7 @@ Three standalone skills: Microversion Release, Project Audit, Repository Workflo
 | G09 | Security: no unresolved blocking risk for claimed operations; unchanged required checks; justified known limits and nonapplicability | T12 PARTIAL; advisory/TOCTOU/resource risks scoped, no sandbox claim |
 | G10 | Separate reproducible ZIP from exact v0.1.0, SHA-256, manifest, verified Sigstore/SLSA attestation | v0.0.21 historical PASS; v0.1.0 NOT_RUN |
 | G11 | Close #78/#81 by criteria, no unfinished release PR/CI; remove preserved/unused branches after verification | OPEN; local worktrees require owner |
-| G12 | Final independent evidence, instructions, supported/unverified environments, known limits; agreed GitHub Release decision | NOT_STARTED; no GitHub Releases at baseline |
+| G12 | Independent evidence, instructions, supported/unverified environments; GitHub Immutable Release with verified ZIP | setting ENABLED (owner PUT204/GET true); publication and verification NOT_RUN |
 
 All mandatory criteria for claimed scope must be evidenced. Any NOT_VERIFIED mandatory item blocks readiness claims. The owner may explicitly change product scope, not assign PASS to an unexecuted criterion. Do not compute a readiness percentage from row counts. Historical results do not transfer to changed files, skill trees, environments or policies.
 
@@ -59,3 +59,7 @@ Source: owner-supplied Codex report (OWNER_REPORTED, not independently reproduce
 ## Reconciliation 26 November 2026 — #92 accepted, next guard candidate
 
 PR #92, exact head 5e770ebf66af9d2758b9df026229794e2932c15b, run 45852127083: all five mandatory PR jobs PASS. Squash commit feaa3d211221ef0301edf45571f312d2637b0341; main run 45859420735 still needs verification and two exact annotated tags. SkillSpector 26/26 Microversion Release files fully inspected, 100%; integrated Tier 1 execution PASS, policy verdict Microversion FAIL (11 HIGH, 24 MEDIUM, 0 CRITICAL), Audit FAIL (1 HIGH — aggregate risk gate, direct 55, 0 direct HIGH), Workflow PASS (0 HIGH, direct risk 30). G09 OPEN: execution PASS is not findings remediation, no suppression. Owner reported Node 24.18.0 / npm 12.0.2; npm manifest @deepseek-ai/dsh 0.2.2-rc.5 requires Node >=24.9.0. Actual Harness not launched. GET immutable-releases returned enabled:false, enforced_by_owner:false — G12 BLOCKED pending enable and repeated verification. G06 Microversion 0.0.5 candidate requires exact --expected-version; 4 new test methods. G07 Audit 0.0.6 protects mutating fixture setup, likewise Microversion; 2 regression methods total. New isolated fixtures pass only explicit allowlist. All new tests require CI; actual client acceptance #81 open. TD04/RW05 separate candidates; preserve occupied branches/worktrees.
+
+## Post-#93 reconciliation
+
+0.0.85 main CI 45859420735 SUCCESS 6/6; exact commit feaa3d211221ef0301edf45571f312d2637b0341, tag objects dc893d0ac9fc5291d53023f0dd5967a8e17d1222 (catalog) and 4cab74df967d2a6f8abd98737b67da84dd30fd4e (microversion-release/v0.0.4), both direct target. #93 run 45860767387 SUCCESS 5/5, squash 0b207f09bb9fca7cf5525d6b35a1919e1d316515. G09 remains OPEN: direct coverage 100% all three; Microversion 9 HIGH (was 11), Audit 1 direct HIGH (was aggregate gate), Workflow 0. No severity changes or exclusions. G12 owner setting ENABLED, publication NOT_RUN. Harness rc.5 CLI help executed (owner-reported), actual session and hook NOT_VERIFIED. TD04 integration candidate 0.0.87; live Gitleaks parity required. #81 OPEN.

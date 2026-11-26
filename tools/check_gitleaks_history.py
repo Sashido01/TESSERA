@@ -22,6 +22,8 @@ from check_official_local_install import InstallCheckError, fixture_env
 MAX_OBJECTS = 20000
 MAX_BLOBS = 2048
 MAX_TOTAL = 128 * 1024 * 1024
+HOST_BATCH_COUNT = 32
+HOST_BATCH_BYTES = 4 * 1024 * 1024
 MAX_SECONDS = 480  # 8 min host budget; container deadline remains 540 s, job limit 20 min.
 OID = re.compile(r"(?:[0-9a-f]{40}|[0-9a-f]{64})\Z")
 
@@ -81,9 +83,8 @@ def history_snapshot(blobs):
     return hashlib.sha256(json.dumps(blobs, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
-def checked_blob(repo, env, oid, size):
+def validate_blob(content, oid, size):
     require(OID.fullmatch(oid) is not None, "HISTORY_OBJECT_INVALID")
-    content = git(repo, env, "cat-file", "blob", oid)
     require(len(content) == size, "HISTORY_BLOB_SIZE_MISMATCH")
     require(blob_oid(content, len(oid)) == oid, "HISTORY_BLOB_OID_MISMATCH")
     require(b"\0" not in content, "HISTORY_UNSUPPORTED_BINARY")
@@ -92,6 +93,59 @@ def checked_blob(repo, env, oid, size):
     except UnicodeError as exc:
         raise InstallCheckError("HISTORY_UNSUPPORTED_ENCODING") from exc
     return content
+
+
+def checked_blob(repo, env, oid, size):
+    require(OID.fullmatch(oid) is not None, "HISTORY_OBJECT_INVALID")
+    return validate_blob(git(repo, env, "cat-file", "blob", oid), oid, size)
+
+
+def history_batches(blobs):
+    batch = []
+    total = 0
+    for oid, size in sorted(blobs.items()):
+        require(OID.fullmatch(oid) is not None and type(size) is int
+                and 0 <= size <= min(MAX_FILE, HOST_BATCH_BYTES), "HISTORY_BATCH_INPUT")
+        if batch and (len(batch) >= HOST_BATCH_COUNT or total + size > HOST_BATCH_BYTES):
+            yield batch
+            batch, total = [], 0
+        batch.append((oid, size))
+        total += size
+    if batch:
+        yield batch
+
+
+def validate_batch_input(batch):
+    require(0 < len(batch) <= HOST_BATCH_COUNT, "HISTORY_BATCH_INPUT")
+    require(all(OID.fullmatch(oid) is not None and type(size) is int
+                and 0 <= size <= MAX_FILE for oid, size in batch), "HISTORY_BATCH_INPUT")
+    require(len({oid for oid, _ in batch}) == len(batch)
+            and sum(size for _, size in batch) <= HOST_BATCH_BYTES, "HISTORY_BATCH_INPUT")
+
+
+def parse_blob_batch(raw, batch):
+    validate_batch_input(batch)
+    require(len(raw) <= HOST_BATCH_BYTES + HOST_BATCH_COUNT * 96, "HISTORY_BATCH_OUTPUT_LIMIT")
+    result = []
+    pos = 0
+    for oid, size in batch:
+        header = f"{oid} blob {size}\n".encode("ascii")
+        require(raw.startswith(header, pos), "HISTORY_BATCH_HEADER")
+        start = pos + len(header)
+        end = start + size
+        require(raw[end:end + 1] == b"\n", "HISTORY_BATCH_FRAME")
+        result.append((oid, size, validate_blob(raw[start:end], oid, size)))
+        pos = end + 1
+    require(pos == len(raw), "HISTORY_BATCH_TRAILING_DATA")
+    return result
+
+
+def checked_blob_batch(repo, env, batch):
+    # The caller provides bounded, inventoried chunks; the parser rechecks framing.
+    validate_batch_input(batch)
+    raw = git(repo, env, "cat-file", "--batch",
+              data=("\n".join(oid for oid, _ in batch) + "\n").encode("ascii"))
+    return parse_blob_batch(raw, batch)
 
 
 def review(repo, cli, temp, env):
@@ -106,9 +160,7 @@ def review(repo, cli, temp, env):
 
     def one(item):
         check_deadline()
-        oid, size = item
-        content = checked_blob(repo, env, oid, size)
-        check_deadline()
+        oid, size, content = item
         if size == 0:
             return oid, size, collections.Counter()
         rules, _, _ = scan(cli, temp, env, content)
@@ -121,13 +173,17 @@ def review(repo, cli, temp, env):
     empty = 0
     # Bounded worker pool. Each scanner receives exactly one object via stdin.
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
-        for oid, size, rules in pool.map(one, sorted(before.items())):
+        for batch in history_batches(before):
             check_deadline()
-            require(oid not in seen and before.get(oid) == size, "HISTORY_DUPLICATE_BLOB")
-            seen.add(oid)
-            bytes_scanned += size
-            empty += int(size == 0)
-            counts.update(rules)
+            records = checked_blob_batch(repo, env, batch)
+            check_deadline()
+            for oid, size, rules in pool.map(one, records):
+                check_deadline()
+                require(oid not in seen and before.get(oid) == size, "HISTORY_DUPLICATE_BLOB")
+                seen.add(oid)
+                bytes_scanned += size
+                empty += int(size == 0)
+                counts.update(rules)
     require(seen == set(before) and bytes_scanned == sum(before.values()),
             "HISTORY_BLOB_COVERAGE_MISMATCH")
     check_deadline()

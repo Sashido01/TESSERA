@@ -4,6 +4,12 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.87 — Batch Git blob reads for Gitleaks (TD04)
+
+- Bounded host batch: up to 32 blobs / 4 MiB, exact order, type/size/OID, UTF-8 and framing, no trailing bytes. Preserve individual scans, coverage and repeated inventory. Independent container path unchanged.
+- Synthetic read benchmark 256 blobs: medians 0.508152/0.013793 s (~36.8x), not whole-CI speedup. New unit/actual Git fixture tests and full host/container parity require current CI. All 4 base blobs reconciled with main v0.0.86.
+- v0.0.85 main 45859420735 SUCCESS 6/6 and both tags verified; PR #93 run 45860767387 SUCCESS 5/5, squash 0b207f09bb9fca7cf5525d6b35a1919e1d316515, main acceptance required. Immutable setting owner-confirmed, Harness rc.5 CLI help executed. G09 and #81 remain open.
+
 ## 0.0.86 — Require exact target and protect Git fixtures
 
 - Microversion Release 0.0.5: required --expected-version in Guarded Run, schema 2; wrong target blocks before tests even if structurally valid. Four regression methods including actual release fixture with and without tag.
