@@ -21,11 +21,33 @@ if pathlib.Path(module.__file__).resolve() != PATH:
     raise RuntimeError("Unexpected test module origin")
 
 
+def require_fixture_context():
+    # Real Git mutations in a disposable test must not inherit redirections
+    # or configuration overrides. Refuse before creating or touching fixtures.
+    if any(key.upper().startswith("GIT_") and key.upper() != "GIT_PAGER"
+           for key in os.environ):
+        raise RuntimeError("FIXTURE_GIT_CONTEXT_UNSAFE")
+
+
+class FixtureContextTests(unittest.TestCase):
+    def test_inherited_context_refuses_before_mutation(self):
+        for name in ("GIT_DIR", "GIT_WORK_TREE", "GIT_CONFIG_COUNT", "GIT_CONFIG_KEY_0"):
+            with self.subTest(name=name), mock.patch.dict(os.environ, {name: "fixture"}), \
+                    mock.patch.object(subprocess, "run") as git, \
+                    mock.patch.object(tempfile, "TemporaryDirectory") as temp:
+                case = ReleaseTagTests("test_create_and_verify_annotated")
+                with self.assertRaisesRegex(RuntimeError, "FIXTURE_GIT_CONTEXT_UNSAFE"):
+                    case.setUp()
+                git.assert_not_called()
+                temp.assert_not_called()
+
+
 class ReleaseTagTests(unittest.TestCase):
     def test_import_origin(self):
         self.assertEqual(pathlib.Path(module.__file__).resolve(), PATH)
 
     def setUp(self):
+        require_fixture_context()
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.repo = pathlib.Path(self.tmp.name)

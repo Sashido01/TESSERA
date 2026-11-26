@@ -109,3 +109,5 @@ hermes skills install Sashido01/TESSERA/skills/microversion-release
 - https://code.claude.com/docs/en/skills
 - https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/skill/skill-filesystem/README.md
 - https://hermes-agent.nousresearch.com/docs/user-guide/features/skills
+
+Кандидат защиты контекста нативных фикстур: setup изменяющих Git unit tests отклоняет наследуемые имена Git_* кроме GIT_PAGER до создания временного каталога или запуска Git. Production-политика и полномочия не изменяются. Не очищать окружение ради PASS. Позитивные реальные Git-тесты выполнять из обычного доверенного терминала с естественно допустимым контекстом; FIXTURE_GIT_CONTEXT_UNSAFE означает BLOCKED, не клиентскую приёмку. Синтетическая Linux-проба двух временных репозиториев подтвердила, что Git -C не предотвращает перенаправление локальной записи config через GIT_DIR; неполная индексированная пара вызвала exit 128. Это доказательство риска фикстуры, не причина каждого ERROR из отчёта владельца. Новый regression test требует CI.
