@@ -4,6 +4,12 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.83 — Plan DELTA audits and reconcile documentation
+
+- Project Audit 0.0.5: recheck planning for two explicitly supplied DAGs; changed and unknown fingerprints invalidate dependents, incomplete graphs or context changes require full rechecks. No project reads or PASS reuse.
+- 14/14 isolated Linux tests; source and test Git blobs verified. Full CI and actual activation required.
+- TD15/#78: reconciled RU/EN README, Inventory, Git Inspector, Evidence Core and roadmap. Verified accepted v0.0.82 and microversion-release/v0.0.3; CI does not establish client acceptance.
+
 ## 0.0.82 — Diagnose inherited Git context
 
 - Microversion Release 0.0.3: report blocking variable names without values or Git execution; orphaned indexed GIT_CONFIG_* also block local tagging and inspection. No removal of host configuration or permission bypass.

@@ -1,0 +1,9 @@
+# DELTA — recheck planning (candidate)
+
+[Русский — оригинал](DELTA_PLAN.md) | **English — translation**
+
+The command `python scripts/delta_plan.py --manifest <manifest.json>` compares only two explicitly supplied graphs. It reads no project, runs no checks and accesses neither Git nor the network. Format v1: `{schema_version: 1, previous: snapshot, current: snapshot}`; snapshot = `{scope, context_sha256, coverage_declared_complete, nodes}`; nodes is an array of `{id, fingerprint, depends_on}`. Scope/id are non-private labels; digests are 64 lowercase hex characters or null. depends_on contains direct dependency IDs. The context digest must include analyzer versions, policy, environment, configuration and other global inputs. Mark incomplete coverage false and unknown fingerprints null. Do not confuse metadata or commit SHA with a content digest.
+
+The algorithm validates the DAG, rejecting duplicates and unknown references. Changed scope, context, node/edge topology or declared incomplete coverage requires FULL_RECHECK of every current node; removed nodes are listed separately. Otherwise changed/unknown fingerprints invalidate the node and all transitive dependents. Traversal O(V+E), output sorting O(V log V). PLAN_ONLY, including an empty list, does not establish coverage, fingerprints or freshness. Evidence reuse NOT_AUTHORIZED, audit_status NOT_VERIFIED. A removed node is not a resolved finding. Never transfer PASS automatically; verify actual results and evidence separately under [Evidence Core](EVIDENCE_CORE.en.md).
+
+Up to 2 MiB JSON, 2000 nodes and 20000 edges per graph; duplicate keys rejected. Exit 0 means valid plan, 2 invalid input. Cross-session state, graph collection, completeness verification, content hashing, TTL, provenance and evidence integration remain open. Bounds are not a sandbox. 14/14 isolated Linux Python 3.13.5 tests; full CI/Windows/actual agent not verified for candidate.

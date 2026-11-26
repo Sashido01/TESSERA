@@ -7,7 +7,7 @@
 ## Входные условия
 
 - Только новый одноразовый локальный проект, без remote, рабочих данных, секретов, глобальных hooks и изменения настоящих проектов. Не выдавать агенту дополнительные полномочия. Не запускать сканеры безопасности в клиентском профиле.
-- Закреплённый снимок каталога: аннотированный `refs/tags/v0.0.80`, commit `6b9b4487f4d5938a179400de0a59dceb4f015c5b`, main CI 45669705980. Навыки устанавливаются по отдельным аннотированным тегам: `microversion-release/v0.0.2` → `9599367afa1aad2f29f0640fc94da5ae8e473cee`, `project-audit/v0.0.4` → `be6a126f08ffbb49b721b50e030b2a6d82c7d4f3`, `repository-workflow/v0.0.2` → `a2a6af6b66e9cd6e5b28ccb227245f3a13389098`. Перед установкой сверить каждый remote tag object и дерево навыка. В main CI 45669705980, catalog_checks 139401346128, все три Security Policy Verdict PASS, 0 HIGH/CRITICAL; #77 закрыта. Это статическая advisory-проверка, не сертификация и не разрешение на продуктивный запуск.
+- Закреплённый проверенный снимок каталога: `refs/tags/v0.0.82`, commit `10ad9905ef2e51e00f2a04723a94cf6b9f78522e`, main CI 45773757137 SUCCESS. Независимые pin: `microversion-release/v0.0.3` → `10ad9905ef2e51e00f2a04723a94cf6b9f78522e`, `project-audit/v0.0.4` → `be6a126f08ffbb49b721b50e030b2a6d82c7d4f3`, `repository-workflow/v0.0.2` → `a2a6af6b66e9cd6e5b28ccb227245f3a13389098`. Перед установкой сверить каждый remote tag object и дерево навыка; новый кандидат Project Audit не включён до проверки его собственного тега. Исторический статический verdict v0.0.80 не сертификат и не разрешение на продуктивный запуск.
 - Официальный gh 2.105.0 проверен для remote pin одного навыка; remote multi-skill и реальная загрузка хостом остаются испытаниями. Не применять --force, --all, обновление без pin или сторонние менеджеры. Сканеры NVIDIA не нужны для работы навыков.
 - Записать точные версии клиента, модели, gh, Git, Python и ОС. Сверить активный профиль и фактические проектные roots. Для Harness проверить включённые dsh-skill/dsh-skill-filesystem/dsh-tool-skill. Не менять глобальный профиль в ходе эксперимента.
 
@@ -28,7 +28,7 @@ gh --version
 foreach ($skill in @('microversion-release','project-audit','repository-workflow')) {
     if (Test-Path -LiteralPath (Join-Path $dest $skill)) { throw 'Skill already exists' }
     $pin = switch ($skill) {
-        'microversion-release' { 'refs/tags/microversion-release/v0.0.2' }
+        'microversion-release' { 'refs/tags/microversion-release/v0.0.3' }
         'project-audit' { 'refs/tags/project-audit/v0.0.4' }
         'repository-workflow' { 'refs/tags/repository-workflow/v0.0.2' }
     }
@@ -110,3 +110,5 @@ TD18 #82: 45627814264 Windows job 139252599141 exact 45eaeed021eb4fc36c805d2260a
 ## Актуальный снимок на момент подготовки PR #88
 
 v0.0.80: все восемь независимых тегов подтверждены; #76/#77/#80/#82/#83 закрыты. Установка точных новых pin, обнаружение, явный вызов, AUTO_USE, ENFORCEMENT, UPDATE, ROLLBACK в реальных клиентах требуют новой приёмки. #81 остаётся открытой; послепроверка 0.0.80 владельцем отклонена GIT_CONTEXT_UNSAFE. Не очищать производственный контекст молча и не переносить доказательства старого профиля на новый pin.
+
+26.11.2026: pin Microversion Release обновлён до принятого 0.0.3; в P03 допустима диагностика `python scripts/release_tag.py context` из установленного навыка (только имена, без Git). Это не разрешение на Git. #81 открыта. Для парной оценки фиксировать одинаковые fixture, модель, разрешения, инструменты, бюджет и свежую сессию; отдельно измерять PASS критериев, вызов навыка, ложную активацию, нарушения и затраты. Сравнение с контролем без навыка обязательно; статистическая значимость не заявляется по одному прогону.
