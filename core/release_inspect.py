@@ -42,8 +42,23 @@ LOCAL_ENV_KEYS = (
 GIT_TIMEOUT = 30
 
 
+def blocking_context_names() -> list[str]:
+    """Report only known variable names; never read or return their values."""
+    found = set()
+    for key in os.environ:
+        if key in GIT_CONTEXT:
+            found.add(key)
+        elif key.startswith(("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_")):
+            if re.fullmatch(r"GIT_CONFIG_(?:KEY|VALUE)_[0-9]{1,6}", key):
+                found.add(key)
+            else:
+                # Untrusted suffixes could contain arbitrary data: do not echo them.
+                found.add("GIT_CONFIG_INDEXED_OTHER")
+    return sorted(found)
+
+
 def local_git_environment() -> dict[str, str]:
-    if any(os.getenv(key) is not None for key in GIT_CONTEXT):
+    if blocking_context_names():
         raise InspectionError("GIT_CONTEXT_UNSAFE")
     result = {}
     for key in LOCAL_ENV_KEYS:

@@ -2,6 +2,14 @@
 
 [Русский — оригинал](CHANGELOG.md) | **English — translation**
 
+## 0.0.6 — Protect mutating Git fixtures
+
+Git Inspector unit-test setup refuses inherited Git_* except pager before fixture creation or Git mutation, separate regression. Production read-only inspector unchanged. Individual owner-pilot error causes NOT_DIAGNOSED; CI and client acceptance required.
+
+## 0.0.5 — DELTA recheck plan
+
+Deterministic delta_plan.py validates explicitly supplied DAGs and propagates invalidation. Global context or graph changes require full rechecks. No PASS reuse or input authentication. 14/14 isolated Linux tests; full CI, tag and actual activation required. Reconciled historical CI and 0.0.4 release evidence.
+
 ## 0.0.4 — Evidence register
 
 Added Evidence Core, a local validator for an explicitly supplied JSON evidence register. It strictly validates fields, references, scopes, snapshot and fingerprints; retains conflicting PASS/FAIL and labels STALE, UNBOUND and INDIRECT. It does not read projects, run checks, or authenticate facts. Windows 11 / Python 3.14.3: 15/15 tests. Full catalog CI and the independent skill tag require completed acceptance.

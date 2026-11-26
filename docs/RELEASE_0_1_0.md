@@ -1,0 +1,61 @@
+# TESSERA 0.1.0 — критерии готовности первого продуктового выпуска
+
+[**Русский — оригинал**](RELEASE_0_1_0.md) | [English — перевод](RELEASE_0_1_0.en.md)
+
+Статус: утверждённый план подготовки (не релиз 0.1.0). 26.11.2026 владелец согласовал законченные базовые версии трёх навыков, обязательное исполнение в Codex/Harness, GitHub Immutable Release с аттестованным ZIP. Baseline v0.0.84: commit df8116f35fdfe2ccb7ee4a4316053455c407d3e9, main CI 45834594641 SUCCESS 6/6, точный аннотированный объект тега 7a1d8d334612fe6c8b60c63ecb4b73a75a763c08. Не назначать фиктивные микроверсии.
+
+## Продуктовая граница
+
+Три самостоятельных навыка Microversion Release, Project Audit и Repository Workflow. RU-first + EN, офлайн-помощники, проверяемые исходники и официальное распространение по точным тегам. Полноценный локальный Git без GitHub. Codex и DeepSeek Harness — целевая практическая приёмка. Не объявлять совместимость с Claude Code/Hermes без отдельного фактического испытания; не добавлять платные API, сторонние менеджеры и обязательный сервис. Расширенные графы, автоматический DELTA reuse, семантический уровень V, дополнительные платформы и оптимизации не входят в минимальную готовность этих трёх навыков без отдельного согласования владельца. Не считать незавершённую обязательную защиту будущей функцией.
+
+## Release gates
+
+| ID | Обязательный результат | Доказательство / состояние |
+|---|---|---|
+| G01 | Последовательный VERSION, changelog RU/EN, аннотированные неизменяемые корневой и независимые теги | v0.0.83 подтверждён; будущий v0.1.0 NOT_VERIFIED |
+| G02 | Все 6 main jobs на точном commit и attempt, полный каталог, native Windows/Linux | кандидат фиксированного CI profile; новый CI требуется |
+| G03 | Безопасная установка каждого из трёх навыков по отдельному pin в чистый каталог, отказ дубликата | исторический single pin и локальный multi-skill PASS; актуальный remote multi-skill открыт |
+| G04 | Безопасное обновление/откат отдельного навыка, сохранность остальных и локальных изменений | исторические fixture PASS; текущие три независимые refs и реальный профиль открыты |
+| G05 | Codex и Harness: обнаружение, явное и автоматическое применение каждого навыка, P01–P08 + релевантные E/RW | текущий клиентский пилот NOT_VERIFIED; #81 открыта |
+| G06 | Microversion Release: положительный и отрицательный release fixture, точный тег, отсутствие ложного COMPLETE при ошибке hook/CI | детерминированные тесты PASS; реальный least-privilege invocation и enforcement открыты |
+| G07 | Project Audit: границы выбранного проекта, противоречивые evidence, неполная область, честный отчёт | исходники/тесты приняты; реальные E01–E20 открыты |
+| G08 | Repository Workflow: LOCAL/GitHub, конфликтующие scopes, независимые задачи, безопасная гигиена, восстановление | planner принят; worktree candidate и реальные RW01–RW20 открыты |
+| G09 | Безопасность: нет нерешённого блокирующего риска для заявленных операций; required checks неизменны; известные ограничения и неприменимость обоснованы | T12 PARTIAL; advisory/TOCTOU/ресурсные риски проверять по области, не обещать песочницу |
+| G10 | Отдельный воспроизводимый ZIP из точного v0.1.0, SHA-256, manifest, проверенная Sigstore/SLSA attestation | v0.0.21 исторический PASS; v0.1.0 NOT_RUN |
+| G11 | Закрытие #81 и подтверждение #78 по критериям, отсутствие незавершённых PR и CI для релиза; сохранённые/неиспользуемые ветки убраны после проверки | OPEN; локальные worktrees требуют владельца |
+| G12 | Итоговое независимое свидетельство, инструкции, перечень поддержанных/непроверенных сред, известные ограничения; согласованное решение публикации GitHub Release | NOT_STARTED; ни одного GitHub Release на baseline |
+
+Все обязательные критерии для заявленного объёма должны быть доказаны. Любой NOT_VERIFIED в обязательной области блокирует заявление о готовности. Владелец может явно изменить продуктовую границу, но не присвоить PASS неисполненному критерию. Статусы не вычисляются как процент по количеству пунктов. Исторические результаты не переносятся на изменившиеся файлы, дерево навыка, окружение или политику.
+
+## Последовательность
+
+1. Принимать только реальные изменения; версия следующего компонента назначается при свободном интеграционном слоте. Политика [VERSIONING](VERSIONING.md) разрешает переход 0.0.99 → 0.1.0 при фактической готовности; незаконченная работа может продолжаться 0.0.100+. Не создавать пустых коммитов для заполнения номеров и не менять правила ради дедлайна.
+2. Сначала исправить release-critical CI profile, TD04 и RW05, синхронизировать приёмку #78. Не ускорять за счёт исключения сканов. Далее реальный multi-skill pin/update/rollback, независимая проверка, минимальные адаптеры с позитивными/негативными испытаниями. Параллельно провести пилот.
+3. Перед назначением 0.1.0 — согласовать точный scope, остановить необязательные изменения, завершить предрелизную приёмку с exact SHA. После merge сверить main CI, annotated tags и exact trees; любой сбой оставляет статус BLOCKED.
+4. Запустить `build-attested-catalog.yml` **на v0.1.0**, не main. Скачать артефакт, проверить точные байты, воспроизводимость, signer workflow, source-ref и source digest официальным gh. Проверить report/certificate, которые не являются самостоятельной подписью. См. [Trusted Build](TRUSTED_BUILD.md).
+5. Владелец утвердил GitHub Immutable Release с аттестованным ZIP: использовать уже существующий тег, подготовить черновик с проверенным ZIP и release notes RU/EN, проверить всё до публикации. Не создавать/перемещать тег повторно. Immutable Releases защищают assets и тег после публикации; это дополнение к Rulesets и проверке provenance, не замена. После публикации сверить метаданные и фактические байты. [GitHub immutable releases](https://docs.github.com/en/code-security/concepts/supply-chain-security/immutable-releases), [verify release integrity](https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/verify-release-integrity).
+
+## Действия владельца (необходимые параллельные проверки)
+
+- Из обычного доверенного терминала Windows, не sandbox агента: проверить чистоту выбранного checkout, текущий branch, worktrees, версии Git/Python/gh; синхронизировать только fast-forward после проверки. Не удалять переменные GIT_* и не ослаблять разрешения. Сверить 0.0.82 / 0.0.83 после подтверждения точного тега.
+- Новый изолированный проект для каждого клиента; [AGENT_PILOT](AGENT_PILOT.md) с подтверждёнными pin. Записать фактические client versions, INSTALL, DISCOVERY, EXPLICIT_USE, AUTO_USE, ENFORCEMENT, UPDATE/ROLLBACK и exit codes. Проверка `python scripts/release_tag.py context` из установленного Microversion Release не запускает Git; при unsafe контексте остановить Git-операцию, вернуть только имена и status. Реальные release fixtures только по разрешению и без remote; не переносить рабочие данные.
+- Проверить старые ветки после сверки сохранности: не удалять, если заняты worktree или есть уникальные изменения. Сначала project-audit-evidence-core (4/4 changed files совпали с main v0.0.82), затем repository-workflow-planner-hardening и agent-pilot-readiness после отдельной смысловой сверки. Не публиковать пути/причины lock. Удаление — только после повторного сравнения актуального SHA и разрешения.
+- Включить Immutable Releases в Settings (решение владельца принято; состояние NOT_VERIFIED) и до публикации первого GitHub Release; выровнять allowed_merge_methods Ruleset до squash only, не менять required checks или tag protections. Не включать Restrict creations. При релизном теге запустить workflow_dispatch и независимую verification; действующий коннектор не предоставляет dispatch/delete ref/release publication. Это ручные действия, не текущий PASS.
+
+## Новая исследовательская гипотеза
+
+Harness capability seams разделяют skill provider, model invocation и shell/permission; явная загрузка skill может отличаться от автоматического вызова. Не судить по одному тексту ответа. Применить наблюдаемый критерий из [Harness skills subsystem](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/subsystems/skills.md), [capability seams](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/capability-seams.md) и [OpenAI skill evals](https://developers.openai.com/blog/eval-skills): свежие изолированные сессии, явные/неявные триггеры, одинаковая задача без навыка, отрицательные проверки, минимальные разрешения. Не считать просмотр upstream доказательством интеграции TESSERA.
+
+Сверка 26.11.2026: #78 CLOSED (completed) владельцем, последующий main CI и оба тега v0.0.83 подтверждены; #81 OPEN. Не переоткрывать без нового доказанного остатка.
+
+## Утверждённая архитектура исполнения и публикации
+
+T13/G06: независимый [Completion Gate и Guarded Run](../skills/microversion-release/references/ENFORCEMENT.md) кандидат 0.0.4. Локальные 26/26 PASS, native/client NOT_VERIFIED. В каждом клиенте подтвердить вызов Stop и реальный внешний контроль (позитив/негатив), не принимать один текст агента и не изменять разрешения. Harness bridge частично fail-open и не обеспечивает veto. Внешний controller не заменяет фактическую активацию; GUI не принимается автоматически. G02: фиксированный профиль CI принят в v0.0.84. G12: Immutable Release теперь обязательный, см. [публикация](IMMUTABLE_RELEASE.md). Ruleset Protect main уже проверен: allowed_merge_methods=[squash]. Иммутабельность ещё не подтверждена, #81 OPEN. TD04/RW05 ожидают интеграции.
+
+## Фактическая предрелизная проверка владельцем — 26.11.2026
+
+Источник: предоставленный владельцем отчёт Codex (OWNER_REPORTED, не независимо воспроизведённый удалённым CI). v0.0.84, main df8116f35fdfe2ccb7ee4a4316053455c407d3e9, чистый checkout, 94/94 tag refs совпали, 6 чистых worktrees. Git 2.52.0.windows.1, Python 3.14.3, gh 2.105.0, Codex CLI 0.166.0, Desktop runtime 26.1123.915.0. Harness CLI/установка не обнаружены — NOT_VERIFIED, не доказательство отсутствия. В обоих отдельных тестовых каталогах gh skill install/list подтвердил 3/3 точных pin (Microversion Release 0.0.3, Project Audit 0.0.5, Repository Workflow 0.0.2); G03 частично принят для размещения и pin, активация/обновление/rollback не приняты. GUI Codex не управлялся из-за недоступной геометрии, prompts не отправлялись. Unit suites с наследуемым контекстом: Microversion 42 (20 PASS, 3 FAIL, 19 ERROR); Audit 75 (61 PASS, 13 ERROR, 1 SKIP); Workflow 17/17 PASS. Причины отдельных ошибок NOT_DIAGNOSED; не переносить PASS чистого CI на клиент. next_version CLI .99→.100 и .99→0.1.0 PASS; release_tag context exit 1 GIT_CONTEXT_UNSAFE / Git NOT_EXECUTED. P02–P08, E/RW клиентские сценарии не приняты, #81 OPEN. Повторить сначала точечную диагностику ошибок и доступность доверенного запуска, затем полные клиентские испытания после опубликованных pin. Не удалять наследуемые настройки и не расширять права. Ветки с уникальными коммитами и занятые worktrees сохранять; удаление не подтверждено. Не публиковать локальные пути.
+
+## Сверка 26.11.2026 — #92 принят, следующая защита кандидата
+
+PR #92, exact head 5e770ebf66af9d2758b9df026229794e2932c15b, run 45852127083: все пять обязательных PR jobs PASS. Squash commit feaa3d211221ef0301edf45571f312d2637b0341; main run 45859420735 ещё требует проверки и двух точных annotated tags. SkillSpector 26/26 полных файлов Microversion Release, 100%; integrated Tier 1 execution PASS, policy verdict Microversion FAIL (11 HIGH, 24 MEDIUM, 0 CRITICAL), Audit FAIL (1 HIGH — aggregate risk gate, direct 55, 0 HIGH прямых), Workflow PASS (0 HIGH, direct risk 30). G09 OPEN: не считать execution PASS устранением находок, не подавлять findings. Владелец сообщил Node 24.18.0 / npm 12.0.2; npm manifest @deepseek-ai/dsh 0.2.2-rc.5 требует Node >=24.9.0. Harness фактически ещё не запущен. GET immutable-releases вернул enabled:false, enforced_by_owner:false — G12 BLOCKED до enable и повторной проверки. G06: кандидат Microversion 0.0.5 требует точный --expected-version; 4 новых тестовых метода. G07: Audit 0.0.6 защищает mutating fixture setup, аналогично Microversion; 2 regression methods в сумме. Новые изолированные fixtures передают только явный allowlist. Все новые тесты требуют CI, реальная приёмка #81 открыта. TD04/RW05 остаются отдельными кандидатами; не удалять occupied branches/worktrees.

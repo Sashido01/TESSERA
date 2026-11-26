@@ -268,3 +268,25 @@ TD02/T16: four historical skill refs and source commits were confirmed; #83 is c
 Project Audit Evidence Core was accepted in `0.0.78` and `project-audit/v0.0.4`. The Repository Workflow planner was accepted in `0.0.79` and `repository-workflow/v0.0.2`: its 17 focused Windows tests passed; full main CI and exact tags were confirmed. Actual skill use in Codex and DeepSeek Harness, T03–T05/T13 and T20.02 remain NOT_VERIFIED.
 
 **Practical pilot P0:** [acceptance of all three skills](AGENT_PILOT.en.md), v0.0.80 and exact independent tags; new disposable Codex/Harness sessions first, then T13 and mandatory gate. Prior T16 and #77 blocks are historical snapshots. TD04 — bounded history review deadline; TD17/#81 — safe client integration; do not substitute instructions for tests.
+
+## Reconciliation 26 November 2026 — verified v0.0.81 and TD17 candidate
+
+Main v0.0.81, commit `2a72e24fd054fc66f33d060be12cccd764207c05`, CI 45768407720 SUCCESS (six jobs), annotated tag object `8aa872d87b04b41a8337636c421763ee080efdd8` points to that commit. PR #88 merged; its head branch was automatically deleted. Local synchronization in this session NOT_VERIFIED.
+
+TD17/#81 PARTIAL: candidate Microversion Release 0.0.3 adds name-only diagnostics and rejection of orphaned indexed variables without modifying the environment. Isolated extracted-logic check 6/6 PASS; full candidate tests and actual Codex remain open. TD15/#78 PARTIAL: main table and pilot accepted, but individual README/roadmap historical or stale status text still requires reconciliation. TD04: v0.0.81 main CI PASS, 480 s deadline accepted; sustained acceleration unproven. See [research](RESEARCH_REGISTER.en.md).
+
+## Reconciliation 26 November 2026 — accepted v0.0.82, DELTA candidate
+
+Main v0.0.82 `10ad9905ef2e51e00f2a04723a94cf6b9f78522e`, CI 45773757137 SUCCESS 6/6, exact annotated v0.0.82 `ee7ae8047b6d6d085d7d9beb481eadc83ed5ea4c` and microversion-release/v0.0.3 `646f9cfbfb3370bdc4ec804475ba203532e215ee` point to that commit. PR #89 merged, head deleted. TD17/#81: diagnostics accepted, least-privilege invocation and actual Codex NOT_VERIFIED. TD15/#78: reconciled Project Audit README/roadmap and stale statuses, refreshed pilot pin; close after CI and exact tag of this change. Project Audit level IV PARTIAL: DELTA planner candidate 0.0.5, 14/14 isolated Linux tests; no automatic evidence reuse, graph collection or persistence. TD04: separate candidate with synthetic scanner/real Git test, full CI required. Local sync not verified; client acceptance P0.
+
+## First finished 0.1.0 release
+
+[Release gate G01–G12](RELEASE_0_1_0.en.md): owner priority, three approved skills, actual client acceptance, exact tags and current attestation. This entry does not complete stages. No dummy microversions; current CI profile candidate requires integration and checks.
+
+## Reconciliation 26 November 2026 — approved 0.1.0 scope
+
+v0.0.84 accepted: df8116f35fdfe2ccb7ee4a4316053455c407d3e9, CI 45834594641 SUCCESS 6/6, exact annotated tag object 7a1d8d334612fe6c8b60c63ecb4b73a75a763c08. Ruleset 27932550 squash only. Owner approved three basic skills, mandatory enforcement and GitHub Immutable Release with attested ZIP. T13/G06 PARTIAL: Microversion Release 0.0.4 Completion Gate/Guarded Run candidate, 26/26 Linux PASS, actual host/Windows NOT_VERIFIED. #81 OPEN; outer control mandatory, no sandbox weakening. [G01–G12](RELEASE_0_1_0.en.md). TD04/RW05 separate candidates; immutability still needs owner verification.
+
+## Reconciliation 26 November 2026 — #92 accepted, next guard candidate
+
+PR #92, exact head 5e770ebf66af9d2758b9df026229794e2932c15b, run 45852127083: all five mandatory PR jobs PASS. Squash commit feaa3d211221ef0301edf45571f312d2637b0341; main run 45859420735 still needs verification and two exact annotated tags. SkillSpector 26/26 Microversion Release files fully inspected, 100%; integrated Tier 1 execution PASS, policy verdict Microversion FAIL (11 HIGH, 24 MEDIUM, 0 CRITICAL), Audit FAIL (1 HIGH — aggregate risk gate, direct 55, 0 direct HIGH), Workflow PASS (0 HIGH, direct risk 30). G09 OPEN: execution PASS is not findings remediation, no suppression. Owner reported Node 24.18.0 / npm 12.0.2; npm manifest @deepseek-ai/dsh 0.2.2-rc.5 requires Node >=24.9.0. Actual Harness not launched. GET immutable-releases returned enabled:false, enforced_by_owner:false — G12 BLOCKED pending enable and repeated verification. G06 Microversion 0.0.5 candidate requires exact --expected-version; 4 new test methods. G07 Audit 0.0.6 protects mutating fixture setup, likewise Microversion; 2 regression methods total. New isolated fixtures pass only explicit allowlist. All new tests require CI; actual client acceptance #81 open. TD04/RW05 separate candidates; preserve occupied branches/worktrees.

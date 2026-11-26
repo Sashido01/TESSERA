@@ -10,8 +10,8 @@ TESSERA is not a fork of Harness or Codex. It stores portable [Agent Skills](htt
 
 | Skill | Purpose | Status |
 | --- | --- | --- |
-| [Microversion Release](skills/microversion-release/README.en.md) | Microversions, mandatory annotated release tags, portable use across agents | 0.0.2 — independent tag verified; client acceptance incomplete (#81) |
-| [Project Audit](skills/project-audit/README.en.md) | Evidence-based audit and metadata/Git inspection | 0.0.4 — Evidence Core and Windows CI accepted; agent acceptance NOT_VERIFIED |
+| [Microversion Release](skills/microversion-release/README.en.md) | Microversions, mandatory annotated release tags, portable use across agents | 0.0.5 — exact-target and fixture-guard candidate; client acceptance open (#81) |
+| [Project Audit](skills/project-audit/README.en.md) | Evidence-based audit and metadata/Git inspection | 0.0.6 — fixture-guard candidate; agent acceptance NOT_VERIFIED |
 | [Repository Workflow](skills/repository-workflow/README.en.md) | Local Git and GitHub, independent tasks, CI, integration and technical debt | 0.0.2 — hardened planner accepted; agent acceptance NOT_VERIFIED |
 
 ## Repository layout
@@ -74,7 +74,7 @@ CI additionally runs the [pinned upstream `skills-ref` validator](docs/AGENT_SKI
 
 **Current catalog version:** see [`VERSION`](VERSION). From this point forward, every independently verified change to TESSERA must increment the catalog microversion, update both changelogs, and use a clear, human-readable Russian commit title. After successful GitHub Actions checks, an annotated `vX.Y.Z` Git tag is created. GitHub Releases are not published automatically.
 
-Latest verified release at preparation of this change: TESSERA `0.0.80`, SHA `6b9b4487f4d5938a179400de0a59dceb4f015c5b`; main CI 45669705980 SUCCESS, exact annotated tag `v0.0.80` and all eight independent tags verified. Source version: [`VERSION`](VERSION).
+Verified baseline: TESSERA `0.0.84`, SHA `df8116f35fdfe2ccb7ee4a4316053455c407d3e9`, main CI 45834594641 SUCCESS, exact annotated `v0.0.84`. Current source version: [`VERSION`](VERSION).
 
 - **The TESSERA catalog** and **each skill** have independent version histories.
 - Work microversions increase PATCH by one. After `.99`, work may continue with `.100`, `.101`, and so on if the task is unfinished.
@@ -183,3 +183,5 @@ Original project: [Sashido01/TESSERA](https://github.com/Sashido01/TESSERA).
 
 
 **T12.03.02 regression correction:** Before merge, a shared get_public_json regression was found: the original strict URL allowlist blocked the existing GitHub Release metadata call. Permit only the canonical /releases/tags/vMAJOR.MINOR.PATCH route and one namespace encoded as %2F; arbitrary escaping, extra paths and parameters remain forbidden. Three regressions exercise verify_github_publication through the actual shared transport (ordinary and namespaced tag), changed response URL rejection and invalid routes. Only networking is mocked, validation and response handling are real. Historical PASS missed this defect; repeat acceptance is required.
+
+First product release preparation: [0.1.0 readiness criteria](docs/RELEASE_0_1_0.en.md). A plan, not a readiness claim.

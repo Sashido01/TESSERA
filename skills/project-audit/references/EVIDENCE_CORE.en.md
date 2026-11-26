@@ -1,4 +1,4 @@
-# Evidence Core — local stage II candidate
+# Evidence Core — local stage II tool
 
 [Русский — оригинал](EVIDENCE_CORE.md) | **English — translation**
 
@@ -6,4 +6,4 @@
 
 Kinds: CHECK, OBSERVATION, OWNER_REPORT, INFERENCE. Results: PASS, FAIL, NOT_RUN, UNKNOWN. Each criterion links existing evidence IDs, with exact scope, snapshot ID and non-null fingerprint matching. Snapshot/fingerprint mismatches are stale; absent fingerprints are unbound; other kinds are indirect and cannot replace CHECK. PASS and FAIL for a criterion are retained as CONFLICTING; FAIL_RECORDED and PASS_RECORDED mean only recorded claims. If no eligible checks exist but stale records do, state is STALE; otherwise NOT_VERIFIED. Even PASS_RECORDED never establishes COMPLETE or authenticates a source. Split multiple required checks into separate exact scopes; do not treat any PASS as sufficient for every condition. Output includes all categories and counts but omits source/limitations; keep the original register private. Canonical JSON digest covers the register, not project contents, and depends on array order.
 
-Exit 0 means structurally valid, including recorded FAIL/CONFLICTING; exit 2 means invalid input. Limits: 2 MiB input, 2,000 records and criteria each, 100 references per criterion. Duplicate IDs and JSON keys, unknown references, invalid dates and observations later than as_of are rejected. Does not verify authenticity, completeness, current files, actual time, scope semantics or execution. Not a release validator or sandbox. 15/15 Linux tests; Windows, actual agent usage and full CI NOT_VERIFIED.
+Exit 0 means structurally valid, including recorded FAIL/CONFLICTING; exit 2 means invalid input. Limits: 2 MiB input, 2,000 records and criteria each, 100 references per criterion. Duplicate IDs and JSON keys, unknown references, invalid dates and observations later than as_of are rejected. Does not verify authenticity, completeness, current files, actual time, scope semantics or execution. Not a release validator or sandbox. 15/15 Linux and 15/15 Windows 11 / Python 3.14.3; accepted v0.0.78, main CI 45658775191 SUCCESS, independent project-audit/v0.0.4 tag verified. Actual agent use NOT_VERIFIED.

@@ -268,3 +268,25 @@ TD02/T16: четыре исторических skill refs и их исходн�
 Project Audit Evidence Core принят в `0.0.78` и `project-audit/v0.0.4`. Планировщик Repository Workflow принят в `0.0.79` и `repository-workflow/v0.0.2`: 17/17 профильных Windows-тестов PASS; полный main CI и точные теги подтверждены. Реальное применение навыков в Codex и DeepSeek Harness, T03–T05/T13 и T20.02 остаются NOT_VERIFIED.
 
 **Практический пилот P0:** [приёмка всех трёх навыков](AGENT_PILOT.md), v0.0.80 и точные независимые теги; сначала новые изолированные сеансы Codex/Harness, затем T13 и обязательный gate. Предыдущие блокировки T16 и #77 относятся к историческим снимкам. TD04 — ограниченный срок history review, TD17/#81 — безопасная клиентская интеграция; не заменять испытания инструкциями.
+
+## Сверка 26.11.2026 — подтверждённый v0.0.81 и кандидат TD17
+
+Main v0.0.81, commit `2a72e24fd054fc66f33d060be12cccd764207c05`, CI 45768407720 SUCCESS (шесть jobs), аннотированный объект тега `8aa872d87b04b41a8337636c421763ee080efdd8` указывает на этот commit. PR #88 принят, head-ветка удалена автоматически. Локальная синхронизация в этой сессии NOT_VERIFIED.
+
+TD17/#81 PARTIAL: кандидат Microversion Release 0.0.3 добавляет диагностику имён и отказ при осиротевших индексированных переменных без изменения окружения. Изолированная проверка извлечённой логики 6/6 PASS; полные проверки кандидата и реальный Codex открыты. TD15/#78 PARTIAL: основная таблица и пилот приняты, но исторические и устаревшие статусы отдельных README/roadmap требуют сверки. TD04: v0.0.81 main CI PASS, срок 480 с принят; устойчивое ускорение не доказано. См. [исследования](RESEARCH_REGISTER.md).
+
+## Сверка 26.11.2026 — принятый v0.0.82, кандидат DELTA
+
+Main v0.0.82 `10ad9905ef2e51e00f2a04723a94cf6b9f78522e`, CI 45773757137 SUCCESS 6/6, точные аннотированные v0.0.82 `ee7ae8047b6d6d085d7d9beb481eadc83ed5ea4c` и microversion-release/v0.0.3 `646f9cfbfb3370bdc4ec804475ba203532e215ee` указывают на этот commit. PR #89 слит, head удалён. TD17/#81: диагностика принята, least-privilege invocation и реальный Codex NOT_VERIFIED. TD15/#78: исправлены README/roadmap и устаревшие статусы Project Audit, обновлён pin пилота; закрытие после CI и точного тега этого изменения. Project Audit уровень IV PARTIAL: DELTA planner кандидат 0.0.5, 14/14 изолированных Linux-тестов; нет автоматического переноса evidence, сбора графа и хранилища. TD04: отдельный кандидат с synthetic scanner/real Git тестом, полный CI требуется. Локальная синхронизация не проверена; клиентская приёмка P0.
+
+## Первый законченный выпуск 0.1.0
+
+[Release gate G01–G12](RELEASE_0_1_0.md): приоритет владельца, три утверждённых навыка, реальная клиентская приёмка, точные теги и актуальная аттестация. Не считать эту запись завершением этапов. Не назначать фиктивные микроверсии; текущий кандидат CI profile требует интеграции и проверок.
+
+## Сверка 26.11.2026 — утверждённые границы 0.1.0
+
+v0.0.84 принят: df8116f35fdfe2ccb7ee4a4316053455c407d3e9, CI 45834594641 SUCCESS 6/6, точный аннотированный объект тега 7a1d8d334612fe6c8b60c63ecb4b73a75a763c08. Ruleset 27932550 допускает только squash. Владелец утвердил три базовых навыка, обязательное исполнение и GitHub Immutable Release с аттестованным ZIP. T13/G06 PARTIAL: Microversion Release 0.0.4 кандидат Completion Gate/Guarded Run, 26/26 Linux PASS, реальные host/Windows NOT_VERIFIED. #81 OPEN; внешний контроль обязателен, sandbox не ослабляется. [G01–G12](RELEASE_0_1_0.md). TD04/RW05 отдельные кандидаты; иммутабельность ещё требует проверки владельца.
+
+## Сверка 26.11.2026 — #92 принят, следующая защита кандидата
+
+PR #92, exact head 5e770ebf66af9d2758b9df026229794e2932c15b, run 45852127083: все пять обязательных PR jobs PASS. Squash commit feaa3d211221ef0301edf45571f312d2637b0341; main run 45859420735 ещё требует проверки и двух точных annotated tags. SkillSpector 26/26 полных файлов Microversion Release, 100%; integrated Tier 1 execution PASS, policy verdict Microversion FAIL (11 HIGH, 24 MEDIUM, 0 CRITICAL), Audit FAIL (1 HIGH — aggregate risk gate, direct 55, 0 HIGH прямых), Workflow PASS (0 HIGH, direct risk 30). G09 OPEN: не считать execution PASS устранением находок, не подавлять findings. Владелец сообщил Node 24.18.0 / npm 12.0.2; npm manifest @deepseek-ai/dsh 0.2.2-rc.5 требует Node >=24.9.0. Harness фактически ещё не запущен. GET immutable-releases вернул enabled:false, enforced_by_owner:false — G12 BLOCKED до enable и повторной проверки. G06: кандидат Microversion 0.0.5 требует точный --expected-version; 4 новых тестовых метода. G07: Audit 0.0.6 защищает mutating fixture setup, аналогично Microversion; 2 regression methods в сумме. Новые изолированные fixtures передают только явный allowlist. Все новые тесты требуют CI, реальная приёмка #81 открыта. TD04/RW05 остаются отдельными кандидатами; не удалять occupied branches/worktrees.

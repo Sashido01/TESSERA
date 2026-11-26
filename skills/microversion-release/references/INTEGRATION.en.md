@@ -46,6 +46,16 @@ Project: `<project-root>/.agents/skills/microversion-release/SKILL.md`. User: `<
 
 Official docs: https://developers.openai.com/codex/skills
 
+### TD17 diagnostics (#81)
+
+In the original Codex session, **without changing its environment**, run:
+
+```bash
+python -B scripts/release_tag.py context
+```
+
+Run from the installed skill directory or specify the path to a verified copy. The command does not execute Git, needs no project root, and writes nothing. Record only the JSON, exit code, client version and OS. GIT_CONTEXT_UNSAFE (exit 1) means blocked; NO_BLOCKING_CONTEXT_OBSERVED (exit 0) means no known blocking names were observed, not proof of safety. Do not remove variables or bypass policy when blocked. Arrange a separate verification run in a trusted environment outside the agent with the owner while preserving applicable restrictions; that run does not prove Codex compatibility. The exact trusted-context adapter contract and real client acceptance remain open.
+
 ## DeepSeek Harness
 
 Project: `<project-root>/.dsh/skills/microversion-release/`. User: `<DSH_HOME>/skills/microversion-release/`, resolved from the actual runtime. Ensure that the `dsh-skill`, `dsh-skill-filesystem`, and `dsh-tool-skill` components are enabled. Verify that the skill appears in the session catalog. Strict completion checks require a separate tested Harness lifecycle hook.
@@ -97,3 +107,7 @@ For multi-agent repositories: maintain one canonical version source, serialize r
 - https://code.claude.com/docs/en/skills
 - https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/skill/skill-filesystem/README.md
 - https://hermes-agent.nousresearch.com/docs/user-guide/features/skills
+
+T13 enforcement candidate: [Completion Gate and Guarded Run](ENFORCEMENT.en.md). External control mandatory, Stop provides additional feedback; actual Codex/Harness NOT_VERIFIED. No production enablement before acceptance.
+
+Native fixture context guard candidate: mutating Git unit-test setup refuses inherited Git_* names except GIT_PAGER before creating a temporary directory or executing Git. Production authorization and context policy unchanged. No environment stripping to obtain PASS. Run positive real-Git fixture tests from an ordinary trusted terminal with a naturally acceptable context; on FIXTURE_GIT_CONTEXT_UNSAFE report BLOCKED, never treat refusal as client acceptance. A synthetic Linux two-repository reproduction confirmed Git -C alone does not prevent GIT_DIR redirection of a local config write; a missing indexed config tuple returned exit 128. This demonstrates the fixture risk, not the cause of every owner-reported error. New regression test requires CI.

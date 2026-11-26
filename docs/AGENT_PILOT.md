@@ -7,7 +7,7 @@
 ## Входные условия
 
 - Только новый одноразовый локальный проект, без remote, рабочих данных, секретов, глобальных hooks и изменения настоящих проектов. Не выдавать агенту дополнительные полномочия. Не запускать сканеры безопасности в клиентском профиле.
-- Закреплённый снимок каталога: аннотированный `refs/tags/v0.0.80`, commit `6b9b4487f4d5938a179400de0a59dceb4f015c5b`, main CI 45669705980. Навыки устанавливаются по отдельным аннотированным тегам: `microversion-release/v0.0.2` → `9599367afa1aad2f29f0640fc94da5ae8e473cee`, `project-audit/v0.0.4` → `be6a126f08ffbb49b721b50e030b2a6d82c7d4f3`, `repository-workflow/v0.0.2` → `a2a6af6b66e9cd6e5b28ccb227245f3a13389098`. Перед установкой сверить каждый remote tag object и дерево навыка. В main CI 45669705980, catalog_checks 139401346128, все три Security Policy Verdict PASS, 0 HIGH/CRITICAL; #77 закрыта. Это статическая advisory-проверка, не сертификация и не разрешение на продуктивный запуск.
+- Закреплённый проверенный снимок: `refs/tags/v0.0.83`, commit `d830dc03c2c6575f69ae45a00fd6f7f22ef4feb4`, main CI 45778355203 SUCCESS. Независимые pin: `microversion-release/v0.0.3` → `10ad9905ef2e51e00f2a04723a94cf6b9f78522e`, `project-audit/v0.0.5` → `d830dc03c2c6575f69ae45a00fd6f7f22ef4feb4`, `repository-workflow/v0.0.2` → `a2a6af6b66e9cd6e5b28ccb227245f3a13389098`. Перед установкой проверить точные tag objects и деревья. Исторические статические проверки не заменяют приёмку.
 - Официальный gh 2.105.0 проверен для remote pin одного навыка; remote multi-skill и реальная загрузка хостом остаются испытаниями. Не применять --force, --all, обновление без pin или сторонние менеджеры. Сканеры NVIDIA не нужны для работы навыков.
 - Записать точные версии клиента, модели, gh, Git, Python и ОС. Сверить активный профиль и фактические проектные roots. Для Harness проверить включённые dsh-skill/dsh-skill-filesystem/dsh-tool-skill. Не менять глобальный профиль в ходе эксперимента.
 
@@ -28,8 +28,8 @@ gh --version
 foreach ($skill in @('microversion-release','project-audit','repository-workflow')) {
     if (Test-Path -LiteralPath (Join-Path $dest $skill)) { throw 'Skill already exists' }
     $pin = switch ($skill) {
-        'microversion-release' { 'refs/tags/microversion-release/v0.0.2' }
-        'project-audit' { 'refs/tags/project-audit/v0.0.4' }
+        'microversion-release' { 'refs/tags/microversion-release/v0.0.3' }
+        'project-audit' { 'refs/tags/project-audit/v0.0.5' }
         'repository-workflow' { 'refs/tags/repository-workflow/v0.0.2' }
     }
     gh skill install Sashido01/TESSERA $skill --pin $pin --dir $dest
@@ -110,3 +110,13 @@ TD18 #82: 45627814264 Windows job 139252599141 exact 45eaeed021eb4fc36c805d2260a
 ## Актуальный снимок на момент подготовки PR #88
 
 v0.0.80: все восемь независимых тегов подтверждены; #76/#77/#80/#82/#83 закрыты. Установка точных новых pin, обнаружение, явный вызов, AUTO_USE, ENFORCEMENT, UPDATE, ROLLBACK в реальных клиентах требуют новой приёмки. #81 остаётся открытой; послепроверка 0.0.80 владельцем отклонена GIT_CONTEXT_UNSAFE. Не очищать производственный контекст молча и не переносить доказательства старого профиля на новый pin.
+
+26.11.2026: pin Microversion Release обновлён до принятого 0.0.3; в P03 допустима диагностика `python scripts/release_tag.py context` из установленного навыка (только имена, без Git). Это не разрешение на Git. #81 открыта. Для парной оценки фиксировать одинаковые fixture, модель, разрешения, инструменты, бюджет и свежую сессию; отдельно измерять PASS критериев, вызов навыка, ложную активацию, нарушения и затраты. Сравнение с контролем без навыка обязательно; статистическая значимость не заявляется по одному прогону.
+
+## Фактическая предрелизная проверка владельцем — 26.11.2026
+
+Источник: предоставленный владельцем отчёт Codex (OWNER_REPORTED, не независимо воспроизведённый удалённым CI). v0.0.84, main df8116f35fdfe2ccb7ee4a4316053455c407d3e9, чистый checkout, 94/94 tag refs совпали, 6 чистых worktrees. Git 2.52.0.windows.1, Python 3.14.3, gh 2.105.0, Codex CLI 0.166.0, Desktop runtime 26.1123.915.0. Harness CLI/установка не обнаружены — NOT_VERIFIED, не доказательство отсутствия. В обоих отдельных тестовых каталогах gh skill install/list подтвердил 3/3 точных pin (Microversion Release 0.0.3, Project Audit 0.0.5, Repository Workflow 0.0.2); G03 частично принят для размещения и pin, активация/обновление/rollback не приняты. GUI Codex не управлялся из-за недоступной геометрии, prompts не отправлялись. Unit suites с наследуемым контекстом: Microversion 42 (20 PASS, 3 FAIL, 19 ERROR); Audit 75 (61 PASS, 13 ERROR, 1 SKIP); Workflow 17/17 PASS. Причины отдельных ошибок NOT_DIAGNOSED; не переносить PASS чистого CI на клиент. next_version CLI .99→.100 и .99→0.1.0 PASS; release_tag context exit 1 GIT_CONTEXT_UNSAFE / Git NOT_EXECUTED. P02–P08, E/RW клиентские сценарии не приняты, #81 OPEN. Повторить сначала точечную диагностику ошибок и доступность доверенного запуска, затем полные клиентские испытания после опубликованных pin. Не удалять наследуемые настройки и не расширять права. Ветки с уникальными коммитами и занятые worktrees сохранять; удаление не подтверждено. Не публиковать локальные пути.
+
+## Подготовка закреплённого Harness 0.2.2-rc.5
+
+Владелец сообщил npm 12.0.2, Node 24.18.0, npm view @deepseek-ai/dsh 0.2.2-rc.5 engines >=24.9.0 — совместимость по заявленному manifest PASS, запуск NOT_VERIFIED. В отдельной доверенной одноразовой среде сначала проверить npm metadata конкретной версии, dist.integrity и peerDependencies hooks-codex той же версии. Не устанавливать глобально и не запускать latest/alpha автоматически. [Исходники rc.5](https://github.com/deepseek-ai/deepseek-harness/tree/dsh-v0.2.2-rc.5), [safety](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.5/SAFETY.md), [headless](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.5/packages/bundle/headless/README.md). Профиль headless не использует сохранённый GUI login; подключение модели отдельно согласовать, не передавать секреты в prompt/argv или публичный отчёт. При пилоте записать exact host/bridge pin, runtime, наблюдаемый hook/invoked и hook/result, exit и final.reason.kind, отдельную проверку Git/test. Не считать tool_result completed доказательством выполнения shell. Guarded Run 0.0.5 candidate требует --expected-version. Не использовать пока не принят независимый тег. Не изменять реальные проекты и существующие профили.

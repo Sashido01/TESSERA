@@ -7,7 +7,7 @@
 ## Entry conditions
 
 - Only a fresh disposable local project, without a remote, production data, secrets, global hooks or changes to real projects. Do not grant additional privileges to the agent. Do not execute security scanners in the client profile.
-- Pinned catalog snapshot: annotated `refs/tags/v0.0.80`, commit `6b9b4487f4d5938a179400de0a59dceb4f015c5b`, main CI 45669705980. Install skills using their separate annotated tags: `microversion-release/v0.0.2` → `9599367afa1aad2f29f0640fc94da5ae8e473cee`, `project-audit/v0.0.4` → `be6a126f08ffbb49b721b50e030b2a6d82c7d4f3`, `repository-workflow/v0.0.2` → `a2a6af6b66e9cd6e5b28ccb227245f3a13389098`. Verify each remote tag object and skill tree before installation. In main CI 45669705980, catalog_checks 139401346128, all three Security Policy Verdicts PASS, 0 HIGH/CRITICAL; #77 closed. Advisory static review is not certification or production approval.
+- Verified pinned snapshot: `refs/tags/v0.0.83`, commit `d830dc03c2c6575f69ae45a00fd6f7f22ef4feb4`, main CI 45778355203 SUCCESS. Independent pins: `microversion-release/v0.0.3` → `10ad9905ef2e51e00f2a04723a94cf6b9f78522e`, `project-audit/v0.0.5` → `d830dc03c2c6575f69ae45a00fd6f7f22ef4feb4`, `repository-workflow/v0.0.2` → `a2a6af6b66e9cd6e5b28ccb227245f3a13389098`. Verify exact tag objects and trees before installation. Historical static checks do not replace acceptance.
 - Official gh 2.105.0 was verified for remote pin of one skill; remote multi-skill installation and actual host loading remain trials. Do not use --force, --all, unpinned updates or third-party managers. NVIDIA scanners are not runtime requirements.
 - Record exact client, model, gh, Git, Python and OS versions. Confirm the active profile and actual project roots. For Harness confirm dsh-skill/dsh-skill-filesystem/dsh-tool-skill are enabled. Do not modify the global profile during the trial.
 
@@ -28,8 +28,8 @@ gh --version
 foreach ($skill in @('microversion-release','project-audit','repository-workflow')) {
     if (Test-Path -LiteralPath (Join-Path $dest $skill)) { throw 'Skill already exists' }
     $pin = switch ($skill) {
-        'microversion-release' { 'refs/tags/microversion-release/v0.0.2' }
-        'project-audit' { 'refs/tags/project-audit/v0.0.4' }
+        'microversion-release' { 'refs/tags/microversion-release/v0.0.3' }
+        'project-audit' { 'refs/tags/project-audit/v0.0.5' }
         'repository-workflow' { 'refs/tags/repository-workflow/v0.0.2' }
     }
     gh skill install Sashido01/TESSERA $skill --pin $pin --dir $dest
@@ -110,3 +110,13 @@ Historical branch snapshot before sequential independent tag acceptance: PR #74 
 ## Current snapshot at PR #88 preparation
 
 v0.0.80: all eight independent tags verified; #76/#77/#80/#82/#83 closed. Actual client installation of new exact pins, discovery, explicit invocation, AUTO_USE, ENFORCEMENT, UPDATE and ROLLBACK require new acceptance. #81 remains open; owner post-check of 0.0.80 rejected GIT_CONTEXT_UNSAFE. Never silently clear production context or transfer old-profile evidence to a new pin.
+
+26 November 2026: Microversion Release pin updated to accepted 0.0.3; P03 may use diagnostic `python scripts/release_tag.py context` from the installed skill (names only, no Git). Not authorization to run Git. #81 open. For paired evaluation record identical fixtures, model, permissions, tools, budget and fresh sessions; measure criterion PASS, skill invocation, false activation, violations and cost separately. Compare against no-skill controls; no statistical significance claim from one trial.
+
+## Actual owner pre-release trial — 26 November 2026
+
+Source: owner-supplied Codex report (OWNER_REPORTED, not independently reproduced by remote CI). v0.0.84, main df8116f35fdfe2ccb7ee4a4316053455c407d3e9, clean checkout, 94/94 tag refs match, 6 clean worktrees. Git 2.52.0.windows.1, Python 3.14.3, gh 2.105.0, Codex CLI 0.166.0, Desktop runtime 26.1123.915.0. Harness CLI/installation not found — NOT_VERIFIED, not proof of absence. Both separate test directories: gh skill install/list confirmed 3/3 exact pins (Microversion Release 0.0.3, Project Audit 0.0.5, Repository Workflow 0.0.2); G03 partially accepted for placement and pin, activation/update/rollback not accepted. Codex GUI geometry unavailable, no prompts sent. Unit suites under inherited context: Microversion 42 (20 PASS, 3 FAIL, 19 ERROR); Audit 75 (61 PASS, 13 ERROR, 1 SKIP); Workflow 17/17 PASS. Individual errors NOT_DIAGNOSED; clean CI PASS does not transfer to clients. next_version CLI .99→.100 and .99→0.1.0 PASS; release_tag context exit 1 GIT_CONTEXT_UNSAFE / Git NOT_EXECUTED. P02–P08, E/RW client scenarios not accepted, #81 OPEN. First diagnose exact errors and availability of trusted invocation, then full client tests after published pins. Never strip inherited configuration or expand permissions. Preserve branches with unique commits and occupied worktrees; deletion not verified. Do not publish local paths.
+
+## Pinned Harness 0.2.2-rc.5 preparation
+
+Owner reported npm 12.0.2, Node 24.18.0, npm view @deepseek-ai/dsh 0.2.2-rc.5 engines >=24.9.0 — manifest compatibility PASS, launch NOT_VERIFIED. In separate trusted disposable environment first inspect exact-version npm metadata, dist.integrity and same-version hooks-codex peerDependencies. No global installation or automatic latest/alpha launch. [rc.5 source](https://github.com/deepseek-ai/deepseek-harness/tree/dsh-v0.2.2-rc.5), [safety](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.5/SAFETY.md), [headless](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.5/packages/bundle/headless/README.md). Headless does not use saved GUI login; authorize model route separately, never send secrets in prompt/argv/public report. Record exact host/bridge pins, runtime, observed hook/invoked and hook/result, exit and final.reason.kind, independent Git/test check. Tool_result completed does not prove shell success. Guarded Run 0.0.5 candidate requires --expected-version. Do not use before accepted independent tag. Never modify real projects or existing profiles.

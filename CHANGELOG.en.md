@@ -4,6 +4,37 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.86 — Require exact target and protect Git fixtures
+
+- Microversion Release 0.0.5: required --expected-version in Guarded Run, schema 2; wrong target blocks before tests even if structurally valid. Four regression methods including actual release fixture with and without tag.
+- Microversion Release and Project Audit 0.0.6: old mutating Git test setup refuses inherited Git_* except pager before any writes, two regression methods. New isolated fixtures use explicit system environment allowlist. Production policy unchanged.
+- PR #92 CI 45852127083 5/5 PASS; SkillSpector 100% coverage, but Microversion 11 HIGH, Audit aggregate risk gate 1 HIGH, Workflow 0 HIGH. G09 open; advisory results do not establish clean security. Candidate native CI and actual client acceptance required.
+
+## 0.0.85 — Independently enforce completion checks
+
+- Microversion Release 0.0.4: Completion Gate validates linear version transitions, changelogs, exact annotated tags, cleanliness and index flags; repeats HEAD/ref checks. Basic root VERSION/changelog profile. Stop adapter requests at most one continuation per owner-selected marker, no automatic tagging.
+- Guarded Run executes only explicitly selected owner commands after --execute; independently checks structure, actual agent exit, tests and final SHA/tag objects. No-op blocked by default. Not a sandbox or proof of activation.
+- 26/26 local Linux / Python 3.13.5 / Git 2.47.3 test methods (16 Git/Stop + 10 subprocess fixtures), verified Git blobs. Full CI and actual client acceptance required.
+- Owner approved basic versions of all three skills, mandatory Codex/Harness enforcement and a GitHub Immutable Release with an attested ZIP. v0.0.84 and squash-only setting verified. #81 stays open.
+
+## 0.0.84 — Fix the mandatory 0.1.0 release checks
+
+- Release Core: required CI jobs selected independently of API job presence. Current profile requires all six; historical TESSERA policy uses root VERSION of exact commit, not skill version. Missing groups block the report; regressions added.
+- Isolated algorithm model 8/8 PASS, historical workflow boundaries verified. Full candidate CI required.
+- Prepared G01–G12, product boundaries, owner steps, ZIP provenance verification and Immutable Releases research. Verified exact v0.0.83/project-audit/v0.0.5 and refreshed pilot pins. #78 closed by owner, #81 remains open.
+
+## 0.0.83 — Plan DELTA audits and reconcile documentation
+
+- Project Audit 0.0.5: recheck planning for two explicitly supplied DAGs; changed and unknown fingerprints invalidate dependents, incomplete graphs or context changes require full rechecks. No project reads or PASS reuse.
+- 14/14 isolated Linux tests; source and test Git blobs verified. Full CI and actual activation required.
+- TD15/#78: reconciled RU/EN README, Inventory, Git Inspector, Evidence Core and roadmap. Verified accepted v0.0.82 and microversion-release/v0.0.3; CI does not establish client acceptance.
+
+## 0.0.82 — Diagnose inherited Git context
+
+- Microversion Release 0.0.3: report blocking variable names without values or Git execution; orphaned indexed GIT_CONFIG_* also block local tagging and inspection. No removal of host configuration or permission bypass.
+- TD17/#81: four new test methods and an extended negative regression; full CI and actual Codex acceptance required. Isolated extracted-logic check 6/6 PASS, not the full suite.
+- Reconciled v0.0.81 evidence; recorded research on Codex/Harness, safe Git batch reads, DELTA and evals. Prototype results do not replace scanner acceptance.
+
 ## 0.0.81 — Refresh the Codex and Harness pilot guide
 
 - Added current RU/EN criteria for disposable Codex and DeepSeek Harness pilots with separate skill tags `microversion-release/v0.0.2`, `project-audit/v0.0.4` and `repository-workflow/v0.0.2`.

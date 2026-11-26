@@ -1,3 +1,4 @@
+import json
 import os
 import pathlib
 import sys
@@ -20,11 +21,33 @@ if pathlib.Path(module.__file__).resolve() != PATH:
     raise RuntimeError("Unexpected test module origin")
 
 
+def require_fixture_context():
+    # Real Git mutations in a disposable test must not inherit redirections
+    # or configuration overrides. Refuse before creating or touching fixtures.
+    if any(key.upper().startswith("GIT_") and key.upper() != "GIT_PAGER"
+           for key in os.environ):
+        raise RuntimeError("FIXTURE_GIT_CONTEXT_UNSAFE")
+
+
+class FixtureContextTests(unittest.TestCase):
+    def test_inherited_context_refuses_before_mutation(self):
+        for name in ("GIT_DIR", "GIT_WORK_TREE", "GIT_CONFIG_COUNT", "GIT_CONFIG_KEY_0"):
+            with self.subTest(name=name), mock.patch.dict(os.environ, {name: "fixture"}), \
+                    mock.patch.object(subprocess, "run") as git, \
+                    mock.patch.object(tempfile, "TemporaryDirectory") as temp:
+                case = ReleaseTagTests("test_create_and_verify_annotated")
+                with self.assertRaisesRegex(RuntimeError, "FIXTURE_GIT_CONTEXT_UNSAFE"):
+                    case.setUp()
+                git.assert_not_called()
+                temp.assert_not_called()
+
+
 class ReleaseTagTests(unittest.TestCase):
     def test_import_origin(self):
         self.assertEqual(pathlib.Path(module.__file__).resolve(), PATH)
 
     def setUp(self):
+        require_fixture_context()
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.repo = pathlib.Path(self.tmp.name)
@@ -135,16 +158,54 @@ class ReleaseTagTests(unittest.TestCase):
                 with self.assertRaisesRegex(module.TagError, "внешнее окружение"):
                     module.verify(self.repo, "0.1.0")
 
+    def test_orphan_indexed_config_overrides_refused_before_git(self):
+        for key in ("GIT_CONFIG_KEY_0", "GIT_CONFIG_VALUE_0", "GIT_CONFIG_KEY_unexpected"):
+            with self.subTest(key=key), mock.patch.dict(os.environ, {key: "synthetic"}):
+                with mock.patch.object(module.subprocess, "run") as run:
+                    with self.assertRaisesRegex(module.TagError, "GIT_CONTEXT_UNSAFE"):
+                        module.create(self.repo, "0.1.0", "Релиз — проверка окружения")
+                    run.assert_not_called()
+        self.assertEqual(self.cmd("tag", "--list"), "")
+
+    def test_context_cli_reports_names_only_without_git(self):
+        env = dict(os.environ)
+        env.update({"GIT_CONFIG_COUNT": "synthetic private marker",
+                    "GIT_CONFIG_KEY_0": "synthetic private marker",
+                    "GIT_CONFIG_VALUE_private_marker": "synthetic private marker",
+                    "GIT_PAGER": "synthetic private marker"})
+        proc = subprocess.run([sys.executable, "-B", str(PATH), "context"],
+                              env=env, capture_output=True, text=True, check=False, timeout=15)
+        self.assertEqual(proc.returncode, 1)
+        self.assertNotIn("private marker", proc.stdout + proc.stderr)
+        self.assertNotIn("private_marker", proc.stdout + proc.stderr)
+        report = json.loads(proc.stdout)
+        self.assertEqual(report["context_status"], "GIT_CONTEXT_UNSAFE")
+        self.assertEqual(report["git_execution"], "NOT_EXECUTED")
+        self.assertEqual(report["release_readiness"], "NOT_VERIFIED")
+        self.assertIn("GIT_CONFIG_KEY_0", report["blocking_names"])
+        self.assertIn("GIT_CONFIG_INDEXED_OTHER", report["blocking_names"])
+        self.assertNotIn("GIT_PAGER", report["blocking_names"])
+
+    def test_context_cli_without_blockers_does_not_prove_readiness(self):
+        env = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+        proc = subprocess.run([sys.executable, "-B", str(PATH), "context"],
+                              env=env, capture_output=True, text=True, check=False, timeout=15)
+        self.assertEqual(proc.returncode, 0)
+        report = json.loads(proc.stdout)
+        self.assertEqual(report["context_status"], "NO_BLOCKING_CONTEXT_OBSERVED")
+        self.assertEqual(report["blocking_names"], [])
+        self.assertEqual(report["release_readiness"], "NOT_VERIFIED")
+
     def test_git_child_receives_only_required_environment(self):
         with mock.patch.dict(os.environ, {"TESSERA_PRIVATE_FIXTURE": "synthetic marker",
                                           "GIT_COMMITTER_NAME": "Test Identity",
-                                          "GIT_CONFIG_KEY_0": "core.worktree"}):
+                                          "GIT_PAGER": "synthetic marker"}):
             with mock.patch.object(module.subprocess, "run") as run:
                 run.return_value = subprocess.CompletedProcess([], 0, "", "")
                 module.git(self.repo, "rev-parse", "HEAD")
                 env = run.call_args.kwargs["env"]
                 self.assertNotIn("TESSERA_PRIVATE_FIXTURE", env)
-                self.assertNotIn("GIT_CONFIG_KEY_0", env)
+                self.assertNotIn("GIT_PAGER", env)
                 self.assertEqual(env["GIT_COMMITTER_NAME"], "Test Identity")
                 self.assertEqual(set(env) - set(module.CHILD_ENV_KEYS), set())
                 self.assertEqual(os.getenv("TESSERA_PRIVATE_FIXTURE"), "synthetic marker")
