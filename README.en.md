@@ -10,8 +10,8 @@ TESSERA is not a fork of Harness or Codex. It stores portable [Agent Skills](htt
 
 | Skill | Purpose | Status |
 | --- | --- | --- |
-| [Microversion Release](skills/microversion-release/README.en.md) | Microversions, mandatory annotated release tags, portable use across agents | See the skill VERSION file; TD17 diagnostics, client acceptance incomplete (#81) |
-| [Project Audit](skills/project-audit/README.en.md) | Evidence-based audit and metadata/Git inspection | 0.0.4 — Evidence Core and Windows CI accepted; agent acceptance NOT_VERIFIED |
+| [Microversion Release](skills/microversion-release/README.en.md) | Microversions, mandatory annotated release tags, portable use across agents | 0.0.3 — independent tag verified, TD17 diagnostics; client acceptance incomplete (#81) |
+| [Project Audit](skills/project-audit/README.en.md) | Evidence-based audit and metadata/Git inspection | 0.0.4 — accepted; 0.0.5 — DELTA candidate, agent acceptance NOT_VERIFIED |
 | [Repository Workflow](skills/repository-workflow/README.en.md) | Local Git and GitHub, independent tasks, CI, integration and technical debt | 0.0.2 — hardened planner accepted; agent acceptance NOT_VERIFIED |
 
 ## Repository layout
@@ -74,7 +74,7 @@ CI additionally runs the [pinned upstream `skills-ref` validator](docs/AGENT_SKI
 
 **Current catalog version:** see [`VERSION`](VERSION). From this point forward, every independently verified change to TESSERA must increment the catalog microversion, update both changelogs, and use a clear, human-readable Russian commit title. After successful GitHub Actions checks, an annotated `vX.Y.Z` Git tag is created. GitHub Releases are not published automatically.
 
-Verified baseline: TESSERA `0.0.81`, SHA `2a72e24fd054fc66f33d060be12cccd764207c05`, main CI 45768407720 SUCCESS, exact annotated tag `v0.0.81`. Current source version: [`VERSION`](VERSION).
+Verified baseline before the candidate: TESSERA `0.0.82`, SHA `10ad9905ef2e51e00f2a04723a94cf6b9f78522e`, main CI 45773757137 SUCCESS, exact annotated `v0.0.82` and `microversion-release/v0.0.3` tags. Current source version: [`VERSION`](VERSION).
 
 - **The TESSERA catalog** and **each skill** have independent version histories.
 - Work microversions increase PATCH by one. After `.99`, work may continue with `.100`, `.101`, and so on if the task is unfinished.
