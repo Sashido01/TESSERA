@@ -93,3 +93,7 @@ TD17/#81 PARTIAL: candidate Microversion Release 0.0.3 adds name-only diagnostic
 ## Reconciliation 26 November 2026 — accepted v0.0.82, DELTA candidate
 
 Main v0.0.82 `10ad9905ef2e51e00f2a04723a94cf6b9f78522e`, CI 45773757137 SUCCESS 6/6, exact annotated v0.0.82 `ee7ae8047b6d6d085d7d9beb481eadc83ed5ea4c` and microversion-release/v0.0.3 `646f9cfbfb3370bdc4ec804475ba203532e215ee` point to that commit. PR #89 merged, head deleted. TD17/#81: diagnostics accepted, least-privilege invocation and actual Codex NOT_VERIFIED. TD15/#78: reconciled Project Audit README/roadmap and stale statuses, refreshed pilot pin; close after CI and exact tag of this change. Project Audit level IV PARTIAL: DELTA planner candidate 0.0.5, 14/14 isolated Linux tests; no automatic evidence reuse, graph collection or persistence. TD04: separate candidate with synthetic scanner/real Git test, full CI required. Local sync not verified; client acceptance P0.
+
+## Reconciliation 26 November 2026 — accepted v0.0.83 and 0.1.0 preparation
+
+Main CI 45778355203 SUCCESS 6/6, d830dc03c2c6575f69ae45a00fd6f7f22ef4feb4, exact v0.0.83 efc73a7313c0ec7ac0715abc5e512fae482e2b67 / project-audit/v0.0.5 b0b5fa73b64f87022520ca3f447616fa9b408e00. #78 closed by owner, release condition verified. #81 OPEN. New candidate fixes required CI profile selection from observed jobs, isolated model 8/8 PASS; full CI required. [0.1.0 criteria](RELEASE_0_1_0.en.md). TD04/RW05 independent candidates not accepted; branches and local worktrees require review. Do not weaken gates.
