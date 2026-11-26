@@ -83,3 +83,9 @@ TD13/#76 PARTIAL: the wheel and official source were checked without installatio
 ### v0.0.80 and PR #88 reconciliation — 25 November 2026
 
 Main `6b9b4487f4d5938a179400de0a59dceb4f015c5b`, annotated v0.0.80 `8a9766b07a0c2f40d34b14fdccbd532e9a37d3d7`, CI 45669705980 SUCCESS; API confirms eight independent annotated tags. #76/#77/#80/#82/#83 closed; #78 (reconciliation) and #81 (actual Codex Git context) open. PR #88 base .80, previous head 70435dafe139ec46eaac19e01a499e77fbb5a030, run 45672953421 FAIL only history gate (HISTORY_TIMEOUT); Windows, source and catalog SUCCESS. TD04: bounded host deadline raised 300→480 s, checks before/after blob and final inventory; all coverage checks and container parity retained, CI still required. Do not delete old work branches without verifying equivalence to accepted changes. Actual agent pilot remains NOT_VERIFIED; no installed profile changed during this review.
+
+## Reconciliation 26 November 2026 — verified v0.0.81 and TD17 candidate
+
+Main v0.0.81, commit `2a72e24fd054fc66f33d060be12cccd764207c05`, CI 45768407720 SUCCESS (six jobs), annotated tag object `8aa872d87b04b41a8337636c421763ee080efdd8` points to that commit. PR #88 merged; its head branch was automatically deleted. Local synchronization in this session NOT_VERIFIED.
+
+TD17/#81 PARTIAL: candidate Microversion Release 0.0.3 adds name-only diagnostics and rejection of orphaned indexed variables without modifying the environment. Isolated extracted-logic check 6/6 PASS; full candidate tests and actual Codex remain open. TD15/#78 PARTIAL: main table and pilot accepted, but individual README/roadmap historical or stale status text still requires reconciliation. TD04: v0.0.81 main CI PASS, 480 s deadline accepted; sustained acceleration unproven. See [research](RESEARCH_REGISTER.en.md).

@@ -268,3 +268,9 @@ TD02/T16: four historical skill refs and source commits were confirmed; #83 is c
 Project Audit Evidence Core was accepted in `0.0.78` and `project-audit/v0.0.4`. The Repository Workflow planner was accepted in `0.0.79` and `repository-workflow/v0.0.2`: its 17 focused Windows tests passed; full main CI and exact tags were confirmed. Actual skill use in Codex and DeepSeek Harness, T03–T05/T13 and T20.02 remain NOT_VERIFIED.
 
 **Practical pilot P0:** [acceptance of all three skills](AGENT_PILOT.en.md), v0.0.80 and exact independent tags; new disposable Codex/Harness sessions first, then T13 and mandatory gate. Prior T16 and #77 blocks are historical snapshots. TD04 — bounded history review deadline; TD17/#81 — safe client integration; do not substitute instructions for tests.
+
+## Reconciliation 26 November 2026 — verified v0.0.81 and TD17 candidate
+
+Main v0.0.81, commit `2a72e24fd054fc66f33d060be12cccd764207c05`, CI 45768407720 SUCCESS (six jobs), annotated tag object `8aa872d87b04b41a8337636c421763ee080efdd8` points to that commit. PR #88 merged; its head branch was automatically deleted. Local synchronization in this session NOT_VERIFIED.
+
+TD17/#81 PARTIAL: candidate Microversion Release 0.0.3 adds name-only diagnostics and rejection of orphaned indexed variables without modifying the environment. Isolated extracted-logic check 6/6 PASS; full candidate tests and actual Codex remain open. TD15/#78 PARTIAL: main table and pilot accepted, but individual README/roadmap historical or stale status text still requires reconciliation. TD04: v0.0.81 main CI PASS, 480 s deadline accepted; sustained acceleration unproven. See [research](RESEARCH_REGISTER.en.md).

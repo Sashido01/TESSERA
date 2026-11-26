@@ -2,6 +2,10 @@
 
 [Русский — оригинал](CHANGELOG.md) | **English — translation**
 
+## 0.0.3 — Inherited Git context diagnostics
+
+- The context command reports recognized blocking names only, without executing Git or modifying the environment. Orphaned indexed Git config overrides are rejected. Three new skill test methods; actual host integration #81 remains open. CI and independent tag required.
+
 ## 0.0.2 — Windows installer compatibility
 
 - Safe output to legacy console encodings; tests compare canonical paths including Windows short names. Redirect and overwrite protections retained. Native CI rerun required.

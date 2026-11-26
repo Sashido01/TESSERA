@@ -4,6 +4,12 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.82 — Diagnose inherited Git context
+
+- Microversion Release 0.0.3: report blocking variable names without values or Git execution; orphaned indexed GIT_CONFIG_* also block local tagging and inspection. No removal of host configuration or permission bypass.
+- TD17/#81: four new test methods and an extended negative regression; full CI and actual Codex acceptance required. Isolated extracted-logic check 6/6 PASS, not the full suite.
+- Reconciled v0.0.81 evidence; recorded research on Codex/Harness, safe Git batch reads, DELTA and evals. Prototype results do not replace scanner acceptance.
+
 ## 0.0.81 — Refresh the Codex and Harness pilot guide
 
 - Added current RU/EN criteria for disposable Codex and DeepSeek Harness pilots with separate skill tags `microversion-release/v0.0.2`, `project-audit/v0.0.4` and `repository-workflow/v0.0.2`.
