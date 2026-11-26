@@ -12,7 +12,7 @@
 
 | ID | Обязательный результат | Доказательство / состояние |
 |---|---|---|
-| G01 | Последовательный VERSION, changelog RU/EN, аннотированные неизменяемые корневой и независимые теги | v0.0.83 подтверждён; будущий v0.1.0 NOT_VERIFIED |
+| G01 | Последовательный VERSION, changelog RU/EN, точные аннотированные теги | 0.0.85 подтверждён, 0.0.86 main CI и тег ожидают сверки; 0.1.0 NOT_VERIFIED |
 | G02 | Все 6 main jobs на точном commit и attempt, полный каталог, native Windows/Linux | кандидат фиксированного CI profile; новый CI требуется |
 | G03 | Безопасная установка каждого из трёх навыков по отдельному pin в чистый каталог, отказ дубликата | исторический single pin и локальный multi-skill PASS; актуальный remote multi-skill открыт |
 | G04 | Безопасное обновление/откат отдельного навыка, сохранность остальных и локальных изменений | исторические fixture PASS; текущие три независимые refs и реальный профиль открыты |
@@ -23,7 +23,7 @@
 | G09 | Безопасность: нет нерешённого блокирующего риска для заявленных операций; required checks неизменны; известные ограничения и неприменимость обоснованы | T12 PARTIAL; advisory/TOCTOU/ресурсные риски проверять по области, не обещать песочницу |
 | G10 | Отдельный воспроизводимый ZIP из точного v0.1.0, SHA-256, manifest, проверенная Sigstore/SLSA attestation | v0.0.21 исторический PASS; v0.1.0 NOT_RUN |
 | G11 | Закрытие #81 и подтверждение #78 по критериям, отсутствие незавершённых PR и CI для релиза; сохранённые/неиспользуемые ветки убраны после проверки | OPEN; локальные worktrees требуют владельца |
-| G12 | Итоговое независимое свидетельство, инструкции, перечень поддержанных/непроверенных сред, известные ограничения; согласованное решение публикации GitHub Release | NOT_STARTED; ни одного GitHub Release на baseline |
+| G12 | Независимое свидетельство, инструкции, поддержанные/непроверенные среды; GitHub Immutable Release с проверенным ZIP | настройка ENABLED (owner PUT204/GET true); публикация и проверка NOT_RUN |
 
 Все обязательные критерии для заявленного объёма должны быть доказаны. Любой NOT_VERIFIED в обязательной области блокирует заявление о готовности. Владелец может явно изменить продуктовую границу, но не присвоить PASS неисполненному критерию. Статусы не вычисляются как процент по количеству пунктов. Исторические результаты не переносятся на изменившиеся файлы, дерево навыка, окружение или политику.
 
@@ -59,3 +59,7 @@ T13/G06: независимый [Completion Gate и Guarded Run](../skills/micro
 ## Сверка 26.11.2026 — #92 принят, следующая защита кандидата
 
 PR #92, exact head 5e770ebf66af9d2758b9df026229794e2932c15b, run 45852127083: все пять обязательных PR jobs PASS. Squash commit feaa3d211221ef0301edf45571f312d2637b0341; main run 45859420735 ещё требует проверки и двух точных annotated tags. SkillSpector 26/26 полных файлов Microversion Release, 100%; integrated Tier 1 execution PASS, policy verdict Microversion FAIL (11 HIGH, 24 MEDIUM, 0 CRITICAL), Audit FAIL (1 HIGH — aggregate risk gate, direct 55, 0 HIGH прямых), Workflow PASS (0 HIGH, direct risk 30). G09 OPEN: не считать execution PASS устранением находок, не подавлять findings. Владелец сообщил Node 24.18.0 / npm 12.0.2; npm manifest @deepseek-ai/dsh 0.2.2-rc.5 требует Node >=24.9.0. Harness фактически ещё не запущен. GET immutable-releases вернул enabled:false, enforced_by_owner:false — G12 BLOCKED до enable и повторной проверки. G06: кандидат Microversion 0.0.5 требует точный --expected-version; 4 новых тестовых метода. G07: Audit 0.0.6 защищает mutating fixture setup, аналогично Microversion; 2 regression methods в сумме. Новые изолированные fixtures передают только явный allowlist. Все новые тесты требуют CI, реальная приёмка #81 открыта. TD04/RW05 остаются отдельными кандидатами; не удалять occupied branches/worktrees.
+
+## Сверка после #93
+
+0.0.85 main CI 45859420735 SUCCESS 6/6; exact commit feaa3d211221ef0301edf45571f312d2637b0341, tag objects dc893d0ac9fc5291d53023f0dd5967a8e17d1222 (catalog) и 4cab74df967d2a6f8abd98737b67da84dd30fd4e (microversion-release/v0.0.4), оба direct target. #93 run 45860767387 SUCCESS 5/5, squash 0b207f09bb9fca7cf5525d6b35a1919e1d316515. G09 остаётся OPEN: direct coverage 100% всех трёх; Microversion 9 HIGH (было 11), Audit 1 direct HIGH (был aggregate gate), Workflow 0. Не менять severity или исключения. G12 owner setting ENABLED, publication NOT_RUN. Harness rc.5 запустил CLI help (owner-reported), реальная сессия и hook NOT_VERIFIED. TD04 интеграционный кандидат 0.0.87; Gitleaks live parity ещё требуется. #81 OPEN.
