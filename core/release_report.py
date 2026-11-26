@@ -13,20 +13,20 @@ import sys
 from typing import Any
 
 try:
-    from .release_inspect import InspectionError, canonical_repo, inspect, resolve_commit
+    from .release_inspect import InspectionError, canonical_repo, inspect, resolve_commit, git
     from .release_preflight import preflight
     from .release_remote import verify_remote_tag
-    from .release_ci import verify_github_ci
+    from .release_ci import verify_github_ci, catalog_job_profile, CIEvidenceError
     from .release_state import evidence_stage
     from .release_publication import verify_github_publication, verify_github_remote_identity
     from .release_certificate import make_certificate
     from .release_assets import verify_release_assets, DEFAULT_MAX_ASSET_BYTES
     from .release_provenance import verify_release_provenance, ProvenanceError
 except ImportError:
-    from release_inspect import InspectionError, canonical_repo, inspect, resolve_commit
+    from release_inspect import InspectionError, canonical_repo, inspect, resolve_commit, git
     from release_preflight import preflight
     from release_remote import verify_remote_tag
-    from release_ci import verify_github_ci
+    from release_ci import verify_github_ci, catalog_job_profile, CIEvidenceError
     from release_state import evidence_stage
     from release_publication import verify_github_publication, verify_github_remote_identity
     from release_certificate import make_certificate
@@ -118,7 +118,16 @@ def build_report(
     ci_status = "NOT_CHECKED"
     if verify_ci:
         assert github_repo is not None and run_id is not None
-        ci_info = verify_github_ci(github_repo, run_id, target_sha)
+        # The catalog VERSION at the exact inspected commit is authoritative
+        # for TESSERA's historical workflow policy, even for a skill release.
+        # Do not select older policy from missing API jobs or skill VERSION.
+        try:
+            profile = "current"
+            if github_repo.casefold() == "sashido01/tessera":
+                profile = catalog_job_profile(git(root, "show", target_sha + ":VERSION").stdout.strip())
+            ci_info = verify_github_ci(github_repo, run_id, target_sha, job_profile=profile)
+        except (InspectionError, CIEvidenceError):
+            ci_info = {"ci_status": "BLOCKED", "problems": ["CI_JOB_PROFILE_UNAVAILABLE"]}
         ci_status = ci_info["ci_status"]
         problems.extend(ci_info["problems"])
 
@@ -235,6 +244,8 @@ def build_report(
         "ci_repository": github_repo if verify_ci else None,
         "ci_observed_commit_sha": ci_info.get("observed_commit_sha") if ci_info else None,
         "ci_run_attempt": ci_info.get("run_attempt") if ci_info else None,
+        "ci_job_profile": ci_info.get("job_profile") if ci_info else None,
+        "ci_required_jobs": ci_info.get("required_jobs", []) if ci_info else [],
         "remote_tag_object_sha": remote_info["remote_tag_object_sha"] if remote_info else None,
         "remote_publication": remote_info["remote_publication"] if remote_info else "NOT_CHECKED",
         "github_release": publication_status,

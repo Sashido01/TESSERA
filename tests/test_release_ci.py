@@ -20,7 +20,7 @@ REPO = "Sashido01/TESSERA"
 RUN_ID = 12345
 
 
-def fixtures():
+def fixtures(profile="current"):
     run = {
         "id": RUN_ID,
         "repository": {"full_name": REPO},
@@ -33,7 +33,7 @@ def fixtures():
         "run_attempt": 1,
     }
     jobs = {
-        "total_count": 2,
+        "total_count": len(release_ci.JOB_PROFILES[profile]),
         "jobs": [
             {
                 "name": name,
@@ -43,62 +43,63 @@ def fixtures():
                 "status": "completed",
                 "conclusion": "success",
             }
-            for name in release_ci.REQUIRED_JOBS
+            for name in release_ci.JOB_PROFILES[profile]
         ]
     }
     return run, jobs
 
 
 class CIEvidenceTests(unittest.TestCase):
-    def test_three_group_evidence_requires_source_and_original_groups(self):
-        run, jobs = fixtures()
-        template = dict(jobs["jobs"][0])
-        jobs["jobs"].extend({**template, "name": name} for name in
-                            (*release_ci.PARALLEL_JOBS, release_ci.SOURCE_JOB))
-        jobs["total_count"] = len(jobs["jobs"])
-        def verify():
-            return release_ci.validate_ci_evidence(run, jobs, repository=REPO,
-                                                   run_id=RUN_ID, commit_sha=SHA)
-        self.assertEqual(verify()["ci_status"], "PASS")
-        jobs["jobs"][-1]["conclusion"] = "cancelled"
-        self.assertIn("CI_REQUIRED_JOB_NOT_SUCCESSFUL", verify()["problems"])
-        jobs["jobs"][-1]["conclusion"] = "success"
-        jobs["jobs"].pop(-2)
-        jobs["total_count"] = len(jobs["jobs"])
-        self.assertIn("CI_REQUIRED_JOB_MISSING", verify()["problems"])
+    def test_historical_profiles_explicitly_selected(self):
+        for profile in ("legacy", "parallel", "source", "current"):
+            with self.subTest(profile=profile):
+                run, jobs = fixtures(profile)
+                result = release_ci.validate_ci_evidence(run, jobs, repository=REPO,
+                    run_id=RUN_ID, commit_sha=SHA, job_profile=profile)
+                self.assertEqual(result["ci_status"], "PASS")
+                self.assertEqual(result["job_profile"], profile)
 
-    def test_windows_evidence_requires_all_groups(self):
-        run, jobs = fixtures()
-        template = dict(jobs["jobs"][0])
-        jobs["jobs"].extend({**template, "name": name} for name in
-                            (*release_ci.PARALLEL_JOBS, release_ci.SOURCE_JOB, release_ci.WINDOWS_JOB))
-        jobs["total_count"] = len(jobs["jobs"])
-        def verify():
-            return release_ci.validate_ci_evidence(run, jobs, repository=REPO,
-                                                   run_id=RUN_ID, commit_sha=SHA)
-        self.assertEqual(verify()["ci_status"], "PASS")
-        jobs["jobs"][-1]["conclusion"] = "skipped"
-        self.assertIn("CI_REQUIRED_JOB_NOT_SUCCESSFUL", verify()["problems"])
-        jobs["jobs"][-1]["conclusion"] = "success"
-        jobs["jobs"].pop(-2)
-        jobs["total_count"] = len(jobs["jobs"])
-        self.assertIn("CI_REQUIRED_JOB_MISSING", verify()["problems"])
+    def test_current_rejects_every_missing_job(self):
+        for name in release_ci.JOB_PROFILES["current"]:
+            with self.subTest(job=name):
+                run, jobs = fixtures()
+                jobs["jobs"] = [row for row in jobs["jobs"] if row["name"] != name]
+                jobs["total_count"] = len(jobs["jobs"])
+                result = release_ci.validate_ci_evidence(run, jobs, repository=REPO,
+                    run_id=RUN_ID, commit_sha=SHA)
+                self.assertIn("CI_REQUIRED_JOB_MISSING", result["problems"])
 
-    def test_parallel_job_evidence_requires_both(self):
+    def test_current_rejects_all_groups_missing(self):
+        run, jobs = fixtures("legacy")
+        result = release_ci.validate_ci_evidence(run, jobs, repository=REPO,
+            run_id=RUN_ID, commit_sha=SHA)
+        self.assertEqual(result["ci_status"], "BLOCKED")
+        self.assertEqual(len(result["required_jobs"]), 6)
+
+    def test_legacy_rejects_newer_job(self):
         run, jobs = fixtures()
-        template = dict(jobs["jobs"][0])
-        jobs["jobs"].extend({**template, "name": name} for name in release_ci.PARALLEL_JOBS)
-        jobs["total_count"] = len(jobs["jobs"])
-        def verify():
-            return release_ci.validate_ci_evidence(run, jobs, repository=REPO, run_id=RUN_ID, commit_sha=SHA)
-        result = verify()
-        self.assertEqual(result["ci_status"], "PASS")
-        self.assertIn("history_checks", result["required_jobs"])
-        jobs["jobs"][-1]["conclusion"] = "skipped"
-        self.assertIn("CI_REQUIRED_JOB_NOT_SUCCESSFUL", verify()["problems"])
-        jobs["jobs"].pop()
-        jobs["total_count"] = len(jobs["jobs"])
-        self.assertIn("CI_REQUIRED_JOB_MISSING", verify()["problems"])
+        result = release_ci.validate_ci_evidence(run, jobs, repository=REPO,
+            run_id=RUN_ID, commit_sha=SHA, job_profile="legacy")
+        self.assertIn("CI_JOB_PROFILE_MISMATCH", result["problems"])
+
+    def test_profile_version_boundaries(self):
+        for version, profile in (("0.0.67", "legacy"), ("0.0.68", "parallel"),
+                ("0.0.71", "parallel"), ("0.0.72", "source"), ("0.0.75", "source"),
+                ("0.0.76", "current"), ("0.0.107", "current"), ("0.1.0", "current"),
+                ("1.0.0", "current")):
+            self.assertEqual(release_ci.catalog_job_profile(version), profile)
+
+    def test_invalid_catalog_version(self):
+        for version in ("", "01.0.0", "0.100.0", "0.0." + "1" * 100, None):
+            with self.assertRaisesRegex(release_ci.CIEvidenceError, "CI_CATALOG_VERSION_INVALID"):
+                release_ci.catalog_job_profile(version)
+
+    def test_invalid_profile_never_fetches_api(self):
+        with mock.patch.object(release_ci, "get_public_json") as request:
+            with self.assertRaisesRegex(release_ci.CIEvidenceError, "CI_JOB_PROFILE_INVALID"):
+                release_ci.verify_github_ci(REPO, RUN_ID, SHA, request_json=request,
+                                            job_profile="unknown")
+            request.assert_not_called()
 
     def setUp(self):
         self.run, self.jobs = fixtures()
@@ -157,8 +158,8 @@ class CIEvidenceTests(unittest.TestCase):
         self.assert_problem("CI_NOT_SUCCESSFUL")
 
     def test_missing_tag_job_blocks(self):
-        self.jobs["jobs"].pop()
-        self.jobs["total_count"] = 1
+        self.jobs["jobs"].pop(1)
+        self.jobs["total_count"] = len(self.jobs["jobs"])
         self.assert_problem("CI_REQUIRED_JOB_MISSING")
 
     def test_failed_validate_job_blocks(self):
@@ -172,11 +173,11 @@ class CIEvidenceTests(unittest.TestCase):
     def test_duplicate_job_name_blocks(self):
         extra = copy.deepcopy(self.jobs["jobs"][0])
         self.jobs["jobs"].append(extra)
-        self.jobs["total_count"] = 3
+        self.jobs["total_count"] = len(self.jobs["jobs"])
         self.assert_problem("CI_JOB_DUPLICATE")
 
     def test_incomplete_page_blocks(self):
-        self.jobs["total_count"] = 3
+        self.jobs["total_count"] = len(self.jobs["jobs"]) + 1
         self.assert_problem("CI_JOBS_INCOMPLETE")
 
     def test_jobs_from_other_attempt_block(self):
@@ -347,7 +348,8 @@ class ReportCIIntegrationTests(unittest.TestCase):
         self.assertEqual(result["release_readiness"], "NOT_VERIFIED")
 
     def test_verified_ci_uses_exact_inspected_commit(self):
-        def check(repo, run_id, sha):
+        def check(repo, run_id, sha, *, job_profile):
+            self.assertEqual(job_profile, "legacy")
             self.assertEqual(sha, self.sha)
             self.assertEqual(repo, REPO)
             self.assertEqual(run_id, RUN_ID)
@@ -360,6 +362,20 @@ class ReportCIIntegrationTests(unittest.TestCase):
         self.assertEqual(result["ci_status"], "PASS")
         self.assertEqual(result["stage"], "CI_VERIFIED")
         self.assertEqual(result["release_readiness"], "NOT_VERIFIED")
+
+    def test_skill_report_uses_catalog_version_not_skill_version(self):
+        skill = self.repo / "skills" / "demo"
+        skill.mkdir(parents=True)
+        (skill / "VERSION").write_text("0.0.1\n", encoding="utf-8")
+        (self.repo / "VERSION").write_text("0.0.76\n", encoding="utf-8")
+        self.git("add", ".")
+        self.git("commit", "-qm", "Обновлена версия каталога")
+        self.git("tag", "-a", "demo/v0.0.1", "-m", "Fixture")
+        with mock.patch.object(release_report, "verify_github_ci",
+                               return_value={"ci_status": "PASS", "problems": []}) as called:
+            release_report.build_report(self.repo, "0.0.1", skill="demo",
+                verify_ci=True, github_repo=REPO, run_id=RUN_ID)
+            self.assertEqual(called.call_args.kwargs["job_profile"], "current")
 
     def test_failing_ci_blocks_release_evidence(self):
         payload = {"ci_status": "BLOCKED", "problems": ["CI_COMMIT_MISMATCH"]}
