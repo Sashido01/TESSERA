@@ -282,3 +282,7 @@ Main v0.0.82 `10ad9905ef2e51e00f2a04723a94cf6b9f78522e`, CI 45773757137 SUCCESS 
 ## First finished 0.1.0 release
 
 [Release gate G01–G12](RELEASE_0_1_0.en.md): owner priority, three approved skills, actual client acceptance, exact tags and current attestation. This entry does not complete stages. No dummy microversions; current CI profile candidate requires integration and checks.
+
+## Reconciliation 26 November 2026 — approved 0.1.0 scope
+
+v0.0.84 accepted: df8116f35fdfe2ccb7ee4a4316053455c407d3e9, CI 45834594641 SUCCESS 6/6, exact annotated tag object 7a1d8d334612fe6c8b60c63ecb4b73a75a763c08. Ruleset 27932550 squash only. Owner approved three basic skills, mandatory enforcement and GitHub Immutable Release with attested ZIP. T13/G06 PARTIAL: Microversion Release 0.0.4 Completion Gate/Guarded Run candidate, 26/26 Linux PASS, actual host/Windows NOT_VERIFIED. #81 OPEN; outer control mandatory, no sandbox weakening. [G01–G12](RELEASE_0_1_0.en.md). TD04/RW05 separate candidates; immutability still needs owner verification.

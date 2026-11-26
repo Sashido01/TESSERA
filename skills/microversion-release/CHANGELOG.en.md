@@ -2,6 +2,11 @@
 
 [Русский — оригинал](CHANGELOG.md) | **English — translation**
 
+## 0.0.4 — Completion gate and mandatory acceptance
+
+- Basic completion_gate.py checks exact linear history from baseline, VERSION/CHANGELOG, release tags and index flags. Stop adapter with one continuation. No commits or tags created.
+- guarded_run.py: independent owner-controlled process, PLAN_ONLY by default, approved agent/tests with --execute, no-op refusal and unchanged checked SHA/tag verification. 26/26 Linux tests with disposable Git fixtures and actual child processes; full CI and actual clients NOT_VERIFIED for candidate.
+
 ## 0.0.3 — Inherited Git context diagnostics
 
 - The context command reports recognized blocking names only, without executing Git or modifying the environment. Orphaned indexed Git config overrides are rejected. Three new skill test methods; actual host integration #81 remains open. CI and independent tag required.

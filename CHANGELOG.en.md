@@ -4,6 +4,13 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.85 — Independently enforce completion checks
+
+- Microversion Release 0.0.4: Completion Gate validates linear version transitions, changelogs, exact annotated tags, cleanliness and index flags; repeats HEAD/ref checks. Basic root VERSION/changelog profile. Stop adapter requests at most one continuation per owner-selected marker, no automatic tagging.
+- Guarded Run executes only explicitly selected owner commands after --execute; independently checks structure, actual agent exit, tests and final SHA/tag objects. No-op blocked by default. Not a sandbox or proof of activation.
+- 26/26 local Linux / Python 3.13.5 / Git 2.47.3 test methods (16 Git/Stop + 10 subprocess fixtures), verified Git blobs. Full CI and actual client acceptance required.
+- Owner approved basic versions of all three skills, mandatory Codex/Harness enforcement and a GitHub Immutable Release with an attested ZIP. v0.0.84 and squash-only setting verified. #81 stays open.
+
 ## 0.0.84 — Fix the mandatory 0.1.0 release checks
 
 - Release Core: required CI jobs selected independently of API job presence. Current profile requires all six; historical TESSERA policy uses root VERSION of exact commit, not skill version. Missing groups block the report; regressions added.

@@ -10,7 +10,7 @@ TESSERA is not a fork of Harness or Codex. It stores portable [Agent Skills](htt
 
 | Skill | Purpose | Status |
 | --- | --- | --- |
-| [Microversion Release](skills/microversion-release/README.en.md) | Microversions, mandatory annotated release tags, portable use across agents | 0.0.3 — independent tag verified, TD17 diagnostics; client acceptance incomplete (#81) |
+| [Microversion Release](skills/microversion-release/README.en.md) | Microversions, mandatory annotated release tags, portable use across agents | 0.0.3 — accepted; 0.0.4 Completion Gate/Guarded Run candidate; client acceptance open (#81) |
 | [Project Audit](skills/project-audit/README.en.md) | Evidence-based audit and metadata/Git inspection | 0.0.5 — DELTA planner, independent tag verified; agent acceptance NOT_VERIFIED |
 | [Repository Workflow](skills/repository-workflow/README.en.md) | Local Git and GitHub, independent tasks, CI, integration and technical debt | 0.0.2 — hardened planner accepted; agent acceptance NOT_VERIFIED |
 
@@ -74,7 +74,7 @@ CI additionally runs the [pinned upstream `skills-ref` validator](docs/AGENT_SKI
 
 **Current catalog version:** see [`VERSION`](VERSION). From this point forward, every independently verified change to TESSERA must increment the catalog microversion, update both changelogs, and use a clear, human-readable Russian commit title. After successful GitHub Actions checks, an annotated `vX.Y.Z` Git tag is created. GitHub Releases are not published automatically.
 
-Verified baseline: TESSERA `0.0.83`, SHA `d830dc03c2c6575f69ae45a00fd6f7f22ef4feb4`, main CI 45778355203 SUCCESS, exact annotated `v0.0.83` and `project-audit/v0.0.5`. Current source version: [`VERSION`](VERSION).
+Verified baseline: TESSERA `0.0.84`, SHA `df8116f35fdfe2ccb7ee4a4316053455c407d3e9`, main CI 45834594641 SUCCESS, exact annotated `v0.0.84`. Current source version: [`VERSION`](VERSION).
 
 - **The TESSERA catalog** and **each skill** have independent version histories.
 - Work microversions increase PATCH by one. After `.99`, work may continue with `.100`, `.101`, and so on if the task is unfinished.

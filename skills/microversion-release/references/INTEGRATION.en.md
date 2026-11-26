@@ -107,3 +107,5 @@ For multi-agent repositories: maintain one canonical version source, serialize r
 - https://code.claude.com/docs/en/skills
 - https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/skill/skill-filesystem/README.md
 - https://hermes-agent.nousresearch.com/docs/user-guide/features/skills
+
+T13 enforcement candidate: [Completion Gate and Guarded Run](ENFORCEMENT.en.md). External control mandatory, Stop provides additional feedback; actual Codex/Harness NOT_VERIFIED. No production enablement before acceptance.
