@@ -122,6 +122,43 @@ class CompletionGateTests(unittest.TestCase):
         self.commit('0.0.100', changelog=False)
         self.assertEqual(self.check()['reason'], 'GATE_METADATA_ONLY_OR_MISSING')
 
+    def test_predeclared_target_heading_refused(self):
+        for name in ('CHANGELOG.md', 'CHANGELOG.en.md'):
+            with (self.repo / name).open('a', encoding='utf-8') as stream:
+                stream.write('## 0.0.100 — reserved\n')
+        self.git('add', '.')
+        self.git('commit', '--amend', '--no-edit', '-q')
+        self.base = self.git('rev-parse', 'HEAD')
+        self.commit('0.0.100', changelog=False)
+        for name in ('CHANGELOG.md', 'CHANGELOG.en.md'):
+            with (self.repo / name).open('a', encoding='utf-8') as stream:
+                stream.write('Other text\n')
+        self.git('add', '.')
+        self.git('commit', '--amend', '--no-edit', '-q')
+        self.assertEqual(self.check()['reason'], 'GATE_CHANGELOG_PREDECLARED')
+
+    def test_duplicate_target_heading_refused(self):
+        self.commit('0.0.100')
+        with (self.repo / 'CHANGELOG.en.md').open('a', encoding='utf-8') as stream:
+            stream.write('## 0.0.100 — duplicate\n')
+        self.git('add', '.')
+        self.git('commit', '--amend', '--no-edit', '-q')
+        self.assertEqual(self.check()['reason'], 'GATE_CHANGELOG_MISSING_OR_DUPLICATE')
+
+    def test_previous_heading_must_remain(self):
+        self.commit('0.0.100')
+        (self.repo / 'CHANGELOG.md').write_text('## 0.0.100 — only\n', encoding='utf-8')
+        self.git('add', '.')
+        self.git('commit', '--amend', '--no-edit', '-q')
+        self.assertEqual(self.check()['reason'], 'GATE_CHANGELOG_PREVIOUS_LOST')
+
+    def test_invalid_baseline_changelog_refused(self):
+        (self.repo / 'CHANGELOG.md').write_text('No baseline entry\n', encoding='utf-8')
+        self.git('add', '.')
+        self.git('commit', '--amend', '--no-edit', '-q')
+        self.base = self.git('rev-parse', 'HEAD')
+        self.assertEqual(self.check()['reason'], 'GATE_BASELINE_CHANGELOG_INVALID')
+
     def test_index_flags_refused(self):
         for flag, undo in (('--assume-unchanged', '--no-assume-unchanged'),
                            ('--skip-worktree', '--no-skip-worktree')):

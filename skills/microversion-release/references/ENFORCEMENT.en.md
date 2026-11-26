@@ -50,3 +50,7 @@ Linux Git 2.47.3 / Python 3.13.5 — 26/26 methods: 16 Git/Stop fixture and 10 a
 ## Exact target (0.0.5 candidate)
 
 Guarded Run schema_version 2 requires --expected-version even for PLAN_ONLY. Validates format, refuses target below baseline and requires change by default. If agent produces valid microversion 0.0.100 instead of requested 0.1.0, RUN_TARGET_VERSION_MISMATCH before tests; missing release tag yields RUN_STRUCTURE_FAILED. For read-only work specify baseline version and explicit --allow-no-change. ACCEPTANCE_CHECKS_PASSED does not establish test adequacy, Stop observation, remote or release readiness. Four new regression methods including actual Git release and negative tag check. Native CI required.
+
+## Direct changelog entry — next candidate
+
+Each required baseline changelog contains exactly one exact heading for its version. Every subsequent commit must introduce exactly one heading for the current version for the first time; predeclared target, duplicate and loss of the previous heading block structural acceptance. Textual headings only, not description substance, preservation of all historic edits or Markdown fence semantics. Four new Git regressions; CI required. Two old context CLI fixtures use a minimal explicit system allowlist and synthetic overrides only; a separate regression excludes arbitrary variables. Production name-only context guard and permissions unchanged.

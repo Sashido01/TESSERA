@@ -21,6 +21,14 @@ if pathlib.Path(module.__file__).resolve() != PATH:
     raise RuntimeError("Unexpected test module origin")
 
 
+def context_cli_fixture_env():
+    # These two tests invoke only the no-Git context command. No credentials,
+    # arbitrary process values or real Git overrides are needed by that child.
+    return {key: value for key in ("PATH", "SystemRoot", "WINDIR",
+            "COMSPEC", "PATHEXT", "TEMP", "TMP", "TMPDIR", "LANG", "LC_ALL",
+            "LC_CTYPE", "TZ") if (value := os.getenv(key)) is not None}
+
+
 def require_fixture_context():
     # Real Git mutations in a disposable test must not inherit redirections
     # or configuration overrides. Refuse before creating or touching fixtures.
@@ -30,6 +38,14 @@ def require_fixture_context():
 
 
 class FixtureContextTests(unittest.TestCase):
+    def test_context_cli_fixture_only_required_values(self):
+        with mock.patch.dict(os.environ, {"TESSERA_PRIVATE_FIXTURE": "synthetic",
+                                           "GIT_CONFIG_COUNT": "synthetic",
+                                           "SSH_AUTH_SOCK": "synthetic"}):
+            env = context_cli_fixture_env()
+            for name in ("TESSERA_PRIVATE_FIXTURE", "GIT_CONFIG_COUNT", "SSH_AUTH_SOCK"):
+                self.assertNotIn(name, env)
+
     def test_inherited_context_refuses_before_mutation(self):
         for name in ("GIT_DIR", "GIT_WORK_TREE", "GIT_CONFIG_COUNT", "GIT_CONFIG_KEY_0"):
             with self.subTest(name=name), mock.patch.dict(os.environ, {name: "fixture"}), \
@@ -168,7 +184,7 @@ class ReleaseTagTests(unittest.TestCase):
         self.assertEqual(self.cmd("tag", "--list"), "")
 
     def test_context_cli_reports_names_only_without_git(self):
-        env = dict(os.environ)
+        env = context_cli_fixture_env()
         env.update({"GIT_CONFIG_COUNT": "synthetic private marker",
                     "GIT_CONFIG_KEY_0": "synthetic private marker",
                     "GIT_CONFIG_VALUE_private_marker": "synthetic private marker",
@@ -187,7 +203,7 @@ class ReleaseTagTests(unittest.TestCase):
         self.assertNotIn("GIT_PAGER", report["blocking_names"])
 
     def test_context_cli_without_blockers_does_not_prove_readiness(self):
-        env = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+        env = context_cli_fixture_env()
         proc = subprocess.run([sys.executable, "-B", str(PATH), "context"],
                               env=env, capture_output=True, text=True, check=False, timeout=15)
         self.assertEqual(proc.returncode, 0)
