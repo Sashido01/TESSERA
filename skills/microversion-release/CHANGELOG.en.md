@@ -2,6 +2,11 @@
 
 [Русский — оригинал](CHANGELOG.md) | **English — translation**
 
+## 0.0.6 — Require a new history entry
+
+- Completion Gate requires one baseline heading and one newly introduced next-version heading, retaining the previous one. Predeclared versions, duplicates and lost previous heading BLOCKED. Four new Git regression methods.
+- Minimal environment for two diagnostic CLI fixtures, only explicitly required system keys and synthetic overrides. Separate regression. Production policy and permissions unchanged. CI and actual client acceptance required.
+
 ## 0.0.5 — Exact target and fixture protection
 
 - Guarded Run requires --expected-version, rejects wrong target before tests; new regression scenarios exact release, missing tag, invalid/old target, CI required.
