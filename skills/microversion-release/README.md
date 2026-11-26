@@ -62,3 +62,5 @@ python -m unittest discover -s tests -v
 ## Лицензия
 
 MIT. Полный текст лицензии поставляется вместе с навыком: [LICENSE.txt](LICENSE.txt).
+
+Кандидат обязательного исполнения T13: [Completion Gate и Guarded Run](references/ENFORCEMENT.md). Внешний контроль обязателен, Stop — дополнительная обратная связь; реальные Codex/Harness NOT_VERIFIED. Не включать в продуктивном профиле до приёмки.

@@ -109,3 +109,5 @@ hermes skills install Sashido01/TESSERA/skills/microversion-release
 - https://code.claude.com/docs/en/skills
 - https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/skill/skill-filesystem/README.md
 - https://hermes-agent.nousresearch.com/docs/user-guide/features/skills
+
+Кандидат обязательного исполнения T13: [Completion Gate и Guarded Run](ENFORCEMENT.md). Внешний контроль обязателен, Stop — дополнительная обратная связь; реальные Codex/Harness NOT_VERIFIED. Не включать в продуктивном профиле до приёмки.

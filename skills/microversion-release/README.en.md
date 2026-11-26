@@ -62,3 +62,5 @@ The portable structure and CLI can be validated in TESSERA CI. **Installation, a
 ## License
 
 MIT. The complete license travels with the skill: [LICENSE.txt](LICENSE.txt).
+
+T13 enforcement candidate: [Completion Gate and Guarded Run](references/ENFORCEMENT.en.md). External control mandatory, Stop provides additional feedback; actual Codex/Harness NOT_VERIFIED. No production enablement before acceptance.
