@@ -28,17 +28,20 @@ def command(executable, args, root):
 
 
 def outcome(status, reason=None, **facts):
-    result = {'schema_version': 1, 'status': status, 'release_readiness': 'NOT_VERIFIED',
+    result = {'schema_version': 2, 'status': status, 'release_readiness': 'NOT_VERIFIED',
               'client_skill_activation': 'NOT_VERIFIED', **facts}
     if reason is not None:
         result['reason'] = reason
     return result
 
 
-def guarded_run(repo, baseline, agent_exe, agent_args, test_exe, test_args, *, execute=False,
+def guarded_run(repo, baseline, agent_exe, agent_args, test_exe, test_args, *, expected_version, execute=False,
                 bilingual=False, allow_no_change=False, agent_timeout=900, test_timeout=300):
-    facts = {'agent_exit_code': None, 'test_exit_code': None, 'structure': None}
+    facts = {'agent_exit_code': None, 'test_exit_code': None, 'structure': None,
+             'expected_version': None}
     try:
+        gate.version_parts(expected_version)
+        facts['expected_version'] = expected_version
         root = repo.resolve(strict=True)
         gate.require(not Path(__file__).resolve().is_relative_to(root) and
                      not Path(gate.__file__).resolve().is_relative_to(root), 'RUN_GATE_INSIDE_PROJECT')
@@ -50,6 +53,10 @@ def guarded_run(repo, baseline, agent_exe, agent_args, test_exe, test_args, *, e
         facts['structure'] = initial
         if initial['status'] != 'STRUCTURE_VERIFIED' or initial['commits_checked'] != 0:
             return outcome('BLOCKED', 'RUN_INITIAL_BASELINE_INVALID', **facts)
+        if gate.version_parts(expected_version) < gate.version_parts(initial['version']):
+            return outcome('BLOCKED', 'RUN_TARGET_VERSION_BEHIND_BASELINE', **facts)
+        if expected_version == initial['version'] and not allow_no_change:
+            return outcome('BLOCKED', 'RUN_TARGET_VERSION_REQUIRES_CHANGE', **facts)
         if not execute:
             return outcome('PLAN_ONLY', **facts)
 
@@ -73,6 +80,8 @@ def guarded_run(repo, baseline, agent_exe, agent_args, test_exe, test_args, *, e
             return outcome('BLOCKED', 'RUN_BASELINE_TAG_CHANGED', **facts)
         if not allow_no_change and observed['commits_checked'] == 0:
             return outcome('BLOCKED', 'RUN_NO_CHANGE', **facts)
+        if observed['version'] != expected_version:
+            return outcome('BLOCKED', 'RUN_TARGET_VERSION_MISMATCH', **facts)
         try:
             facts['test_exit_code'] = run(tests, test_timeout)
         except subprocess.TimeoutExpired:
@@ -92,6 +101,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repo', required=True, type=Path)
     parser.add_argument('--baseline', required=True)
+    parser.add_argument('--expected-version', required=True)
     parser.add_argument('--agent-exe', required=True, type=Path)
     parser.add_argument('--agent-arg', action='append', default=[])
     parser.add_argument('--test-exe', required=True, type=Path)
@@ -103,7 +113,8 @@ def main():
     parser.add_argument('--execute', action='store_true')
     args = parser.parse_args()
     result = guarded_run(args.repo, args.baseline, args.agent_exe, args.agent_arg,
-                         args.test_exe, args.test_arg, execute=args.execute, bilingual=args.bilingual,
+                         args.test_exe, args.test_arg, expected_version=args.expected_version,
+                         execute=args.execute, bilingual=args.bilingual,
                          allow_no_change=args.allow_no_change, agent_timeout=args.agent_timeout,
                          test_timeout=args.test_timeout)
     print(json.dumps(result, sort_keys=True))

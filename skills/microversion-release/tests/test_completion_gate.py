@@ -28,7 +28,9 @@ class CompletionGateTests(unittest.TestCase):
         self.hooks = self.root / 'empty-hooks'
         self.hooks.mkdir()
         # Only the disposable fixture gets a clean child Git context.
-        clean = {k: v for k, v in os.environ.items() if not k.upper().startswith('GIT_')}
+        clean = {k: os.environ[k] for k in ('PATH', 'SystemRoot', 'WINDIR', 'COMSPEC',
+                 'PATHEXT', 'TEMP', 'TMP', 'TMPDIR', 'APPDATA', 'LOCALAPPDATA',
+                 'HOMEDRIVE', 'HOMEPATH', 'LANG', 'LC_ALL', 'LC_CTYPE', 'TZ') if k in os.environ}
         clean.update(HOME=str(self.home), USERPROFILE=str(self.home))
         env_patch = mock.patch.dict(os.environ, clean, clear=True)
         env_patch.start()
@@ -44,7 +46,7 @@ class CompletionGateTests(unittest.TestCase):
         self.base = self.git('rev-parse', 'HEAD')
 
     def git(self, *args):
-        env = {k: v for k, v in os.environ.items() if not k.upper().startswith('GIT_')}
+        env = {k: os.environ[k] for k in gate.SYSTEM_ENV if k in os.environ}
         env.update(GIT_CONFIG_NOSYSTEM='1', GIT_CONFIG_GLOBAL=os.devnull, GIT_TERMINAL_PROMPT='0',
                    GIT_ALLOW_PROTOCOL='')
         return subprocess.run(['git', '-C', str(self.repo), *args], env=env, check=True,
