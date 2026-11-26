@@ -58,6 +58,40 @@ def finding_location(row, expected):
     return {"file": name, "start_line": start, "end_line": end}
 
 
+def high_occurrence_locations(rows, expected):
+    """Project reported HIGH/CRITICAL occurrence coordinates, not raw evidence."""
+    locations = []
+    total = unresolved = omitted = missing_groups = groups = 0
+    for row in rows:
+        if row["severity"] not in {"HIGH", "CRITICAL"}:
+            continue
+        groups += 1
+        occurrences = row.get("occurrences")
+        if not isinstance(occurrences, list) or not occurrences:
+            missing_groups += 1
+            continue
+        total += len(occurrences)
+        for occurrence in occurrences:
+            if len(locations) >= MAX_LOCATION_ROWS:
+                omitted += 1
+                continue
+            location = finding_location({"location": occurrence}, expected)
+            if location is None:
+                unresolved += 1
+                continue
+            locations.append({"rule": row["id"], "severity": row["severity"], **location})
+    return {
+        "high_occurrence_groups": groups,
+        "high_occurrence_groups_missing": missing_groups,
+        "high_occurrences_reported": total,
+        "high_occurrences_unresolved": unresolved,
+        "high_occurrences_omitted": omitted,
+        "high_occurrence_locations": sorted(locations, key=lambda x: (
+            x["rule"], x["file"], x["start_line"], x["end_line"] or 0, x["severity"])),
+        "high_occurrence_scope": "REPORTED_HIGH_CRITICAL_ONLY_NOT_INDEPENDENT_COVERAGE",
+    }
+
+
 def summary(data, rc, expected):
     require(rc in (0, 1) and isinstance(data, dict)
             and data.get("execution_successful") is True, "SP_EXECUTION_FAILED_RC_" + str(rc))
@@ -184,6 +218,7 @@ def summary(data, rc, expected):
             "primary_locations_unresolved": unresolved_locations,
             "primary_locations_omitted": omitted_locations,
             "location_scope": "PRIMARY_ONLY_NOT_ALL_OCCURRENCES",
+            **high_occurrence_locations(rows, {name: expected[name] for name in observed}),
             "by_rule": [{"rule": rule, "severity": sev, "count": n}
                         for (rule, sev), n in sorted(counter.items())],
             "coverage_locations": sorted(coverage_locations, key=lambda x: (
