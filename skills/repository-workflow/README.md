@@ -7,3 +7,5 @@
 Опциональный Python планировщик работает только с явно предоставленным снимком. Windows 11 / Python 3.14.3: 17/17 тестов. Планировщик не проверяет истинность доказательств и не блокирует запись; реальные агентные оценки остаются NOT_VERIFIED. Навык не требует платных API, внешней БД или сервиса-оркестратора.
 
 Из доверенного checkout TESSERA: `python core/release_preflight.py --repo . --skill repository-workflow --version 0.0.2 --config release-checks-repository-workflow.json --plan`. План ничего не исполняет и не создаёт тег.
+
+Опциональный кандидат [Worktree Inventory](references/WORKTREE_INVENTORY.md) сверяет два переданных бинарных снимка, не вызывает Git и не удаляет ветки. 12/12 изолированных Linux-тестов; полный CI и Windows открыты.

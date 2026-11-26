@@ -1,0 +1,11 @@
+# Worktree inventory — RW05 candidate
+
+[Русский — оригинал](WORKTREE_INVENTORY.md) | **English — translation**
+
+`python scripts/worktree_inventory.py --first <capture1.bin> --second <capture2.bin> --branch refs/heads/example` compares two explicitly supplied binary outputs from `git worktree list --porcelain -z`. It opens no Git, network, inspected worktrees or repository. Obtain captures using separate authorized commands in the selected trusted Git, check exit codes and preserve only stdout with NUL delimiters (no text transcoding). Never publish captures containing paths or lock reasons. Do not use an unverified Git context #81 to acquire captures.
+
+Bounds: 2 MiB per capture, 2000 records, 100 explicitly requested ASCII refs/heads/...; name validation is format-level, not a complete check-ref-format implementation. Checks NUL framing, duplicate paths and attributes, unknown attributes, valid HEAD and bare/branch/detached state, locked/prunable flags; paths and reasons remain opaque bytes. Duplicate occupancy of a branch is counted, not collapsed. Exact-byte comparison treats reordered records as STALE. Exit 0 OBSERVED, 1 STALE, 2 invalid input. Output includes state counts and matches by requested branch index, without paths, OIDs, ref names or reasons. Locked/prunable/detached counts can overlap.
+
+Matching captures do not establish provenance, completeness, capture time or physical path identity. Distinct file names do not prove independent observations. local_occupancy_now and snapshot_authenticity always NOT_VERIFIED, deletion_authorized always false. Even zero matches do not authorize deletion: separately check SHA, preservation after squash, no open PR, uncommitted files, active executors, local worktrees, authority and freshness. Never delete a worktree based on prunable. No automatic command execution. Captures must be ordinary trusted files; path substitution, special-file and race protection are not guaranteed.
+
+12/12 Linux tests with Git 2.47.3: synthetic records and actual disposable Git with unborn, detached and locked; tested source/test Git blobs match publication. Full CI, Windows and actual projects NOT_VERIFIED for candidate. Next RW05 steps: verify accepted-result equivalence, exact refs and open PRs, agreed deletion policy; no automatic deletion.

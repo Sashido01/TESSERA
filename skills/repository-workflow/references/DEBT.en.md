@@ -37,3 +37,5 @@ gh run list --limit 30
 gh run view <run-id>
 ```
 List limits mean sampling; for exhaustive audit process all API pages. Check exact SHAs, workflow, attempts and required jobs. An old failed run after successful correction of the same task is historical evidence, not an open task. Do not delete historical runs. If remote or gh is unavailable continue locally. Review output for secrets and private paths before publication. These are executor commands, not an automated scanner.
+
+For private reconciliation of two explicitly supplied binary `git worktree list --porcelain -z` captures optionally use [Worktree Inventory](WORKTREE_INVENTORY.en.md). OBSERVED does not prove current occupancy, zero matches do not authorize deletion. On STALE/error recheck, do not delete. Never publish raw captures.

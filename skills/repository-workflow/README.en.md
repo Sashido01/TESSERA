@@ -7,3 +7,5 @@ Skill version 0.0.2. Organizes fast, continuous, verifiable development cycles, 
 The optional Python planner operates only on an explicitly supplied snapshot. Windows 11 / Python 3.14.3: 17/17 tests. It does not establish evidence truth or block writes; actual agent evaluation remains NOT_VERIFIED. No paid APIs, external database or orchestration service is required.
 
 From a trusted TESSERA checkout: `python core/release_preflight.py --repo . --skill repository-workflow --version 0.0.2 --config release-checks-repository-workflow.json --plan`. Planning runs no commands and creates no tag.
+
+Optional [Worktree Inventory](references/WORKTREE_INVENTORY.en.md) candidate compares two supplied binary captures, invokes no Git and deletes no branches. 12/12 isolated Linux tests; full CI and Windows open.
