@@ -47,7 +47,7 @@ foreach ($skill in @('microversion-release','project-audit','repository-workflow
         'project-audit' { 'refs/tags/project-audit/v0.0.6' }
         'repository-workflow' { 'refs/tags/repository-workflow/v0.0.2' }
     }
-    gh skill install Sashido01/TESSERA $skill --pin $pin --dir $dest
+    gh skill install Sashido01/TESSERA "skills/$skill" --pin $pin --dir $dest
     if ($LASTEXITCODE -ne 0) { throw "Installation failed: $skill" }
 }
 gh skill list --dir $dest --json
@@ -146,4 +146,10 @@ OWNER_REPORTED: npm 12.0.2 / Node 24.18.0, @deepseek-ai/dsh@0.2.2-rc.5 dist.inte
 
 ## Owner acceptance 2026-11-27 — v0.0.88
 
-OWNER_REPORTED: Harness 0.2.2-rc.1, 29 PASS / 1 FAIL / 4 NOT_VERIFIED. All three trees match the table above; explicit calls of all three skills, unknown-name refusal and actual headless P02/P04/P05 observed. Supplied JSONL independently confirms native successful skill dispatch for all three, but not every child run. Guarded Run positive and negative fixtures, unit suites 78/78, 76 PASS + 1 FIFO SKIP, 17/17 are OWNER_REPORTED. AUTO_USE, live GUI, Stop-hook NOT_VERIFIED; gh search unavailable. gh 2.105.0: could not record install warning about missing USERPROFILE variable (exact cause not independently reproduced), files and frontmatter owner-verified. Do not recommend broad --unpin --all; individual staged pin/rollback and preservation of adjacent skills required. Codex: network timeout, installation/activation NOT_VERIFIED, #81 OPEN. Repeat narrow checks locally; fail closed on unsafe Git context, without removing restrictions.
+OWNER_REPORTED: Harness 0.2.2-rc.1, 29 PASS / 1 FAIL / 4 NOT_VERIFIED. All three trees match the table above; explicit calls of all three skills, unknown-name refusal and actual headless P02/P04/P05 observed. Supplied JSONL independently confirms native successful skill dispatch for all three, but not every child run. Guarded Run positive and negative fixtures, unit suites 78/78, 76 PASS + 1 FIFO SKIP, 17/17 are OWNER_REPORTED. AUTO_USE, live GUI, Stop-hook NOT_VERIFIED; gh search unavailable. gh 2.105.0: could not record install warning about missing USERPROFILE variable (source trace supports the cause; native reproduction pending), files and frontmatter owner-verified. Do not recommend broad --unpin --all; individual staged pin/rollback and preservation of adjacent skills required. Codex: network timeout, installation/activation NOT_VERIFIED, #81 OPEN. Repeat narrow checks locally; fail closed on unsafe Git context, without removing restrictions.
+
+### Targeted installation and Windows metadata warning
+
+At exact gh v2.105.0, [install.go](https://github.com/cli/cli/blob/v2.105.0/pkg/cmd/skills/install/install.go) selects DiscoverSkillByPath for a selector beginning with skills/. [discovery.go](https://github.com/cli/cli/blob/v2.105.0/internal/skills/discovery/discovery.go) resolves that single directory via parent contents at the resolved commit, instead of full repository discovery. The executable block above uses this narrower form. Its native remote-install latency and client acceptance are NOT_VERIFIED; do not claim that it fixes network timeouts.
+
+The same version's [installer.go](https://github.com/cli/cli/blob/v2.105.0/internal/skills/installer/installer.go) appends a warning when RecordInstall fails after successful file installation; [lockfile.go](https://github.com/cli/cli/blob/v2.105.0/internal/skills/lockfile/lockfile.go) obtains its lock path via os.UserHomeDir. On Windows HOME/GH_CONFIG_DIR do not establish USERPROFILE. Diagnose only whether the variable exists (not its value) in a trusted disposable Windows process; compare the lock record and installed bytes separately. Do not set another person's home, alter the host sandbox, or claim the lock record succeeded because exit is 0. No automatic upstream bug conclusion without reproduction.

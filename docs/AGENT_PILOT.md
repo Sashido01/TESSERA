@@ -47,7 +47,7 @@ foreach ($skill in @('microversion-release','project-audit','repository-workflow
         'project-audit' { 'refs/tags/project-audit/v0.0.6' }
         'repository-workflow' { 'refs/tags/repository-workflow/v0.0.2' }
     }
-    gh skill install Sashido01/TESSERA $skill --pin $pin --dir $dest
+    gh skill install Sashido01/TESSERA "skills/$skill" --pin $pin --dir $dest
     if ($LASTEXITCODE -ne 0) { throw "Installation failed: $skill" }
 }
 gh skill list --dir $dest --json
@@ -146,4 +146,10 @@ OWNER_REPORTED: npm 12.0.2 / Node 24.18.0, @deepseek-ai/dsh@0.2.2-rc.5 dist.inte
 
 ## Приёмка владельца 27.11.2026 — v0.0.88
 
-OWNER_REPORTED: Harness 0.2.2-rc.1, 29 PASS / 1 FAIL / 4 NOT_VERIFIED. Все три дерева совпали с таблицей выше; наблюдались явные вызовы трёх навыков, отказ неизвестного имени и реальные headless P02/P04/P05. Предоставленный JSONL независимо подтверждает успешные native skill dispatch для всех трёх, но не все дочерние прогоны. Guarded Run positive и отрицательные fixtures, unit suites 78/78, 76 PASS + 1 FIFO SKIP, 17/17 — OWNER_REPORTED. AUTO_USE, GUI-live, Stop-hook NOT_VERIFIED; gh search недоступен. gh 2.105.0: предупреждение could not record install из-за отсутствующей переменной USERPROFILE (точная причина не воспроизведена независимо), файлы и frontmatter проверены владельцем. Не рекомендовать широкое --unpin --all; отдельный staging pin/rollback и проверка сохранности соседних навыков обязательны. Codex: сетевой timeout, установка/активация NOT_VERIFIED, #81 OPEN. Повторить узкие проверки локально; при unsafe Git контексте отказ обязателен, без удаления ограничений.
+OWNER_REPORTED: Harness 0.2.2-rc.1, 29 PASS / 1 FAIL / 4 NOT_VERIFIED. Все три дерева совпали с таблицей выше; наблюдались явные вызовы трёх навыков, отказ неизвестного имени и реальные headless P02/P04/P05. Предоставленный JSONL независимо подтверждает успешные native skill dispatch для всех трёх, но не все дочерние прогоны. Guarded Run positive и отрицательные fixtures, unit suites 78/78, 76 PASS + 1 FIFO SKIP, 17/17 — OWNER_REPORTED. AUTO_USE, GUI-live, Stop-hook NOT_VERIFIED; gh search недоступен. gh 2.105.0: предупреждение could not record install из-за отсутствующей переменной USERPROFILE (цепочка вызовов подтверждена исходниками; native reproduction открыт), файлы и frontmatter проверены владельцем. Не рекомендовать широкое --unpin --all; отдельный staging pin/rollback и проверка сохранности соседних навыков обязательны. Codex: сетевой timeout, установка/активация NOT_VERIFIED, #81 OPEN. Повторить узкие проверки локально; при unsafe Git контексте отказ обязателен, без удаления ограничений.
+
+### Адресная установка и предупреждение Windows metadata
+
+В точном gh v2.105.0 [install.go](https://github.com/cli/cli/blob/v2.105.0/pkg/cmd/skills/install/install.go) выбирает DiscoverSkillByPath для селектора с префиксом skills/. [discovery.go](https://github.com/cli/cli/blob/v2.105.0/internal/skills/discovery/discovery.go) разрешает одну папку через contents родительского каталога на разрешённом коммите вместо полного discovery репозитория. Исполняемый блок выше использует этот более узкий вариант. Реальная задержка remote install и клиентская приёмка NOT_VERIFIED; не заявлять устранение сетевых таймаутов.
+
+[installer.go](https://github.com/cli/cli/blob/v2.105.0/internal/skills/installer/installer.go) той же версии добавляет warning при отказе RecordInstall после успешной записи файлов; [lockfile.go](https://github.com/cli/cli/blob/v2.105.0/internal/skills/lockfile/lockfile.go) получает путь lock через os.UserHomeDir. На Windows HOME/GH_CONFIG_DIR не устанавливают USERPROFILE. Диагностировать только факт наличия переменной (не значение) в доверенном одноразовом Windows-процессе; отдельно сверять запись lock и байты установки. Не подставлять чужой home, не менять песочницу, не считать lock успешным из-за exit 0. Не объявлять upstream bug без воспроизведения.

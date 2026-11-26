@@ -6,7 +6,7 @@ This file tracks changes to the **shared catalog**. Individual skills may mainta
 
 ## 0.0.89 — Pin the short pilot and Harness evidence
 
-- Current independent pin/commit/tree, short local checks without full repository audit; bounded network retries and separate explicit/automatic activation.
+- Current independent pin/commit/tree, direct gh selector skills/<skill> (gh 2.105.0 source verified, actual run pending), short local checks without full repository audit; bounded network retries and separate explicit/automatic activation.
 - Record verified v0.0.88 CI and tags, owner Harness rc.1 results, observed JSONL loading and open Codex/Stop-hook/AUTO_USE; gh metadata warning remains open. No skill changes or weaker safeguards.
 
 ## 0.0.88 — Harden version history and static-finding evidence
