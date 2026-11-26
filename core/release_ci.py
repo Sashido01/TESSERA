@@ -20,10 +20,33 @@ REQUIRED_JOBS = ("validate", "Создать аннотированный тег
 PARALLEL_JOBS = ("catalog_checks", "history_checks")
 SOURCE_JOB = "source_secret_checks"
 WINDOWS_JOB = "windows_skill_checks"
+JOB_PROFILES = {
+    "legacy": REQUIRED_JOBS,
+    "parallel": REQUIRED_JOBS + PARALLEL_JOBS,
+    "source": REQUIRED_JOBS + PARALLEL_JOBS + (SOURCE_JOB,),
+    "current": REQUIRED_JOBS + PARALLEL_JOBS + (SOURCE_JOB, WINDOWS_JOB),
+}
+CATALOG_VERSION = re.compile(r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\Z")
 
 
 class CIEvidenceError(ValueError):
     """Invalid or unavailable GitHub CI evidence."""
+
+
+def catalog_job_profile(version: str) -> str:
+    """Select TESSERA history policy from the trusted target commit's root VERSION."""
+    if not isinstance(version, str) or len(version) > 64 or not CATALOG_VERSION.fullmatch(version):
+        raise CIEvidenceError("CI_CATALOG_VERSION_INVALID")
+    major, minor, patch = map(int, version.split("."))
+    if minor > 99:
+        raise CIEvidenceError("CI_CATALOG_VERSION_INVALID")
+    if (major, minor) != (0, 0) or patch >= 76:
+        return "current"
+    if patch >= 72:
+        return "source"
+    if patch >= 68:
+        return "parallel"
+    return "legacy"
 
 
 def parameters(repository: str, run_id: int, commit_sha: str) -> None:
@@ -91,9 +114,12 @@ def validate_ci_evidence(
     repository: str,
     run_id: int,
     commit_sha: str,
+    job_profile: str = "current",
 ) -> dict[str, Any]:
-    """Validate a complete, exact-commit GitHub Actions run and named jobs."""
+    """Validate a complete, exact-commit run against independently chosen policy."""
     parameters(repository, run_id, commit_sha)
+    if not isinstance(job_profile, str) or job_profile not in JOB_PROFILES:
+        raise CIEvidenceError("CI_JOB_PROFILE_INVALID")
     problems: list[str] = []
     if not isinstance(run, dict) or not isinstance(jobs_data, dict):
         raise CIEvidenceError("CI_DATA_INVALID")
@@ -122,21 +148,20 @@ def validate_ci_evidence(
     if len(jobs) > 100:
         problems.append("CI_JOBS_INCOMPLETE")
         jobs = []
-    # Preserve historical two-job evidence; if a parallel-group job is present,
-    # require both groups for this run in addition to the mandatory gate and tag.
-    required_jobs = REQUIRED_JOBS + (PARALLEL_JOBS if any(
-        isinstance(item, dict) and item.get("name") in PARALLEL_JOBS for item in jobs
-    ) else ())
-    if any(isinstance(item, dict) and item.get("name") == SOURCE_JOB for item in jobs):
-        required_jobs = REQUIRED_JOBS + PARALLEL_JOBS + (SOURCE_JOB,)
-    if any(isinstance(item, dict) and item.get("name") == WINDOWS_JOB for item in jobs):
-        required_jobs = REQUIRED_JOBS + PARALLEL_JOBS + (SOURCE_JOB, WINDOWS_JOB)
+    # Never infer the required checks from jobs present in the API response.
+    required_jobs = JOB_PROFILES[job_profile]
+    known_jobs = set(JOB_PROFILES["current"])
     relevant: dict[str, dict[str, Any]] = {}
     for item in jobs:
         if not isinstance(item, dict):
             problems.append("CI_JOB_INVALID")
             continue
         name = item.get("name")
+        if not isinstance(name, str):
+            problems.append("CI_JOB_INVALID")
+            continue
+        if name in known_jobs and name not in required_jobs:
+            problems.append("CI_JOB_PROFILE_MISMATCH")
         if name not in required_jobs:
             continue
         if name in relevant:
@@ -163,6 +188,7 @@ def validate_ci_evidence(
         "expected_commit_sha": commit_sha,
         "observed_commit_sha": run.get("head_sha"),
         "run_attempt": attempt if type(attempt) is int else None,
+        "job_profile": job_profile,
         "required_jobs": list(required_jobs),
         "ci_status": "PASS" if not problems else "BLOCKED",
         "release_readiness": "NOT_VERIFIED",
@@ -176,9 +202,12 @@ def verify_github_ci(
     commit_sha: str,
     *,
     request_json: Callable[[str], dict[str, Any]] = get_public_json,
+    job_profile: str = "current",
 ) -> dict[str, Any]:
     """Explicit API query, bound to the user's selected trusted owner/repo."""
     parameters(repository, run_id, commit_sha)
+    if not isinstance(job_profile, str) or job_profile not in JOB_PROFILES:
+        raise CIEvidenceError("CI_JOB_PROFILE_INVALID")
     root = "https://api.github.com/repos/" + repository + "/actions/runs/" + str(run_id)
     try:
         run = request_json(root)
@@ -195,4 +224,5 @@ def verify_github_ci(
         }
     return validate_ci_evidence(
         run, jobs_data, repository=repository, run_id=run_id, commit_sha=commit_sha,
+        job_profile=job_profile,
     )

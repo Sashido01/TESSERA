@@ -4,6 +4,12 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.84 — Fix the mandatory 0.1.0 release checks
+
+- Release Core: required CI jobs selected independently of API job presence. Current profile requires all six; historical TESSERA policy uses root VERSION of exact commit, not skill version. Missing groups block the report; regressions added.
+- Isolated algorithm model 8/8 PASS, historical workflow boundaries verified. Full candidate CI required.
+- Prepared G01–G12, product boundaries, owner steps, ZIP provenance verification and Immutable Releases research. Verified exact v0.0.83/project-audit/v0.0.5 and refreshed pilot pins. #78 closed by owner, #81 remains open.
+
 ## 0.0.83 — Plan DELTA audits and reconcile documentation
 
 - Project Audit 0.0.5: recheck planning for two explicitly supplied DAGs; changed and unknown fingerprints invalidate dependents, incomplete graphs or context changes require full rechecks. No project reads or PASS reuse.

@@ -30,8 +30,8 @@ Using the official REST endpoints `GET /repos/{owner}/{repo}/actions/runs/{run_i
 1. Exact workflow run ID, repository name, and full target commit SHA.
 2. `event=push`, `head_branch=main`, and expected workflow file `.github/workflows/validate.yml`.
 3. Workflow `status=completed` and `conclusion=success`.
-4. Actual `run_attempt` matching both required jobs.
-5. Successful completion of **both** jobs: `validate` and `Создать аннотированный тег проверенной версии`.
+4. Actual `run_attempt` matching every required job.
+5. Successful completion of every job in the preselected profile, not merely jobs present in the API response.
 6. Job list completeness: `total_count` must equal the number of returned jobs. If more than a single API window (100) is needed, the verification is blocked rather than silently skipping jobs.
 
 Missing or skipped jobs, mismatching SHAs, wrong workflow, incomplete runs, different attempts, API errors, and network failures produce `ci_status=BLOCKED`.
@@ -70,3 +70,7 @@ python -m unittest discover -s skills/microversion-release/tests -v
 ```
 
 **T09.04 COMPLETE** refers to implemented CI evidence checks, report states, and tests. **Overall T09 remains PARTIAL:** final `RELEASED` determination, software publication evidence, and safe parallel-release coordination are not implemented.
+
+## Fixed required-job profile — candidate
+
+Default current requires 6 jobs: validate, tag, catalog_checks, history_checks, source_secret_checks, windows_skill_checks. Historical TESSERA policy is selected from the root VERSION of the exact inspected commit (not skill VERSION or API job list): before 0.0.68 legacy; 0.0.68–71 parallel; 0.0.72–75 source; from 0.0.76 and later MINOR/MAJOR current. Boundaries checked against actual historical tag workflows. Missing trusted VERSION blocks; other repositories use current. A newer mandatory job in an older profile blocks the result. Direct API verifier defaults to current. Never downgrade the profile when jobs are missing. Report includes ci_job_profile and ci_required_jobs. Isolated algorithm model 8/8 Linux; full candidate CI required.

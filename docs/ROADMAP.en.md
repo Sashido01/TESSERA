@@ -278,3 +278,7 @@ TD17/#81 PARTIAL: candidate Microversion Release 0.0.3 adds name-only diagnostic
 ## Reconciliation 26 November 2026 — accepted v0.0.82, DELTA candidate
 
 Main v0.0.82 `10ad9905ef2e51e00f2a04723a94cf6b9f78522e`, CI 45773757137 SUCCESS 6/6, exact annotated v0.0.82 `ee7ae8047b6d6d085d7d9beb481eadc83ed5ea4c` and microversion-release/v0.0.3 `646f9cfbfb3370bdc4ec804475ba203532e215ee` point to that commit. PR #89 merged, head deleted. TD17/#81: diagnostics accepted, least-privilege invocation and actual Codex NOT_VERIFIED. TD15/#78: reconciled Project Audit README/roadmap and stale statuses, refreshed pilot pin; close after CI and exact tag of this change. Project Audit level IV PARTIAL: DELTA planner candidate 0.0.5, 14/14 isolated Linux tests; no automatic evidence reuse, graph collection or persistence. TD04: separate candidate with synthetic scanner/real Git test, full CI required. Local sync not verified; client acceptance P0.
+
+## First finished 0.1.0 release
+
+[Release gate G01–G12](RELEASE_0_1_0.en.md): owner priority, three approved skills, actual client acceptance, exact tags and current attestation. This entry does not complete stages. No dummy microversions; current CI profile candidate requires integration and checks.

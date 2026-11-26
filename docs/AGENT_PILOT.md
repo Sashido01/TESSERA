@@ -7,7 +7,7 @@
 ## Входные условия
 
 - Только новый одноразовый локальный проект, без remote, рабочих данных, секретов, глобальных hooks и изменения настоящих проектов. Не выдавать агенту дополнительные полномочия. Не запускать сканеры безопасности в клиентском профиле.
-- Закреплённый проверенный снимок каталога: `refs/tags/v0.0.82`, commit `10ad9905ef2e51e00f2a04723a94cf6b9f78522e`, main CI 45773757137 SUCCESS. Независимые pin: `microversion-release/v0.0.3` → `10ad9905ef2e51e00f2a04723a94cf6b9f78522e`, `project-audit/v0.0.4` → `be6a126f08ffbb49b721b50e030b2a6d82c7d4f3`, `repository-workflow/v0.0.2` → `a2a6af6b66e9cd6e5b28ccb227245f3a13389098`. Перед установкой сверить каждый remote tag object и дерево навыка; новый кандидат Project Audit не включён до проверки его собственного тега. Исторический статический verdict v0.0.80 не сертификат и не разрешение на продуктивный запуск.
+- Закреплённый проверенный снимок: `refs/tags/v0.0.83`, commit `d830dc03c2c6575f69ae45a00fd6f7f22ef4feb4`, main CI 45778355203 SUCCESS. Независимые pin: `microversion-release/v0.0.3` → `10ad9905ef2e51e00f2a04723a94cf6b9f78522e`, `project-audit/v0.0.5` → `d830dc03c2c6575f69ae45a00fd6f7f22ef4feb4`, `repository-workflow/v0.0.2` → `a2a6af6b66e9cd6e5b28ccb227245f3a13389098`. Перед установкой проверить точные tag objects и деревья. Исторические статические проверки не заменяют приёмку.
 - Официальный gh 2.105.0 проверен для remote pin одного навыка; remote multi-skill и реальная загрузка хостом остаются испытаниями. Не применять --force, --all, обновление без pin или сторонние менеджеры. Сканеры NVIDIA не нужны для работы навыков.
 - Записать точные версии клиента, модели, gh, Git, Python и ОС. Сверить активный профиль и фактические проектные roots. Для Harness проверить включённые dsh-skill/dsh-skill-filesystem/dsh-tool-skill. Не менять глобальный профиль в ходе эксперимента.
 
@@ -29,7 +29,7 @@ foreach ($skill in @('microversion-release','project-audit','repository-workflow
     if (Test-Path -LiteralPath (Join-Path $dest $skill)) { throw 'Skill already exists' }
     $pin = switch ($skill) {
         'microversion-release' { 'refs/tags/microversion-release/v0.0.3' }
-        'project-audit' { 'refs/tags/project-audit/v0.0.4' }
+        'project-audit' { 'refs/tags/project-audit/v0.0.5' }
         'repository-workflow' { 'refs/tags/repository-workflow/v0.0.2' }
     }
     gh skill install Sashido01/TESSERA $skill --pin $pin --dir $dest
