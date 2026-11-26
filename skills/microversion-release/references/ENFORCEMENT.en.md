@@ -36,25 +36,9 @@ Not a ready shell command. For Codex check version, exec --help and permissions;
 
 Mode stop reads up to 256 KiB JSON from stdin, requires event Stop, boolean stop_hook_active, absolute cwd matching explicit root. Reads no transcript, never uses payload cwd to choose repository, never prints payload. Owner supplies a new marker in an existing trusted private directory outside root, writable for one hook file creation but not for agent deletion/substitution. Do not expand permissions for marker; unavailable marker means no forced continuation, external gate remains mandatory. Exclusive creation, no overwrite/delete. One marker per approved run, never reuse. On first failure decision:block requests one continuation, subsequently continue:false with stopReason; invalid input/marker does not invoke Git outside scope or loop. JSON exit 0 is protocol success, not task PASS.
 
-Example hook config structure with **absolute** owner-reviewed command for actual host shell:
-```json
-{
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "REVIEWED_COMMAND_REQUIRED",
-            "timeout": 45
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-REVIEWED_COMMAND_REQUIRED is deliberately not an executable command. Before enabling the hook, owner assembles the actual host-shell command: trusted absolute Python with -E, -s, -B; absolute scripts/completion_gate.py; stop; --repo, --baseline, --marker with reviewed values; optional --bilingual. Verify path quoting and run a protocol fixture manually before connecting. Do not interpolate prompt/payload values. Codex: project .codex/hooks.json, preserve existing content, review/trust exact definition via /hooks; no trust bypass. Harness: experimental @deepseek-ai/dsh-hooks-codex with configPath pointing to reviewed file, separate profile only. Upstream Stop **always** sends stop_hook_active=false and ignores continue:false; hook load/execution failures may allow agent continuation. Marker only bounds repeated continuation requests, not a veto. External controller mandatory in both clients. Missing/failing hook means client activation NOT_VERIFIED, not PASS; never accept successful model text.
+Project hook config schema (not a ready file): the root hooks object contains a Stop array. Each Stop entry contains a hooks array; its entry has type set to command, the command field with the owner's reviewed absolute command, and a numeric execution time limit (full field name: hooks.Stop[0].hooks[0].timeout), set to 45 seconds. Preserve existing handlers; do not overwrite config. Do not install a non-executable example.
+
+Before enabling the hook, owner assembles the actual host-shell command: trusted absolute Python with -E, -s, -B; absolute scripts/completion_gate.py; stop; --repo, --baseline, --marker with reviewed values; optional --bilingual. Verify path quoting and run a protocol fixture manually before connecting. Do not interpolate prompt/payload values. Codex: project .codex/hooks.json, preserve existing content, review/trust exact definition via /hooks; no trust bypass. Harness: experimental @deepseek-ai/dsh-hooks-codex with configPath pointing to reviewed file, separate profile only. Upstream Stop **always** sends stop_hook_active=false and ignores continue:false; hook load/execution failures may allow agent continuation. Marker only bounds repeated continuation requests, not a veto. External controller mandatory in both clients. Missing/failing hook means client activation NOT_VERIFIED, not PASS; never accept successful model text.
 
 Sources: [Codex Hooks](https://learn.chatgpt.com/docs/hooks), [Codex exec](https://learn.chatgpt.com/docs/non-interactive-mode), [Harness bridge](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/experimental/hooks-codex/README.md).
 
