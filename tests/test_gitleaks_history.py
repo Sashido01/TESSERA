@@ -163,6 +163,45 @@ class HistoryTests(unittest.TestCase):
             self.assertEqual(actual, [(oid, size, h.checked_blob(root, env, oid, size))
                                       for oid, size in batch])
 
+    def test_batch_real_history_coverage_and_changed_inventory(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as folder:
+            root = pathlib.Path(folder)
+            env = h.fixture_env(root)
+            h.git(root, env, "init", "-q", "-b", "main")
+            for i in range(70):
+                content = (b"fixture-marker\n" if i == 0 else b"") + f"entry {i}\n".encode()
+                (root / f"{i:02}.txt").write_bytes(content)
+            (root / "empty.txt").write_bytes(b"")
+            h.git(root, env, "add", ".")
+            h.git(root, env, "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+                  "commit", "-qm", "initial")
+            (root / "00.txt").write_bytes(b"clean\n")
+            h.git(root, env, "add", ".")
+            h.git(root, env, "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+                  "commit", "-qm", "remove marker")
+            blobs = h.inventory(root, env)
+            expected = {oid: h.checked_blob(root, env, oid, size) for oid, size in blobs.items()}
+            actual = {oid: content for batch in h.history_batches(blobs)
+                      for oid, _, content in h.checked_blob_batch(root, env, batch)}
+            self.assertEqual(actual, expected)
+
+            def synthetic_scan(cli, temp, env, content):
+                self.assertTrue(content)
+                count = content.count(b"fixture-marker")
+                return ({"synthetic-marker": count} if count else {}), b"", b""
+
+            with mock.patch.object(h, "scan", side_effect=synthetic_scan):
+                report = h.review(root, None, root, env)
+                self.assertEqual(report["distinct_blobs"], 72)
+                self.assertEqual(report["empty"], 1)
+                self.assertEqual(report["scanned_nonempty"], 71)
+                self.assertEqual(report["findings"], 1)
+                self.assertEqual(report["bytes_scanned"], sum(blobs.values()))
+                with mock.patch.object(h, "inventory", side_effect=[blobs, {}]):
+                    with self.assertRaisesRegex(h.InstallCheckError, "REFS_CHANGED"):
+                        h.review(root, None, root, env)
+
     def test_unexpected_object(self):
         with self.assertRaisesRegex(h.InstallCheckError, "INVALID"):
             h.blob_metadata(f"{B} blob 1\n".encode(), {A})
