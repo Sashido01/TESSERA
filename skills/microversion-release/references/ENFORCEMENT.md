@@ -8,7 +8,7 @@
 
 Явно выбранный доверенный Git-root, существующий baseline commit, линейная история, корневые VERSION и CHANGELOG.md (заголовки ## MAJOR.MINOR.PATCH), опционально обязательный CHANGELOG.en.md через --bilingual. Проверяется до 32 новых коммитов: каждый должен изменить VERSION, применимые changelog и хотя бы один не-метаданный путь; следующий PATCH или разрешённый релизный рубеж, включая .100+. Для .0-релизов и релизного baseline нужен точный локальный аннотированный v-тег с непустой аннотацией. Проверка не создаёт тегов. Имена независимых тегов монорепозитория остаются отдельным контрактом release_tag.py/Release Core; данный базовый профиль их не проверяет.
 
-`python -E -s -B <trusted-skill>/scripts/completion_gate.py check --repo <root> --baseline <full-sha> --bilingual`
+Запуск: доверенный Python с параметрами -E, -s и -B; абсолютный путь к scripts/completion_gate.py; режим check; параметры --repo и --baseline с реальными значениями, при необходимости --bilingual. Передавать отдельные аргументы, не конструировать строку из непроверенных данных.
 
 Выход 0 STRUCTURE_VERIFIED — только структурная проверка; 1 BLOCKED. Ноль коммитов может быть допустим для читающей задачи, но не доказательство завершённой работы. Git status, ls-files -v (отказ при assume-unchanged/skip-worktree), HEAD и tag refs сверяются повторно. Игнорируемые файлы, полноценная вложенная история submodules, содержание тестов, подлинность baseline, атомарность, исчезающие гонки и доверенность локального Git не доказаны. Не sandbox. 30 с общий бюджет Git, до 5 с команда, 2 МиБ после захвата; нет жёсткой границы памяти или потомков. Все Git_* (кроме GIT_PAGER) в наследуемом контексте блокируются до запуска Git, в т.ч. #81. Не чистить окружение production для получения PASS. Граница может быть строже release_tag.py.
 
@@ -20,13 +20,17 @@
 
 Пример **схемы** (подставить доверенные абсолютные пути, актуальные flags конкретного клиента и утверждённые команды; сначала без --execute):
 
-```text
-python -E -s -B <trusted-skill>/scripts/guarded_run.py
-  --repo <root> --baseline <full-sha>
-  --agent-exe <absolute-exe> --agent-arg=exec --agent-arg=--json
-  --agent-arg <reviewed-prompt>
-  --test-exe <absolute-python> --test-arg=-B --test-arg <trusted-test-entry>
-```
+| Аргумент | Значение |
+| --- | --- |
+| Интерпретатор | Доверенный абсолютный Python; параметры -E, -s, -B |
+| Скрипт | Абсолютный путь к scripts/guarded_run.py |
+| --repo | Выбранный Git root |
+| --baseline | Полный SHA существующего baseline |
+| --agent-exe | Проверенный абсолютный executable клиента |
+| --agent-arg | Повторять для каждого согласованного аргумента, например exec и --json у Codex; prompt отдельным аргументом |
+| --test-exe | Проверенный абсолютный executable тестов |
+| --test-arg | Повторять для каждого согласованного тестового аргумента |
+| --execute | Только после проверки PLAN_ONLY и разрешения владельца |
 
 Команда показана как перечень аргументов, не готовая shell-строка. Для Codex проверить версию, exec --help и выбранные права; для Harness — актуальный headless profile/CLI, не копировать Codex flags. Не добавлять flags отключения approval/sandbox или trust. GUI-сессия требует отдельно наблюдаемого хука и независимой проверки результата; wrapper не управляет чужим уже запущенным GUI.
 
@@ -43,7 +47,7 @@ python -E -s -B <trusted-skill>/scripts/guarded_run.py
         "hooks": [
           {
             "type": "command",
-            "command": "<reviewed-python-and-absolute-script> stop --repo <root> --baseline <full-sha> --marker <private-new-marker> --bilingual",
+            "command": "REVIEWED_COMMAND_REQUIRED",
             "timeout": 45
           }
         ]
@@ -52,7 +56,7 @@ python -E -s -B <trusted-skill>/scripts/guarded_run.py
   }
 }
 ```
-Не копировать строку с placeholders буквально. Не подставлять произвольные значения из prompt или payload. Codex: проектный .codex/hooks.json, существующее содержимое не перезаписывать, review/trust через /hooks после просмотра точного определения; не обходить проверку доверия. Harness: экспериментальный @deepseek-ai/dsh-hooks-codex с configPath на проверенный файл, только отдельный профиль. Upstream Stop **всегда** передаёт stop_hook_active=false и игнорирует continue:false, при ошибке загрузки/выполнения хука агент может продолжить. Маркер ограничивает лишь повторный запрос продолжения, не доказывает veto. Внешний controller обязателен в обоих клиентах. Если отсутствует/падает hook, это NOT_VERIFIED для клиентской активации, не PASS. Не принимать успешную фразу агента.
+Значение REVIEWED_COMMAND_REQUIRED намеренно не является рабочей командой. До включения хука владелец формирует команду для реальной оболочки: абсолютный доверенный Python с -E, -s, -B; абсолютный scripts/completion_gate.py; stop; --repo, --baseline, --marker с проверенными значениями; опционально --bilingual. Проверить quoting путей и вручную выполнить protocol fixture до подключения. Не подставлять произвольные значения из prompt или payload. Codex: проектный .codex/hooks.json, существующее содержимое не перезаписывать, review/trust через /hooks после просмотра точного определения; не обходить проверку доверия. Harness: экспериментальный @deepseek-ai/dsh-hooks-codex с configPath на проверенный файл, только отдельный профиль. Upstream Stop **всегда** передаёт stop_hook_active=false и игнорирует continue:false, при ошибке загрузки/выполнения хука агент может продолжить. Маркер ограничивает лишь повторный запрос продолжения, не доказывает veto. Внешний controller обязателен в обоих клиентах. Если отсутствует/падает hook, это NOT_VERIFIED для клиентской активации, не PASS. Не принимать успешную фразу агента.
 
 Источники: [Codex Hooks](https://learn.chatgpt.com/docs/hooks), [Codex exec](https://learn.chatgpt.com/docs/non-interactive-mode), [Harness bridge](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/experimental/hooks-codex/README.md).
 

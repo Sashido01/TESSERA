@@ -25,6 +25,19 @@ LEVELS = {"CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO", "NONE"}
 ID = re.compile(r"[A-Za-z][A-Za-z0-9_.-]{0,79}\Z")
 PUBLIC_RELATIVE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]*(?:/[A-Za-z0-9][A-Za-z0-9_.-]*)*\Z")
 MAX_LOCATION_ROWS = 1000
+# Fixed public identifiers from inspection_ledger.ParserCheck, pinned v2.13.7.
+PARSER_CHECKS = frozenset("""
+command_word_unquoted_characters command_argument_characters command_word_boundary
+command_argument_boundary command_redirection_target documented_command_operand
+runtime_command_identity generated_text_destination printf_input_characters
+printf_argument_count printf_argument_characters printf_output_characters ssh_arguments
+shell_filter_argument shell_script_path shell_arithmetic printf_format printf_invocation
+wrapper_depth wrapper_arguments wrapper_clause_steps command_string_depth
+command_string_runtime command_string_effects json_string_decoding startup_proof_characters
+brace_characters brace_alternatives brace_products brace_rounds brace_syntax javascript_syntax
+generated_html_markup markdown_literal_ownership heredoc_header heredoc_count heredoc_body
+heredoc_grammar expansion_boundary
+""".split())
 
 
 def finding_location(row, expected):
@@ -130,9 +143,28 @@ def summary(data, rc, expected):
                 continue
             location = finding_location({"location": {"file": name,
                 "start_line": row.get("start_line"), "end_line": row.get("end_line")}}, expected)
+            diagnostic = row.get("parser_diagnostic")
+            detail = {}
+            if isinstance(diagnostic, dict):
+                cause = diagnostic.get("cause")
+                check = diagnostic.get("check")
+                scope = diagnostic.get("unchecked_scope")
+                precision = diagnostic.get("location_precision")
+                if (isinstance(cause, str) and cause in {"resource_limit", "boundary_unresolved",
+                        "malformed_input", "unsupported_syntax", "runtime_dependent"}
+                        and isinstance(check, str) and check in PARSER_CHECKS
+                        and isinstance(scope, str) and scope in {"command_word", "command_arguments",
+                            "command_string", "expression", "remaining_input"}
+                        and isinstance(precision, str) and precision in {"source_span", "enclosing_expression"}):
+                    detail = {"parser_cause": cause, "parser_check": check,
+                              "parser_scope": scope, "location_precision": precision}
+                    if location is None:
+                        location = finding_location({"location": {"file": name,
+                            "start_line": diagnostic.get("start_line"),
+                            "end_line": diagnostic.get("end_line")}}, expected)
             coverage_locations.append({"source": key, "reason": reason, "file": name,
                 "start_line": location["start_line"] if location else None,
-                "end_line": location["end_line"] if location else None})
+                "end_line": location["end_line"] if location else None, **detail})
     risk = data.get("risk_assessment")
     require(isinstance(risk, dict), "SP_RISK_INVALID")
     score = risk.get("score")

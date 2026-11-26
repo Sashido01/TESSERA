@@ -106,6 +106,23 @@ class SkillSpectorTests(unittest.TestCase):
         self.assertEqual(result["coverage_reasons"][0]["count"], s.MAX_LOCATION_ROWS + 2)
         self.assertIsNone(result["coverage_locations"][0]["start_line"])
 
+    def test_parser_diagnostic_nested_coordinates_and_identifiers(self):
+        data = self.report()
+        diag = {"cause": "runtime_dependent", "check": "runtime_command_identity",
+                "unchecked_scope": "command_word", "location_precision": "source_span",
+                "start_line": 5, "end_line": 7, "message": "synthetic private detail"}
+        data["analysis_completeness"]["ledger_exceptions"] = [
+            {"path": "SKILL.md", "reason_code": "static_parse_limit", "parser_diagnostic": diag}]
+        row = self.check(data)["coverage_locations"][0]
+        self.assertEqual((row["start_line"], row["end_line"]), (5, 7))
+        self.assertEqual(row["parser_cause"], "runtime_dependent")
+        self.assertEqual(row["parser_check"], "runtime_command_identity")
+        self.assertNotIn("private", str(row))
+        diag["check"] = "private_identifier"
+        row = self.check(data)["coverage_locations"][0]
+        self.assertNotIn("parser_check", row)
+        self.assertIsNone(row["start_line"])
+
     def test_suppression_is_forbidden(self):
         data = self.report()
         data["suppressed_count"] = 1

@@ -8,7 +8,7 @@ Owner approved mandatory Microversion Release enforcement in Codex and DeepSeek 
 
 Explicit trusted Git root, existing baseline commit, linear history, root VERSION and CHANGELOG.md (## MAJOR.MINOR.PATCH headings); optional required CHANGELOG.en.md with --bilingual. Check up to 32 new commits: each must modify VERSION, applicable changelogs and at least one non-metadata path; next PATCH or allowed milestone, including .100+. Every .0 release and release baseline requires its exact local annotated v-tag with nonempty annotation. Never creates tags. Independent monorepo skill tags remain the separate release_tag.py/Release Core contract; not checked by this basic profile.
 
-`python -E -s -B <trusted-skill>/scripts/completion_gate.py check --repo <root> --baseline <full-sha> --bilingual`
+Invocation: trusted Python with -E, -s and -B; absolute scripts/completion_gate.py path; check mode; --repo and --baseline with actual values, optionally --bilingual. Pass separate arguments, never construct a string from unreviewed data.
 
 Exit 0 STRUCTURE_VERIFIED is only structural; 1 BLOCKED. Zero commits may be valid for read-only work, not evidence of completed change. Repeat Git status, ls-files -v (refuse assume-unchanged/skip-worktree), HEAD and tag refs. Ignored files, full submodule history, test substance, baseline authenticity, atomicity, reverted races and Git trust are not established. Not a sandbox. 30 s Git budget, up to 5 s per command, 2 MiB post-capture limit; no hard memory/descendant bound. All inherited Git_* except GIT_PAGER block before Git, including #81. Never strip production context for PASS. May be stricter than release_tag.py.
 
@@ -19,13 +19,17 @@ Run `guarded_run.py` from a verified skill copy **outside agent writable scope**
 Without --execute: PLAN_ONLY, validates inputs and baseline, runs no agent/tests. With --execute: launch the specified agent, verify Git independently of its text/exit 0, run agreed test command and recheck exact SHA/version/release tag objects. No-op blocked by default; --allow-no-change only for an explicitly read-only task. No tests after agent/structure failure. Any failure, timeout, invalid structure or changed final state yields BLOCKED exit 1. ACCEPTANCE_CHECKS_PASSED exit 0 means only two executed commands and structural checks; not RELEASED or proof of adequate tests or hook loading. Stdout JSON; child output sent to stderr, potentially private; never publish stderr/argv. Up to 64 args / 32 KiB per command, agent timeout 1–3600 s and test timeout 1–900 s; direct process termination does not guarantee descendants stop.
 
 Argument **schema** (replace paths, actual client flags and reviewed commands; first without --execute):
-```text
-python -E -s -B <trusted-skill>/scripts/guarded_run.py
-  --repo <root> --baseline <full-sha>
-  --agent-exe <absolute-exe> --agent-arg=exec --agent-arg=--json
-  --agent-arg <reviewed-prompt>
-  --test-exe <absolute-python> --test-arg=-B --test-arg <trusted-test-entry>
-```
+| Argument | Value |
+| --- | --- |
+| Interpreter | Trusted absolute Python; options -E, -s, -B |
+| Script | Absolute scripts/guarded_run.py path |
+| --repo | Selected Git root |
+| --baseline | Full SHA of existing baseline |
+| --agent-exe | Reviewed absolute client executable |
+| --agent-arg | Repeat for each reviewed argument, e.g. exec and --json for Codex; prompt as a separate argument |
+| --test-exe | Reviewed absolute test executable |
+| --test-arg | Repeat for each approved test argument |
+| --execute | Only after PLAN_ONLY review and owner authorization |
 Not a ready shell command. For Codex check version, exec --help and permissions; for Harness check actual headless profile/CLI, do not copy Codex flags. No approval/sandbox/trust bypass. GUI sessions require separately observed hook and independent acceptance; wrapper cannot control an already running GUI.
 
 ## Stop adapter
@@ -41,7 +45,7 @@ Example hook config structure with **absolute** owner-reviewed command for actua
         "hooks": [
           {
             "type": "command",
-            "command": "<reviewed-python-and-absolute-script> stop --repo <root> --baseline <full-sha> --marker <private-new-marker> --bilingual",
+            "command": "REVIEWED_COMMAND_REQUIRED",
             "timeout": 45
           }
         ]
@@ -50,7 +54,7 @@ Example hook config structure with **absolute** owner-reviewed command for actua
   }
 }
 ```
-Do not copy placeholders literally or interpolate prompt/payload values. Codex: project .codex/hooks.json, preserve existing content, review/trust exact definition via /hooks; no trust bypass. Harness: experimental @deepseek-ai/dsh-hooks-codex with configPath pointing to reviewed file, separate profile only. Upstream Stop **always** sends stop_hook_active=false and ignores continue:false; hook load/execution failures may allow agent continuation. Marker only bounds repeated continuation requests, not a veto. External controller mandatory in both clients. Missing/failing hook means client activation NOT_VERIFIED, not PASS; never accept successful model text.
+REVIEWED_COMMAND_REQUIRED is deliberately not an executable command. Before enabling the hook, owner assembles the actual host-shell command: trusted absolute Python with -E, -s, -B; absolute scripts/completion_gate.py; stop; --repo, --baseline, --marker with reviewed values; optional --bilingual. Verify path quoting and run a protocol fixture manually before connecting. Do not interpolate prompt/payload values. Codex: project .codex/hooks.json, preserve existing content, review/trust exact definition via /hooks; no trust bypass. Harness: experimental @deepseek-ai/dsh-hooks-codex with configPath pointing to reviewed file, separate profile only. Upstream Stop **always** sends stop_hook_active=false and ignores continue:false; hook load/execution failures may allow agent continuation. Marker only bounds repeated continuation requests, not a veto. External controller mandatory in both clients. Missing/failing hook means client activation NOT_VERIFIED, not PASS; never accept successful model text.
 
 Sources: [Codex Hooks](https://learn.chatgpt.com/docs/hooks), [Codex exec](https://learn.chatgpt.com/docs/non-interactive-mode), [Harness bridge](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/experimental/hooks-codex/README.md).
 
