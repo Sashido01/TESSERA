@@ -140,6 +140,14 @@ class HistoryTests(unittest.TestCase):
         with self.assertRaisesRegex(h.InstallCheckError, "INPUT"):
             list(h.history_batches({A: h.MAX_FILE + 1}))
 
+    def test_invalid_batch_refused_before_git(self):
+        for batch in ([(A, 1), (A, 1)], [(A, h.MAX_FILE + 1)],
+                      [(f"{i:040x}", h.MAX_FILE) for i in range(3)]):
+            with self.subTest(batch_size=len(batch)), mock.patch.object(h, "git") as git:
+                with self.assertRaisesRegex(h.InstallCheckError, "INPUT"):
+                    h.checked_blob_batch(None, {}, batch)
+                git.assert_not_called()
+
     def test_batch_real_git_matches_single_object_reads(self):
         import tempfile
         with tempfile.TemporaryDirectory() as folder:

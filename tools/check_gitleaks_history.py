@@ -115,12 +115,16 @@ def history_batches(blobs):
         yield batch
 
 
-def parse_blob_batch(raw, batch):
+def validate_batch_input(batch):
     require(0 < len(batch) <= HOST_BATCH_COUNT, "HISTORY_BATCH_INPUT")
     require(all(OID.fullmatch(oid) is not None and type(size) is int
                 and 0 <= size <= MAX_FILE for oid, size in batch), "HISTORY_BATCH_INPUT")
     require(len({oid for oid, _ in batch}) == len(batch)
             and sum(size for _, size in batch) <= HOST_BATCH_BYTES, "HISTORY_BATCH_INPUT")
+
+
+def parse_blob_batch(raw, batch):
+    validate_batch_input(batch)
     require(len(raw) <= HOST_BATCH_BYTES + HOST_BATCH_COUNT * 96, "HISTORY_BATCH_OUTPUT_LIMIT")
     result = []
     pos = 0
@@ -138,8 +142,7 @@ def parse_blob_batch(raw, batch):
 
 def checked_blob_batch(repo, env, batch):
     # The caller provides bounded, inventoried chunks; the parser rechecks framing.
-    require(0 < len(batch) <= HOST_BATCH_COUNT and all(OID.fullmatch(oid) is not None
-            for oid, _ in batch), "HISTORY_BATCH_INPUT")
+    validate_batch_input(batch)
     raw = git(repo, env, "cat-file", "--batch",
               data=("\n".join(oid for oid, _ in batch) + "\n").encode("ascii"))
     return parse_blob_batch(raw, batch)
