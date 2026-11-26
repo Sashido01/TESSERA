@@ -90,17 +90,71 @@ class WorktreeTests(unittest.TestCase):
             b.write_bytes(row(branch=None))
             self.assertEqual(subprocess.run(args + [str(b)], capture_output=True, timeout=15).returncode, 1)
 
+    def test_detached_head_and_branch_counts(self):
+        raw = row() + row(b'/detached', branch=None)
+        result = w.compare(raw, raw, [BRANCH], [A])
+        self.assertEqual(result['candidate_checks'], [{'index': 1, 'matching_worktrees': 1,
+            'matching_head_worktrees': 2, 'detached_head_worktrees': 1}])
+        self.assertFalse(result['deletion_authorized'])
+        self.assertNotIn(A.decode(), json.dumps(result))
+
+    def test_invalid_candidate_heads(self):
+        for heads in ([b'0' * 40], [b'bad'], [A, A], [None]):
+            with self.subTest(heads=heads), self.assertRaises(w.InventoryError):
+                w.compare(row(), row(), [BRANCH], heads)
+        with self.assertRaises(w.InventoryError):
+            w.compare(row(), row(), [[]])
+
+    def test_capture_size_and_directory(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            file = root / 'capture'
+            file.write_bytes(row())
+            self.assertEqual(w.read_capture(file), row())
+            with self.assertRaises(w.InventoryError):
+                w.read_capture(root)
+            file.write_bytes(b'')
+            with self.assertRaises(w.InventoryError):
+                w.read_capture(file)
+            with file.open('wb') as stream:
+                stream.truncate(w.MAX_BYTES + 1)
+            with self.assertRaises(w.InventoryError):
+                w.read_capture(file)
+
+    @unittest.skipUnless(hasattr(os, 'mkfifo'), 'FIFO unavailable')
+    def test_fifo_refused_without_open(self):
+        with tempfile.TemporaryDirectory() as folder:
+            fifo = Path(folder) / 'capture'
+            os.mkfifo(fifo)
+            with self.assertRaisesRegex(w.InventoryError, 'NOT_REGULAR'):
+                w.read_capture(fifo)
+
+    def test_hardlinked_captures_not_distinct(self):
+        with tempfile.TemporaryDirectory() as folder:
+            a, b = Path(folder) / 'a', Path(folder) / 'b'
+            a.write_bytes(row())
+            try:
+                os.link(a, b)
+            except OSError:
+                self.skipTest('hardlinks unavailable')
+            result = subprocess.run([sys.executable, '-B', str(SOURCE), '--first', str(a),
+                '--second', str(b)], capture_output=True, timeout=15)
+            self.assertEqual(result.returncode, 2)
+            self.assertIn(b'WORKTREE_CAPTURE_NOT_DISTINCT', result.stderr)
+
     @unittest.skipUnless(shutil.which('git'), 'Git unavailable')
     def test_actual_git_worktrees(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             repo, linked = root / 'repo', root / 'linked'
             repo.mkdir()
+            hooks = root / 'empty-hooks'
+            hooks.mkdir()
             env = {k: v for k, v in os.environ.items() if not k.upper().startswith('GIT_')}
             env.update({'GIT_CONFIG_NOSYSTEM': '1', 'GIT_CONFIG_GLOBAL': os.devnull,
                         'GIT_TERMINAL_PROMPT': '0'})
             def git(*args):
-                return subprocess.run(['git', '-c', 'core.hooksPath=' + os.devnull, *args], cwd=repo,
+                return subprocess.run(['git', '-c', 'core.hooksPath=' + str(hooks), *args], cwd=repo,
                                       env=env, capture_output=True, check=True, timeout=20).stdout
             git('init', '-q', '-b', 'main')
             unborn = git('worktree', 'list', '--porcelain', '-z')
