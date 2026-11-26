@@ -70,3 +70,7 @@ Shared read-only Git helper for inspect/preflight/report rejects inherited Git c
 ## T12.03.12 — remote inspection (candidate)
 
 Only a configured named remote with one effective fetch URL; absolute local path/file, HTTPS and SSH, no HTTP/git/ext, password or HTTPS userinfo. GIT_ALLOW_PROTOCOL permits file:https:ssh, fixed upload-pack, no HTTP redirects, closed stdin and minimal environment; SSH_AUTH_SOCK allowed for explicit remote operation. Trusted Git config, credential helpers, SSH config, HOME/PATH and server remain prerequisites. No network sandbox or descendant termination guarantee; rechecks do not eliminate ABA/TOCTOU. Recheck local evidence and URL after query; report compares commit and object SHA. GitHub publication uses the same URL contract. Ten regressions; CI required. Actual authenticated HTTPS/SSH NOT_VERIFIED.
+
+## TD17 — explicit inherited-context diagnostics (candidate)
+
+The inspector and local tagger also reject orphaned indexed GIT_CONFIG_KEY_*/GIT_CONFIG_VALUE_* variables, even without GIT_CONFIG_COUNT. The `release_tag.py context` diagnostic does not run Git or modify the environment, reports only recognized names (not values), and replaces arbitrary suffixes with the fixed GIT_CONFIG_INDEXED_OTHER label. Exit 1 indicates blocking context; exit 0 only indicates that no known blocking names were observed at that instant. This is not permission to remove host restrictions, a trust check, or release readiness. Actual Codex execution and the safe adapter contract remain open (#81).

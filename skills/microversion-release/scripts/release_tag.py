@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import pathlib
 import re
@@ -32,7 +33,7 @@ GIT_CONTEXT = frozenset({
 
 
 # Forward only explicit process, identity and local signing context.
-# Git config override keys require GIT_CONFIG_COUNT; neither is forwarded.
+# Reject indexed Git configuration overrides even if the count is missing.
 CHILD_ENV_KEYS = (
     "PATH", "HOME", "USERPROFILE", "HOMEDRIVE", "HOMEPATH", "SystemRoot",
     "WINDIR", "COMSPEC", "PATHEXT", "TEMP", "TMP", "TMPDIR", "APPDATA", "LOCALAPPDATA",
@@ -43,9 +44,24 @@ CHILD_ENV_KEYS = (
 )
 
 
+def blocking_context_names() -> list[str]:
+    """Report only known variable names; never read or return their values."""
+    found = set()
+    for key in os.environ:
+        if key in GIT_CONTEXT:
+            found.add(key)
+        elif key.startswith(("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_")):
+            if re.fullmatch(r"GIT_CONFIG_(?:KEY|VALUE)_[0-9]{1,6}", key):
+                found.add(key)
+            else:
+                # Untrusted suffixes could contain arbitrary data: do not echo them.
+                found.add("GIT_CONFIG_INDEXED_OTHER")
+    return sorted(found)
+
+
 def child_environment() -> dict[str, str]:
-    if any(os.getenv(key) is not None for key in GIT_CONTEXT):
-        raise TagError("RELEASE_NOT_TAGGED: внешнее окружение Git может изменить выбранный репозиторий или конфигурацию")
+    if blocking_context_names():
+        raise TagError("RELEASE_NOT_TAGGED: GIT_CONTEXT_UNSAFE: внешнее окружение Git может изменить выбранный репозиторий или конфигурацию")
     result = {}
     for key in CHILD_ENV_KEYS:
         value = os.getenv(key)
@@ -164,6 +180,7 @@ def create(repo: pathlib.Path, version: str, message: str, prefix: str = "",
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
+    sub.add_parser("context", help="Диагностика блокирующих имён Git без чтения их значений или запуска Git")
     for action in ("verify", "create"):
         p = sub.add_parser(action)
         p.add_argument("version", help="Релизная версия, например 0.1.0")
@@ -173,6 +190,16 @@ def main() -> int:
         if action == "create":
             p.add_argument("--message", required=True, help="Русская аннотация реального релиза")
     args = parser.parse_args()
+    if args.command == "context":
+        names = blocking_context_names()
+        print(json.dumps({
+            "schema_version": 1,
+            "context_status": "GIT_CONTEXT_UNSAFE" if names else "NO_BLOCKING_CONTEXT_OBSERVED",
+            "blocking_names": names,
+            "git_execution": "NOT_EXECUTED",
+            "release_readiness": "NOT_VERIFIED",
+        }, sort_keys=True))
+        return 1 if names else 0
     try:
         sha = (create(args.repo, args.version, args.message, args.prefix, expected_head=args.expected_head)
                if args.command == "create" else verify(args.repo, args.version, args.prefix, expected_head=args.expected_head))

@@ -198,10 +198,23 @@ class ReleaseInspectionTests(unittest.TestCase):
         self.assertEqual(r["version_in_commit"], "0.1.0")
 
     def test_inherited_git_context_rejected(self):
-        for key in ("GIT_DIR", "GIT_WORK_TREE", "GIT_CONFIG_COUNT", "GIT_REPLACE_REF_BASE"):
+        for key in ("GIT_DIR", "GIT_WORK_TREE", "GIT_CONFIG_COUNT", "GIT_REPLACE_REF_BASE",
+                    "GIT_CONFIG_KEY_0", "GIT_CONFIG_VALUE_0", "GIT_CONFIG_KEY_unexpected"):
             with self.subTest(key=key), patch.dict(os.environ, {key: "unexpected"}):
                 with self.assertRaisesRegex(inspect_module.InspectionError, "GIT_CONTEXT_UNSAFE"):
                     inspect_module.inspect(self.repo, "0.1.0")
+
+    def test_context_names_never_echo_unknown_suffixes_or_values(self):
+        with patch.dict(os.environ, {"GIT_CONFIG_COUNT": "synthetic private value",
+                                     "GIT_CONFIG_KEY_0": "synthetic private value",
+                                     "GIT_CONFIG_VALUE_private_marker": "synthetic private value",
+                                     "GIT_PAGER": "synthetic private value"}, clear=True):
+            self.assertEqual(inspect_module.blocking_context_names(),
+                             ["GIT_CONFIG_COUNT", "GIT_CONFIG_INDEXED_OTHER", "GIT_CONFIG_KEY_0"])
+            with patch.object(inspect_module.subprocess, "run") as run:
+                with self.assertRaisesRegex(inspect_module.InspectionError, "GIT_CONTEXT_UNSAFE"):
+                    inspect_module.git(self.repo, "status")
+                run.assert_not_called()
 
     def test_local_git_minimal_environment_and_timeout(self):
         with patch.dict(os.environ, {"TESSERA_PRIVATE_MARKER": "synthetic",
