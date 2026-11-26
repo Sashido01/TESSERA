@@ -4,6 +4,12 @@
 
 Здесь фиксируются изменения **общего каталога**. Истории отдельных навыков могут вестись в их собственных папках.
 
+## 0.0.86 — Проверять точную цель и защищать Git-фикстуры
+
+- Microversion Release 0.0.5: обязательный --expected-version в Guarded Run, schema 2; несоответствие цели блокирует до тестов, даже если версия структурно допустима. Четыре новых regression methods, включая реальный release fixture с тегом и без него.
+- Microversion Release и Project Audit 0.0.6: setup старых изменяющих Git tests отклоняет наследуемые Git_* кроме pager до любых записей, два regression methods. Изолированные новые fixtures используют явный allowlist системных переменных. Production-политика неизменна.
+- PR #92 CI 45852127083 5/5 PASS; SkillSpector 100% coverage, но Microversion 11 HIGH, Audit aggregate risk gate 1 HIGH, Workflow 0 HIGH. G09 открыт, результаты advisory не равны чистой безопасности. Native CI кандидата и реальная клиентская приёмка обязательны.
+
 ## 0.0.85 — Обязательная независимая проверка завершения
 
 - Microversion Release 0.0.4: Completion Gate проверяет линейные переходы версии, changelog, точные annotated tags, чистоту и флаги индекса, повторно сверяет HEAD/refs. Базовый профиль корневых VERSION/changelog. Stop adapter запрашивает не больше одного продолжения на выбранный владельцем marker, без автоматического тегирования.

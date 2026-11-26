@@ -2,6 +2,11 @@
 
 [Русский — оригинал](CHANGELOG.md) | **English — translation**
 
+## 0.0.5 — Exact target and fixture protection
+
+- Guarded Run requires --expected-version, rejects wrong target before tests; new regression scenarios exact release, missing tag, invalid/old target, CI required.
+- Old mutating Git fixtures refuse inherited Git_* before writes; new isolated fixtures use only explicit system-context allowlist. Production Git context remains fail-closed.
+
 ## 0.0.4 — Completion gate and mandatory acceptance
 
 - Basic completion_gate.py checks exact linear history from baseline, VERSION/CHANGELOG, release tags and index flags. Stop adapter with one continuation. No commits or tags created.
