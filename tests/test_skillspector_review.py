@@ -70,6 +70,42 @@ class SkillSpectorTests(unittest.TestCase):
             "scanned_components": 0, "coverage_percent": 0})
         self.assertEqual(self.check(data)["analysis_status"], "partial")
 
+    def test_partial_coverage_locations_are_inventory_bound(self):
+        data = self.report()
+        coverage = data["analysis_completeness"]
+        coverage.update({"status": "partial", "is_complete": False,
+            "fully_inspected_files": 0, "partially_inspected_files": 1,
+            "scanned_components": 0, "coverage_percent": 0})
+        coverage["ledger_exceptions"] = [
+            {"path": "SKILL.md", "reason_code": "static_parse_limit",
+             "start_line": 3, "end_line": 4, "message": "synthetic private detail"},
+            {"path": "SKILL.md", "reason_code": "static_parse_limit"},
+            {"path": "/private/marker", "reason_code": "static_parse_limit"},
+            {"path": "other.md", "reason_code": "static_parse_limit"},
+        ]
+        result = self.check(data)
+        self.assertEqual(result["analysis_status"], "partial")
+        self.assertEqual(result["coverage_locations"], [
+            {"source": "ledger_exceptions", "reason": "static_parse_limit",
+             "file": "SKILL.md", "start_line": None, "end_line": None},
+            {"source": "ledger_exceptions", "reason": "static_parse_limit",
+             "file": "SKILL.md", "start_line": 3, "end_line": 4}])
+        self.assertEqual(result["coverage_locations_unresolved"], 2)
+        self.assertEqual(result["coverage_reasons"][0]["count"], 4)
+        self.assertNotIn("private", str(result))
+        self.assertNotIn("other.md", str(result))
+
+    def test_coverage_locations_bounded(self):
+        data = self.report()
+        data["analysis_completeness"]["scope_exclusions"] = [
+            {"path": "SKILL.md", "reason_code": "fixture",
+             "start_line": True, "end_line": 10}] * (s.MAX_LOCATION_ROWS + 2)
+        result = self.check(data)
+        self.assertEqual(len(result["coverage_locations"]), s.MAX_LOCATION_ROWS)
+        self.assertEqual(result["coverage_locations_omitted"], 2)
+        self.assertEqual(result["coverage_reasons"][0]["count"], s.MAX_LOCATION_ROWS + 2)
+        self.assertIsNone(result["coverage_locations"][0]["start_line"])
+
     def test_suppression_is_forbidden(self):
         data = self.report()
         data["suppressed_count"] = 1

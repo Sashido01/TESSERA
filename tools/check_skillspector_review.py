@@ -109,6 +109,9 @@ def summary(data, rc, expected):
         else:
             locations.append({"rule": code, "severity": severity, **location})
     reasons = collections.Counter()
+    coverage_locations = []
+    coverage_unresolved = 0
+    coverage_omitted = 0
     for key in ("ledger_exceptions", "scope_exclusions"):
         values = coverage.get(key)
         require(isinstance(values, list) and len(values) <= 10000, "SP_LEDGER_INVALID")
@@ -117,6 +120,19 @@ def summary(data, rc, expected):
             reason = row.get("reason_code", "unspecified")
             require(isinstance(reason, str) and ID.fullmatch(reason), "SP_LEDGER_INVALID")
             reasons[key, reason] += 1
+            name = row.get("path")
+            if (not isinstance(name, str) or len(name) > 240
+                    or not PUBLIC_RELATIVE.fullmatch(name) or name not in observed):
+                coverage_unresolved += 1
+                continue
+            if len(coverage_locations) >= MAX_LOCATION_ROWS:
+                coverage_omitted += 1
+                continue
+            location = finding_location({"location": {"file": name,
+                "start_line": row.get("start_line"), "end_line": row.get("end_line")}}, expected)
+            coverage_locations.append({"source": key, "reason": reason, "file": name,
+                "start_line": location["start_line"] if location else None,
+                "end_line": location["end_line"] if location else None})
     risk = data.get("risk_assessment")
     require(isinstance(risk, dict), "SP_RISK_INVALID")
     score = risk.get("score")
@@ -138,6 +154,10 @@ def summary(data, rc, expected):
             "location_scope": "PRIMARY_ONLY_NOT_ALL_OCCURRENCES",
             "by_rule": [{"rule": rule, "severity": sev, "count": n}
                         for (rule, sev), n in sorted(counter.items())],
+            "coverage_locations": sorted(coverage_locations, key=lambda x: (
+                x["source"], x["reason"], x["file"], x["start_line"] or 0, x["end_line"] or 0)),
+            "coverage_locations_unresolved": coverage_unresolved,
+            "coverage_locations_omitted": coverage_omitted,
             "coverage_reasons": [{"source": src, "reason": code, "count": n}
                                  for (src, code), n in sorted(reasons.items())]}
 
