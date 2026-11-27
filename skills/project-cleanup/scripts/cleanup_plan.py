@@ -25,6 +25,7 @@ MAX_DETAILS = 100
 MAX_SCOPES = 20
 MAX_REVIEW = 10000
 MAX_SECONDS = 30
+WINDOWS = os.name == "nt"
 OID = re.compile(rb"(?:[0-9a-f]{40}|[0-9a-f]{64})\Z")
 MODES = {b"100644": b"blob", b"100755": b"blob", b"120000": b"blob", b"160000": b"commit"}
 RESERVED = {"con", "prn", "aux", "nul", "conin$", "conout$"} | {
@@ -136,8 +137,17 @@ def overlaps(key, keys, ordered):
     return index < len(ordered) and ordered[index].startswith(prefix)
 
 
+def cross_identity(info):
+    # Windows path stat and descriptor fstat may expose different ctime
+    # semantics (CPython #157671). Cross-check only comparable fields.
+    comparable_time = getattr(info, "st_birthtime_ns", None) if WINDOWS else info.st_ctime_ns
+    return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns,
+            stat.S_IFMT(info.st_mode), info.st_nlink, comparable_time)
+
+
 def identity(info):
-    return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+    return (*cross_identity(info), info.st_ctime_ns,
+            getattr(info, "st_file_attributes", None))
 
 
 def read_record(path):
@@ -150,11 +160,13 @@ def read_record(path):
     try:
         opened = os.fstat(fd)
         require(stat.S_ISREG(opened.st_mode) and not reparse(opened) and opened.st_nlink == 1
-                and identity(before) == identity(opened), "CAPTURE_CHANGED")
+                and cross_identity(before) == cross_identity(opened), "CAPTURE_CHANGED")
         with os.fdopen(fd, "rb", closefd=False) as stream:
             data = stream.read(MAX_FRAME + 1)
-        require(len(data) == before.st_size and identity(os.fstat(fd)) == identity(before)
-                and identity(path.lstat()) == identity(before), "CAPTURE_CHANGED")
+        after_fd, after_path = os.fstat(fd), path.lstat()
+        require(len(data) == before.st_size and not reparse(after_fd) and not reparse(after_path)
+                and identity(after_fd) == identity(opened)
+                and identity(after_path) == identity(before), "CAPTURE_CHANGED")
         return data, (opened.st_dev, opened.st_ino)
     finally:
         os.close(fd)

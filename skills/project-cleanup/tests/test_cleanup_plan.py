@@ -8,6 +8,7 @@ import sys
 import tempfile
 import unittest
 from unittest.mock import patch
+from types import SimpleNamespace
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
@@ -213,6 +214,53 @@ class PlanTests(unittest.TestCase):
         result = subprocess.run(command, capture_output=True, timeout=15)
         self.assertEqual(result.returncode, 2)
         self.assertEqual(json.loads(result.stdout)["reason"], "CAPTURE_FRAME_INVALID")
+
+    @staticmethod
+    def adjusted(info, **changes):
+        fields = ("st_dev", "st_ino", "st_size", "st_mtime_ns", "st_ctime_ns",
+                  "st_mode", "st_nlink", "st_birthtime_ns", "st_file_attributes")
+        data = {field: getattr(info, field) for field in fields if hasattr(info, field)}
+        data.update(changes)
+        return SimpleNamespace(**data)
+
+    def test_windows_cross_method_ctime_difference(self):
+        f = self.file("build/a")
+        original = os.fstat
+
+        def descriptor_stat(fd):
+            info = original(fd)
+            return self.adjusted(info, st_ctime_ns=info.st_ctime_ns + 100)
+
+        with patch.object(p, "WINDOWS", True), patch.object(p.os, "fstat", side_effect=descriptor_stat):
+            self.assertEqual(p.read_record(f)[0], b"abc")
+
+    def test_windows_same_method_ctime_change_refused(self):
+        f = self.file("build/a")
+        original = os.fstat
+        calls = 0
+
+        def descriptor_stat(fd):
+            nonlocal calls
+            calls += 1
+            info = original(fd)
+            return self.adjusted(info, st_ctime_ns=info.st_ctime_ns + calls * 100)
+
+        with patch.object(p, "WINDOWS", True), patch.object(p.os, "fstat", side_effect=descriptor_stat):
+            with self.assertRaisesRegex(p.PlanError, "CAPTURE_CHANGED"):
+                p.read_record(f)
+
+    def test_windows_cross_method_mtime_or_identity_change_refused(self):
+        f = self.file("build/a")
+        original = os.fstat
+        for field in ("st_mtime_ns", "st_ino", "st_nlink"):
+            def descriptor_stat(fd):
+                info = original(fd)
+                return self.adjusted(info, **{field: getattr(info, field) + 1})
+
+            with self.subTest(field=field), patch.object(p, "WINDOWS", True), \
+                    patch.object(p.os, "fstat", side_effect=descriptor_stat):
+                with self.assertRaisesRegex(p.PlanError, "CAPTURE_CHANGED"):
+                    p.read_record(f)
 
     def test_hardlinked_capture_rejected(self):
         f = self.file("build/a")
