@@ -128,3 +128,43 @@ class ProfilePlanTests(unittest.TestCase):
         self.assertEqual(self.plan()["decisions"][0]["reason"], "PROFILE_STAGE_VERSION")
         with mock.patch.object(p, "MAX_TOTAL_READ", 1), self.assertRaisesRegex(p.CatalogError, "BUDGET"):
             self.plan()
+
+    def test_persistent_stage_change_across_selection_refused(self):
+        original = p.one
+        def changed(*args):
+            result = original(*args)
+            if args[3]["id"] == "beta":
+                (self.stage / "alpha" / "SKILL.md").write_bytes(b"persistent mutation")
+            return result
+        with mock.patch.object(p, "one", side_effect=changed):
+            with self.assertRaisesRegex(p.CatalogError, "PROFILE_CHANGED"):
+                self.plan(("alpha", "beta"), all_skills=True)
+
+    def test_absence_rechecked_even_with_unchanged_root_timestamp(self):
+        original, original_stat = p.one, p.metadata
+        before = original_stat(self.profile)
+        def changed(*args):
+            result = original(*args)
+            if args[3]["id"] == "beta":
+                self.write(self.profile, "alpha", "0.0.1")
+            return result
+        def stable_root(path):
+            return before if path == self.profile else original_stat(path)
+        with mock.patch.object(p, "one", side_effect=changed), \
+                mock.patch.object(p, "metadata", side_effect=stable_root):
+            with self.assertRaisesRegex(p.CatalogError, "PROFILE_TARGET_APPEARED"):
+                self.plan(("alpha", "beta"), all_skills=True)
+
+    def test_windows_cross_method_identity_keeps_same_method_metadata(self):
+        from types import SimpleNamespace
+        info = (self.stage / "alpha" / "SKILL.md").stat()
+        keys = ("st_dev", "st_ino", "st_mode", "st_nlink", "st_size", "st_mtime_ns", "st_ctime_ns")
+        values = {key: getattr(info, key) for key in keys}
+        before = SimpleNamespace(**values, st_birthtime_ns=1, st_file_attributes=0)
+        after = SimpleNamespace(**{**values, "st_ctime_ns": info.st_ctime_ns + 1},
+                                st_birthtime_ns=1, st_file_attributes=0)
+        with mock.patch.object(p, "WINDOWS", True):
+            self.assertEqual(p.cross_identity(before), p.cross_identity(after))
+            self.assertNotEqual(p.identity(before), p.identity(after))
+            after.st_file_attributes = p.REPARSE
+            self.assertTrue(p.reparse(after))

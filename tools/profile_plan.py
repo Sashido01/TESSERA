@@ -23,6 +23,7 @@ MAX_ROOT_ENTRIES = 4096
 MAX_TOTAL_READ = 128 * 1024 * 1024
 MAX_SECONDS = 60
 REPARSE = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
+WINDOWS = os.name == "nt"
 PORTABLE = re.compile(r"[A-Za-z0-9._-]{1,128}\Z")
 DEVICE = re.compile(r"(?:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])\Z", re.I)
 
@@ -38,18 +39,25 @@ class Budget:
                 "PROFILE_BUDGET")
 
 
-def identity(info, *, descriptor=False):
-    fields = (info.st_dev, info.st_ino, info.st_mode, info.st_nlink,
-              info.st_size, info.st_mtime_ns)
-    if descriptor and os.name == "nt":
-        return fields + (getattr(info, "st_birthtime_ns", None),)
-    return fields + (info.st_ctime_ns,)
+def reparse(info):
+    return stat.S_ISLNK(info.st_mode) or bool(getattr(info, "st_file_attributes", 0) & REPARSE)
+
+
+def cross_identity(info):
+    # Windows path-stat and descriptor-stat ctime/mode details may differ.
+    comparable_time = getattr(info, "st_birthtime_ns", None) if WINDOWS else info.st_ctime_ns
+    return (info.st_dev, info.st_ino, stat.S_IFMT(info.st_mode), info.st_nlink,
+            info.st_size, info.st_mtime_ns, comparable_time)
+
+
+def identity(info):
+    return (*cross_identity(info), info.st_mode, info.st_ctime_ns,
+            getattr(info, "st_file_attributes", None))
 
 
 def metadata(path):
     info = path.lstat()
-    require(info.st_ino != 0 and not stat.S_ISLNK(info.st_mode)
-            and not (getattr(info, "st_file_attributes", 0) & REPARSE), "PROFILE_LINK_OR_IDENTITY")
+    require(info.st_ino != 0 and not reparse(info), "PROFILE_LINK_OR_IDENTITY")
     return info
 
 
@@ -87,14 +95,26 @@ def aliases(root, selected, budget):
 
 
 def recheck_ancestors(root, path, rows):
-    for component in (path, *path.parents):
-        if not component.is_relative_to(root):
-            break
+    require(path.is_relative_to(root), "PROFILE_SCOPE")
+    chain = [root, *[parent for parent in reversed(path.parents)
+                     if parent != root and parent.is_relative_to(root)]]
+    if path != root:
+        chain.append(path)
+    for component in chain:
         name = component.relative_to(root).as_posix() if component != root else ""
         require(identity(metadata(component)) == identity(rows[name]), "PROFILE_CHANGED")
 
 
+def recheck_tree(root, rows, budget):
+    ordinary_root(root)
+    # Parents precede children; do not rely on a root directory timestamp alone.
+    for name, info in sorted(rows.items(), key=lambda row: (row[0].count("/"), row[0])):
+        budget.check()
+        require(identity(metadata(root / name)) == identity(info), "PROFILE_CHANGED")
+
+
 def inventory(root, budget):
+    ordinary_root(root)
     root_info = metadata(root)
     require(stat.S_ISDIR(root_info.st_mode), "PROFILE_SKILL_DIRECTORY")
     rows = {"": root_info}
@@ -140,8 +160,8 @@ def read_file(path, expected, budget=None):
     fd = os.open(path, flags)
     try:
         before = os.fstat(fd)
-        require(stat.S_ISREG(before.st_mode) and identity(before, descriptor=True) ==
-                identity(expected, descriptor=True), "PROFILE_CHANGED")
+        require(stat.S_ISREG(before.st_mode) and not reparse(before) and before.st_ino
+                and cross_identity(before) == cross_identity(expected), "PROFILE_CHANGED")
         with os.fdopen(fd, "rb", closefd=False) as stream:
             data = stream.read(expected.st_size + 1)
         require(len(data) == expected.st_size and identity(os.fstat(fd)) == identity(before),
@@ -170,8 +190,7 @@ def snapshot(root, rows, budget):
                 installed_version = data.decode("utf-8").strip()
                 version(installed_version)
             records.append([name, "file", stat.S_IMODE(info.st_mode), len(data), hashlib.sha256(data).hexdigest()])
-    for name, info in rows.items():
-        require(identity(metadata(root / name)) == identity(info), "PROFILE_CHANGED")
+    recheck_tree(root, rows, budget)
     digest = hashlib.sha256(json.dumps(records, separators=(",", ":")).encode()).hexdigest()
     return installed_version, digest
 
@@ -201,10 +220,11 @@ def read_resolution(raw):
     return obj
 
 
-def one(profile, stage, baseline, row, operation, budget):
+def one(profile, stage, baseline, row, operation, budget, observed_trees, absent_targets):
     name = row["id"]
     new = stage / name
     new_rows = inventory(new, budget)
+    observed_trees.append((new, new_rows))
     new_version, new_digest = snapshot(new, new_rows, budget)
     require(new_version == row["version"], "PROFILE_STAGE_VERSION")
     result = {"id": name, "desired_version": new_version, "stage_sha256": new_digest}
@@ -212,8 +232,10 @@ def one(profile, stage, baseline, row, operation, budget):
     try:
         metadata(target)
     except FileNotFoundError:
+        absent_targets.append(target)
         return {**result, "decision": "PLAN_INSTALL", "reason": "ABSENT"}
     target_rows = inventory(target, budget)
+    observed_trees.append((target, target_rows))
     old = baseline / name if baseline is not None else None
     observed = None
     if shape(target_rows) == shape(new_rows):
@@ -226,6 +248,7 @@ def one(profile, stage, baseline, row, operation, budget):
     if old is None:
         return {**result, "decision": "BLOCKED", "reason": "BASELINE_REQUIRED"}
     old_rows = inventory(old, budget)
+    observed_trees.append((old, old_rows))
     if shape(target_rows) != shape(old_rows):
         return {**result, "decision": "BLOCKED", "reason": "LOCAL_STRUCTURE_DIFFERS"}
     old_version, old_digest = snapshot(old, old_rows, budget)
@@ -247,16 +270,32 @@ def plan(profile, stage, baseline, raw_resolution):
     decisions = []
     selected = {row["id"] for row in resolution["skills"]}
     ambiguous = set().union(*(aliases(p, selected, budget) for p in roots))
+    observed_trees, absent_targets = [], []
     for row in resolution["skills"]:
         try:
             budget.check()
             require(row["id"] not in ambiguous, "PROFILE_NAME_ALIAS")
-            decisions.append(one(profile, stage, baseline, row, resolution["operation"], budget))
+            decisions.append(one(profile, stage, baseline, row, resolution["operation"], budget,
+                                 observed_trees, absent_targets))
         except (CatalogError, OSError, UnicodeError) as exc:
             decisions.append({"id": row["id"], "decision": "BLOCKED",
                               "reason": str(exc) if isinstance(exc, CatalogError) else "PROFILE_UNREADABLE"})
     budget.check()
+    for root in roots:
+        ordinary_root(root)
     require([identity(metadata(p)) for p in roots] == root_ids, "PROFILE_ROOT_CHANGED")
+    require(set().union(*(aliases(p, selected, budget) for p in roots)) == ambiguous,
+            "PROFILE_NAME_ALIAS_CHANGED")
+    for root, rows in observed_trees:
+        recheck_tree(root, rows, budget)
+    for target in absent_targets:
+        budget.check()
+        try:
+            metadata(target)
+        except FileNotFoundError:
+            continue
+        raise CatalogError("PROFILE_TARGET_APPEARED")
+    budget.check()
     return {"status": "PLAN_ONLY", "operation": resolution["operation"], "selection": resolution["selection"],
             "decisions": decisions, "apply_authorized": False, "source_authenticity": "NOT_VERIFIED",
             "exclusive_access": "NOT_VERIFIED", "snapshot_atomic": False, "bytes_read": budget.read}
