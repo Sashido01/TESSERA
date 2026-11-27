@@ -15,6 +15,14 @@ CATEGORIES = ("protected_hint", "review_cache", "review_build",
 PROTECTED = frozenset({"data", "userdata", "user-data", "vault", "backups",
                        "backup", "evidence", "models", "logs", "secrets",
                        "credentials", "releases", "release"})
+# These stores are excluded entirely, not traversed or read.
+SENSITIVE_DIRS = frozenset({".ssh", ".aws", ".gnupg", ".kube", ".azure",
+                            ".docker", "credentials", "secrets"})
+SENSITIVE_NAMES = frozenset({".netrc", "_netrc", ".git-credentials",
+                             "authorized_keys", "known_hosts", "htpasswd"})
+SENSITIVE_STEMS = frozenset({"credential", "credentials", "secret", "secrets",
+                             "password", "passwords", "access_token",
+                             "refresh_token", "bearer_token", "api_token"})
 CACHE = frozenset({"__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache",
                    ".cache", ".parcel-cache"})
 BUILD = frozenset({"build", "dist", "target", "out", ".next"})
@@ -55,6 +63,15 @@ def ordinary_root(root):
     root = Path(os.path.abspath(root))
     if root == root.parent:
         raise InventoryError("ROOT_VOLUME_REFUSED")
+    if any(part.casefold() in SENSITIVE_DIRS or part.casefold() == ".git"
+           for part in root.parts):
+        raise InventoryError("ROOT_PROTECTED_SCOPE")
+    try:
+        home = Path(os.path.abspath(Path.home()))
+    except (OSError, RuntimeError) as exc:
+        raise InventoryError("ROOT_PROFILE_UNKNOWN") from exc
+    if root == home or root in home.parents:
+        raise InventoryError("ROOT_PROFILE_REFUSED")
     for item in (root, *root.parents):
         info = item.lstat()
         if reparse(info) or not stat.S_ISDIR(info.st_mode):
@@ -65,8 +82,10 @@ def ordinary_root(root):
 def category(parts):
     names = tuple(x.casefold() for x in parts)
     last = names[-1]
-    if (any(n in PROTECTED or n == ".env" or n.startswith(".env.")
-            or n.startswith("id_rsa") or n.startswith("id_ed25519") for n in names)
+    if (any(n in PROTECTED or n in SENSITIVE_DIRS or n in SENSITIVE_NAMES
+            or n == ".env" or n.startswith(".env.")
+            or n.startswith(("id_rsa", "id_ed25519", "id_ecdsa", "id_dsa"))
+            or Path(n).stem in SENSITIVE_STEMS for n in names)
             or Path(last).suffix in PROTECTED_SUFFIX):
         return "protected_hint"
     if any(n in CACHE for n in names) or Path(last).suffix in {".pyc", ".pyo"}:
@@ -91,7 +110,7 @@ def inventory(root, max_entries=200000, max_depth=64, max_seconds=30, details=Fa
     started = time.monotonic()
     categories = {key: {"files": 0, "logical_bytes": 0} for key in CATEGORIES}
     skipped = {key: 0 for key in ("git_metadata", "nested_git", "links_reparse",
-                                  "other_device", "special", "errors", "depth")}
+                                  "other_device", "special", "errors", "depth", "sensitive_dirs")}
     entries = dirs = count = logical = aliases = 0
     hardlinks = set()
     largest = []
@@ -144,6 +163,9 @@ def inventory(root, max_entries=200000, max_depth=64, max_seconds=30, details=Fa
                         continue
                     relative = parts + (entry.name,)
                     if stat.S_ISDIR(info.st_mode):
+                        if entry.name.casefold() in SENSITIVE_DIRS:
+                            skipped["sensitive_dirs"] += 1
+                            continue
                         if len(relative) >= max_depth:
                             skipped["depth"] += 1
                         elif len(stack) >= MAX_PENDING_DIRS:

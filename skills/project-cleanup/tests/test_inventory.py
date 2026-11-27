@@ -51,6 +51,47 @@ class InventoryTests(unittest.TestCase):
                      "tmp/backup.zip", "build/db.sqlite", "tmp/logs/a"):
             self.assertEqual(m.category(name.split("/")), "protected_hint")
 
+    def test_named_protected_files_and_no_content_access(self):
+        for name in ("tmp/credentials.json", "dist/password.txt", "build/access_token.txt",
+                     "tmp/.netrc", "build/id_ecdsa", "build/.git-credentials"):
+            self.file(name, b"synthetic")
+            self.assertEqual(m.category(name.split("/")), "protected_hint")
+        with patch("builtins.open", side_effect=AssertionError("content read")), \
+                patch.object(Path, "open", side_effect=AssertionError("content read")), \
+                patch.object(m.os, "open", side_effect=AssertionError("content read")):
+            result = m.inventory(self.root, details=True)
+        self.assertEqual(result["categories"]["protected_hint"]["files"], 6)
+        self.assertEqual(result["private_review_details"], [])
+
+    def test_sensitive_directory_never_enumerated(self):
+        protected = self.file("build/.ssh/private", b"fixture").parent
+        self.file("build/output.bin", b"ok")
+        original = m.os.scandir
+
+        def guarded(folder):
+            self.assertNotEqual(Path(folder), protected)
+            return original(folder)
+
+        with patch.object(m.os, "scandir", side_effect=guarded):
+            result = m.inventory(self.root, details=True)
+        self.assertEqual(result["files"], 1)
+        self.assertEqual(result["logical_bytes"], 2)
+        self.assertEqual(result["skipped"]["sensitive_dirs"], 1)
+        self.assertNotIn(".ssh", json.dumps(result))
+        with self.assertRaisesRegex(m.InventoryError, "ROOT_PROTECTED_SCOPE"):
+            m.inventory(protected)
+
+    def test_profile_and_ancestor_refused(self):
+        child = self.root / "profile"
+        child.mkdir()
+        with patch.object(Path, "home", return_value=child):
+            for target in (self.root, child):
+                with self.assertRaisesRegex(m.InventoryError, "ROOT_PROFILE_REFUSED"):
+                    m.inventory(target)
+        with patch.object(Path, "home", side_effect=RuntimeError("unavailable")):
+            with self.assertRaisesRegex(m.InventoryError, "ROOT_PROFILE_UNKNOWN"):
+                m.inventory(self.root)
+
     def test_details_are_bounded_and_relative(self):
         for i in range(25):
             self.file(f"build/{i}.bin", b"x" * (i + 1))

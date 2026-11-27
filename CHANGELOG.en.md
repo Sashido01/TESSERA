@@ -540,3 +540,5 @@ This file tracks changes to the **shared catalog**. Individual skills may mainta
 - Added contribution, security, and roadmap documentation.
 
 **Status:** initial repository state. Automatic integration with an installed Harness, build publication, and GitHub Release publication have not been verified.
+
+- Pre-merge hardening: protected-store exclusions, explicit profile/ancestor refusal, additional protected filename hints, three regression methods including no-content-access assertions. Prior 18-test evidence applies to the earlier source; renewed CI required. No scanner suppression.
