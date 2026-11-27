@@ -246,7 +246,12 @@ def main():
     try:
         result = inventory(args.root, args.max_entries, args.max_depth,
                            args.max_seconds, args.details)
-    except (OSError, InventoryError, RuntimeError, ValueError):
+    except InventoryError as exc:
+        # All InventoryError reasons are fixed machine codes; never print OS errors.
+        print(json.dumps({"status": "BLOCKED", "reason": str(exc),
+                          "deletion_authorized": False}))
+        return 2
+    except (OSError, RuntimeError, ValueError):
         print(json.dumps({"status": "BLOCKED", "reason": "ROOT_OR_LIMIT_INVALID",
                           "deletion_authorized": False}))
         return 2

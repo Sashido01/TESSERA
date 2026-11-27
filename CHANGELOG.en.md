@@ -9,6 +9,7 @@ This file tracks changes to the **shared catalog**. Individual skills may mainta
 - Fourth independent skill 0.0.1: metadata-only inventory, scope protections, traversal budget, REVIEW classification, top-level/private details, cleanup and prevention workflow. Linux 18/18 PASS on exact blobs; native Windows and client acceptance open.
 - TESSERA: exact committed tree check for generated paths, non-source entries and blob >1 MiB; dedicated ignored local-state directory. No automated deletion or weaker CI safeguards.
 - Previous v0.0.89 main CI 45994903581 SUCCESS 6/6, exact annotated tag 1a904240fc2f1c17dc5bedfb2af2583e9f0bfa0a → efece8ad28fa6e5968d57c41ce68be195e932324. New candidate requires mandatory CI; #81 and branches with unique work remain open.
+- Pre-merge hardening: protected-store exclusions, explicit profile/ancestor refusal, additional protected filename hints, three regression methods including no-content-access assertions. Prior 18-test evidence applies to the earlier source; renewed CI required. No scanner suppression.
 
 ## 0.0.89 — Pin the short pilot and Harness evidence
 
@@ -540,5 +541,3 @@ This file tracks changes to the **shared catalog**. Individual skills may mainta
 - Added contribution, security, and roadmap documentation.
 
 **Status:** initial repository state. Automatic integration with an installed Harness, build publication, and GitHub Release publication have not been verified.
-
-- Pre-merge hardening: protected-store exclusions, explicit profile/ancestor refusal, additional protected filename hints, three regression methods including no-content-access assertions. Prior 18-test evidence applies to the earlier source; renewed CI required. No scanner suppression.

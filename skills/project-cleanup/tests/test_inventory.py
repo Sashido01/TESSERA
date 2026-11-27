@@ -247,6 +247,11 @@ class InventoryTests(unittest.TestCase):
                                  str(self.root / "missing")], capture_output=True, timeout=15)
         self.assertEqual(result.returncode, 2)
         self.assertEqual(json.loads(result.stdout)["status"], "BLOCKED")
+        result = subprocess.run([sys.executable, "-B", str(SOURCE), "--root",
+                                 str(self.root), "--max-entries", "0"],
+                                capture_output=True, timeout=15)
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(json.loads(result.stdout)["reason"], "LIMIT_INVALID")
 
 
 if __name__ == "__main__":
