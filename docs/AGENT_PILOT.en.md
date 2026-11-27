@@ -4,11 +4,26 @@
 
 **Status:** acceptance instructions; real client trials NOT_VERIFIED. Owner priority of 25 November 2026: start a pilot before the entire roadmap is finished. T03–T05/T13, TD06/TD13–TD15. A pilot is not an independent release or mandatory enforcement.
 
+## Quick start: not a repository audit
+
+Verified catalog snapshot: `v0.0.88`, commit `015bed7f9eaf344b59e699a4b607c0e21b86f608`, main CI 45874463052 SUCCESS (6/6). Three independent annotated tags and trees match this snapshot. A GitHub Release is not required for tag-pinned installation; a missing releases/latest does not imply missing skills.
+
+| Skill | Pin | Commit | Skill tree |
+| --- | --- | --- | --- |
+| microversion-release | `refs/tags/microversion-release/v0.0.6` | `015bed7f9eaf344b59e699a4b607c0e21b86f608` | `12aebcae998b098a1e7d3c5f1fadd8bcd2b096e7` |
+| project-audit | `refs/tags/project-audit/v0.0.6` | `0b207f09bb9fca7cf5525d6b35a1919e1d316515` | `50d3f3dee94f1ceff9df343ef34689caf99ca184` |
+| repository-workflow | `refs/tags/repository-workflow/v0.0.2` | `a2a6af6b66e9cd6e5b28ccb227245f3a13389098` | `7bd8a54e7102a4bd83ae4b6c14e296a91c5b9f9c` |
+
+1. First inspect only the three installed directories in the active profile and their versions. If they match verified trees (accounting for gh install metadata), do not reinstall.
+2. If installation is needed, use a fresh empty project and the three exact pins below; if the API is unavailable, a verified local checkout of the exact tag and native --from-local installation into an empty directory are acceptable. A local copy is not a remote pin. Do not audit all history or use latest/main, --all, --unpin or --force against the user profile.
+3. Open a fresh session after installation and explicitly invoke each skill: Codex via $name (e.g. $microversion-release), Harness via native /name or the skill tool. Run P01–P05 as separate short prompts. For P06 use a fresh session without naming the skill; a correct answer alone does not establish loading. Negative control: an unrelated task with no expected invocation.
+4. Bound network retries to two attempts per operation; record BLOCKED on refusal and continue independent local read-only checks. Do not change permissions or scrub the production environment. P07/P08 and Stop-hook are separate authorized trials, not prerequisites for starting P01–P06.
+
 ## Entry conditions
 
 - Only a fresh disposable local project, without a remote, production data, secrets, global hooks or changes to real projects. Do not grant additional privileges to the agent. Do not execute security scanners in the client profile.
-- Verified pinned snapshot: `refs/tags/v0.0.83`, commit `d830dc03c2c6575f69ae45a00fd6f7f22ef4feb4`, main CI 45778355203 SUCCESS. Independent pins: `microversion-release/v0.0.3` → `10ad9905ef2e51e00f2a04723a94cf6b9f78522e`, `project-audit/v0.0.5` → `d830dc03c2c6575f69ae45a00fd6f7f22ef4feb4`, `repository-workflow/v0.0.2` → `a2a6af6b66e9cd6e5b28ccb227245f3a13389098`. Verify exact tag objects and trees before installation. Historical static checks do not replace acceptance.
-- Official gh 2.105.0 was verified for remote pin of one skill; remote multi-skill installation and actual host loading remain trials. Do not use --force, --all, unpinned updates or third-party managers. NVIDIA scanners are not runtime requirements.
+- Use only the current pin table above; earlier snapshots below are historical evidence, not installation instructions.
+- gh 2.105.0: owner confirmed remote multi-skill install and explicit Harness loading; metadata-record warning requires separate verification. Do not use --force, --all, unpinned updates or third-party managers.
 - Record exact client, model, gh, Git, Python and OS versions. Confirm the active profile and actual project roots. For Harness confirm dsh-skill/dsh-skill-filesystem/dsh-tool-skill are enabled. Do not modify the global profile during the trial.
 
 ## Installation: separate clean project for each client
@@ -28,11 +43,11 @@ gh --version
 foreach ($skill in @('microversion-release','project-audit','repository-workflow')) {
     if (Test-Path -LiteralPath (Join-Path $dest $skill)) { throw 'Skill already exists' }
     $pin = switch ($skill) {
-        'microversion-release' { 'refs/tags/microversion-release/v0.0.3' }
-        'project-audit' { 'refs/tags/project-audit/v0.0.5' }
+        'microversion-release' { 'refs/tags/microversion-release/v0.0.6' }
+        'project-audit' { 'refs/tags/project-audit/v0.0.6' }
         'repository-workflow' { 'refs/tags/repository-workflow/v0.0.2' }
     }
-    gh skill install Sashido01/TESSERA $skill --pin $pin --dir $dest
+    gh skill install Sashido01/TESSERA "skills/$skill" --pin $pin --dir $dest
     if ($LASTEXITCODE -ne 0) { throw "Installation failed: $skill" }
 }
 gh skill list --dir $dest --json
@@ -128,3 +143,13 @@ OWNER_REPORTED: npm 12.0.2 / Node 24.18.0, @deepseek-ai/dsh@0.2.2-rc.5 dist.inte
 ## Owner-confirmed headless help
 
 26 November 2026: exact npm pin 0.2.2-rc.5 printed dsh --profile headless --help. PROFILE_HELP_PASS, not model session. Next bounded trial: fresh disposable project and separate DSH_HOME and DSH_AGENTS_HOME (both needed, see [home-paths rc.5](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.5/packages/util/home-paths/README.md)); no global skills, extra writable roots or full access. [skill-filesystem rc.5](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.5/packages/skill/skill-filesystem/README.md): project .dsh/skills rank 100, shared .agents/skills rank 200. Use current published .5/.6/.2 pins; retest affected scenarios after update. First model run only P01/P02 discovery/explicit read-only calculation; no repo changes. Inspect actual NDJSON session, skill load and CLI tool_call/tool_result, final.reason.kind=completed and exit 0. Raw events may contain prompts, args or private data; report sanitized facts only. Missing authorized model route or sandbox refusal means BLOCKED; no expanded rights. Do not install bridge until clean run verified.
+
+## Owner acceptance 2026-11-27 — v0.0.88
+
+OWNER_REPORTED: Harness 0.2.2-rc.1, 29 PASS / 1 FAIL / 4 NOT_VERIFIED. All three trees match the table above; explicit calls of all three skills, unknown-name refusal and actual headless P02/P04/P05 observed. Supplied JSONL independently confirms native successful skill dispatch for all three, but not every child run. Guarded Run positive and negative fixtures, unit suites 78/78, 76 PASS + 1 FIFO SKIP, 17/17 are OWNER_REPORTED. AUTO_USE, live GUI, Stop-hook NOT_VERIFIED; gh search unavailable. gh 2.105.0: could not record install warning about missing USERPROFILE variable (source trace supports the cause; native reproduction pending), files and frontmatter owner-verified. Do not recommend broad --unpin --all; individual staged pin/rollback and preservation of adjacent skills required. Codex: network timeout, installation/activation NOT_VERIFIED, #81 OPEN. Repeat narrow checks locally; fail closed on unsafe Git context, without removing restrictions.
+
+### Targeted installation and Windows metadata warning
+
+At exact gh v2.105.0, [install.go](https://github.com/cli/cli/blob/v2.105.0/pkg/cmd/skills/install/install.go) selects DiscoverSkillByPath for a selector beginning with skills/. [discovery.go](https://github.com/cli/cli/blob/v2.105.0/internal/skills/discovery/discovery.go) resolves that single directory via parent contents at the resolved commit, instead of full repository discovery. The executable block above uses this narrower form. Its native remote-install latency and client acceptance are NOT_VERIFIED; do not claim that it fixes network timeouts.
+
+The same version's [installer.go](https://github.com/cli/cli/blob/v2.105.0/internal/skills/installer/installer.go) appends a warning when RecordInstall fails after successful file installation; [lockfile.go](https://github.com/cli/cli/blob/v2.105.0/internal/skills/lockfile/lockfile.go) obtains its lock path via os.UserHomeDir. On Windows HOME/GH_CONFIG_DIR do not establish USERPROFILE. Diagnose only whether the variable exists (not its value) in a trusted disposable Windows process; compare the lock record and installed bytes separately. Do not set another person's home, alter the host sandbox, or claim the lock record succeeded because exit is 0. No automatic upstream bug conclusion without reproduction.
