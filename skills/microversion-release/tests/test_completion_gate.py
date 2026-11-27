@@ -177,6 +177,13 @@ class CompletionGateTests(unittest.TestCase):
             self.assertEqual(self.check()['reason'], 'GATE_GIT_CONTEXT_UNSAFE')
             command.assert_not_called()
 
+    def test_preserve_xdg_config_location_without_git_invocation(self):
+        with mock.patch.dict(os.environ, {'XDG_CONFIG_HOME': 'synthetic config root'}), \
+                mock.patch.object(gate.subprocess, 'run') as command:
+            inspector = gate.Inspector(self.repo)
+            self.assertEqual(inspector.env['XDG_CONFIG_HOME'], 'synthetic config root')
+            command.assert_not_called()
+
     def test_stop_one_continuation_even_if_active_false(self):
         (self.repo / 'dirty.txt').touch()
         first = gate.stop_hook(self.payload(), self.repo, self.base, self.marker, True)

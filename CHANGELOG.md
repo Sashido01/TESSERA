@@ -4,6 +4,12 @@
 
 Здесь фиксируются изменения **общего каталога**. Истории отдельных навыков могут вестись в их собственных папках.
 
+## 0.0.93 — Усилить отказ при небезопасном Git-контексте и синхронизировать пилот
+
+- Microversion Release 0.0.7: неизвестные/несогласованные GIT_* блокируются, имена редактируются, XDG_CONFIG_HOME сохраняется, локальные Git-протоколы/неявная загрузка отключены. 4 focused isolated Linux probes PASS на exact release_tag.py, включая реальную одноразовую positive/negative fixture. Полный CI и #81 открыты.
+- 0.0.92 main CI 46019956070 SUCCESS 6/6, commit 7ace18df60412f98cc84835a6ad81d4c36414683, оба точных аннотированных тега. Project Cleanup Linux 49 PASS, Windows 47 PASS + 2 FIFO SKIP. Синхронизация четырёх pin в RU/EN quick start и PowerShell.
+- TD04 отдельный кандидат: пакетное чтение Git-объектов, синтетическое ускорение только чтения; лимиты и scanner coverage неизменны. 0.1.0 readiness остаётся BLOCKED.
+
 ## 0.0.92 — Учитывать Git при планировании очистки (PC02)
 
 - Project Cleanup 0.0.2: bounded read-only план по двум наборам HEAD/index/ignored/untracked; защищены пересечения, staged deletions, gitlinks, sparse-index, nonportable paths и коллизии. Повторная сверка метаданных снимков и предков; no deletion authorization. 28/28 изолированных Linux-тестов PASS на exact blobs; native CI требуется.

@@ -10,10 +10,10 @@ TESSERA is not a fork of Harness or Codex. It stores portable [Agent Skills](htt
 
 | Skill | Purpose | Status |
 | --- | --- | --- |
-| [Microversion Release](skills/microversion-release/README.en.md) | Microversions, mandatory annotated release tags, portable use across agents | 0.0.6 — Harness explicit use observed; Codex and enforcement open (#81) |
+| [Microversion Release](skills/microversion-release/README.en.md) | Microversions, mandatory annotated release tags, portable use across agents | 0.0.7 — TD17 candidate; Harness explicit use observed for 0.0.6; Codex and enforcement open (#81) |
 | [Project Audit](skills/project-audit/README.en.md) | Evidence-based audit and metadata/Git inspection | 0.0.6 — Harness explicit use observed; full acceptance open |
 | [Repository Workflow](skills/repository-workflow/README.en.md) | Local Git and GitHub, independent tasks, CI, integration and technical debt | 0.0.3 — tag and CI verified; Harness explicit use observed for 0.0.2 |
-| [Project Cleanup](skills/project-cleanup/README.en.md) | Inventory, safe local/GitHub cleanup, growth control | 0.0.2 — PC02 candidate, exact 0.0.1 pin accepted; client acceptance open |
+| [Project Cleanup](skills/project-cleanup/README.en.md) | Inventory, safe local/GitHub cleanup, growth control | 0.0.2 — tag and native CI verified; PC03–PC06 open |
 
 ## Repository layout
 
@@ -37,7 +37,7 @@ docs/                   Rules, architecture, and roadmap
 
 For Microversion Release, see the [installation guide](skills/microversion-release/README.en.md).
 
-**Practical pilot:** [acceptance of all three skills in Codex and DeepSeek Harness](docs/AGENT_PILOT.en.md). Disposable projects only; actual activation and enforcement are separately verified.
+**Practical pilot:** [acceptance of all four skills in Codex and DeepSeek Harness](docs/AGENT_PILOT.en.md). Disposable projects only; actual activation and enforcement are separately verified.
 
 ## Validation
 
@@ -79,7 +79,7 @@ CI additionally runs the [pinned upstream `skills-ref` validator](docs/AGENT_SKI
 
 **Current catalog version:** see [`VERSION`](VERSION). From this point forward, every independently verified change to TESSERA must increment the catalog microversion, update both changelogs, and use a clear, human-readable Russian commit title. After successful GitHub Actions checks, an annotated `vX.Y.Z` Git tag is created. GitHub Releases are not published automatically.
 
-Verified baseline: TESSERA `0.0.89`, SHA `efece8ad28fa6e5968d57c41ce68be195e932324`, main CI 45994903581 SUCCESS, annotated `v0.0.89` exact target verified. Current source version: [`VERSION`](VERSION).
+Verified baseline: TESSERA `0.0.92`, SHA `7ace18df60412f98cc84835a6ad81d4c36414683`, main CI 46019956070 SUCCESS, exact annotated `v0.0.92` verified. Current source version: [`VERSION`](VERSION).
 
 - **The TESSERA catalog** and **each skill** have independent version histories.
 - Work microversions increase PATCH by one. After `.99`, work may continue with `.100`, `.101`, and so on if the task is unfinished.

@@ -183,6 +183,32 @@ class ReleaseTagTests(unittest.TestCase):
                     run.assert_not_called()
         self.assertEqual(self.cmd("tag", "--list"), "")
 
+    def test_unknown_and_restrictive_git_context_refused_before_git(self):
+        for name, diagnostic in (
+                ("GIT_ALLOW_PROTOCOL", "GIT_ALLOW_PROTOCOL"),
+                ("GIT_PROTOCOL_FROM_USER", "GIT_PROTOCOL_FROM_USER"),
+                ("GIT_NO_LAZY_FETCH", "GIT_NO_LAZY_FETCH"),
+                ("GIT_TERMINAL_PROMPT", "GIT_TERMINAL_PROMPT"),
+                ("GIT_OPTIONAL_LOCKS", "GIT_OPTIONAL_LOCKS"),
+                ("GIT_PRIVATE_FIXTURE_MARKER", "GIT_CONTEXT_OTHER")):
+            with self.subTest(name=name), mock.patch.dict(os.environ, {name: "synthetic"}), \
+                    mock.patch.object(module.subprocess, "run") as run:
+                self.assertEqual(module.blocking_context_names(), [diagnostic])
+                with self.assertRaisesRegex(module.TagError, "GIT_CONTEXT_UNSAFE"):
+                    module.create(self.repo, "0.1.0", "Релиз — проверка окружения")
+                run.assert_not_called()
+        self.assertEqual(self.cmd("tag", "--list"), "")
+
+    def test_unknown_git_name_and_value_redacted_in_context_cli(self):
+        env = context_cli_fixture_env()
+        env["GIT_PRIVATE_FIXTURE_MARKER"] = "synthetic private value"
+        proc = subprocess.run([sys.executable, "-B", str(PATH), "context"],
+                              env=env, capture_output=True, text=True, check=False, timeout=15)
+        self.assertEqual(proc.returncode, 1)
+        self.assertNotIn("PRIVATE_FIXTURE_MARKER", proc.stdout + proc.stderr)
+        self.assertNotIn("synthetic private value", proc.stdout + proc.stderr)
+        self.assertEqual(json.loads(proc.stdout)["blocking_names"], ["GIT_CONTEXT_OTHER"])
+
     def test_context_cli_reports_names_only_without_git(self):
         env = context_cli_fixture_env()
         env.update({"GIT_CONFIG_COUNT": "synthetic private marker",
@@ -215,7 +241,8 @@ class ReleaseTagTests(unittest.TestCase):
     def test_git_child_receives_only_required_environment(self):
         with mock.patch.dict(os.environ, {"TESSERA_PRIVATE_FIXTURE": "synthetic marker",
                                           "GIT_COMMITTER_NAME": "Test Identity",
-                                          "GIT_PAGER": "synthetic marker"}):
+                                          "GIT_PAGER": "synthetic marker",
+                                          "XDG_CONFIG_HOME": "synthetic config root"}):
             with mock.patch.object(module.subprocess, "run") as run:
                 run.return_value = subprocess.CompletedProcess([], 0, "", "")
                 module.git(self.repo, "rev-parse", "HEAD")
@@ -223,7 +250,11 @@ class ReleaseTagTests(unittest.TestCase):
                 self.assertNotIn("TESSERA_PRIVATE_FIXTURE", env)
                 self.assertNotIn("GIT_PAGER", env)
                 self.assertEqual(env["GIT_COMMITTER_NAME"], "Test Identity")
-                self.assertEqual(set(env) - set(module.CHILD_ENV_KEYS), set())
+                self.assertEqual(env["XDG_CONFIG_HOME"], "synthetic config root")
+                self.assertEqual(set(env) - set(module.CHILD_ENV_KEYS), set(module.LOCAL_GIT_DEFAULTS))
+                self.assertEqual({key: env[key] for key in module.LOCAL_GIT_DEFAULTS},
+                                 module.LOCAL_GIT_DEFAULTS)
+                self.assertIn("--no-pager", run.call_args.args[0])
                 self.assertEqual(os.getenv("TESSERA_PRIVATE_FIXTURE"), "synthetic marker")
 
 

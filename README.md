@@ -10,10 +10,10 @@ TESSERA не является форком Harness или Codex. Здесь хр
 
 | Навык | Назначение | Состояние |
 | --- | --- | --- |
-| [Microversion Release](skills/microversion-release/README.md) | Микроверсии, обязательные аннотированные Git-теги релизов, переносимость между агентами | 0.0.6 — Harness explicit use подтверждён; Codex и enforcement открыты (#81) |
+| [Microversion Release](skills/microversion-release/README.md) | Микроверсии, обязательные аннотированные Git-теги релизов, переносимость между агентами | 0.0.7 — кандидат TD17; Harness explicit use подтверждён для 0.0.6; Codex и enforcement открыты (#81) |
 | [Project Audit](skills/project-audit/README.md) | Доказательный аудит, инвентаризация метаданных и Git | 0.0.6 — Harness explicit use подтверждён; полная приёмка открыта |
 | [Repository Workflow](skills/repository-workflow/README.md) | Локальный Git и GitHub, независимые задачи, CI, интеграция и технический долг | 0.0.3 — тег и CI подтверждены; Harness explicit use подтверждён для 0.0.2 |
-| [Project Cleanup](skills/project-cleanup/README.md) | Инвентаризация, безопасная очистка локального проекта и GitHub, контроль роста | 0.0.2 — кандидат PC02, точный pin 0.0.1 принят; агентная приёмка открыта |
+| [Project Cleanup](skills/project-cleanup/README.md) | Инвентаризация, безопасная очистка локального проекта и GitHub, контроль роста | 0.0.2 — тег и native CI подтверждены; PC03–PC06 открыты |
 
 ## Как устроен репозиторий
 
@@ -37,7 +37,7 @@ docs/                   Правила, архитектура и дорожна
 
 Для Microversion Release: [инструкция установки](skills/microversion-release/README.md).
 
-**Практический пилот:** [приёмка трёх навыков в Codex и DeepSeek Harness](docs/AGENT_PILOT.md). Только изолированные проекты; фактическая активация и enforcement проверяются отдельно.
+**Практический пилот:** [приёмка четырёх навыков в Codex и DeepSeek Harness](docs/AGENT_PILOT.md). Только изолированные проекты; фактическая активация и enforcement проверяются отдельно.
 
 ## Проверка
 
@@ -83,7 +83,7 @@ CI также проверяет официальный `gh skill publish --dry-
 
 **Текущая версия каталога:** файл [`VERSION`](VERSION). С этой точки каждое новое самостоятельное проверенное изменение TESSERA получает следующую микроверсию, запись в обоих CHANGELOG и Git-коммит с понятным русским сообщением. После успешной проверки GitHub Actions создаёт аннотированный тег `vX.Y.Z`; GitHub Release автоматически не публикуется.
 
-Подтверждённый baseline: TESSERA `0.0.89`, SHA `efece8ad28fa6e5968d57c41ce68be195e932324`, main CI 45994903581 SUCCESS, точный аннотированный `v0.0.89` подтверждён. Текущая версия исходников: [`VERSION`](VERSION).
+Подтверждённый baseline: TESSERA `0.0.92`, SHA `7ace18df60412f98cc84835a6ad81d4c36414683`, main CI 46019956070 SUCCESS, точный аннотированный `v0.0.92` подтверждён. Текущая версия исходников: [`VERSION`](VERSION).
 
 - **Каталог TESSERA** и **каждый навык** имеют собственную историю изменений.
 - Рабочие микроверсии увеличивают PATCH. После `.99` работу можно продолжить с `.100`, `.101` и далее, если задача не завершена.

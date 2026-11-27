@@ -4,6 +4,12 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.93 — Harden unsafe Git-context refusal and synchronize the pilot
+
+- Microversion Release 0.0.7: unknown/unapproved GIT_* blocked, names redacted, XDG_CONFIG_HOME preserved, local Git protocols/lazy fetching disabled. Four focused isolated Linux probes PASS on exact release_tag.py, including actual disposable positive/negative fixture. Full CI and #81 open.
+- 0.0.92 main CI 46019956070 SUCCESS 6/6, commit 7ace18df60412f98cc84835a6ad81d4c36414683, both exact annotated tags. Project Cleanup Linux 49 PASS, Windows 47 PASS + 2 FIFO SKIP. Synchronize four pins across RU/EN quick start and PowerShell.
+- TD04 separate candidate: batch Git object reads, synthetic speedup for reading only; limits and scanner coverage unchanged. 0.1.0 readiness remains BLOCKED.
+
 ## 0.0.92 — Account for Git in cleanup planning (PC02)
 
 - Project Cleanup 0.0.2: bounded read-only plan from two HEAD/index/ignored/untracked captures; protect overlaps, staged deletions, gitlinks, sparse-index, nonportable paths and collisions. Recheck capture and ancestor metadata; no deletion authorization. 28/28 isolated Linux tests PASS on exact blobs; native CI required.
