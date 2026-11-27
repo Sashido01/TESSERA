@@ -294,3 +294,7 @@ PR #92, exact head 5e770ebf66af9d2758b9df026229794e2932c15b, run 45852127083: в
 ## T21 — Project Cleanup, четвёртый навык (27.11.2026)
 
 Утверждён владельцем. Независимый [план PC01–PC06](../skills/project-cleanup/references/ROADMAP.md): инвентаризация, безопасный точный план, исполнение и восстановление, Git/GitHub storage, профилактика/retention, реальные клиенты. Начальный кандидат 0.0.1: 18/18 Linux tests, точные source/test blobs, native Windows/полный CI ожидаются. Не вводить обязательные внешние инструменты. T21 PARTIAL; исходный 0.1.0 scope трёх навыков не доказывает приёмку нового.
+
+## 27.11.2026 — актуальная сверка 0.0.90 / RW05
+
+v0.0.90 main CI 46001257853 6/6 PASS, exact tags v0.0.90 и project-cleanup/v0.0.1 → 79f369b6f817976c2d0b1f026ed86f00be045860, Project Cleanup tree f545939f00975dbceaf6536d8c61ecb04b8cea5a; PC01 native CI Linux 21 PASS, Windows 20 PASS + FIFO SKIP. Клиенты открыты. RW05 кандидат 0.0.3 — read-only сверка, 21/21 Linux; интеграционный CI обязателен. PC02 отдельный Git-aware кандидат 8e55f2bee4de780c5599bc4556d02e97f754b634, 19/19 Linux, без назначения общей версии. Не считать планы разрешением удаления; PC03–PC06 открыты.

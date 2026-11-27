@@ -2,24 +2,27 @@
 
 [Русский — оригинал](AGENT_PILOT.md) | **English — translation**
 
-**Status:** acceptance instructions; real client trials NOT_VERIFIED. Owner priority of 25 November 2026: start a pilot before the entire roadmap is finished. T03–T05/T13, TD06/TD13–TD15. A pilot is not an independent release or mandatory enforcement.
+**Status:** basic explicit Harness use of three skills was observed (see evidence below); Codex, AUTO_USE and enforcement NOT_VERIFIED. Project Cleanup is a separate new pilot. Owner priority of 25 November 2026: start a pilot before the entire roadmap is finished. T03–T05/T13, TD06/TD13–TD15. A pilot is not an independent release or mandatory enforcement.
 
 ## Quick start: not a repository audit
 
-The matrix below covers the three previously accepted versions. Fourth Project Cleanup 0.0.1 is a separate T21 candidate; do not install from floating main before its independent tag and tree are confirmed. Separate PC01–PC06 acceptance.
+The matrix below contains four verified pins; Project Cleanup has separate PC01–PC06 acceptance. Repository Workflow 0.0.3 is still a candidate, so use pin 0.0.2 until its exact tag is verified.
 
-Verified catalog snapshot: `v0.0.88`, commit `015bed7f9eaf344b59e699a4b607c0e21b86f608`, main CI 45874463052 SUCCESS (6/6). Three independent annotated tags and trees match this snapshot. A GitHub Release is not required for tag-pinned installation; a missing releases/latest does not imply missing skills.
+Verified catalog snapshot: `v0.0.90`, commit `79f369b6f817976c2d0b1f026ed86f00be045860`, main CI 46001257853 SUCCESS (6/6). Four independent annotated tags; the first three skills are unchanged from v0.0.88. A GitHub Release is not required for tag-pinned installation; a missing releases/latest does not imply missing skills.
 
 | Skill | Pin | Commit | Skill tree |
 | --- | --- | --- | --- |
 | microversion-release | `refs/tags/microversion-release/v0.0.6` | `015bed7f9eaf344b59e699a4b607c0e21b86f608` | `12aebcae998b098a1e7d3c5f1fadd8bcd2b096e7` |
 | project-audit | `refs/tags/project-audit/v0.0.6` | `0b207f09bb9fca7cf5525d6b35a1919e1d316515` | `50d3f3dee94f1ceff9df343ef34689caf99ca184` |
 | repository-workflow | `refs/tags/repository-workflow/v0.0.2` | `a2a6af6b66e9cd6e5b28ccb227245f3a13389098` | `7bd8a54e7102a4bd83ae4b6c14e296a91c5b9f9c` |
+| project-cleanup | `refs/tags/project-cleanup/v0.0.1` | `79f369b6f817976c2d0b1f026ed86f00be045860` | `f545939f00975dbceaf6536d8c61ecb04b8cea5a` |
 
 1. First inspect only the three installed directories in the active profile and their versions. If they match verified trees (accounting for gh install metadata), do not reinstall.
 2. If installation is needed, use a fresh empty project and the three exact pins below; if the API is unavailable, a verified local checkout of the exact tag and native --from-local installation into an empty directory are acceptable. A local copy is not a remote pin. Do not audit all history or use latest/main, --all, --unpin or --force against the user profile.
 3. Open a fresh session after installation and explicitly invoke each skill: Codex via $name (e.g. $microversion-release), Harness via native /name or the skill tool. Run P01–P05 as separate short prompts. For P06 use a fresh session without naming the skill; a correct answer alone does not establish loading. Negative control: an unrelated task with no expected invocation.
 4. Bound network retries to two attempts per operation; record BLOCKED on refusal and continue independent local read-only checks. Do not change permissions or scrub the production environment. P07/P08 and Stop-hook are separate authorized trials, not prerequisites for starting P01–P06.
+
+**Separate short PC01/PC06 test:** if needed install only Project Cleanup into a fresh empty project using the exact pin: `gh skill install Sashido01/TESSERA skills/project-cleanup --pin refs/tags/project-cleanup/v0.0.1 --dir <empty-project>/.agents/skills` (for Harness use `.dsh/skills` if required). Explicitly invoke `$project-cleanup`/`/project-cleanup` on a synthetic fixture with build/cache, data and a link; run metadata inventory only, confirm scope/sum/no deletion. No full repository audit, broad updates or actual cleanup. Separate fresh implicit trial; a correct answer does not prove loading.
 
 ## Entry conditions
 
