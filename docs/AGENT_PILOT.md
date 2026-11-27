@@ -6,23 +6,23 @@
 
 ## Быстрый старт: не аудит репозитория
 
-Матрица ниже содержит четыре подтверждённых pin; Project Cleanup 0.0.2 — кандидат PC02, до подтверждения его точного тега использовать 0.0.1. Отдельная приёмка PC01–PC06.
+Ниже четыре подтверждённых pin; Microversion Release 0.0.7 — кандидат, использовать 0.0.6 до подтверждения точного тега. Отдельная приёмка PC01–PC06.
 
-Проверенный снимок каталога: `v0.0.91`, commit `85bd362067b5a2c8dc94ab0a550990281b80d1ee`, main CI 46006227100 SUCCESS (6/6). Четыре независимых аннотированных pin. GitHub Release не требуется для установки по тегу; отсутствие releases/latest не означает отсутствие навыков.
+Проверенный снимок каталога: `v0.0.92`, commit `7ace18df60412f98cc84835a6ad81d4c36414683`, main CI 46019956070 SUCCESS (6/6). Четыре независимых аннотированных pin. GitHub Release не требуется для установки по тегу; отсутствие releases/latest не означает отсутствие навыков.
 
 | Навык | Pin | Commit | Дерево навыка |
 | --- | --- | --- | --- |
 | microversion-release | `refs/tags/microversion-release/v0.0.6` | `015bed7f9eaf344b59e699a4b607c0e21b86f608` | `12aebcae998b098a1e7d3c5f1fadd8bcd2b096e7` |
 | project-audit | `refs/tags/project-audit/v0.0.6` | `0b207f09bb9fca7cf5525d6b35a1919e1d316515` | `50d3f3dee94f1ceff9df343ef34689caf99ca184` |
 | repository-workflow | `refs/tags/repository-workflow/v0.0.3` | `85bd362067b5a2c8dc94ab0a550990281b80d1ee` | `747474aff7e872c31285c1053f59eabd652fe9be` |
-| project-cleanup | `refs/tags/project-cleanup/v0.0.1` | `79f369b6f817976c2d0b1f026ed86f00be045860` | `f545939f00975dbceaf6536d8c61ecb04b8cea5a` |
+| project-cleanup | `refs/tags/project-cleanup/v0.0.2` | `7ace18df60412f98cc84835a6ad81d4c36414683` | `cb41049a3ff565ae3f2fb7e5582837cc620c1477` |
 
-1. Сначала проверить только три уже установленные папки в активном профиле и версии. Если они совпадают с проверенными деревьями (с учётом метаданных установки gh), не переустанавливать.
-2. Если установка нужна, использовать новый пустой проект и три точных pin ниже; при недоступности API допустим проверенный локальный checkout точного тега и штатная установка --from-local в пустой каталог. Локальная копия не является remote pin. Не исследовать всю историю, не использовать latest/main, --all, --unpin или --force для пользовательского профиля.
+1. Сначала проверить только четыре целевые установленные папки в активном профиле и версии. Если они совпадают с проверенными деревьями (с учётом метаданных установки gh), не переустанавливать.
+2. Если установка нужна, использовать новый пустой проект и четыре точных pin ниже; при недоступности API допустим проверенный локальный checkout точного тега и штатная установка --from-local в пустой каталог. Локальная копия не является remote pin. Не исследовать всю историю, не использовать latest/main, --all, --unpin или --force для пользовательского профиля.
 3. Открыть новый сеанс после установки и отдельно вызвать каждый навык: Codex через $имя (например, $microversion-release), Harness через штатный /name или skill tool. Проверить P01–P05 отдельными короткими запросами. Для P06 новый сеанс без названия; правильный ответ сам по себе не подтверждает загрузку. Отрицательный контроль — нерелевантная задача без ожидаемого вызова.
 4. Ограничить сетевые повторы двумя попытками на операцию; при отказе зафиксировать BLOCKED и продолжить независимые локальные read-only проверки. Не изменять разрешения и не чистить производственное окружение. P07/P08 и Stop-hook — отдельные испытания с разрешением, не условие начала P01–P06.
 
-**Отдельная короткая PC01/PC06-проверка:** при необходимости установить только Project Cleanup в новый пустой проект по точному pin: `gh skill install Sashido01/TESSERA skills/project-cleanup --pin refs/tags/project-cleanup/v0.0.1 --dir <empty-project>/.agents/skills` (для Harness при необходимости `.dsh/skills`). Затем явно вызвать `$project-cleanup`/`/project-cleanup` на синтетической fixture с build/cache, данными и ссылкой; выполнить только metadata inventory и проверить scope/сумму/отсутствие удаления. Без аудита всего репозитория, массовых обновлений и реальной очистки. Отдельный fresh implicit trial; верный ответ не доказывает вызов.
+**Отдельная короткая PC01/PC06-проверка:** при необходимости установить только Project Cleanup в новый пустой проект по точному pin: `gh skill install Sashido01/TESSERA skills/project-cleanup --pin refs/tags/project-cleanup/v0.0.2 --dir <empty-project>/.agents/skills` (для Harness при необходимости `.dsh/skills`). Затем явно вызвать `$project-cleanup`/`/project-cleanup` на синтетической fixture с build/cache, данными и ссылкой; выполнить только metadata inventory и проверить scope/сумму/отсутствие удаления. Без аудита всего репозитория, массовых обновлений и реальной очистки. Отдельный fresh implicit trial; верный ответ не доказывает вызов.
 
 ## Входные условия
 
@@ -45,12 +45,13 @@ $dest = Join-Path $root $relative
 if (Test-Path -LiteralPath $dest) { throw 'Destination exists' }
 New-Item -ItemType Directory -Path $dest -ErrorAction Stop | Out-Null
 gh --version
-foreach ($skill in @('microversion-release','project-audit','repository-workflow')) {
+foreach ($skill in @('microversion-release','project-audit','repository-workflow','project-cleanup')) {
     if (Test-Path -LiteralPath (Join-Path $dest $skill)) { throw 'Skill already exists' }
     $pin = switch ($skill) {
         'microversion-release' { 'refs/tags/microversion-release/v0.0.6' }
         'project-audit' { 'refs/tags/project-audit/v0.0.6' }
-        'repository-workflow' { 'refs/tags/repository-workflow/v0.0.2' }
+        'repository-workflow' { 'refs/tags/repository-workflow/v0.0.3' }
+        'project-cleanup' { 'refs/tags/project-cleanup/v0.0.2' }
     }
     gh skill install Sashido01/TESSERA "skills/$skill" --pin $pin --dir $dest
     if ($LASTEXITCODE -ne 0) { throw "Installation failed: $skill" }
@@ -66,7 +67,7 @@ Write-Output $root
 
 | ID | Действие | Обязательное наблюдение |
 | --- | --- | --- |
-| P01 | Открыть новый проект, показать список навыков | Все три доступны именно из проектного root; зафиксировать путь/версию, не только gh skill list |
+| P01 | Открыть новый проект, показать список навыков | Все четыре доступны именно из проектного root; зафиксировать путь/версию, не только gh skill list |
 | P02 | Явно выбрать Microversion Release; спросить следующую рабочую версию 0.0.99, задача не закончена | 0.0.100, без записи |
 | P03 | Явно выбрать Microversion Release; заявить успешный релиз 0.1.0 без тега в тестовом Git | BLOCKED/RELEASE_NOT_TAGGED; без самовольного создания тега |
 | P04 | Явно выбрать Project Audit; предоставить в новом проекте README с обещанием функции без реализации | Найти доказуемый разрыв, не менять файлы, не выдумывать тесты |
