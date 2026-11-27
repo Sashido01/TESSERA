@@ -15,7 +15,7 @@ TESSERA is not a fork of Harness or Codex. It stores portable [Agent Skills](htt
 | [Microversion Release](skills/microversion-release/README.en.md) | Microversions, mandatory annotated release tags, portable use across agents | 0.0.7 — tag and CI verified; Harness explicit use observed for 0.0.6; Codex and enforcement open (#81) |
 | [Project Audit](skills/project-audit/README.en.md) | Evidence-based audit and metadata/Git inspection | 0.0.6 — Harness explicit use observed; full acceptance open |
 | [Repository Workflow](skills/repository-workflow/README.en.md) | Local Git and GitHub, independent tasks, CI, integration and technical debt | 0.0.3 — tag and CI verified; Harness explicit use observed for 0.0.2 |
-| [Project Cleanup](skills/project-cleanup/README.en.md) | Inventory, safe local/GitHub cleanup, growth control | 0.0.3 — Windows PC02 correction candidate; exact 0.0.2 pin accepted; PC03–PC06 open |
+| [Project Cleanup](skills/project-cleanup/README.en.md) | Inventory, safe local/GitHub cleanup, growth control | 0.0.3 — exact pin and native CI verified; PC03–PC06 open |
 
 ## Repository layout
 
@@ -81,7 +81,7 @@ CI additionally runs the [pinned upstream `skills-ref` validator](docs/AGENT_SKI
 
 **Current catalog version:** see [`VERSION`](VERSION). From this point forward, every independently verified change to TESSERA must increment the catalog microversion, update both changelogs, and use a clear, human-readable Russian commit title. After successful GitHub Actions checks, an annotated `vX.Y.Z` Git tag is created. GitHub Releases are not published automatically.
 
-Verified baseline: TESSERA `0.0.93`, SHA `168ccae683e92ed13fba141c6654201765cb2e3a`, main CI 46033970329 SUCCESS, exact annotated `v0.0.93` verified. Current source version: [`VERSION`](VERSION).
+Verified baseline: TESSERA `0.0.95`, SHA `b179d71f091083916a88067a895c85c6539bc480`, main CI 46053357417 SUCCESS, exact annotated `v0.0.95` verified. Current source version: [`VERSION`](VERSION).
 
 - **The TESSERA catalog** and **each skill** have independent version histories.
 - Work microversions increase PATCH by one. After `.99`, work may continue with `.100`, `.101`, and so on if the task is unfinished.

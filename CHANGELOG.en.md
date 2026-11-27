@@ -4,6 +4,11 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.96 — Read-only profile planning and raw tree proof (UP02)
+
+- main 0.0.95 b179d71f091083916a88067a895c85c6539bc480, CI 46053357417 6/6 PASS, annotated catalog and Cleanup tags 672f08ad6ae306f74410f4a6c62e813be89cb87f / c33bd2fe15aba1aeb35dadc80390820338720376, all four independent skill trees match.
+- Integrate profile_plan, skill_tree and regression tests; 25/25 Linux per branch report, exact candidate native CI pending. No writes or apply authority. Live metadata, journal, rollback and client acceptance open.
+
 ## 0.0.95 — Stabilize Windows PC02 and batch CI history reads
 
 - 0.0.94 PR #101 5/5 PASS, squash 346a28001263dffe09920f96821a2170de68a4be; main CI 46042052275 Windows job 140651970098 FAIL. No retroactive v0.0.94 tag. Verified baseline remains 0.0.93 until a new exact tag.
