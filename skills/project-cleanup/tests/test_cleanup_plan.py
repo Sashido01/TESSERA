@@ -391,5 +391,58 @@ class GitFixtureTests(unittest.TestCase):
             self.assertEqual(first, snapshot())
 
 
+    @unittest.skipUnless(shutil.which("git"), "Git unavailable")
+    def test_actual_sparse_index_preserves_absent_paths(self):
+        env = fixture_env()
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder).resolve() / "repo"
+            root.mkdir()
+            hooks = root.parent / "hooks"
+            hooks.mkdir()
+
+            def git(*args):
+                return subprocess.run(["git", "-c", "core.hooksPath=" + str(hooks), *args], cwd=root,
+                    env=env, stdin=subprocess.DEVNULL, capture_output=True, check=True, timeout=15).stdout
+
+            git("init", "-q", "-b", "main")
+            (root / "build").mkdir()
+            (root / "src").mkdir()
+            (root / ".gitignore").write_text("build/\n", encoding="utf-8")
+            keep = root / "build" / "keep.txt"
+            keep.write_bytes(b"tracked")
+            (root / "src" / "main.txt").write_bytes(b"source")
+            git("add", ".gitignore", "src/main.txt")
+            git("add", "-f", "build/keep.txt")
+            git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "-qm", "fixture")
+            git("sparse-checkout", "init", "--cone", "--sparse-index")
+            git("sparse-checkout", "set", "src")
+            self.assertFalse(keep.exists())
+            expanded = git("ls-files", "--stage", "-z")
+            compressed = git("ls-files", "--stage", "--sparse", "-z")
+            self.assertIn(b"\tbuild/keep.txt\0", expanded)
+            self.assertIn(b"\tbuild/\0", compressed)
+            (root / "build").mkdir(exist_ok=True)
+            (root / "build" / "review.tmp").write_bytes(b"review")
+
+            def snapshot(index_bytes):
+                return dict(zip(p.NAMES, (git("rev-parse", "--verify", "HEAD"),
+                    git("ls-tree", "-r", "-z", "HEAD"), index_bytes,
+                    git("ls-files", "--others", "--ignored", "--exclude-standard", "-z"),
+                    git("ls-files", "--others", "--exclude-standard", "-z")), strict=True))
+
+            first = snapshot(expanded)
+            parsed = p.parse_capture(first)
+            self.assertIn("build/keep.txt", parsed["index.z"])
+            result = p.plan(root, first, dict(first), [b"build"], True)
+            self.assertFalse(result["deletion_authorized"])
+            self.assertEqual(result["counts"]["review"], 1)
+            self.assertEqual(result["private_review"][0]["relative_path"], "build/review.tmp")
+            invalid = snapshot(compressed)
+            with self.assertRaisesRegex(p.PlanError, "GIT_MODE_UNSUPPORTED"):
+                p.plan(root, invalid, dict(invalid), [b"build"], True)
+            self.assertFalse(keep.exists())
+            self.assertEqual((root / "build" / "review.tmp").read_bytes(), b"review")
+
+
 if __name__ == "__main__":
     unittest.main()
