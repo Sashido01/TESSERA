@@ -124,3 +124,9 @@ Starting at 0.0.97 the ZIP contract requires CATALOG.json, both UPDATE and profi
 0.0.97 main 4f0e5ec0175e42bf67afceef3360497d1261d140, CI 46062411446 SUCCESS, annotated tag object 726389b4f834b243413ab84ef36d9379bbd1684d.
 
 UP02.02: read-only gh_stage binds supplied raw Git tree to installed staging and checks the exact five github-* metadata fields, original frontmatter fields, body, other file bytes, modes and stage fingerprint. Narrow YAML subset (plain/simple quoted scalars and >- without complex constructs); unsupported forms BLOCKED. Actual gh serialization, lockfile, live refs, apply authorization, atomicity and rollback NOT_VERIFIED. From 0.0.98 the tool is required in ZIP; 0.0.97 remains compatible. Ten fixture tests and package gate; native/full CI pending.
+
+## Read-only recovery classification (0.0.99)
+
+PR #105 CI 46065687896 PASS, squash b94fd6855f2a32179f6804cd8e562f7f5ca1f2f4; main CI/tag pending.
+
+UP02.03: read-only single-skill recovery classifier. Compares a bounded strict journal with actual profile/stage/backup fingerprints, requires disjoint ordinary same-volume roots and rechecks observed identities. Distinguishes NOT_STARTED, OLD_IN_BACKUP, NEW_PRESENT, NEW_PRESENT_OLD_RETAINED; ambiguity and phase mismatch BLOCKED. Ten disposable fixture tests cover interruption between rename and phase record, local edit and missing stage. Does not create journals, rename/delete, authorize apply or prove durability. Next: separate writer with no-clobber primitives and crash recovery, fixtures first. Diagnostic candidate not included in runtime ZIP before acceptance.

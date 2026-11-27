@@ -4,6 +4,11 @@
 
 Здесь фиксируются изменения **общего каталога**. Истории отдельных навыков могут вестись в их собственных папках.
 
+## 0.0.99 — Классификация восстановления без записи
+
+- PR #105 CI 46065687896 PASS, squash b94fd6855f2a32179f6804cd8e562f7f5ca1f2f4; main CI/tag pending.
+- UP02.03: read-only классификатор восстановления одного навыка. Сопоставляет строго ограниченный journal с фактическими fingerprint profile/stage/backup, проверяет disjoint ordinary same-volume roots и повторно наблюдает identity. Различает NOT_STARTED, OLD_IN_BACKUP, NEW_PRESENT, NEW_PRESENT_OLD_RETAINED; неоднозначность и несовпадение фаз BLOCKED. 10 disposable fixture tests, включая прерывания между rename и записью фазы, local edit и отсутствие stage. Не создаёт journal, не выполняет rename/delete, не разрешает apply и не доказывает durability. Следующий этап — отдельный writer с no-clobber primitives и crash recovery, сначала в fixtures. Не включать диагностический кандидат в runtime ZIP до приёмки.
+
 ## 0.0.98 — Проверка метаданных gh staging (кандидат 0.0.98)
 
 - 0.0.97 main 4f0e5ec0175e42bf67afceef3360497d1261d140, CI 46062411446 SUCCESS, annotated tag object 726389b4f834b243413ab84ef36d9379bbd1684d.
