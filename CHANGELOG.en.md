@@ -4,6 +4,12 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.90 — Add Project Cleanup and catalog storage guard
+
+- Fourth independent skill 0.0.1: metadata-only inventory, scope protections, traversal budget, REVIEW classification, top-level/private details, cleanup and prevention workflow. Linux 18/18 PASS on exact blobs; native Windows and client acceptance open.
+- TESSERA: exact committed tree check for generated paths, non-source entries and blob >1 MiB; dedicated ignored local-state directory. No automated deletion or weaker CI safeguards.
+- Previous v0.0.89 main CI 45994903581 SUCCESS 6/6, exact annotated tag 1a904240fc2f1c17dc5bedfb2af2583e9f0bfa0a → efece8ad28fa6e5968d57c41ce68be195e932324. New candidate requires mandatory CI; #81 and branches with unique work remain open.
+
 ## 0.0.89 — Pin the short pilot and Harness evidence
 
 - Current independent pin/commit/tree, direct gh selector skills/<skill> (gh 2.105.0 source verified, actual run pending), short local checks without full repository audit; bounded network retries and separate explicit/automatic activation.

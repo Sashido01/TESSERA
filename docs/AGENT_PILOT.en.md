@@ -6,6 +6,8 @@
 
 ## Quick start: not a repository audit
 
+The matrix below covers the three previously accepted versions. Fourth Project Cleanup 0.0.1 is a separate T21 candidate; do not install from floating main before its independent tag and tree are confirmed. Separate PC01–PC06 acceptance.
+
 Verified catalog snapshot: `v0.0.88`, commit `015bed7f9eaf344b59e699a4b607c0e21b86f608`, main CI 45874463052 SUCCESS (6/6). Three independent annotated tags and trees match this snapshot. A GitHub Release is not required for tag-pinned installation; a missing releases/latest does not imply missing skills.
 
 | Skill | Pin | Commit | Skill tree |
