@@ -11,4 +11,4 @@
 | PC05 | Prevention | Agreed retention/budgets, growth checks, timing and rebuild cost |
 | PC06 | Clients | Codex/Harness discovery, explicit/auto-use, actual fixture execution, scope containment |
 
-PC01 — candidate source; PC02–PC05 documented workflow, automated execution NOT_IMPLEMENTED. PC06 NOT_VERIFIED. No reclaimed-space claim without measurement. Default policy deletes no data; project chooses budgets/retention. Optional tools are not mandatory.
+PC01 — native CI PASS (0.0.1), actual platform and client boundaries still require acceptance. PC02 — PARTIAL, [advisory](CLEANUP_PLAN.en.md) 28/28 Linux PASS; native CI, reproducibility and execution unproved. PC03–PC05 documented workflow, automated execution NOT_IMPLEMENTED. PC06 NOT_VERIFIED. No reclaimed-space claim without measurement. Default policy deletes no data; project chooses budgets/retention. Optional tools are not mandatory.
