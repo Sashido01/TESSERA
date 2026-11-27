@@ -4,6 +4,12 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.95 — Stabilize Windows PC02 and batch CI history reads
+
+- 0.0.94 PR #101 5/5 PASS, squash 346a28001263dffe09920f96821a2170de68a4be; main CI 46042052275 Windows job 140651970098 FAIL. No retroactive v0.0.94 tag. Verified baseline remains 0.0.93 until a new exact tag.
+- Project Cleanup 0.0.3: fixed .git marker test without assuming immediate directory mtime; strengthened root/marker identity, disappearance, hardlink and nonzero inode checks. Four new regression methods, renewed native CI pending. CATALOG.json reflects candidate, not published pin.
+- TD04: batch reads via existing checked_blob_batch, unchanged limits/scanner coverage, five additional regressions, full parity CI required. No weakening G09/#81/UP01/PC03–PC06. Historical branches preserved in ancestry; 0.1.0 not ready.
+
 ## 0.0.94 — Exact-version catalog and addressed install/update (UP01)
 
 - CATALOG.json, UPDATE RU/EN, read-only catalog_index: independent annotated pins, matching subtrees, refusal on moved refs or missing index; explicit install/update and repeatable --skill or --all. No unselected pin requests or widening invalid selection. 15/15 isolated Linux PASS on exact source/test blobs, mocked API; native CI, live API, safe replacement and recovery still required.

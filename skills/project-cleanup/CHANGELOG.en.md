@@ -2,6 +2,10 @@
 
 [Русский — оригинал](CHANGELOG.md) | **English — translation**
 
+## 0.0.3 — Stable root Git marker observation
+
+- Main 0.0.94 Windows CI 46042052275, job 140651970098: test_git_marker_changed_during_plan FAIL (48 other executions, 2 FIFO SKIP); old test assumed an immediate directory metadata change when creating a child file. Replace with actual directory substitution retaining the old object and separate metadata-change injection. Add refusals for disappeared marker, unknown root/marker inode and hardlinked .git file. Runtime rechecks ordinary_root and marker identity; reads no .git contents, does not authenticate Git state or authorize deletion. Renewed native CI required.
+
 ## 0.0.2 — Git-aware cleanup plan
 
 - Optional comparison of two Git capture sets and metadata, HEAD/index/untracked protection, explicit scopes, resource bounds, opt-in private details. No deletion or Git execution. 28/28 Linux PASS, including staged deletion and sparse-index actual Git fixtures. Native CI and client acceptance open.

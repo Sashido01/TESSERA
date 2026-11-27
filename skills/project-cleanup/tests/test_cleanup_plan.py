@@ -163,15 +163,77 @@ class PlanTests(unittest.TestCase):
         self.file("build/a")
         c = capture(ignored=b"build/a\0")
         original = p.metadata
+        marker = self.root / ".git"
+        retained = self.root / "previous-marker"
+        before = marker.lstat()
 
         def change(*args):
             result = original(*args)
-            (self.root / ".git" / "changed").write_bytes(b"fixture")
+            # Replace the actual directory, retaining the old object so that
+            # inode reuse and filesystem timestamp granularity are irrelevant.
+            marker.rename(retained)
+            marker.mkdir()
+            self.assertNotEqual(before.st_ino, marker.lstat().st_ino)
             return result
 
         with patch.object(p, "metadata", side_effect=change):
             with self.assertRaisesRegex(p.PlanError, "ROOT_CHANGED"):
                 self.check(c)
+        self.assertTrue(retained.is_dir())
+
+    def test_marker_metadata_change_observed_without_clock_assumption(self):
+        self.file("build/a")
+        c = capture(ignored=b"build/a\0")
+        original = Path.lstat
+        marker = self.root / ".git"
+        hits = 0
+
+        def changed(path):
+            nonlocal hits
+            info = original(path)
+            if path == marker:
+                hits += 1
+                if hits >= 2:
+                    return self.adjusted(info, st_mtime_ns=info.st_mtime_ns + 1)
+            return info
+
+        with patch.object(Path, "lstat", changed):
+            with self.assertRaisesRegex(p.PlanError, "ROOT_CHANGED"):
+                self.check(c)
+        self.assertGreaterEqual(hits, 2)
+
+    def test_marker_disappears_during_plan(self):
+        self.file("build/a")
+        c = capture(ignored=b"build/a\0")
+        original = p.metadata
+
+        def change(*args):
+            result = original(*args)
+            (self.root / ".git").rename(self.root / "previous-marker")
+            return result
+
+        with patch.object(p, "metadata", side_effect=change):
+            with self.assertRaisesRegex(p.PlanError, "ROOT_CHANGED"):
+                self.check(c)
+
+    def test_unknown_root_or_marker_identity_refused(self):
+        original = Path.lstat
+        for suspect in (self.root, self.root / ".git"):
+            def unknown(path):
+                info = original(path)
+                return self.adjusted(info, st_ino=0) if path == suspect else info
+
+            with self.subTest(root=suspect == self.root), patch.object(Path, "lstat", unknown):
+                with self.assertRaisesRegex(p.PlanError, "GIT_ROOT_MARKER_INVALID"):
+                    self.check(capture())
+
+    def test_hardlinked_git_file_marker_refused(self):
+        marker = self.root / ".git"
+        marker.rmdir()
+        marker.write_bytes(b"gitdir: synthetic\n")
+        os.link(marker, self.parent / "marker-alias")
+        with self.assertRaisesRegex(p.PlanError, "GIT_ROOT_MARKER_INVALID"):
+            self.check(capture())
 
     def test_capture_changes_after_first_read(self):
         c = capture(ignored=b"build/a\0")

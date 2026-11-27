@@ -14,7 +14,8 @@ import tempfile
 import time
 
 from check_gitleaks_container import binary_ok, run_records, LIMIT
-from check_gitleaks_history import inventory, checked_blob, history_snapshot, MAX_BLOBS, MAX_TOTAL, MAX_FILE
+from check_gitleaks_history import (inventory, checked_blob_batch, history_batches,
+                                    history_snapshot, MAX_BLOBS, MAX_TOTAL, MAX_FILE)
 from check_gitleaks_review import VERSION, synthetic_marker
 from check_nvidia_tier1 import require
 from check_official_local_install import fixture_env
@@ -42,6 +43,35 @@ def batches(blobs):
         total += size
     if batch:
         yield batch
+
+
+def records_for_batch(repo, env, batch, deadline):
+    """Read each inventoried object once; preserve order and content boundaries."""
+    require(0 < len(batch) <= BATCH_COUNT
+            and all(type(size) is int and 0 <= size <= MAX_FILE for _, size in batch)
+            and sum(size for _, size in batch) <= BATCH_BYTES,
+            "HISTORY_CONTAINER_READ_LIMIT")
+    mapping = dict(batch)
+    require(len(mapping) == len(batch) and batch == sorted(mapping.items()),
+            "HISTORY_CONTAINER_READ_INPUT")
+    # Validate all smaller chunks before the first Git subprocess. The shared
+    # reader checks exact framing, type, size, object digest and UTF-8 per blob.
+    chunks = list(history_batches(mapping))
+    records = []
+    observed = []
+    for chunk in chunks:
+        require(time.monotonic() < deadline, "HISTORY_CONTAINER_DEADLINE")
+        rows = checked_blob_batch(repo, env, chunk)
+        require([(oid, size) for oid, size, _ in rows] == chunk,
+                "HISTORY_CONTAINER_READ_COVERAGE")
+        for oid, size, content in rows:
+            require(type(content) is bytes and len(content) == size,
+                    "HISTORY_CONTAINER_READ_COVERAGE")
+            observed.append((oid, size))
+            records.append((0, content))
+        require(time.monotonic() < deadline, "HISTORY_CONTAINER_DEADLINE")
+    require(observed == batch, "HISTORY_CONTAINER_READ_COVERAGE")
+    return records
 
 
 def validate_batch(report, records, digest):
@@ -110,7 +140,7 @@ def accept(repo, cli, host_path):
         counts = collections.Counter()
         total = empty = batch_count = 0
         for batch in batches(blobs):
-            records = [(0, checked_blob(repo, env, oid, size)) for oid, size in batch]
+            records = records_for_batch(repo, env, batch, started + DEADLINE)
             counts.update(execute(records))
             for oid, size in batch:
                 require(oid not in seen, "HISTORY_CONTAINER_DUPLICATE")

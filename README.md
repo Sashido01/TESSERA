@@ -15,7 +15,7 @@ TESSERA не является форком Harness или Codex. Здесь хр
 | [Microversion Release](skills/microversion-release/README.md) | Микроверсии, обязательные аннотированные Git-теги релизов, переносимость между агентами | 0.0.7 — тег и CI подтверждены; Harness explicit use подтверждён для 0.0.6; Codex и enforcement открыты (#81) |
 | [Project Audit](skills/project-audit/README.md) | Доказательный аудит, инвентаризация метаданных и Git | 0.0.6 — Harness explicit use подтверждён; полная приёмка открыта |
 | [Repository Workflow](skills/repository-workflow/README.md) | Локальный Git и GitHub, независимые задачи, CI, интеграция и технический долг | 0.0.3 — тег и CI подтверждены; Harness explicit use подтверждён для 0.0.2 |
-| [Project Cleanup](skills/project-cleanup/README.md) | Инвентаризация, безопасная очистка локального проекта и GitHub, контроль роста | 0.0.2 — тег и native CI подтверждены; PC03–PC06 открыты |
+| [Project Cleanup](skills/project-cleanup/README.md) | Инвентаризация, безопасная очистка локального проекта и GitHub, контроль роста | 0.0.3 — кандидат исправления Windows PC02; точный pin 0.0.2 принят; PC03–PC06 открыты |
 
 ## Как устроен репозиторий
 

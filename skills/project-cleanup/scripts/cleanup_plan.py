@@ -253,6 +253,27 @@ def metadata(root, parts, base):
         return None
 
 
+def root_marker(root):
+    base = root.lstat()
+    marker = (root / ".git").lstat()
+    require(stat.S_ISDIR(base.st_mode) and not reparse(base) and base.st_ino
+            and not reparse(marker) and marker.st_ino and marker.st_dev == base.st_dev
+            and (stat.S_ISDIR(marker.st_mode) or
+                 (stat.S_ISREG(marker.st_mode) and marker.st_nlink == 1)),
+            "GIT_ROOT_MARKER_INVALID")
+    return base, marker
+
+
+def recheck_root_marker(root, expected):
+    # This observes marker identity, not the contents of the Git directory.
+    # Directory timestamps alone do not authenticate repository state.
+    try:
+        actual = tuple(map(identity, root_marker(ordinary_root(root))))
+    except (OSError, ValueError):
+        raise PlanError("ROOT_CHANGED") from None
+    require(actual == expected, "ROOT_CHANGED")
+
+
 def plan(root, first, second, scopes, details=False):
     result = {"schema_version": 1, "deletion_authorized": False,
               "capture_authenticity": "NOT_VERIFIED", "snapshot_atomic": False,
@@ -271,10 +292,8 @@ def plan(root, first, second, scopes, details=False):
         others = set(scoped) - {key}
         require(not overlaps(key, others, sorted(others)), "SCOPE_OVERLAP")
     root = ordinary_root(root)
-    base = root.lstat()
-    marker = (root / ".git").lstat()
-    require(not reparse(marker) and (stat.S_ISDIR(marker.st_mode) or stat.S_ISREG(marker.st_mode)),
-            "GIT_ROOT_MARKER_INVALID")
+    base, marker = root_marker(root)
+    marker_identity = identity(base), identity(marker)
     tracked = set(parsed["head.z"]) | set(parsed["index.z"])
     ordered = sorted(tracked)
     untracked = set(parsed["untracked.z"])
@@ -314,8 +333,7 @@ def plan(root, first, second, scopes, details=False):
                     heapq.heappush(private, entry)
                 elif entry > private[0]:
                     heapq.heapreplace(private, entry)
-    require(identity(root.lstat()) == identity(base)
-            and identity((root / ".git").lstat()) == identity(marker), "ROOT_CHANGED")
+    recheck_root_marker(root, marker_identity)
     digest = hashlib.sha256()
     for name in NAMES:
         data = first[name]

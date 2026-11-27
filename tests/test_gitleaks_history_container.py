@@ -1,6 +1,8 @@
 import hashlib
 import pathlib
 import sys
+import tempfile
+import time
 import unittest
 from unittest import mock
 
@@ -31,6 +33,63 @@ class HistoryContainerTests(unittest.TestCase):
         for blobs in ({}, {"a": -1}, {"a": h.MAX_FILE + 1}):
             with self.assertRaises(RuntimeError):
                 list(c.batches(blobs))
+
+    def test_read_subchunks_preserve_exact_records(self):
+        blobs = {h.blob_oid(f"fixture {i}".encode(), 40): f"fixture {i}".encode()
+                 for i in range(65)}
+        batch = sorted((oid, len(data)) for oid, data in blobs.items())
+        def reader(repo, env, chunk):
+            return [(oid, size, blobs[oid]) for oid, size in chunk]
+        with mock.patch.object(c, "checked_blob_batch", side_effect=reader) as read:
+            self.assertEqual(c.records_for_batch(None, {}, batch, time.monotonic() + 10),
+                             [(0, blobs[oid]) for oid, _ in batch])
+            self.assertEqual([len(x.args[2]) for x in read.call_args_list], [32, 32, 1])
+
+    def test_read_invalid_refused_before_git(self):
+        a, b = "a" * 40, "b" * 40
+        for batch in ([], [(a, 1), (a, 1)], [(b, 1), (a, 1)],
+                      [(a, -1)], [(a, h.MAX_FILE + 1)], [(a, True)],
+                      [(a, 1), ("invalid", 1)]):
+            with self.subTest(batch=batch), mock.patch.object(c, "checked_blob_batch") as read:
+                with self.assertRaises(RuntimeError):
+                    c.records_for_batch(None, {}, batch, time.monotonic() + 10)
+                read.assert_not_called()
+
+    def test_read_incomplete_or_reordered_rejected(self):
+        batch = [("a" * 40, 1), ("b" * 40, 1)]
+        for rows in ([], [(batch[0][0], 1, b"x")],
+                     [(batch[1][0], 1, b"y"), (batch[0][0], 1, b"x")],
+                     [(batch[0][0], 1, b"wrong"), (batch[1][0], 1, b"y")]):
+            with self.subTest(rows=rows), mock.patch.object(c, "checked_blob_batch", return_value=rows):
+                with self.assertRaisesRegex(RuntimeError, "READ_COVERAGE"):
+                    c.records_for_batch(None, {}, batch, time.monotonic() + 10)
+
+    def test_read_deadline_refused(self):
+        batch = [("a" * 40, 1)]
+        with mock.patch.object(c, "checked_blob_batch") as read:
+            with self.assertRaisesRegex(RuntimeError, "DEADLINE"):
+                c.records_for_batch(None, {}, batch, 0)
+            read.assert_not_called()
+        with mock.patch.object(c.time, "monotonic", side_effect=[1, 3]), \
+                mock.patch.object(c, "checked_blob_batch", return_value=[("a" * 40, 1, b"x")]):
+            with self.assertRaisesRegex(RuntimeError, "DEADLINE"):
+                c.records_for_batch(None, {}, batch, 2)
+
+    def test_read_actual_git_preserves_blob_boundaries(self):
+        import os
+        if any(k.upper().startswith("GIT_") and k.upper() != "GIT_PAGER" for k in os.environ):
+            raise RuntimeError("FIXTURE_GIT_CONTEXT_UNSAFE")
+        with tempfile.TemporaryDirectory() as folder:
+            root = pathlib.Path(folder)
+            env = h.fixture_env(root)
+            h.git(root, env, "init", "-q")
+            blobs = {}
+            for data in [b"", b"first\nsecond\n", *[f"entry {i}\n".encode() for i in range(65)]]:
+                oid = h.git(root, env, "hash-object", "-w", "--stdin", data=data).strip().decode("ascii")
+                blobs[oid] = len(data)
+            batch = sorted(blobs.items())
+            expected = [(0, h.checked_blob(root, env, oid, size)) for oid, size in batch]
+            self.assertEqual(c.records_for_batch(root, env, batch, time.monotonic() + 30), expected)
 
     def report(self):
         return {"digest": "d", "version": c.VERSION, "files": 2, "scanned_nonempty": 1,
