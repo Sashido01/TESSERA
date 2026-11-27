@@ -29,13 +29,15 @@ GIT_CONTEXT = frozenset({
     "GIT_INTERNAL_SUPER_PREFIX", "GIT_CONFIG", "GIT_CONFIG_PARAMETERS",
     "GIT_CONFIG_COUNT", "GIT_CONFIG_SYSTEM", "GIT_CONFIG_GLOBAL",
     "GIT_CONFIG_NOSYSTEM", "GIT_EXEC_PATH",
+    "GIT_ALLOW_PROTOCOL", "GIT_PROTOCOL_FROM_USER", "GIT_NO_LAZY_FETCH",
+    "GIT_TERMINAL_PROMPT", "GIT_OPTIONAL_LOCKS",
 })
 
 
 # Forward only explicit process, identity and local signing context.
 # Reject indexed Git configuration overrides even if the count is missing.
 CHILD_ENV_KEYS = (
-    "PATH", "HOME", "USERPROFILE", "HOMEDRIVE", "HOMEPATH", "SystemRoot",
+    "PATH", "HOME", "XDG_CONFIG_HOME", "USERPROFILE", "HOMEDRIVE", "HOMEPATH", "SystemRoot",
     "WINDIR", "COMSPEC", "PATHEXT", "TEMP", "TMP", "TMPDIR", "APPDATA", "LOCALAPPDATA",
     "LANG", "LC_ALL", "LC_CTYPE", "LC_MESSAGES", "TZ", "TERM",
     "GIT_AUTHOR_NAME", "GIT_AUTHOR_EMAIL", "GIT_AUTHOR_DATE",
@@ -44,10 +46,20 @@ CHILD_ENV_KEYS = (
 )
 
 
+# GIT_PAGER is irrelevant to explicitly noninteractive no-pager commands.
+# The other allowed names are forwarded, not silently discarded.
+GIT_ALLOWED = frozenset(k for k in CHILD_ENV_KEYS if k.startswith("GIT_")) | {"GIT_PAGER"}
+LOCAL_GIT_DEFAULTS = {
+    "GIT_NO_LAZY_FETCH": "1", "GIT_ALLOW_PROTOCOL": "", "GIT_TERMINAL_PROMPT": "0",
+}
+
+
 def blocking_context_names() -> list[str]:
     """Report only known variable names; never read or return their values."""
     found = set()
     for key in os.environ:
+        if key in GIT_ALLOWED:
+            continue
         if key in GIT_CONTEXT:
             found.add(key)
         elif key.startswith(("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_")):
@@ -56,6 +68,10 @@ def blocking_context_names() -> list[str]:
             else:
                 # Untrusted suffixes could contain arbitrary data: do not echo them.
                 found.add("GIT_CONFIG_INDEXED_OTHER")
+        elif key.upper().startswith("GIT_"):
+            # Unknown or differently cased names may encode policy or private data.
+            # Refuse instead of stripping them, and never echo arbitrary names.
+            found.add("GIT_CONTEXT_OTHER")
     return sorted(found)
 
 
@@ -67,6 +83,7 @@ def child_environment() -> dict[str, str]:
         value = os.getenv(key)
         if value is not None:
             result[key] = value
+    result.update(LOCAL_GIT_DEFAULTS)
     return result
 
 
@@ -89,7 +106,7 @@ def git(repo: pathlib.Path, *args: str, check: bool = True) -> subprocess.Comple
     try:
         executable = git_executable(env)
         proc = subprocess.run(
-            [str(executable), "--no-replace-objects", "-C", str(repo), *args],
+            [str(executable), "--no-pager", "--no-replace-objects", "-C", str(repo), *args],
             text=True, encoding="utf-8", capture_output=True, check=False, env=env,
             shell=False, stdin=subprocess.DEVNULL, timeout=GIT_TIMEOUT,
         )
