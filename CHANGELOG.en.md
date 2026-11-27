@@ -4,6 +4,11 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.97 — Update tools in the source ZIP (0.0.97 candidate)
+
+- Starting at 0.0.97 the ZIP contract requires CATALOG.json, both UPDATE and profile-plan documents, and the three read-only UP01/UP02 tools. Verification rejects missing/extra files and inconsistent catalog versions even with a recomputed manifest. Older ZIPs retain their legacy contract. The ZIP remains a runtime subset: skill tests are excluded, so it is not a raw Git tree or staging for skill_tree.py. Use verifier code from an independently trusted checkout, never execute code from an unverified ZIP. Attestation, live resolver, gh metadata, apply and rollback remain separate open tasks.
+- PR #103 CI 46055009112 PASS, main 0.0.96 18611a86f6ce76749a9892c0c2779d7f0fb97576; exact main CI/tag pending. New contract tests require CI.
+
 ## 0.0.96 — Read-only profile planning and raw tree proof (UP02)
 
 - main 0.0.95 b179d71f091083916a88067a895c85c6539bc480, CI 46053357417 6/6 PASS, annotated catalog and Cleanup tags 672f08ad6ae306f74410f4a6c62e813be89cb87f / c33bd2fe15aba1aeb35dadc80390820338720376, all four independent skill trees match.

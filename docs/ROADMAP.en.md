@@ -328,3 +328,7 @@ PR #101 exact 23311503daf73bdee2430a14127a0167bcb60171 CI 46038347655 5/5 PASS; 
 ## 0.0.95 reconciliation and UP02 candidate 0.0.96
 
 main 0.0.95 b179d71f091083916a88067a895c85c6539bc480, CI 46053357417 6/6 PASS, annotated catalog and Cleanup tags 672f08ad6ae306f74410f4a6c62e813be89cb87f / c33bd2fe15aba1aeb35dadc80390820338720376, all four independent skill trees match. UP02 adds read-only profile_plan and skill_tree, 25/25 Linux per branch report; native/full CI not yet verified. See [profile plan](PROFILE_UPDATE_PLAN.en.md). UP01/UP02 remain PARTIAL: live resolver, gh metadata, journal, safe replacement and rollback, packaging and client acceptance remain open. #81/G09/PC03–PC06 and 0.1.0 remain open.
+
+## Update tools in the source ZIP (0.0.97 candidate)
+
+Starting at 0.0.97 the ZIP contract requires CATALOG.json, both UPDATE and profile-plan documents, and the three read-only UP01/UP02 tools. Verification rejects missing/extra files and inconsistent catalog versions even with a recomputed manifest. Older ZIPs retain their legacy contract. The ZIP remains a runtime subset: skill tests are excluded, so it is not a raw Git tree or staging for skill_tree.py. Use verifier code from an independently trusted checkout, never execute code from an unverified ZIP. Attestation, live resolver, gh metadata, apply and rollback remain separate open tasks.

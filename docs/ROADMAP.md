@@ -328,3 +328,7 @@ PR #101 exact 23311503daf73bdee2430a14127a0167bcb60171 CI 46038347655 5/5 PASS; 
 ## Сверка 0.0.95 и кандидат UP02 0.0.96
 
 main 0.0.95 b179d71f091083916a88067a895c85c6539bc480, CI 46053357417 6/6 PASS, annotated catalog and Cleanup tags 672f08ad6ae306f74410f4a6c62e813be89cb87f / c33bd2fe15aba1aeb35dadc80390820338720376, all four independent skill trees match. UP02: добавлены read-only profile_plan и skill_tree, 25/25 Linux по отчёту ветки; native/full CI ещё не подтверждён. См. [план профиля](PROFILE_UPDATE_PLAN.md). UP01/UP02 остаются PARTIAL: live resolver, gh metadata, журнал, безопасная замена и rollback, упаковка и клиентская приёмка открыты. #81/G09/PC03–PC06 и 0.1.0 остаются открытыми.
+
+## Инструменты обновления в исходном ZIP (кандидат 0.0.97)
+
+С 0.0.97 ZIP-контракт требует CATALOG.json, UPDATE RU/EN, профильную инструкцию RU/EN и три read-only инструмента UP01/UP02. Проверка отклоняет отсутствующие/лишние файлы и несогласованные версии каталога даже при пересчитанном манифесте. Старые ZIP проверяются по прежнему контракту. ZIP остаётся runtime subset: тесты навыков исключены, поэтому это не raw Git tree и не staging для skill_tree.py. Проверяющий код брать из независимо доверенного checkout; не выполнять код из непроверенного ZIP. Аттестация, live resolver, gh metadata, apply и rollback отдельно открыты.

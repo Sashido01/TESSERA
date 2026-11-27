@@ -80,3 +80,7 @@ gh attestation verify TESSERA-catalog-v0.0.14.zip \
 Реальная приёмка v0.0.21 завершена: `SIGNED_ARTIFACT=PASS` для указанного ZIP. Каждая другая версия требует отдельной подписи и проверки; версия 0.0.22 содержит запись приёмки, но сама не аттестована. Никакой GitHub Release этим этапом не создаётся. Следующие задачи: решение о публикации настоящего GitHub Release, интеграция attestations в Release Core и координация конкурирующих релизов.
 
 Официальные руководства: [GitHub artifact attestations](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations), [`gh workflow run`](https://cli.github.com/manual/gh_workflow_run), [`gh attestation verify`](https://cli.github.com/manual/gh_attestation_verify).
+
+## Инструменты обновления в исходном ZIP (кандидат 0.0.97)
+
+С 0.0.97 ZIP-контракт требует CATALOG.json, UPDATE RU/EN, профильную инструкцию RU/EN и три read-only инструмента UP01/UP02. Проверка отклоняет отсутствующие/лишние файлы и несогласованные версии каталога даже при пересчитанном манифесте. Старые ZIP проверяются по прежнему контракту. ZIP остаётся runtime subset: тесты навыков исключены, поэтому это не raw Git tree и не staging для skill_tree.py. Проверяющий код брать из независимо доверенного checkout; не выполнять код из непроверенного ZIP. Аттестация, live resolver, gh metadata, apply и rollback отдельно открыты.

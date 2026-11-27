@@ -80,3 +80,7 @@ Unit tests cover deterministic packaging, manifest SHA-256, safe file inclusion,
 Live acceptance of v0.0.21 is complete: `SIGNED_ARTIFACT=PASS` for that exact ZIP. Each other version requires separate signing and verification; v0.0.22 records evidence, but is not itself attested. No GitHub Release is created here. Next tasks: decide on actual GitHub Release publication, integrate attestations into Release Core and coordinate concurrent releases.
 
 Official references: [GitHub artifact attestations](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations), [`gh workflow run`](https://cli.github.com/manual/gh_workflow_run), [`gh attestation verify`](https://cli.github.com/manual/gh_attestation_verify).
+
+## Update tools in the source ZIP (0.0.97 candidate)
+
+Starting at 0.0.97 the ZIP contract requires CATALOG.json, both UPDATE and profile-plan documents, and the three read-only UP01/UP02 tools. Verification rejects missing/extra files and inconsistent catalog versions even with a recomputed manifest. Older ZIPs retain their legacy contract. The ZIP remains a runtime subset: skill tests are excluded, so it is not a raw Git tree or staging for skill_tree.py. Use verifier code from an independently trusted checkout, never execute code from an unverified ZIP. Attestation, live resolver, gh metadata, apply and rollback remain separate open tasks.
