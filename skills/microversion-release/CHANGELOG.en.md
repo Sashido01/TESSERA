@@ -2,6 +2,10 @@
 
 [Русский — оригинал](CHANGELOG.md) | **English — translation**
 
+## 0.0.7 — Refuse unknown Git restrictions
+
+- All unknown/unapproved GIT_* cause BLOCKED before Git; unknown names and values are not published. XDG_CONFIG_HOME preserved in tag/gate, local Git operation explicitly noninteractive, no protocols or lazy fetch. Three new regression methods; four separate Linux probes PASS, full CI/clients NOT_VERIFIED. #81 OPEN.
+
 ## 0.0.6 — Require a new history entry
 
 - Completion Gate requires one baseline heading and one newly introduced next-version heading, retaining the previous one. Predeclared versions, duplicates and lost previous heading BLOCKED. Four new Git regression methods.

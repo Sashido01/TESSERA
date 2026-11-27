@@ -16,7 +16,7 @@ VERSION = re.compile(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\Z')
 MAX_COMMITS = 32
 MAX_OUTPUT = 2 * 1024 * 1024
 MAX_HOOK_INPUT = 256 * 1024
-SYSTEM_ENV = ('PATH', 'HOME', 'USERPROFILE', 'HOMEDRIVE', 'HOMEPATH', 'SystemRoot',
+SYSTEM_ENV = ('PATH', 'HOME', 'XDG_CONFIG_HOME', 'USERPROFILE', 'HOMEDRIVE', 'HOMEPATH', 'SystemRoot',
               'WINDIR', 'COMSPEC', 'PATHEXT', 'TEMP', 'TMP', 'TMPDIR', 'APPDATA',
               'LOCALAPPDATA', 'LANG', 'LC_ALL', 'LC_CTYPE', 'TZ')
 

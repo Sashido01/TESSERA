@@ -6,23 +6,23 @@
 
 ## Quick start: not a repository audit
 
-The matrix below contains four verified pins; Project Cleanup 0.0.2 is a PC02 candidate, use 0.0.1 until the exact tag is verified. Separate PC01–PC06 acceptance.
+Four verified pins below; Microversion Release 0.0.7 is a candidate, use 0.0.6 until its exact tag is verified. Separate PC01–PC06 acceptance.
 
-Verified catalog snapshot: `v0.0.91`, commit `85bd362067b5a2c8dc94ab0a550990281b80d1ee`, main CI 46006227100 SUCCESS (6/6). Four independent annotated pins. A GitHub Release is not required for tag-pinned installation; a missing releases/latest does not imply missing skills.
+Verified catalog snapshot: `v0.0.92`, commit `7ace18df60412f98cc84835a6ad81d4c36414683`, main CI 46019956070 SUCCESS (6/6). Four independent annotated pins. A GitHub Release is not required for tag-pinned installation; a missing releases/latest does not imply missing skills.
 
 | Skill | Pin | Commit | Skill tree |
 | --- | --- | --- | --- |
 | microversion-release | `refs/tags/microversion-release/v0.0.6` | `015bed7f9eaf344b59e699a4b607c0e21b86f608` | `12aebcae998b098a1e7d3c5f1fadd8bcd2b096e7` |
 | project-audit | `refs/tags/project-audit/v0.0.6` | `0b207f09bb9fca7cf5525d6b35a1919e1d316515` | `50d3f3dee94f1ceff9df343ef34689caf99ca184` |
 | repository-workflow | `refs/tags/repository-workflow/v0.0.3` | `85bd362067b5a2c8dc94ab0a550990281b80d1ee` | `747474aff7e872c31285c1053f59eabd652fe9be` |
-| project-cleanup | `refs/tags/project-cleanup/v0.0.1` | `79f369b6f817976c2d0b1f026ed86f00be045860` | `f545939f00975dbceaf6536d8c61ecb04b8cea5a` |
+| project-cleanup | `refs/tags/project-cleanup/v0.0.2` | `7ace18df60412f98cc84835a6ad81d4c36414683` | `cb41049a3ff565ae3f2fb7e5582837cc620c1477` |
 
-1. First inspect only the three installed directories in the active profile and their versions. If they match verified trees (accounting for gh install metadata), do not reinstall.
-2. If installation is needed, use a fresh empty project and the three exact pins below; if the API is unavailable, a verified local checkout of the exact tag and native --from-local installation into an empty directory are acceptable. A local copy is not a remote pin. Do not audit all history or use latest/main, --all, --unpin or --force against the user profile.
+1. First inspect only the four target installed directories in the active profile and their versions. If they match verified trees (accounting for gh install metadata), do not reinstall.
+2. If installation is needed, use a fresh empty project and the four exact pins below; if the API is unavailable, a verified local checkout of the exact tag and native --from-local installation into an empty directory are acceptable. A local copy is not a remote pin. Do not audit all history or use latest/main, --all, --unpin or --force against the user profile.
 3. Open a fresh session after installation and explicitly invoke each skill: Codex via $name (e.g. $microversion-release), Harness via native /name or the skill tool. Run P01–P05 as separate short prompts. For P06 use a fresh session without naming the skill; a correct answer alone does not establish loading. Negative control: an unrelated task with no expected invocation.
 4. Bound network retries to two attempts per operation; record BLOCKED on refusal and continue independent local read-only checks. Do not change permissions or scrub the production environment. P07/P08 and Stop-hook are separate authorized trials, not prerequisites for starting P01–P06.
 
-**Separate short PC01/PC06 test:** if needed install only Project Cleanup into a fresh empty project using the exact pin: `gh skill install Sashido01/TESSERA skills/project-cleanup --pin refs/tags/project-cleanup/v0.0.1 --dir <empty-project>/.agents/skills` (for Harness use `.dsh/skills` if required). Explicitly invoke `$project-cleanup`/`/project-cleanup` on a synthetic fixture with build/cache, data and a link; run metadata inventory only, confirm scope/sum/no deletion. No full repository audit, broad updates or actual cleanup. Separate fresh implicit trial; a correct answer does not prove loading.
+**Separate short PC01/PC06 test:** if needed install only Project Cleanup into a fresh empty project using the exact pin: `gh skill install Sashido01/TESSERA skills/project-cleanup --pin refs/tags/project-cleanup/v0.0.2 --dir <empty-project>/.agents/skills` (for Harness use `.dsh/skills` if required). Explicitly invoke `$project-cleanup`/`/project-cleanup` on a synthetic fixture with build/cache, data and a link; run metadata inventory only, confirm scope/sum/no deletion. No full repository audit, broad updates or actual cleanup. Separate fresh implicit trial; a correct answer does not prove loading.
 
 ## Entry conditions
 
@@ -45,12 +45,13 @@ $dest = Join-Path $root $relative
 if (Test-Path -LiteralPath $dest) { throw 'Destination exists' }
 New-Item -ItemType Directory -Path $dest -ErrorAction Stop | Out-Null
 gh --version
-foreach ($skill in @('microversion-release','project-audit','repository-workflow')) {
+foreach ($skill in @('microversion-release','project-audit','repository-workflow','project-cleanup')) {
     if (Test-Path -LiteralPath (Join-Path $dest $skill)) { throw 'Skill already exists' }
     $pin = switch ($skill) {
         'microversion-release' { 'refs/tags/microversion-release/v0.0.6' }
         'project-audit' { 'refs/tags/project-audit/v0.0.6' }
-        'repository-workflow' { 'refs/tags/repository-workflow/v0.0.2' }
+        'repository-workflow' { 'refs/tags/repository-workflow/v0.0.3' }
+        'project-cleanup' { 'refs/tags/project-cleanup/v0.0.2' }
     }
     gh skill install Sashido01/TESSERA "skills/$skill" --pin $pin --dir $dest
     if ($LASTEXITCODE -ne 0) { throw "Installation failed: $skill" }
@@ -151,7 +152,7 @@ OWNER_REPORTED: npm 12.0.2 / Node 24.18.0, @deepseek-ai/dsh@0.2.2-rc.5 dist.inte
 
 ## Owner acceptance 2026-11-27 — v0.0.88
 
-OWNER_REPORTED: Harness 0.2.2-rc.1, 29 PASS / 1 FAIL / 4 NOT_VERIFIED. All three trees match the table above; explicit calls of all three skills, unknown-name refusal and actual headless P02/P04/P05 observed. Supplied JSONL independently confirms native successful skill dispatch for all three, but not every child run. Guarded Run positive and negative fixtures, unit suites 78/78, 76 PASS + 1 FIFO SKIP, 17/17 are OWNER_REPORTED. AUTO_USE, live GUI, Stop-hook NOT_VERIFIED; gh search unavailable. gh 2.105.0: could not record install warning about missing USERPROFILE variable (source trace supports the cause; native reproduction pending), files and frontmatter owner-verified. Do not recommend broad --unpin --all; individual staged pin/rollback and preservation of adjacent skills required. Codex: network timeout, installation/activation NOT_VERIFIED, #81 OPEN. Repeat narrow checks locally; fail closed on unsafe Git context, without removing restrictions.
+OWNER_REPORTED: Harness 0.2.2-rc.1, 29 PASS / 1 FAIL / 4 NOT_VERIFIED. Three historical pins (.6/.6/.2) matched their exact trees at the time; explicit calls of all three skills, unknown-name refusal and actual headless P02/P04/P05 observed. Supplied JSONL independently confirms native successful skill dispatch for all three, but not every child run. Guarded Run positive and negative fixtures, unit suites 78/78, 76 PASS + 1 FIFO SKIP, 17/17 are OWNER_REPORTED. AUTO_USE, live GUI, Stop-hook NOT_VERIFIED; gh search unavailable. gh 2.105.0: could not record install warning about missing USERPROFILE variable (source trace supports the cause; native reproduction pending), files and frontmatter owner-verified. Do not recommend broad --unpin --all; individual staged pin/rollback and preservation of adjacent skills required. Codex: network timeout, installation/activation NOT_VERIFIED, #81 OPEN. Repeat narrow checks locally; fail closed on unsafe Git context, without removing restrictions.
 
 ### Targeted installation and Windows metadata warning
 
