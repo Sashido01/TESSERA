@@ -4,6 +4,12 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.91 — Add evidence-based worktree reconciliation (RW05)
+
+- Repository Workflow 0.0.3: read-only Worktree Inventory, 21/21 Linux PASS, exact source/test blobs verified; stale/ref/OID/descriptor and Git context guard. Actual occupancy and deletion permission NOT_VERIFIED; native CI required.
+- v0.0.90 accepted via PR #97, commit 79f369b6f817976c2d0b1f026ed86f00be045860, main CI 46001257853 SUCCESS 6/6; both exact annotated tags confirmed. Project Cleanup Linux 21 PASS, Windows 20 PASS + FIFO SKIP; exact pin recorded, client acceptance open.
+- Unique RW05 work preserved on its existing branch, base updated without force. PC02 separate candidate, 19/19 Linux, no common version reserved. G09, #81 and actual worktrees remain open.
+
 ## 0.0.90 — Add Project Cleanup and catalog storage guard
 
 - Fourth independent skill 0.0.1: metadata-only inventory, scope protections, traversal budget, REVIEW classification, top-level/private details, cleanup and prevention workflow. Linux 18/18 PASS on exact blobs; native Windows and client acceptance open.

@@ -12,8 +12,8 @@ TESSERA is not a fork of Harness or Codex. It stores portable [Agent Skills](htt
 | --- | --- | --- |
 | [Microversion Release](skills/microversion-release/README.en.md) | Microversions, mandatory annotated release tags, portable use across agents | 0.0.6 — Harness explicit use observed; Codex and enforcement open (#81) |
 | [Project Audit](skills/project-audit/README.en.md) | Evidence-based audit and metadata/Git inspection | 0.0.6 — Harness explicit use observed; full acceptance open |
-| [Repository Workflow](skills/repository-workflow/README.en.md) | Local Git and GitHub, independent tasks, CI, integration and technical debt | 0.0.2 — Harness explicit use observed; full acceptance open |
-| [Project Cleanup](skills/project-cleanup/README.en.md) | Inventory, safe local/GitHub cleanup, growth control | 0.0.1 — candidate; Windows/client acceptance open |
+| [Repository Workflow](skills/repository-workflow/README.en.md) | Local Git and GitHub, independent tasks, CI, integration and technical debt | 0.0.3 — RW05 candidate; Harness explicit use observed for 0.0.2 |
+| [Project Cleanup](skills/project-cleanup/README.en.md) | Inventory, safe local/GitHub cleanup, growth control | 0.0.1 — tag verified, Linux/Windows CI PASS; client acceptance open |
 
 ## Repository layout
 
