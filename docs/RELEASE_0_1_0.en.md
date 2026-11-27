@@ -75,3 +75,20 @@ Main CI 45874463052 SUCCESS 6/6; catalog tag 3be87bc90d9745aa2b074c9022cd4656e24
 ## 2026-11-27 — fourth skill authorized by owner
 
 Project Cleanup 0.0.1 candidate is an independent component for storage hygiene. The previously approved three-skill G01–G12 matrix remains valid only for those skills; it cannot establish Project Cleanup acceptance. Before a catalog release containing it, verify PC01–PC06 in its roadmap at the declared scope, native Windows/Linux, exact tree pin, no unsafe cleanup and explicit client use. Any unimplemented automation must remain explicitly labeled. Do not shift the original three-skill gates or claim full four-skill readiness from this candidate. No destructive operation in the initial helper.
+
+## Current 0.1.0 readiness review — 27 November 2026
+
+Last fully accepted engineering release v0.0.91, main 85bd362067b5a2c8dc94ab0a550990281b80d1ee, CI 46006227100 6/6 PASS; annotated catalog tag be2a4605bee0772454c4690c9b3dcfe51e39b323 and repository-workflow/v0.0.3 ce833071628b1bc60d70b9806de9651d9dc6d4e5 → exact main. Four skills: Microversion 0.0.6, Audit 0.0.6, Workflow 0.0.3, Cleanup 0.0.1. PC02 candidate 0.0.2 (28/28 isolated Linux PASS). Original matrix above contains historical criteria, not current statuses. The four-skill product release also requires PC01–PC06 without weakening G01–G12.
+
+| Group | Current assessment | Closure condition |
+| --- | --- | --- |
+| G01/G02 | PASS for v0.0.91, 0.1.0 NOT_RUN | exact candidate/main/tags, full CI |
+| G03/G04 | PARTIAL | scoped pin/update/rollback in both clients, preserve local edits/other skills, gh metadata warning |
+| G05/G06 | BLOCKED on client evidence | fresh Codex explicit/implicit, actual authorized Git fixture without scrubbing GIT_*, Harness AUTO_USE and Stop/guard, owner-approved isolated hook only |
+| G07/G08 | PARTIAL | actual client E/RW scenarios, independent work, actual occupancy, recovery |
+| G09 | OPEN | 18 direct HIGH (7 Microversion + 1 Audit + 1 Workflow + 9 Cleanup), 0 CRITICAL occurrences in v0.0.91; all four raw policies FAIL, independent disposition of each cause, no suppression |
+| G10/G12 | NOT_RUN | exact v0.1.0 dispatch, attested ZIP, independent gh verification, draft→immutable publication; owner setting ENABLED reported, recheck before release |
+| G11 | OPEN | #81, three old branches: result preservation/actual occupancy, no destructive shortcuts |
+| PC01–PC06 | PARTIAL | PC01 native CI, PC02 advisory 28/28 Linux pending native CI; PC03 execution/recovery, PC04 counters, PC05 budgets, PC06 client NOT_VERIFIED |
+
+Do not assign 0.1.0 before readiness conditions are fulfilled. 0.0.99 is not a deadline. Priority: PC02 native CI, verifiable PC03 execution (explicitly authorized disposable fixtures only), G09 dispositions, focused client acceptance, Git/GitHub storage and prevention, independent release preflight. History scan approaching cap: PR #98 1642/2048 distinct blobs (406 reserve), container 274.9 s, parity PASS, zero findings in scope. Change limits only after measured capacity and regression, never reduce coverage. Parallel work allowed, common versions assigned sequentially.

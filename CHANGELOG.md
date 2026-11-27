@@ -4,6 +4,12 @@
 
 Здесь фиксируются изменения **общего каталога**. Истории отдельных навыков могут вестись в их собственных папках.
 
+## 0.0.92 — Учитывать Git при планировании очистки (PC02)
+
+- Project Cleanup 0.0.2: bounded read-only план по двум наборам HEAD/index/ignored/untracked; защищены пересечения, staged deletions, gitlinks, sparse-index, nonportable paths и коллизии. Повторная сверка метаданных снимков и предков; no deletion authorization. 28/28 изолированных Linux-тестов PASS на exact blobs; native CI требуется.
+- 0.0.91 main CI 46006227100 SUCCESS 6/6, commit 85bd362067b5a2c8dc94ab0a550990281b80d1ee, оба аннотированных тега подтверждены. Repository Workflow Linux 41 PASS, Windows 40 PASS + FIFO SKIP; actual client use 0.0.3 NOT_VERIFIED.
+- Подготовка 0.1.0: не считать CI доказательством реального клиента, не ослаблять G09/#81; PC03–PC06 открыты.
+
 ## 0.0.91 — Добавить доказательную сверку worktrees (RW05)
 
 - Repository Workflow 0.0.3: read-only Worktree Inventory, 21/21 Linux PASS, проверены точные source/test blobs; stale/ref/OID/descriptor и Git context guard. Реальная занятость и разрешение удаления NOT_VERIFIED; требуется native CI.

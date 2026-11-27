@@ -6,15 +6,15 @@
 
 ## Quick start: not a repository audit
 
-The matrix below contains four verified pins; Project Cleanup has separate PC01–PC06 acceptance. Repository Workflow 0.0.3 is still a candidate, so use pin 0.0.2 until its exact tag is verified.
+The matrix below contains four verified pins; Project Cleanup 0.0.2 is a PC02 candidate, use 0.0.1 until the exact tag is verified. Separate PC01–PC06 acceptance.
 
-Verified catalog snapshot: `v0.0.90`, commit `79f369b6f817976c2d0b1f026ed86f00be045860`, main CI 46001257853 SUCCESS (6/6). Four independent annotated tags; the first three skills are unchanged from v0.0.88. A GitHub Release is not required for tag-pinned installation; a missing releases/latest does not imply missing skills.
+Verified catalog snapshot: `v0.0.91`, commit `85bd362067b5a2c8dc94ab0a550990281b80d1ee`, main CI 46006227100 SUCCESS (6/6). Four independent annotated pins. A GitHub Release is not required for tag-pinned installation; a missing releases/latest does not imply missing skills.
 
 | Skill | Pin | Commit | Skill tree |
 | --- | --- | --- | --- |
 | microversion-release | `refs/tags/microversion-release/v0.0.6` | `015bed7f9eaf344b59e699a4b607c0e21b86f608` | `12aebcae998b098a1e7d3c5f1fadd8bcd2b096e7` |
 | project-audit | `refs/tags/project-audit/v0.0.6` | `0b207f09bb9fca7cf5525d6b35a1919e1d316515` | `50d3f3dee94f1ceff9df343ef34689caf99ca184` |
-| repository-workflow | `refs/tags/repository-workflow/v0.0.2` | `a2a6af6b66e9cd6e5b28ccb227245f3a13389098` | `7bd8a54e7102a4bd83ae4b6c14e296a91c5b9f9c` |
+| repository-workflow | `refs/tags/repository-workflow/v0.0.3` | `85bd362067b5a2c8dc94ab0a550990281b80d1ee` | `747474aff7e872c31285c1053f59eabd652fe9be` |
 | project-cleanup | `refs/tags/project-cleanup/v0.0.1` | `79f369b6f817976c2d0b1f026ed86f00be045860` | `f545939f00975dbceaf6536d8c61ecb04b8cea5a` |
 
 1. First inspect only the three installed directories in the active profile and their versions. If they match verified trees (accounting for gh install metadata), do not reinstall.

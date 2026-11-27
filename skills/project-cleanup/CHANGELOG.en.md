@@ -2,6 +2,11 @@
 
 [Русский — оригинал](CHANGELOG.md) | **English — translation**
 
+## 0.0.2 — Git-aware cleanup plan
+
+- Optional comparison of two Git capture sets and metadata, HEAD/index/untracked protection, explicit scopes, resource bounds, opt-in private details. No deletion or Git execution. 28/28 Linux PASS, including staged deletion and sparse-index actual Git fixtures. Native CI and client acceptance open.
+- PC01 0.0.1 verified by independent annotated tag; Linux 21 PASS, Windows 20 PASS + FIFO SKIP in v0.0.90.
+
 ## 0.0.1 — Safe inventory and cleanup workflow
 
 - Initial independent skill, metadata-only inventory, traversal bounds, REVIEW classification, aggregates and private details.

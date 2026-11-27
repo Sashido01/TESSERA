@@ -6,15 +6,15 @@
 
 ## Быстрый старт: не аудит репозитория
 
-Матрица ниже содержит четыре подтверждённых pin; приёмка Project Cleanup отдельная PC01–PC06. Repository Workflow 0.0.3 ещё кандидат, поэтому до его точного тега использовать pin 0.0.2.
+Матрица ниже содержит четыре подтверждённых pin; Project Cleanup 0.0.2 — кандидат PC02, до подтверждения его точного тега использовать 0.0.1. Отдельная приёмка PC01–PC06.
 
-Проверенный снимок каталога: `v0.0.90`, commit `79f369b6f817976c2d0b1f026ed86f00be045860`, main CI 46001257853 SUCCESS (6/6). Четыре независимых аннотированных тега; версии первых трёх навыков не изменились относительно v0.0.88. GitHub Release не требуется для установки по тегу; отсутствие releases/latest не означает отсутствие навыков.
+Проверенный снимок каталога: `v0.0.91`, commit `85bd362067b5a2c8dc94ab0a550990281b80d1ee`, main CI 46006227100 SUCCESS (6/6). Четыре независимых аннотированных pin. GitHub Release не требуется для установки по тегу; отсутствие releases/latest не означает отсутствие навыков.
 
 | Навык | Pin | Commit | Дерево навыка |
 | --- | --- | --- | --- |
 | microversion-release | `refs/tags/microversion-release/v0.0.6` | `015bed7f9eaf344b59e699a4b607c0e21b86f608` | `12aebcae998b098a1e7d3c5f1fadd8bcd2b096e7` |
 | project-audit | `refs/tags/project-audit/v0.0.6` | `0b207f09bb9fca7cf5525d6b35a1919e1d316515` | `50d3f3dee94f1ceff9df343ef34689caf99ca184` |
-| repository-workflow | `refs/tags/repository-workflow/v0.0.2` | `a2a6af6b66e9cd6e5b28ccb227245f3a13389098` | `7bd8a54e7102a4bd83ae4b6c14e296a91c5b9f9c` |
+| repository-workflow | `refs/tags/repository-workflow/v0.0.3` | `85bd362067b5a2c8dc94ab0a550990281b80d1ee` | `747474aff7e872c31285c1053f59eabd652fe9be` |
 | project-cleanup | `refs/tags/project-cleanup/v0.0.1` | `79f369b6f817976c2d0b1f026ed86f00be045860` | `f545939f00975dbceaf6536d8c61ecb04b8cea5a` |
 
 1. Сначала проверить только три уже установленные папки в активном профиле и версии. Если они совпадают с проверенными деревьями (с учётом метаданных установки gh), не переустанавливать.

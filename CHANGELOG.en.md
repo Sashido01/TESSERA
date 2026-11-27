@@ -4,6 +4,12 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.92 — Account for Git in cleanup planning (PC02)
+
+- Project Cleanup 0.0.2: bounded read-only plan from two HEAD/index/ignored/untracked captures; protect overlaps, staged deletions, gitlinks, sparse-index, nonportable paths and collisions. Recheck capture and ancestor metadata; no deletion authorization. 28/28 isolated Linux tests PASS on exact blobs; native CI required.
+- 0.0.91 main CI 46006227100 SUCCESS 6/6, commit 85bd362067b5a2c8dc94ab0a550990281b80d1ee, both annotated tags verified. Repository Workflow Linux 41 PASS, Windows 40 PASS + FIFO SKIP; actual client use 0.0.3 NOT_VERIFIED.
+- 0.1.0 preparation: CI is not client evidence, no weakening G09/#81; PC03–PC06 open.
+
 ## 0.0.91 — Add evidence-based worktree reconciliation (RW05)
 
 - Repository Workflow 0.0.3: read-only Worktree Inventory, 21/21 Linux PASS, exact source/test blobs verified; stale/ref/OID/descriptor and Git context guard. Actual occupancy and deletion permission NOT_VERIFIED; native CI required.
