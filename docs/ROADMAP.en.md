@@ -294,3 +294,7 @@ PR #92, exact head 5e770ebf66af9d2758b9df026229794e2932c15b, run 45852127083: al
 ## T21 — Project Cleanup, fourth skill (27 November 2026)
 
 Owner-authorized. Independent [PC01–PC06 plan](../skills/project-cleanup/references/ROADMAP.en.md): inventory, safe exact plan, execution/recovery, Git/GitHub storage, prevention/retention, actual clients. Initial 0.0.1 candidate: 18/18 Linux tests, exact source/test blobs, native Windows/full CI pending. No mandatory external tools. T21 PARTIAL; original three-skill 0.1.0 scope does not establish new-skill acceptance.
+
+## 2026-11-27 — current reconciliation 0.0.90 / RW05
+
+v0.0.90 main CI 46001257853 6/6 PASS, exact tags v0.0.90 and project-cleanup/v0.0.1 → 79f369b6f817976c2d0b1f026ed86f00be045860, Project Cleanup tree f545939f00975dbceaf6536d8c61ecb04b8cea5a; PC01 native CI Linux 21 PASS, Windows 20 PASS + FIFO SKIP. Clients open. RW05 candidate 0.0.3 — read-only reconciliation, 21/21 Linux; integration CI required. PC02 separate Git-aware candidate 8e55f2bee4de780c5599bc4556d02e97f754b634, 19/19 Linux, no common version assigned. Plans are not deletion authority; PC03–PC06 open.
