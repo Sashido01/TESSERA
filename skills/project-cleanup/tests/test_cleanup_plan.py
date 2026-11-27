@@ -114,7 +114,8 @@ class PlanTests(unittest.TestCase):
     def test_nonportable_path_rejected(self):
         for raw in (b"/abs", b"build/../a", b"build//a", b"build/NUL.txt", b"build/x.",
                     b"build/x ", b"build/a:b", b"build/FILE~1", b"build/a\\b", b"build/.git/x",
-                    b"build/line\nname", b"build/\xff", b"build/a/"):
+                    b"build/line\nname", b"build/\xff", b"build/a/", b"build/ leading",
+                    b"build/NUL .txt", "build/COM¹.txt".encode(), "build/a\u200db".encode()):
             with self.subTest(raw=raw), self.assertRaises(p.PlanError):
                 self.check(capture(ignored=raw + b"\0"))
 
@@ -130,6 +131,68 @@ class PlanTests(unittest.TestCase):
                 self.check(c)
         with patch.object(p, "MAX_FRAME", 4), self.assertRaises(p.PlanError):
             p.rows(b"12345\0")
+
+    def test_prefix_memory_budget(self):
+        c = capture(ignored=b"build/long_component/file\0")
+        with patch.object(p, "MAX_PREFIX_BYTES", 20):
+            with self.assertRaisesRegex(p.PlanError, "PATH_PREFIX_LIMIT"):
+                self.check(c)
+
+    def test_parent_change_during_metadata_is_not_reviewed(self):
+        self.file("build/nested/a")
+        c = capture(ignored=b"build/nested/a\0")
+        original = Path.lstat
+        folder = self.root / "build" / "nested"
+        hits = 0
+
+        def changed(path):
+            nonlocal hits
+            info = original(path)
+            if path == folder:
+                hits += 1
+                if hits == 2:
+                    return self.adjusted(info, st_ino=info.st_ino + 1)
+            return info
+
+        with patch.object(Path, "lstat", changed):
+            result = self.check(c)
+        self.assertEqual(result["counts"]["metadata_unverified"], 1)
+        self.assertEqual(result["private_review"], [])
+
+    def test_git_marker_changed_during_plan(self):
+        self.file("build/a")
+        c = capture(ignored=b"build/a\0")
+        original = p.metadata
+
+        def change(*args):
+            result = original(*args)
+            (self.root / ".git" / "changed").write_bytes(b"fixture")
+            return result
+
+        with patch.object(p, "metadata", side_effect=change):
+            with self.assertRaisesRegex(p.PlanError, "ROOT_CHANGED"):
+                self.check(c)
+
+    def test_capture_changes_after_first_read(self):
+        c = capture(ignored=b"build/a\0")
+        first, second = self.snapshots(c)
+        original = p.read_record
+
+        def change(path):
+            if path == second / "head-ref.txt":
+                (first / "ignored.z").write_bytes(b"build/changed\0")
+            return original(path)
+
+        with patch.object(p, "read_record", side_effect=change):
+            with self.assertRaisesRegex(p.PlanError, "CAPTURE_CHANGED"):
+                p.read_pair(self.root, first, second)
+
+    def test_nested_capture_directories_refused(self):
+        first = self.parent / "first"
+        second = first / "second"
+        second.mkdir(parents=True)
+        with self.assertRaisesRegex(p.PlanError, "CAPTURE_SCOPE_OVERLAP"):
+            p.read_pair(self.root, first, second)
 
     def test_stale_capture_no_candidates(self):
         first = capture(ignored=b"build/a\0")

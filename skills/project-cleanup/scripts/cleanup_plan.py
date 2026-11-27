@@ -21,6 +21,7 @@ NAMES = ("head-ref.txt", "head.z", "index.z", "ignored.z", "untracked.z")
 MAX_FRAME = 2 * 1024 * 1024
 MAX_ROWS = 50000
 MAX_PREFIXES = 100000
+MAX_PREFIX_BYTES = 8 * 1024 * 1024
 MAX_DETAILS = 100
 MAX_SCOPES = 20
 MAX_REVIEW = 10000
@@ -53,9 +54,11 @@ def path_parts(raw):
         key = unicodedata.normalize("NFKC", component).casefold()
         for value in (component, key):
             require(value and value not in (".", "..") and not value.endswith((".", " "))
-                    and not any(ord(c) < 32 or ord(c) == 127 or c in '\\/:<>"|?*~' for c in value),
+                    and not value.startswith(" ")
+                    and not any(unicodedata.category(c) in {"Cc", "Cf"} or c in '\\/:<>"|?*~' for c in value),
                     "PATH_NOT_PORTABLE")
-        require(key.split(".", 1)[0] not in RESERVED and key != ".git", "PATH_PROTECTED_OR_RESERVED")
+        require(key.split(".", 1)[0].rstrip(" ") not in RESERVED and key != ".git",
+                "PATH_PROTECTED_OR_RESERVED")
         canonical.append(key)
     return tuple(original), "/".join(canonical)
 
@@ -85,6 +88,7 @@ def parse_capture(capture):
     require(OID.fullmatch(sha) and set(sha) != {48} and
             capture["head-ref.txt"] in (sha, sha + b"\n", sha + b"\r\n"), "HEAD_REF_INVALID")
     prefixes = {}
+    prefix_bytes = 0
     result = {}
     for name in NAMES[1:]:
         paths = {}
@@ -113,7 +117,9 @@ def parse_capture(capture):
                 if prefix in prefixes:
                     require(prefixes[prefix] == display, "PATH_ALIAS_COLLISION")
                 else:
-                    require(len(prefixes) < MAX_PREFIXES, "PATH_PREFIX_LIMIT")
+                    prefix_bytes += len(prefix.encode("utf-8")) + len(display.encode("utf-8"))
+                    require(len(prefixes) < MAX_PREFIXES and prefix_bytes <= MAX_PREFIX_BYTES,
+                            "PATH_PREFIX_LIMIT")
                     prefixes[prefix] = display
             paths[key] = original
         # No one Git path-list can contain both a leaf and its descendant.
@@ -174,29 +180,42 @@ def read_record(path):
 
 def read_pair(root, first, second):
     seen = set()
+    observations = []
     captures = []
-    for path in (first, second):
-        folder = ordinary_root(path)
+    folders = [ordinary_root(path) for path in (first, second)]
+    for folder in folders:
         require(folder != root and root not in folder.parents and folder not in root.parents,
                 "CAPTURE_SCOPE_OVERLAP")
+    require(folders[0] != folders[1], "CAPTURE_NOT_DISTINCT")
+    require(folders[0] not in folders[1].parents and folders[1] not in folders[0].parents,
+            "CAPTURE_SCOPE_OVERLAP")
+    for folder in folders:
         before = folder.lstat()
         require(before.st_ino and (before.st_dev, before.st_ino) not in seen,
                 "CAPTURE_NOT_DISTINCT")
         seen.add((before.st_dev, before.st_ino))
+        observations.append((folder, identity(before)))
         capture = {}
         for name in NAMES:
-            data, ident = read_record(folder / name)
+            path = folder / name
+            before_file = path.lstat()
+            data, ident = read_record(path)
             require(ident not in seen, "CAPTURE_NOT_DISTINCT")
+            require(ident == (before_file.st_dev, before_file.st_ino), "CAPTURE_CHANGED")
             seen.add(ident)
+            observations.append((path, identity(before_file)))
             capture[name] = data
-        require(identity(folder.lstat()) == identity(before), "CAPTURE_CHANGED")
         captures.append(capture)
+    # Detect persistent changes to either capture while the other was read.
+    # This is not a lock or an atomic snapshot.
+    for path, expected in reversed(observations):
+        require(identity(path.lstat()) == expected, "CAPTURE_CHANGED")
     return captures
-
 
 def metadata(root, parts, base):
     # No content reads, links, nested repositories, or cross-device entries.
     current = root
+    parents = []
     for i, part in enumerate(parts):
         current = current / part
         try:
@@ -206,6 +225,7 @@ def metadata(root, parts, base):
             if i + 1 < len(parts):
                 if not stat.S_ISDIR(info.st_mode):
                     return None
+                parents.append((current, identity(info)))
                 try:
                     (current / ".git").lstat()
                 except FileNotFoundError:
@@ -217,7 +237,18 @@ def metadata(root, parts, base):
         except OSError:
             return None
     try:
-        return info if identity(current.lstat()) == identity(info) else None
+        if identity(current.lstat()) != identity(info):
+            return None
+        for folder, expected in reversed(parents):
+            if identity(folder.lstat()) != expected:
+                return None
+            try:
+                (folder / ".git").lstat()
+            except FileNotFoundError:
+                pass
+            else:
+                return None
+        return info
     except OSError:
         return None
 
@@ -283,7 +314,8 @@ def plan(root, first, second, scopes, details=False):
                     heapq.heappush(private, entry)
                 elif entry > private[0]:
                     heapq.heapreplace(private, entry)
-    require(identity(root.lstat()) == identity(base), "ROOT_CHANGED")
+    require(identity(root.lstat()) == identity(base)
+            and identity((root / ".git").lstat()) == identity(marker), "ROOT_CHANGED")
     digest = hashlib.sha256()
     for name in NAMES:
         data = first[name]
