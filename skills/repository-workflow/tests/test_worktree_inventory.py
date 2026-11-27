@@ -9,6 +9,7 @@ import sys
 import tempfile
 import unittest
 from unittest.mock import patch
+from types import SimpleNamespace
 
 SOURCE = Path(__file__).resolve().parents[1] / 'scripts' / 'worktree_inventory.py'
 spec = importlib.util.spec_from_file_location('worktree_inventory_fixture', SOURCE)
@@ -142,7 +143,9 @@ class WorktreeTests(unittest.TestCase):
                 result = subprocess.run(args + [str(path)], capture_output=True, timeout=15)
                 self.assertEqual(result.returncode, code)
             b.write_bytes(row(branch=None))
-            self.assertEqual(subprocess.run(args + [str(b)], capture_output=True, timeout=15).returncode, 1)
+            stale = subprocess.run(args + [str(b)], capture_output=True, timeout=15)
+            self.assertEqual(stale.returncode, 1, stale.stderr)
+            self.assertEqual(json.loads(stale.stdout)['status'], 'STALE')
 
     def test_detached_head_and_branch_counts(self):
         raw = row() + row(b'/detached', branch=None)
@@ -158,6 +161,59 @@ class WorktreeTests(unittest.TestCase):
                 w.compare(row(), row(), [BRANCH], heads)
         with self.assertRaises(w.InventoryError):
             w.compare(row(), row(), [[]])
+
+    @staticmethod
+    def adjusted(info, **changes):
+        fields = ('st_dev', 'st_ino', 'st_size', 'st_mtime_ns', 'st_ctime_ns',
+                  'st_mode', 'st_nlink', 'st_birthtime_ns', 'st_file_attributes')
+        data = {field: getattr(info, field) for field in fields if hasattr(info, field)}
+        data.update(changes)
+        return SimpleNamespace(**data)
+
+    def test_windows_cross_method_ctime_difference(self):
+        with tempfile.TemporaryDirectory() as folder:
+            file = Path(folder) / 'capture'
+            file.write_bytes(row())
+            original = os.fstat
+
+            def descriptor_stat(fd):
+                info = original(fd)
+                return self.adjusted(info, st_ctime_ns=info.st_ctime_ns + 100)
+
+            with patch.object(w, 'WINDOWS', True), patch.object(w.os, 'fstat', side_effect=descriptor_stat):
+                self.assertEqual(w.read_capture(file), row())
+
+    def test_windows_same_method_ctime_change_refused(self):
+        with tempfile.TemporaryDirectory() as folder:
+            file = Path(folder) / 'capture'
+            file.write_bytes(row())
+            original = os.fstat
+            calls = 0
+
+            def descriptor_stat(fd):
+                nonlocal calls
+                calls += 1
+                info = original(fd)
+                return self.adjusted(info, st_ctime_ns=info.st_ctime_ns + calls * 100)
+
+            with patch.object(w, 'WINDOWS', True), patch.object(w.os, 'fstat', side_effect=descriptor_stat):
+                with self.assertRaisesRegex(w.InventoryError, 'CAPTURE_CHANGED'):
+                    w.read_capture(file)
+
+    def test_windows_cross_method_mtime_or_identity_change_refused(self):
+        with tempfile.TemporaryDirectory() as folder:
+            file = Path(folder) / 'capture'
+            file.write_bytes(row())
+            original = os.fstat
+            for field in ('st_mtime_ns', 'st_ino', 'st_nlink'):
+                def descriptor_stat(fd):
+                    info = original(fd)
+                    return self.adjusted(info, **{field: getattr(info, field) + 1})
+
+                with self.subTest(field=field), patch.object(w, 'WINDOWS', True), \
+                        patch.object(w.os, 'fstat', side_effect=descriptor_stat):
+                    with self.assertRaisesRegex(w.InventoryError, 'CAPTURE_CHANGED'):
+                        w.read_capture(file)
 
     def test_capture_size_and_directory(self):
         with tempfile.TemporaryDirectory() as folder:

@@ -13,6 +13,7 @@ import sys
 MAX_BYTES = 2 * 1024 * 1024
 MAX_ROWS = 2000
 MAX_CANDIDATES = 100
+WINDOWS = os.name == "nt"
 OID = re.compile(rb'(?:[0-9a-f]{40}|[0-9a-f]{64})\Z')
 
 
@@ -120,8 +121,18 @@ def ordinary(info):
         getattr(info, 'st_file_attributes', 0) & getattr(stat, 'FILE_ATTRIBUTE_REPARSE_POINT', 0))
 
 
+def cross_identity(info):
+    # Windows path stat and descriptor fstat can expose different ctime
+    # semantics (CPython #157671). Compare equivalent fields across methods.
+    comparable_time = getattr(info, 'st_birthtime_ns', None) if WINDOWS else info.st_ctime_ns
+    return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns,
+            stat.S_IFMT(info.st_mode), info.st_nlink, comparable_time)
+
+
 def identity(info):
-    return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+    # Compare ctime within the SAME observation method even on Windows.
+    return (*cross_identity(info), info.st_ctime_ns,
+            getattr(info, 'st_file_attributes', None))
 
 
 def read_capture_record(path):
@@ -134,11 +145,14 @@ def read_capture_record(path):
     fd = os.open(path, flags)
     try:
         opened = os.fstat(fd)
-        require(ordinary(opened) and identity(opened) == identity(before), 'WORKTREE_CAPTURE_CHANGED')
+        require(ordinary(opened) and cross_identity(opened) == cross_identity(before),
+                'WORKTREE_CAPTURE_CHANGED')
         with os.fdopen(fd, 'rb', closefd=False) as stream:
             raw = stream.read(MAX_BYTES + 1)
-        require(len(raw) == before.st_size and identity(os.fstat(fd)) == identity(before)
-                and identity(path.lstat()) == identity(before), 'WORKTREE_CAPTURE_CHANGED')
+        after_fd, after_path = os.fstat(fd), path.lstat()
+        require(len(raw) == before.st_size and ordinary(after_fd) and ordinary(after_path)
+                and identity(after_fd) == identity(opened)
+                and identity(after_path) == identity(before), 'WORKTREE_CAPTURE_CHANGED')
         require(opened.st_ino != 0, 'WORKTREE_CAPTURE_IDENTITY_UNKNOWN')
         return raw, (opened.st_dev, opened.st_ino)
     finally:

@@ -10,6 +10,8 @@
 - v0.0.90 принят PR #97, commit 79f369b6f817976c2d0b1f026ed86f00be045860, main CI 46001257853 SUCCESS 6/6; оба точных annotated tags подтверждены. Project Cleanup Linux 21 PASS, Windows 20 PASS + FIFO SKIP; опубликован точный pin, клиентская приёмка открыта.
 - Сохранён уникальный RW05 в его существующей ветке с обновлением базы без force. PC02 отдельный кандидат, 19/19 Linux, без резервирования общей версии. G09, #81 и реальные worktrees открыты.
 
+- Windows regression: разделены path/fstat ctime семантики, сохранены same-method identity checks, добавлены 3 теста; 24/24 Linux PASS, новый Windows CI обязателен.
+
 ## 0.0.90 — Добавить Project Cleanup и контроль размера каталога
 
 - Четвёртый самостоятельный навык 0.0.1: безопасная metadata-only инвентаризация, защита границ, бюджет обхода, классификация REVIEW, top-level/private details, рабочий цикл очистки и профилактики. Linux 18/18 PASS на exact blobs; native Windows и клиентская приёмка открыты.
