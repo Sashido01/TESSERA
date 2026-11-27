@@ -4,6 +4,12 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.94 — Exact-version catalog and addressed install/update (UP01)
+
+- CATALOG.json, UPDATE RU/EN, read-only catalog_index: independent annotated pins, matching subtrees, refusal on moved refs or missing index; explicit install/update and repeatable --skill or --all. No unselected pin requests or widening invalid selection. 15/15 isolated Linux PASS on exact source/test blobs, mocked API; native CI, live API, safe replacement and recovery still required.
+- 0.0.93 main CI 46033970329 SUCCESS 6/6, exact commit 168ccae683e92ed13fba141c6654201765cb2e3a and two annotated tags. Microversion Release 0.0.7 accepted, Windows 81/81 PASS; #81 actual context remains OPEN. Four current pilot pins refreshed.
+- Actual 0.0.92 one-link reports and Harness log recorded as bounded client evidence; least privilege/preservation/addressed update NOT_VERIFIED. UP01 required for 0.1.0, packaging the catalog and production updater still open. Historical Audit branch preserved in ancestry, source/test match main; CI and independent checks required.
+
 ## 0.0.93 — Harden unsafe Git-context refusal and synchronize the pilot
 
 - Microversion Release 0.0.7: unknown/unapproved GIT_* blocked, names redacted, XDG_CONFIG_HOME preserved, local Git protocols/lazy fetching disabled. Four focused isolated Linux probes PASS on exact release_tag.py, including actual disposable positive/negative fixture. Full CI and #81 open.

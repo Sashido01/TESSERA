@@ -6,13 +6,13 @@
 
 ## Quick start: not a repository audit
 
-Four verified pins below; Microversion Release 0.0.7 is a candidate, use 0.0.6 until its exact tag is verified. Separate PC01–PC06 acceptance.
+Four verified pins below; UP01 allows one, several or all skills via [UPDATE](../UPDATE.en.md), pending acceptance. Separate PC01–PC06 acceptance.
 
-Verified catalog snapshot: `v0.0.92`, commit `7ace18df60412f98cc84835a6ad81d4c36414683`, main CI 46019956070 SUCCESS (6/6). Four independent annotated pins. A GitHub Release is not required for tag-pinned installation; a missing releases/latest does not imply missing skills.
+Verified catalog snapshot: `v0.0.93`, commit `168ccae683e92ed13fba141c6654201765cb2e3a`, main CI 46033970329 SUCCESS (6/6). Four independent annotated pins. A GitHub Release is not required for tag-pinned installation; a missing releases/latest does not imply missing skills.
 
 | Skill | Pin | Commit | Skill tree |
 | --- | --- | --- | --- |
-| microversion-release | `refs/tags/microversion-release/v0.0.6` | `015bed7f9eaf344b59e699a4b607c0e21b86f608` | `12aebcae998b098a1e7d3c5f1fadd8bcd2b096e7` |
+| microversion-release | `refs/tags/microversion-release/v0.0.7` | `168ccae683e92ed13fba141c6654201765cb2e3a` | `c668493d2c117e7d336adb4555ec51348b36296d` |
 | project-audit | `refs/tags/project-audit/v0.0.6` | `0b207f09bb9fca7cf5525d6b35a1919e1d316515` | `50d3f3dee94f1ceff9df343ef34689caf99ca184` |
 | repository-workflow | `refs/tags/repository-workflow/v0.0.3` | `85bd362067b5a2c8dc94ab0a550990281b80d1ee` | `747474aff7e872c31285c1053f59eabd652fe9be` |
 | project-cleanup | `refs/tags/project-cleanup/v0.0.2` | `7ace18df60412f98cc84835a6ad81d4c36414683` | `cb41049a3ff565ae3f2fb7e5582837cc620c1477` |
@@ -48,7 +48,7 @@ gh --version
 foreach ($skill in @('microversion-release','project-audit','repository-workflow','project-cleanup')) {
     if (Test-Path -LiteralPath (Join-Path $dest $skill)) { throw 'Skill already exists' }
     $pin = switch ($skill) {
-        'microversion-release' { 'refs/tags/microversion-release/v0.0.6' }
+        'microversion-release' { 'refs/tags/microversion-release/v0.0.7' }
         'project-audit' { 'refs/tags/project-audit/v0.0.6' }
         'repository-workflow' { 'refs/tags/repository-workflow/v0.0.3' }
         'project-cleanup' { 'refs/tags/project-cleanup/v0.0.2' }
