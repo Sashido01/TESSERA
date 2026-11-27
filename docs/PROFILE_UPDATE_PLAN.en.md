@@ -19,3 +19,9 @@ Upstream gh v2.105.0 installer source confirms RecordInstall is called even with
 ## Additional plan stability checks
 
 After all selected operations recheck ordinary roots, alias observations, all metadata of observed trees (ancestors before descendants) and explicitly absent targets. Do not rely only on parent-directory mtime. Windows cross-method stat/fstat uses comparable fields with birthtime, same-method retains mode/ctime/attributes; reparse/zero inode refused. Three new regression methods: first stage mutation after second skill, previously absent target appearing with synthetic unchanged root stat, Windows ctime/attribute simulation. Combined isolated Linux 25/25 PASS (0.101 s). Exact profile_plan 9b23c5177b85fae81e88752a95ff10fdb87c7c9e, tests ee39642039440c38ff953e6d73b8d4a212c0f729; raw tree source/test unchanged. Native CI and actual gh open; not atomic, no apply authority or guarantee of exclusive access.
+
+## Verify gh staging metadata (0.0.98 candidate)
+
+0.0.97 main 4f0e5ec0175e42bf67afceef3360497d1261d140, CI 46062411446 SUCCESS, annotated tag object 726389b4f834b243413ab84ef36d9379bbd1684d.
+
+UP02.02: read-only gh_stage binds supplied raw Git tree to installed staging and checks the exact five github-* metadata fields, original frontmatter fields, body, other file bytes, modes and stage fingerprint. Narrow YAML subset (plain/simple quoted scalars and >- without complex constructs); unsupported forms BLOCKED. Actual gh serialization, lockfile, live refs, apply authorization, atomicity and rollback NOT_VERIFIED. From 0.0.98 the tool is required in ZIP; 0.0.97 remains compatible. Ten fixture tests and package gate; native/full CI pending.

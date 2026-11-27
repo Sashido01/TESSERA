@@ -13,7 +13,7 @@ import zipfile
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "tools"))
 import build_catalog_package as builder
 import verify_catalog_package as verifier
-from catalog_package_policy import UPDATE_FILES, requires_update_files
+from catalog_package_policy import UPDATE_FILES, requires_update_files, update_files
 
 
 class UpdatePackageTests(unittest.TestCase):
@@ -113,6 +113,11 @@ class UpdatePackageTests(unittest.TestCase):
         raw = self.repack(lambda files: files.update({"CATALOG.json": json.dumps(self.index).encode()}))
         with self.assertRaisesRegex(verifier.VerificationError, "CATALOG_UPDATE_CONTRACT_INVALID"):
             self.verify(raw)
+
+    def test_new_stage_tool_version_gate(self):
+        self.assertNotIn("tools/gh_stage.py", update_files("0.0.97"))
+        for version in ("0.0.98", "0.1.0"):
+            self.assertIn("tools/gh_stage.py", update_files(version))
 
     def test_version_gate(self):
         for version in ("0.0.21", "0.0.96"):

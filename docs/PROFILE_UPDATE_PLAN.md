@@ -19,3 +19,9 @@
 ## Дополнительная проверка стабильности плана
 
 После всех выбранных операций повторно сверяются ordinary roots, alias observations, все метаданные просмотренных деревьев (предки до потомков) и явно отсутствующие цели. Не полагаться только на mtime родительского каталога. Windows cross-method stat/fstat сравнение использует сопоставимые поля с birthtime, same-method сохраняет mode/ctime/attributes; reparse/zero inode блокируются. 3 новых regression methods: mutation первого stage после обработки второго, появление ранее отсутствующей цели при синтетически неизменном root stat, Windows ctime/attribute simulation. Combined isolated Linux 25/25 PASS (0.101 s). Exact profile_plan 9b23c5177b85fae81e88752a95ff10fdb87c7c9e, tests ee39642039440c38ff953e6d73b8d4a212c0f729; raw tree source/test unchanged. Native CI и реальный gh открыты; это не atomic, не разрешение на apply, не гарантия эксклюзивного доступа.
+
+## Проверка метаданных gh staging (кандидат 0.0.98)
+
+0.0.97 main 4f0e5ec0175e42bf67afceef3360497d1261d140, CI 46062411446 SUCCESS, annotated tag object 726389b4f834b243413ab84ef36d9379bbd1684d.
+
+UP02.02: read-only gh_stage связывает независимо предоставленный raw Git tree с установленным деревом и проверяет точный набор пяти github-* metadata, исходные поля frontmatter, body, bytes остальных файлов, modes и stage fingerprint. Ограниченный subset YAML (plain/simple quoted scalar и >- без сложных конструкций); неподдерживаемые формы BLOCKED. Реальная сериализация gh, lockfile, live refs, авторизация apply, атомарность и rollback NOT_VERIFIED. С 0.0.98 инструмент обязателен в ZIP; 0.0.97 остаётся совместимой. 10 новых fixture tests и package gate; native/full CI pending.
