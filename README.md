@@ -13,6 +13,7 @@ TESSERA не является форком Harness или Codex. Здесь хр
 | [Microversion Release](skills/microversion-release/README.md) | Микроверсии, обязательные аннотированные Git-теги релизов, переносимость между агентами | 0.0.6 — Harness explicit use подтверждён; Codex и enforcement открыты (#81) |
 | [Project Audit](skills/project-audit/README.md) | Доказательный аудит, инвентаризация метаданных и Git | 0.0.6 — Harness explicit use подтверждён; полная приёмка открыта |
 | [Repository Workflow](skills/repository-workflow/README.md) | Локальный Git и GitHub, независимые задачи, CI, интеграция и технический долг | 0.0.2 — Harness explicit use подтверждён; полная приёмка открыта |
+| [Project Cleanup](skills/project-cleanup/README.md) | Инвентаризация, безопасная очистка локального проекта и GitHub, контроль роста | 0.0.1 — кандидат; Windows/агентная приёмка открыта |
 
 ## Как устроен репозиторий
 
@@ -24,6 +25,8 @@ docs/                   Правила, архитектура и дорожна
 ```
 
 ## Начало работы
+
+**Гигиена TESSERA:** временные данные хранить в выделенном игнорируемом `/.tessera-local/` или системном временном каталоге. При каждом завершении задачи проверять рост и удалять только доказанно ненужные объекты. В каталоге исходников не хранить generated binaries, архивы, кеши, логи и временные файлы; новый blob более 1 MiB требует отдельного осознанного изменения политики. См. [Project Cleanup](skills/project-cleanup/README.md).
 
 **Для быстрой установки:** [точные проверенные pins и короткий пилот](docs/AGENT_PILOT.md#быстрый-старт-не-аудит-репозитория). GitHub Release не требуется; не использовать плавающий main.
 

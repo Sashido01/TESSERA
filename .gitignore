@@ -17,3 +17,14 @@ dist/
 build/
 *.egg-info/
 .external/
+
+# Project-local generated state only; ignore is not deletion permission.
+/.tessera-local/
+/.tmp/
+.cache/
+node_modules/
+.tox/
+.nox/
+.coverage
+.coverage.*
+*.tmp
