@@ -261,14 +261,14 @@ def root_marker(root):
             and (stat.S_ISDIR(marker.st_mode) or
                  (stat.S_ISREG(marker.st_mode) and marker.st_nlink == 1)),
             "GIT_ROOT_MARKER_INVALID")
-    return identity(base), identity(marker)
+    return base, marker
 
 
 def recheck_root_marker(root, expected):
     # This observes marker identity, not the contents of the Git directory.
     # Directory timestamps alone do not authenticate repository state.
     try:
-        actual = root_marker(ordinary_root(root))
+        actual = tuple(map(identity, root_marker(ordinary_root(root))))
     except (OSError, ValueError):
         raise PlanError("ROOT_CHANGED") from None
     require(actual == expected, "ROOT_CHANGED")
@@ -292,7 +292,8 @@ def plan(root, first, second, scopes, details=False):
         others = set(scoped) - {key}
         require(not overlaps(key, others, sorted(others)), "SCOPE_OVERLAP")
     root = ordinary_root(root)
-    marker_identity = root_marker(root)
+    base, marker = root_marker(root)
+    marker_identity = identity(base), identity(marker)
     tracked = set(parsed["head.z"]) | set(parsed["index.z"])
     ordered = sorted(tracked)
     untracked = set(parsed["untracked.z"])
