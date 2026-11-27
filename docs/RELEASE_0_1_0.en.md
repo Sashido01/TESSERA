@@ -71,3 +71,7 @@ PR #92, exact head 5e770ebf66af9d2758b9df026229794e2932c15b, run 45852127083: al
 ## 2026-11-27 — verified v0.0.88 and owner pilot
 
 Main CI 45874463052 SUCCESS 6/6; catalog tag 3be87bc90d9745aa2b074c9022cd4656e241010d and microversion-release/v0.0.6 tag 49eb12134036b1c33e3e3a9198eea76cfde6d057 both target 015bed7f9eaf344b59e699a4b607c0e21b86f608. All three independent skill trees match catalog v0.0.88. G03/G04/G05/G06–G08 PARTIAL: owner Harness rc.1 positive trials and observed native skill dispatch (see pilot); automatic selection, Stop-hook, full E/RW matrices and Codex remain open. Metadata-record warning under gh requires reproduction, not a bypass. G09: 7+1 direct HIGH occurrences, no CRITICAL finding; Tier 1 policy FAIL for two skills, do not suppress. G11 #81 remains open. G10/G12 publication NOT_RUN. No claim of v0.1.0 readiness.
+
+## 2026-11-27 — fourth skill authorized by owner
+
+Project Cleanup 0.0.1 candidate is an independent component for storage hygiene. The previously approved three-skill G01–G12 matrix remains valid only for those skills; it cannot establish Project Cleanup acceptance. Before a catalog release containing it, verify PC01–PC06 in its roadmap at the declared scope, native Windows/Linux, exact tree pin, no unsafe cleanup and explicit client use. Any unimplemented automation must remain explicitly labeled. Do not shift the original three-skill gates or claim full four-skill readiness from this candidate. No destructive operation in the initial helper.

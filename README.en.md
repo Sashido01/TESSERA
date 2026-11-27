@@ -13,6 +13,7 @@ TESSERA is not a fork of Harness or Codex. It stores portable [Agent Skills](htt
 | [Microversion Release](skills/microversion-release/README.en.md) | Microversions, mandatory annotated release tags, portable use across agents | 0.0.6 — Harness explicit use observed; Codex and enforcement open (#81) |
 | [Project Audit](skills/project-audit/README.en.md) | Evidence-based audit and metadata/Git inspection | 0.0.6 — Harness explicit use observed; full acceptance open |
 | [Repository Workflow](skills/repository-workflow/README.en.md) | Local Git and GitHub, independent tasks, CI, integration and technical debt | 0.0.2 — Harness explicit use observed; full acceptance open |
+| [Project Cleanup](skills/project-cleanup/README.en.md) | Inventory, safe local/GitHub cleanup, growth control | 0.0.1 — candidate; Windows/client acceptance open |
 
 ## Repository layout
 
@@ -24,6 +25,8 @@ docs/                   Rules, architecture, and roadmap
 ```
 
 ## Getting started
+
+**TESSERA hygiene:** store temporary data in dedicated ignored `/.tessera-local/` or the system temporary directory. Inspect growth at task completion and remove only proven dispensable items. No generated binaries, archives, caches, logs or temporary files in the source catalog; a new blob above 1 MiB requires a separate explicit policy change. See [Project Cleanup](skills/project-cleanup/README.en.md).
 
 **For quick installation:** [exact verified pins and short pilot](docs/AGENT_PILOT.en.md#quick-start-not-a-repository-audit). A GitHub Release is not required; do not use floating main.
 
@@ -76,7 +79,7 @@ CI additionally runs the [pinned upstream `skills-ref` validator](docs/AGENT_SKI
 
 **Current catalog version:** see [`VERSION`](VERSION). From this point forward, every independently verified change to TESSERA must increment the catalog microversion, update both changelogs, and use a clear, human-readable Russian commit title. After successful GitHub Actions checks, an annotated `vX.Y.Z` Git tag is created. GitHub Releases are not published automatically.
 
-Verified baseline: TESSERA `0.0.86`, SHA `0b207f09bb9fca7cf5525d6b35a1919e1d316515`, main CI 45864624507 SUCCESS, annotated `v0.0.86` verified. Current source version: [`VERSION`](VERSION).
+Verified baseline: TESSERA `0.0.89`, SHA `efece8ad28fa6e5968d57c41ce68be195e932324`, main CI 45994903581 SUCCESS, annotated `v0.0.89` exact target verified. Current source version: [`VERSION`](VERSION).
 
 - **The TESSERA catalog** and **each skill** have independent version histories.
 - Work microversions increase PATCH by one. After `.99`, work may continue with `.100`, `.101`, and so on if the task is unfinished.
