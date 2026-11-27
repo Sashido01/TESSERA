@@ -15,6 +15,9 @@ import stat
 import sys
 import zipfile
 
+from catalog_index import CatalogError
+from catalog_package_policy import requires_update_files, check_update_catalog
+
 VERSION_RE = re.compile(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\Z")
 SHA_RE = re.compile(r"(?:[0-9a-f]{40}|[0-9a-f]{64})\Z")
 DIGEST_RE = re.compile(r"[0-9a-f]{64}\Z")
@@ -111,6 +114,7 @@ def verify(archive_path: pathlib.Path, *, version: str, source_commit: str) -> d
             names: list[str] = []
             version_metadata: dict[str, dict[str, bytes]] = {}
             total = 0
+            index_bytes = None
             for record in records:
                 if not isinstance(record, dict) or set(record) != {"path", "bytes", "sha256"}:
                     raise VerificationError("CATALOG_MANIFEST_RECORD_INVALID")
@@ -131,6 +135,8 @@ def verify(archive_path: pathlib.Path, *, version: str, source_commit: str) -> d
                     raise VerificationError("CATALOG_TOTAL_SIZE_INVALID")
                 if hashlib.sha256(data).hexdigest() != digest:
                     raise VerificationError("CATALOG_CONTENT_DIGEST_MISMATCH")
+                if name == "CATALOG.json":
+                    index_bytes = data
                 if name == "VERSION" and data.decode("utf-8", errors="replace").strip() != version:
                     raise VerificationError("CATALOG_VERSION_MISMATCH")
                 match = re.fullmatch(r"skills/([a-z0-9]+(?:-[a-z0-9]+)*)/(VERSION|CHANGELOG\.md|CHANGELOG\.en\.md)", name)
@@ -143,6 +149,7 @@ def verify(archive_path: pathlib.Path, *, version: str, source_commit: str) -> d
                 re.fullmatch(r"skills/[a-z0-9]+(?:-[a-z0-9]+)*/SKILL\.md", n) for n in names
             ):
                 raise VerificationError("CATALOG_REQUIRED_FILES_MISSING")
+            skill_versions = {}
             for skill, metadata in version_metadata.items():
                 if (set(metadata) != {"VERSION", "CHANGELOG.md", "CHANGELOG.en.md"}
                         or f"skills/{skill}/SKILL.md" not in names):
@@ -151,12 +158,18 @@ def verify(archive_path: pathlib.Path, *, version: str, source_commit: str) -> d
                     skill_version = metadata["VERSION"].decode("utf-8").strip()
                     if not VERSION_RE.fullmatch(skill_version) or int(skill_version.split(".")[1]) > 99:
                         raise VerificationError("CATALOG_SKILL_VERSION_INVALID")
+                    skill_versions[skill] = skill_version
                     for key in ("CHANGELOG.md", "CHANGELOG.en.md"):
                         if not re.search(r"(?m)^## " + re.escape(skill_version) + r"(?:\s|$)",
                                          metadata[key].decode("utf-8")):
                             raise VerificationError("CATALOG_SKILL_CHANGELOG_INVALID")
                 except UnicodeError:
                     raise VerificationError("CATALOG_SKILL_VERSION_ENCODING_INVALID") from None
+            if requires_update_files(version):
+                try:
+                    check_update_catalog(names, index_bytes, skill_versions)
+                except (CatalogError, ValueError, UnicodeError) as exc:
+                    raise VerificationError("CATALOG_UPDATE_CONTRACT_INVALID") from exc
         sha = hashlib.sha256()
         with path.open("rb") as stream:
             while chunk := stream.read(64 * 1024):

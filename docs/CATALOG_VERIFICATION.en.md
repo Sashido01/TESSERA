@@ -37,3 +37,7 @@ Authenticity requires independent validation of the annotated `vX.Y.Z` tag, exac
 ## Acceptance boundaries
 
 A positive fixture uses the actual packager. Negative cases include byte tampering, wrong SHA/version, corrupted ZIP, missing manifest, duplicates, traversal, absolute paths, symlinks, and compression. T09 remains PARTIAL pending a live signed build, independent verification, and the remaining Release Core requirements.
+
+## Update tools in the source ZIP (0.0.97 candidate)
+
+Starting at 0.0.97 the ZIP contract requires CATALOG.json, both UPDATE and profile-plan documents, and the three read-only UP01/UP02 tools. Verification rejects missing/extra files and inconsistent catalog versions even with a recomputed manifest. Older ZIPs retain their legacy contract. The ZIP remains a runtime subset: skill tests are excluded, so it is not a raw Git tree or staging for skill_tree.py. Use verifier code from an independently trusted checkout, never execute code from an unverified ZIP. Attestation, live resolver, gh metadata, apply and rollback remain separate open tasks.
