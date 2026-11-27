@@ -8,7 +8,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 ROOT_DOCS = (
     "README.md", "AGENTS.md", "CHANGELOG.md", "CONTRIBUTING.md",
-    "CODE_OF_CONDUCT.md", "SECURITY.md",
+    "CODE_OF_CONDUCT.md", "SECURITY.md", "UPDATE.md",
     ".github/PULL_REQUEST_TEMPLATE.md",
 )
 EXCLUDED = {".git", ".venv", "venv", "__pycache__"}

@@ -115,8 +115,24 @@ def select_tag(refs):
     return found[max(found)]
 
 
-def resolve(get, requested=None):
-    """Use a trusted read-only API transport. No latest/main fallback."""
+def selection(skills, all_skills):
+    """Explicit selection; never widen a mistyped or empty request."""
+    require(type(all_skills) is bool and isinstance(skills, (list, tuple))
+            and len(skills) <= MAX_SKILLS, "CATALOG_SELECTION")
+    require((all_skills and not skills) or (not all_skills and bool(skills)),
+            "CATALOG_SELECTION")
+    require(all(isinstance(name, str) and len(name) <= 64 and NAME.fullmatch(name)
+                for name in skills), "CATALOG_SELECTION_NAME")
+    require(len(set(skills)) == len(skills), "CATALOG_SELECTION_DUPLICATE")
+    return set(skills)
+
+
+def resolve(get, requested=None, *, skills=(), all_skills=False, operation):
+    """Resolve selected pins through a trusted read-only API. No fallback."""
+    names = selection(skills, all_skills)
+    require(operation in ("install", "update"), "CATALOG_OPERATION")
+    if requested is not None:
+        version(requested)
     cache = {}
     observed_refs = {}
     calls = 0
@@ -194,8 +210,12 @@ def resolve(get, requested=None):
     rows = parse_index(blob(root, "CATALOG.json"))
     catalog_skills = entries(entry(root, "skills", "tree", "040000"))
     require(set(catalog_skills) == {row["id"] for row in rows}, "CATALOG_SKILL_SET")
-    resolved = []
     for row in rows:
+        entry(catalog_skills, row["id"], "tree", "040000")
+    require(names.issubset(catalog_skills), "CATALOG_UNKNOWN_SKILL")
+    selected_rows = rows if all_skills else [row for row in rows if row["id"] in names]
+    resolved = []
+    for row in selected_rows:
         skill_tag, skill_commit = annotated(row["ref"])
         skill_root = entries(tree(skill_commit))
         skill_dirs = entries(entry(skill_root, "skills", "tree", "040000"))
@@ -219,6 +239,9 @@ def resolve(get, requested=None):
                 "CATALOG_LATEST_CHANGED")
     return {"status": "RESOLVED", "repository": REPO, "catalog_ref": catalog_ref,
             "catalog_tag_object": tag_sha, "catalog_commit": commit, "skills": resolved,
+            "operation": operation, "selection": "ALL" if all_skills else "EXPLICIT",
+            "catalog_skill_count": len(rows), "selected_count": len(resolved),
+            "unselected_count": len(rows) - len(resolved),
             "install_authorized": False, "local_state": "NOT_VERIFIED",
             "publication": "NOT_VERIFIED", "snapshot_atomic": False, "api_calls": calls}
 
@@ -248,14 +271,19 @@ def main():
     check.add_argument("--root", required=True, type=pathlib.Path)
     remote = sub.add_parser("resolve")
     remote.add_argument("--gh", required=True, type=pathlib.Path)
-    remote.add_argument("--version")
+    remote.add_argument("--version", help="Exact catalog version, not an individual skill version")
+    remote.add_argument("--operation", choices=("install", "update"), required=True)
+    scope = remote.add_mutually_exclusive_group(required=True)
+    scope.add_argument("--skill", action="append", default=[], help="Exact skill ID; repeat for a subset")
+    scope.add_argument("--all", action="store_true", help="All skills in the selected catalog")
     args = parser.parse_args()
     try:
         if args.action == "check":
             result = {"status": "SOURCE_VERIFIED", "skills": check_source(args.root),
                       "publication": "NOT_VERIFIED", "install_authorized": False}
         else:
-            result = resolve(gh_transport(args.gh), args.version)
+            result = resolve(gh_transport(args.gh), args.version, skills=args.skill,
+                             all_skills=args.all, operation=args.operation)
     except (OSError, ValueError, TypeError, KeyError, subprocess.SubprocessError) as exc:
         print("BLOCKED: " + (str(exc) if isinstance(exc, CatalogError) else "CATALOG_RUNTIME"), file=sys.stderr)
         return 1
