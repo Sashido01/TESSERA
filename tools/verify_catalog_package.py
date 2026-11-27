@@ -167,7 +167,7 @@ def verify(archive_path: pathlib.Path, *, version: str, source_commit: str) -> d
                     raise VerificationError("CATALOG_SKILL_VERSION_ENCODING_INVALID") from None
             if requires_update_files(version):
                 try:
-                    check_update_catalog(names, index_bytes, skill_versions)
+                    check_update_catalog(names, index_bytes, skill_versions, version)
                 except (CatalogError, ValueError, UnicodeError) as exc:
                     raise VerificationError("CATALOG_UPDATE_CONTRACT_INVALID") from exc
         sha = hashlib.sha256()

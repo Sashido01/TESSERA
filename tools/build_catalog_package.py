@@ -17,7 +17,7 @@ import tempfile
 import zipfile
 
 from catalog_index import CatalogError
-from catalog_package_policy import UPDATE_FILES, requires_update_files, check_update_catalog
+from catalog_package_policy import update_files, requires_update_files, check_update_catalog
 
 VERSION = re.compile(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\Z")
 SHA = re.compile(r"(?:[0-9a-f]{40}|[0-9a-f]{64})\Z")
@@ -135,13 +135,13 @@ def package_bytes(root: pathlib.Path, version: str, commit_sha: str) -> bytes:
     if files["VERSION"].decode("utf-8").strip() != version:
         raise PackageError("PACKAGE_VERSION_MISMATCH")
     if requires_update_files(version):
-        for name in sorted(UPDATE_FILES):
+        for name in sorted(update_files(version)):
             files[name] = file_bytes(root, pathlib.Path(name))
         try:
             check_update_catalog(files, files["CATALOG.json"], {
                 name.split("/")[1]: data.decode("utf-8").strip()
                 for name, data in files.items() if re.fullmatch(r"skills/[^/]+/VERSION", name)
-            })
+            }, version)
         except (CatalogError, ValueError, UnicodeError) as exc:
             raise PackageError("PACKAGE_UPDATE_CATALOG_INVALID") from exc
     for name, data in files.items():

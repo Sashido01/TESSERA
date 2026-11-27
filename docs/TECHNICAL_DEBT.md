@@ -151,3 +151,9 @@ main 0.0.95 b179d71f091083916a88067a895c85c6539bc480, CI 46053357417 6/6 PASS, a
 ## Инструменты обновления в исходном ZIP (кандидат 0.0.97)
 
 С 0.0.97 ZIP-контракт требует CATALOG.json, UPDATE RU/EN, профильную инструкцию RU/EN и три read-only инструмента UP01/UP02. Проверка отклоняет отсутствующие/лишние файлы и несогласованные версии каталога даже при пересчитанном манифесте. Старые ZIP проверяются по прежнему контракту. ZIP остаётся runtime subset: тесты навыков исключены, поэтому это не raw Git tree и не staging для skill_tree.py. Проверяющий код брать из независимо доверенного checkout; не выполнять код из непроверенного ZIP. Аттестация, live resolver, gh metadata, apply и rollback отдельно открыты.
+
+## Проверка метаданных gh staging (кандидат 0.0.98)
+
+0.0.97 main 4f0e5ec0175e42bf67afceef3360497d1261d140, CI 46062411446 SUCCESS, annotated tag object 726389b4f834b243413ab84ef36d9379bbd1684d.
+
+UP02.02: read-only gh_stage связывает независимо предоставленный raw Git tree с установленным деревом и проверяет точный набор пяти github-* metadata, исходные поля frontmatter, body, bytes остальных файлов, modes и stage fingerprint. Ограниченный subset YAML (plain/simple quoted scalar и >- без сложных конструкций); неподдерживаемые формы BLOCKED. Реальная сериализация gh, lockfile, live refs, авторизация apply, атомарность и rollback NOT_VERIFIED. С 0.0.98 инструмент обязателен в ZIP; 0.0.97 остаётся совместимой. 10 новых fixture tests и package gate; native/full CI pending.
