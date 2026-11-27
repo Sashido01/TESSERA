@@ -29,6 +29,12 @@ def branch_ref(value):
     require(isinstance(value, bytes) and value.startswith(b'refs/heads/') and
             len(value) > len(b'refs/heads/') and not any(c <= 32 or c == 127 for c in value),
             'WORKTREE_BRANCH_INVALID')
+    # Git check-ref-format restrictions for a full refs/heads/... name.
+    require(not any(c in value for c in (b'..', b'@{', b'~', b'^', b':',
+                                         b'?', b'*', b'[', b'\\')) and
+            not value.endswith(b'.') and
+            all(part and not part.startswith(b'.') and not part.endswith(b'.lock')
+                for part in value.split(b'/')), 'WORKTREE_BRANCH_INVALID')
     return value
 
 
@@ -68,6 +74,8 @@ def parse(raw):
         rows.append({'bare': bare, 'detached': detached, 'branch': branch, 'head': attrs.get(b'HEAD'),
                      'unborn': not bare and set(attrs[b'HEAD']) == {48},
                      'locked': b'locked' in attrs, 'prunable': b'prunable' in attrs})
+    require(len({len(row['head']) for row in rows if row['head'] is not None}) <= 1,
+            'WORKTREE_OBJECT_FORMAT_MIXED')
     return rows
 
 
@@ -89,6 +97,10 @@ def compare(first, second, candidates=(), candidate_heads=()):
               'snapshot_authenticity': 'NOT_VERIFIED', 'local_occupancy_now': 'NOT_VERIFIED'}
     if first != second:
         return {**result, 'status': 'STALE', 'candidate_checks': []}
+    widths = {len(row['head']) for row in b if row['head'] is not None}
+    if widths:
+        require(all(len(head) in widths for head in candidate_heads),
+                'WORKTREE_CANDIDATE_OBJECT_FORMAT_MISMATCH')
     checks = []
     for i, ref in enumerate(candidates):
         item = {'index': i + 1, 'matching_worktrees': sum(row['branch'] == ref for row in b)}
@@ -112,7 +124,7 @@ def identity(info):
     return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
 
 
-def read_capture(path):
+def read_capture_record(path):
     # Trusted ordinary captures only. Refuse special files before open, recheck
     # the opened descriptor, and use nonblocking/no-follow flags where available.
     before = path.lstat()
@@ -127,9 +139,23 @@ def read_capture(path):
             raw = stream.read(MAX_BYTES + 1)
         require(len(raw) == before.st_size and identity(os.fstat(fd)) == identity(before)
                 and identity(path.lstat()) == identity(before), 'WORKTREE_CAPTURE_CHANGED')
-        return raw
+        require(opened.st_ino != 0, 'WORKTREE_CAPTURE_IDENTITY_UNKNOWN')
+        return raw, (opened.st_dev, opened.st_ino)
     finally:
         os.close(fd)
+
+
+def read_capture(path):
+    return read_capture_record(path)[0]
+
+
+def capture_pair(first, second):
+    # Reject aliases using identities of the descriptors actually read, not
+    # only a pathname samefile precheck. Still not atomic or race-proof.
+    a, identity_a = read_capture_record(first)
+    b, identity_b = read_capture_record(second)
+    require(identity_a != identity_b, 'WORKTREE_CAPTURE_NOT_DISTINCT')
+    return a, b
 
 
 def main():
@@ -140,8 +166,8 @@ def main():
     parser.add_argument('--head', action='append', default=[])
     args = parser.parse_args()
     try:
-        require(not args.first.samefile(args.second), 'WORKTREE_CAPTURE_NOT_DISTINCT')
-        result = compare(read_capture(args.first), read_capture(args.second),
+        first, second = capture_pair(args.first, args.second)
+        result = compare(first, second,
                          [x.encode('ascii') for x in args.branch],
                          [x.encode('ascii') for x in args.head])
     except (InventoryError, OSError, UnicodeError, ValueError, RuntimeError) as exc:

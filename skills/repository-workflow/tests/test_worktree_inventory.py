@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 SOURCE = Path(__file__).resolve().parents[1] / 'scripts' / 'worktree_inventory.py'
 spec = importlib.util.spec_from_file_location('worktree_inventory_fixture', SOURCE)
@@ -20,6 +21,23 @@ BRANCH = b'refs/heads/main'
 def row(path=b'/fixture', head=A, branch=BRANCH, extras=()):
     return b'\0'.join([b'worktree ' + path, b'HEAD ' + head,
                       b'branch ' + branch if branch else b'detached', *extras]) + b'\0\0'
+
+
+def require_fixture_context():
+    # Reject before creating a fixture; do not strip host Git policy and proceed.
+    if any(key.upper().startswith('GIT_') and key.upper() != 'GIT_PAGER'
+           for key in os.environ):
+        raise RuntimeError('FIXTURE_GIT_CONTEXT_UNSAFE')
+
+
+def fixture_environment():
+    require_fixture_context()
+    keys = ('PATH', 'SystemRoot', 'WINDIR', 'COMSPEC', 'PATHEXT',
+            'TEMP', 'TMP', 'TMPDIR', 'LANG', 'LC_ALL', 'LC_CTYPE', 'TZ')
+    env = {key: value for key in keys if (value := os.getenv(key)) is not None}
+    env.update({'GIT_CONFIG_NOSYSTEM': '1', 'GIT_CONFIG_GLOBAL': os.devnull,
+                'GIT_TERMINAL_PROMPT': '0'})
+    return env
 
 
 class WorktreeTests(unittest.TestCase):
@@ -69,6 +87,42 @@ class WorktreeTests(unittest.TestCase):
         for raw in (row(head=b'no'), row(branch=b'refs/tags/v1'), row(branch=b'refs/heads/a b')):
             with self.subTest(raw=raw), self.assertRaises(w.InventoryError):
                 w.parse(raw)
+
+    def test_full_ref_format(self):
+        for ref in (b'refs/heads/.hidden', b'refs/heads/a.lock/b',
+                    b'refs/heads/a..b', b'refs/heads/a//b', b'refs/heads/a.',
+                    b'refs/heads/a/', b'refs/heads/a@{b', b'refs/heads/a\\b',
+                    b'refs/heads/a*b'):
+            with self.subTest(ref=ref), self.assertRaises(w.InventoryError):
+                w.parse(row(branch=ref))
+        self.assertEqual(w.parse(row(branch=b'refs/heads/topic/v1'))[0]['branch'],
+                         b'refs/heads/topic/v1')
+        self.assertEqual(w.parse(row(branch=b'refs/heads/\xc3\xa9'))[0]['branch'],
+                         b'refs/heads/\xc3\xa9')
+
+    def test_mixed_or_mismatched_object_format(self):
+        raw = row() + row(b'/other', head=b'a' * 64)
+        with self.assertRaisesRegex(w.InventoryError, 'OBJECT_FORMAT_MIXED'):
+            w.parse(raw)
+        with self.assertRaisesRegex(w.InventoryError, 'OBJECT_FORMAT_MISMATCH'):
+            w.compare(row(), row(), [BRANCH], [b'a' * 64])
+
+    def test_descriptor_identity_collision(self):
+        with patch.object(w, 'read_capture_record', side_effect=[
+                (row(), (1, 23)), (row(), (1, 23))]):
+            with self.assertRaisesRegex(w.InventoryError, 'CAPTURE_NOT_DISTINCT'):
+                w.capture_pair(Path('first'), Path('second'))
+
+    def test_fixture_refuses_context_without_mutations(self):
+        case = WorktreeTests('test_actual_git_worktrees')
+        for key in ('GIT_DIR', 'GIT_CONFIG_COUNT', 'GIT_CONFIG_VALUE_0'):
+            with self.subTest(key=key), patch.dict(os.environ, {key: 'fixture'}), \
+                    patch.object(tempfile, 'TemporaryDirectory') as temp, \
+                    patch.object(subprocess, 'run') as git:
+                with self.assertRaisesRegex(RuntimeError, 'FIXTURE_GIT_CONTEXT_UNSAFE'):
+                    case.test_actual_git_worktrees()
+                temp.assert_not_called()
+                git.assert_not_called()
 
     def test_duplicate_branch_not_collapsed(self):
         raw = row() + row(b'/other')
@@ -144,15 +198,13 @@ class WorktreeTests(unittest.TestCase):
 
     @unittest.skipUnless(shutil.which('git'), 'Git unavailable')
     def test_actual_git_worktrees(self):
+        env = fixture_environment()
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             repo, linked = root / 'repo', root / 'linked'
             repo.mkdir()
             hooks = root / 'empty-hooks'
             hooks.mkdir()
-            env = {k: v for k, v in os.environ.items() if not k.upper().startswith('GIT_')}
-            env.update({'GIT_CONFIG_NOSYSTEM': '1', 'GIT_CONFIG_GLOBAL': os.devnull,
-                        'GIT_TERMINAL_PROMPT': '0'})
             def git(*args):
                 return subprocess.run(['git', '-c', 'core.hooksPath=' + str(hooks), *args], cwd=repo,
                                       env=env, capture_output=True, check=True, timeout=20).stdout

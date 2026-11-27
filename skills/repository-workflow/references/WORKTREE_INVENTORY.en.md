@@ -13,3 +13,7 @@ Matching captures do not establish provenance, completeness, capture time or phy
 ## Pre-release trial follow-up, 26 November 2026
 
 Owner reported detached worktrees at exact SHAs of older branches. Branch name alone is insufficient. Optional repeated --head supplies full OIDs in same order/count as --branch; report adds matching_head_worktrees and detached_head_worktrees by index, no OID disclosure. Zero matches do not establish preservation or safe deletion. Ordinary capture files only: lstat, special/reparse leaf refusal, no-follow/nonblocking where supported, fstat and repeated metadata check; hardlinked same file is not two captures. No proof against parent substitution, capture authenticity/independence or hostile filesystem; use trusted directory. Five regression tests added, CI required. Never delete on this report alone.
+
+## Additional review 27 November 2026
+
+The candidate refines full ref format under git-check-ref-format constraints (without invoking Git): reject empty, dot and .lock components, special characters, .. and @{. Mixed OID widths in one capture and incompatible candidate heads are refused. File distinctness uses actual read-descriptor identities; zero inode is UNKNOWN/BLOCKED. This does not prove independent capture acquisition, race freedom or safe deletion. The Git fixture now refuses inherited Git context before creation and uses only an explicit allowlist in a disposable fixture; no policy bypass. Four new regression tests require execution.
