@@ -7,7 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 SOURCE = Path(__file__).resolve().parents[1] / "scripts" / "inventory.py"
 spec = importlib.util.spec_from_file_location("project_cleanup_inventory", SOURCE)
@@ -103,6 +103,47 @@ class InventoryTests(unittest.TestCase):
         for kwargs in ({"max_entries": 0}, {"max_depth": 129}, {"max_seconds": -1}):
             with self.assertRaises(m.InventoryError):
                 m.inventory(self.root, **kwargs)
+
+    def test_windows_direntry_identity_requires_fresh_stat(self):
+        entry = Mock()
+        entry.path = str(self.root / 'file')
+        hint = Mock(st_mode=0o100644, st_file_attributes=0, st_dev=0, st_ino=0, st_nlink=0)
+        fresh = Mock(st_dev=7, st_ino=11, st_nlink=2)
+        entry.stat.return_value = hint
+        with patch.object(m.os, 'stat', return_value=fresh) as call:
+            self.assertIs(m.entry_metadata(entry, True), fresh)
+            call.assert_called_once_with(entry.path, follow_symlinks=False)
+            call.reset_mock()
+            self.assertIs(m.entry_metadata(entry, False), hint)
+            call.assert_not_called()
+            hint.st_file_attributes = 0x400
+            with patch.object(m.stat, 'FILE_ATTRIBUTE_REPARSE_POINT', 0x400, create=True):
+                self.assertIs(m.entry_metadata(entry, True), hint)
+                call.assert_not_called()
+
+    def test_parent_traversal_is_refused(self):
+        with self.assertRaisesRegex(m.InventoryError, 'ROOT_PARENT_TRAVERSAL'):
+            m.inventory(self.root / '..' / self.root.name)
+
+    def test_pending_directory_budget(self):
+        for name in ('a', 'b', 'c'):
+            self.file(name + '/file')
+        with patch.object(m, 'MAX_PENDING_DIRS', 1):
+            result = m.inventory(self.root)
+        self.assertEqual(result['status'], 'PARTIAL')
+        self.assertEqual(result['limit'], 'PENDING_DIRECTORY_LIMIT')
+
+    def test_hardlink_identity_budget(self):
+        for name in ('a', 'b'):
+            file = self.file(name)
+            try:
+                os.link(file, file.with_suffix('.copy'))
+            except OSError:
+                self.skipTest('hardlinks unavailable')
+        with patch.object(m, 'MAX_HARDLINK_IDENTITIES', 1):
+            result = m.inventory(self.root)
+        self.assertEqual(result['status'], 'PARTIAL')
+        self.assertEqual(result['limit'], 'HARDLINK_IDENTITY_LIMIT')
 
     def test_links_are_not_followed(self):
         target = self.file("data/item")

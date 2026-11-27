@@ -24,6 +24,8 @@ PROTECTED_SUFFIX = frozenset({".db", ".sqlite", ".sqlite3", ".pem", ".key",
                               ".pfx", ".p12", ".onnx", ".gguf", ".safetensors",
                               ".log", ".bak", ".zip"})
 MAX_DETAILS = 20
+MAX_PENDING_DIRS = 8192
+MAX_HARDLINK_IDENTITIES = 100000
 
 
 class InventoryError(ValueError):
@@ -37,7 +39,18 @@ def reparse(info):
     )
 
 
+def entry_metadata(entry, windows):
+    info = entry.stat(follow_symlinks=False)
+    # Windows DirEntry.stat reports zero device, inode and link count.
+    # Do not request further metadata for a known reparse point.
+    if windows and not reparse(info):
+        return os.stat(entry.path, follow_symlinks=False)
+    return info
+
+
 def ordinary_root(root):
+    if '..' in Path(root).parts:
+        raise InventoryError("ROOT_PARENT_TRAVERSAL")
     root = Path(os.path.abspath(root))
     if root == root.parent:
         raise InventoryError("ROOT_VOLUME_REFUSED")
@@ -116,7 +129,7 @@ def inventory(root, max_entries=200000, max_depth=64, max_seconds=30, details=Fa
                         skipped["git_metadata"] += 1
                         continue
                     try:
-                        info = entry.stat(follow_symlinks=False)
+                        info = entry_metadata(entry, os.name == 'nt')
                     except OSError:
                         skipped["errors"] += 1
                         continue
@@ -130,6 +143,9 @@ def inventory(root, max_entries=200000, max_depth=64, max_seconds=30, details=Fa
                     if stat.S_ISDIR(info.st_mode):
                         if len(relative) >= max_depth:
                             skipped["depth"] += 1
+                        elif len(stack) >= MAX_PENDING_DIRS:
+                            limit = "PENDING_DIRECTORY_LIMIT"
+                            break
                         else:
                             stack.append((Path(entry.path), relative, info.st_ino))
                         continue
@@ -145,7 +161,11 @@ def inventory(root, max_entries=200000, max_depth=64, max_seconds=30, details=Fa
                         ident = (info.st_dev, info.st_ino)
                         if ident in hardlinks:
                             aliases += 1
-                        hardlinks.add(ident)
+                        elif len(hardlinks) >= MAX_HARDLINK_IDENTITIES:
+                            limit = "HARDLINK_IDENTITY_LIMIT"
+                            break
+                        else:
+                            hardlinks.add(ident)
                     if details and key.startswith("review_"):
                         largest.append((info.st_size, "/".join(relative), key))
                         largest.sort(reverse=True)
