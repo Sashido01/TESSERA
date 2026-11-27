@@ -62,6 +62,23 @@ class InventoryTests(unittest.TestCase):
         self.assertTrue(all(x["relative_path"].startswith("build/") for x in rows))
         self.assertNotIn(str(self.root), json.dumps(result))
 
+    def test_top_level_groups_and_root_files(self):
+        self.file('a/one', b'123')
+        self.file('a/two', b'12')
+        self.file('b/item', b'1')
+        self.file('root.txt', b'12')
+        result = m.inventory(self.root, details=True)
+        self.assertEqual(result['private_top_level'], [
+            {'relative_directory': 'a', 'files': 2, 'logical_bytes': 5},
+            {'relative_directory': None, 'files': 1, 'logical_bytes': 2},
+            {'relative_directory': 'b', 'files': 1, 'logical_bytes': 1}])
+        self.assertTrue(result['private_top_level_complete'])
+        with patch.object(m, 'MAX_TOP_LEVEL_GROUPS', 1):
+            bounded = m.inventory(self.root, details=True)
+        self.assertEqual(bounded['logical_bytes'], 8)
+        self.assertFalse(bounded['private_top_level_complete'])
+        self.assertEqual(len(bounded['private_top_level']), 1)
+
     def test_nested_git_excluded(self):
         self.file("nested/.git", b"gitdir: elsewhere")
         self.file("nested/build/file", b"not ours")

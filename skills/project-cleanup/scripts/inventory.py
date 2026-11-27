@@ -26,6 +26,7 @@ PROTECTED_SUFFIX = frozenset({".db", ".sqlite", ".sqlite3", ".pem", ".key",
 MAX_DETAILS = 20
 MAX_PENDING_DIRS = 8192
 MAX_HARDLINK_IDENTITIES = 100000
+MAX_TOP_LEVEL_GROUPS = 8192
 
 
 class InventoryError(ValueError):
@@ -94,6 +95,8 @@ def inventory(root, max_entries=200000, max_depth=64, max_seconds=30, details=Fa
     entries = dirs = count = logical = aliases = 0
     hardlinks = set()
     largest = []
+    top_level = {}
+    grouped_details_complete = True
     stack = [(root, (), base.st_ino)]
     limit = None
     while stack and limit is None:
@@ -166,6 +169,16 @@ def inventory(root, max_entries=200000, max_depth=64, max_seconds=30, details=Fa
                             break
                         else:
                             hardlinks.add(ident)
+                    if details:
+                        # Top-level directory totals help locate many small files.
+                        # A distinct sentinel groups ordinary files at the root.
+                        group = relative[0] if len(relative) > 1 else None
+                        if group in top_level or len(top_level) < MAX_TOP_LEVEL_GROUPS:
+                            row = top_level.setdefault(group, [0, 0])
+                            row[0] += 1
+                            row[1] += info.st_size
+                        else:
+                            grouped_details_complete = False
                     if details and key.startswith("review_"):
                         largest.append((info.st_size, "/".join(relative), key))
                         largest.sort(reverse=True)
@@ -189,6 +202,11 @@ def inventory(root, max_entries=200000, max_depth=64, max_seconds=30, details=Fa
         "git_status": "NOT_VERIFIED",
     }
     if details:
+        result["private_top_level"] = [
+            {"relative_directory": name, "files": row[0], "logical_bytes": row[1]}
+            for name, row in sorted(top_level.items(),
+                                    key=lambda item: (-item[1][1], item[0] or ""))[:MAX_DETAILS]]
+        result["private_top_level_complete"] = grouped_details_complete
         result["private_review_details"] = [
             {"relative_path": name, "logical_bytes": size, "category": key}
             for size, name, key in largest]
