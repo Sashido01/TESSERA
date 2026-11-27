@@ -6,13 +6,13 @@
 
 ## Quick start: not a repository audit
 
-Four verified pins below; Microversion Release 0.0.7 is a candidate, use 0.0.6 until its exact tag is verified. Separate PC01–PC06 acceptance.
+Four verified pins below; UP01 allows one, several or all skills via [UPDATE](../UPDATE.en.md), pending acceptance. Separate PC01–PC06 acceptance.
 
-Verified catalog snapshot: `v0.0.92`, commit `7ace18df60412f98cc84835a6ad81d4c36414683`, main CI 46019956070 SUCCESS (6/6). Four independent annotated pins. A GitHub Release is not required for tag-pinned installation; a missing releases/latest does not imply missing skills.
+Verified catalog snapshot: `v0.0.93`, commit `168ccae683e92ed13fba141c6654201765cb2e3a`, main CI 46033970329 SUCCESS (6/6). Four independent annotated pins. A GitHub Release is not required for tag-pinned installation; a missing releases/latest does not imply missing skills.
 
 | Skill | Pin | Commit | Skill tree |
 | --- | --- | --- | --- |
-| microversion-release | `refs/tags/microversion-release/v0.0.6` | `015bed7f9eaf344b59e699a4b607c0e21b86f608` | `12aebcae998b098a1e7d3c5f1fadd8bcd2b096e7` |
+| microversion-release | `refs/tags/microversion-release/v0.0.7` | `168ccae683e92ed13fba141c6654201765cb2e3a` | `c668493d2c117e7d336adb4555ec51348b36296d` |
 | project-audit | `refs/tags/project-audit/v0.0.6` | `0b207f09bb9fca7cf5525d6b35a1919e1d316515` | `50d3f3dee94f1ceff9df343ef34689caf99ca184` |
 | repository-workflow | `refs/tags/repository-workflow/v0.0.3` | `85bd362067b5a2c8dc94ab0a550990281b80d1ee` | `747474aff7e872c31285c1053f59eabd652fe9be` |
 | project-cleanup | `refs/tags/project-cleanup/v0.0.2` | `7ace18df60412f98cc84835a6ad81d4c36414683` | `cb41049a3ff565ae3f2fb7e5582837cc620c1477` |
@@ -48,7 +48,7 @@ gh --version
 foreach ($skill in @('microversion-release','project-audit','repository-workflow','project-cleanup')) {
     if (Test-Path -LiteralPath (Join-Path $dest $skill)) { throw 'Skill already exists' }
     $pin = switch ($skill) {
-        'microversion-release' { 'refs/tags/microversion-release/v0.0.6' }
+        'microversion-release' { 'refs/tags/microversion-release/v0.0.7' }
         'project-audit' { 'refs/tags/project-audit/v0.0.6' }
         'repository-workflow' { 'refs/tags/repository-workflow/v0.0.3' }
         'project-cleanup' { 'refs/tags/project-cleanup/v0.0.2' }
@@ -159,3 +159,9 @@ OWNER_REPORTED: Harness 0.2.2-rc.1, 29 PASS / 1 FAIL / 4 NOT_VERIFIED. Three his
 At exact gh v2.105.0, [install.go](https://github.com/cli/cli/blob/v2.105.0/pkg/cmd/skills/install/install.go) selects DiscoverSkillByPath for a selector beginning with skills/. [discovery.go](https://github.com/cli/cli/blob/v2.105.0/internal/skills/discovery/discovery.go) resolves that single directory via parent contents at the resolved commit, instead of full repository discovery. The executable block above uses this narrower form. Its native remote-install latency and client acceptance are NOT_VERIFIED; do not claim that it fixes network timeouts.
 
 The same version's [installer.go](https://github.com/cli/cli/blob/v2.105.0/internal/skills/installer/installer.go) appends a warning when RecordInstall fails after successful file installation; [lockfile.go](https://github.com/cli/cli/blob/v2.105.0/internal/skills/lockfile/lockfile.go) obtains its lock path via os.UserHomeDir. On Windows HOME/GH_CONFIG_DIR do not establish USERPROFILE. Diagnose only whether the variable exists (not its value) in a trusted disposable Windows process; compare the lock record and installed bytes separately. Do not set another person's home, alter the host sandbox, or claim the lock record succeeded because exit is 0. No automatic upstream bug conclusion without reproduction.
+
+## 2026-11-27 — actual one-link pilot and mandatory UP01
+
+Owner supplied Codex/Harness reports and Harness JSONL. Both user profiles reported current contents of four skills at catalog v0.0.92 (7ace18df60412f98cc84835a6ad81d4c36414683); GitHub independently confirms trees Microversion 0.0.6 12aebcae998b098a1e7d3c5f1fadd8bcd2b096e7, Audit 0.0.6 50d3f3dee94f1ceff9df343ef34689caf99ca184, Cleanup 0.0.2 cb41049a3ff565ae3f2fb7e5582837cc620c1477, Workflow 0.0.3 747474aff7e872c31285c1053f59eabd652fe9be. Installed bytes/backup owner-reported, not independent profile access. Codex used named --unpin --all and some main installs; local-edit preservation unproved. gh metadata or up-to-date is insufficient; actual Codex automatic invocation NOT_VERIFIED. Harness rc.1: log 687 records, 1 completed turn seq 11–685, 1661.002 s (27m41s), 41 steps, 43 top-level tool calls, 113 nested dispatches, 85 pwsh, 16 model retries (14 TIMEOUT, 2 TRANSPORT). Successful native skill loads seq 567/569/571/572 including Cleanup; catalog suite 754=747 PASS+7 SKIP; per-skill tests and actual bytes in report. Session mode changed workspace-write→danger-full-access before turn, least-privilege NOT_VERIFIED; do not recommend that as an update method. One user scope may be shared between clients; independence of the two installs NOT_VERIFIED. Do not publish raw session or local paths.
+
+UP01 — mandatory separate 0.1.0 acceptance: one short link-only request, no history/full unit suite, fresh clients in naturally authorized context, exact pins, repeated no-op, missing skill, old pin, local edit, unrelated same-name skill, network/permission failure and recovery. Goal: minimal request and short report; measure elapsed, API calls, tool calls, retries, actual discovery, bytes and preservation, no invented fixed SLA. Proposed CATALOG.json + UPDATE.en.md + read-only catalog_index.py: exact source 6531e6790398b8dbb7554206f98f08b0754b5f61, tests fcb5def96289ebfd2f45fefd7c20d2d7f7e87323, index 258e8b62e57628e20c239dfc7685907f49e46377. 10/10 isolated Linux tests PASS (0.006 s, mocked API and temporary minimal source tree); all three blob SHAs match, separate remote source check of four VERSION files PASS. Not live API acceptance or production updater. After tag publication test actual resolver via official gh and exact skill trees, then staged per-skill updater/recovery in disposable native Windows/Linux; do not use CI swap on a working profile. G03/G04/G05 remain PARTIAL; G06–G09, PC03–PC06, G10/G12 open.

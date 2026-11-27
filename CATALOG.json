@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "repository": "Sashido01/TESSERA",
+  "skills": [
+    {
+      "id": "microversion-release",
+      "path": "skills/microversion-release",
+      "version": "0.0.7",
+      "ref": "refs/tags/microversion-release/v0.0.7"
+    },
+    {
+      "id": "project-audit",
+      "path": "skills/project-audit",
+      "version": "0.0.6",
+      "ref": "refs/tags/project-audit/v0.0.6"
+    },
+    {
+      "id": "project-cleanup",
+      "path": "skills/project-cleanup",
+      "version": "0.0.2",
+      "ref": "refs/tags/project-cleanup/v0.0.2"
+    },
+    {
+      "id": "repository-workflow",
+      "path": "skills/repository-workflow",
+      "version": "0.0.3",
+      "ref": "refs/tags/repository-workflow/v0.0.3"
+    }
+  ]
+}
