@@ -6,6 +6,8 @@
 
 TESSERA is not a fork of Harness or Codex. It stores portable [Agent Skills](https://agentskills.io/) instructions, scripts, and integration examples. Compatibility and automatic activation must be verified for each specific agent environment.
 
+**Update all skills from one link:** [short route](UPDATE.en.md) and [machine-readable catalog](CATALOG.json). Do not conduct a full repository audit for routine install/update. Use verified tags; unfinished main is not a release.
+
 ## Skill catalog
 
 | Skill | Purpose | Status |

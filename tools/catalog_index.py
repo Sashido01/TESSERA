@@ -118,11 +118,18 @@ def select_tag(refs):
 def resolve(get, requested=None):
     """Use a trusted read-only API transport. No latest/main fallback."""
     cache = {}
+    observed_refs = {}
+    calls = 0
+
+    def fresh(path):
+        nonlocal calls
+        require(calls < MAX_CALLS, "CATALOG_CALL_LIMIT")
+        calls += 1
+        return get(path)
 
     def fetch(path):
         if path not in cache:
-            require(len(cache) < MAX_CALLS, "CATALOG_CALL_LIMIT")
-            cache[path] = get(path)
+            cache[path] = fresh(path)
         return cache[path]
 
     def annotated(ref):
@@ -131,6 +138,7 @@ def resolve(get, requested=None):
         obj = info.get("object")
         require(isinstance(obj, dict) and obj.get("type") == "tag", "CATALOG_ANNOTATED_REQUIRED")
         tag_sha = oid(obj.get("sha"))
+        observed_refs[ref] = tag_sha
         tag = fetch("git/tags/" + tag_sha)
         require(isinstance(tag, dict) and tag.get("sha") == tag_sha
                 and tag.get("tag") == ref.removeprefix("refs/tags/")
@@ -199,10 +207,20 @@ def resolve(get, requested=None):
                 "CATALOG_SOURCE_VERSION")
         entry(skill_files, "SKILL.md", "blob", "100644")
         resolved.append({**row, "tag_object": skill_tag, "commit": skill_commit, "tree": skill_tree})
+    # A second live observation catches persistent ref changes; not atomic.
+    for ref, tag_object in observed_refs.items():
+        info = fresh("git/ref/" + ref.removeprefix("refs/"))
+        require(isinstance(info, dict) and info.get("ref") == ref
+                and isinstance(info.get("object"), dict)
+                and info["object"].get("type") == "tag"
+                and info["object"].get("sha") == tag_object, "CATALOG_REF_CHANGED")
+    if requested is None:
+        require(select_tag(fresh("git/matching-refs/tags/v")) == selected,
+                "CATALOG_LATEST_CHANGED")
     return {"status": "RESOLVED", "repository": REPO, "catalog_ref": catalog_ref,
             "catalog_tag_object": tag_sha, "catalog_commit": commit, "skills": resolved,
             "install_authorized": False, "local_state": "NOT_VERIFIED",
-            "publication": "NOT_VERIFIED", "api_calls": len(cache)}
+            "publication": "NOT_VERIFIED", "snapshot_atomic": False, "api_calls": calls}
 
 
 def gh_transport(executable):

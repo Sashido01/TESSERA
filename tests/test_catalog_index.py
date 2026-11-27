@@ -1,5 +1,4 @@
 import base64
-import copy
 import hashlib
 import json
 import pathlib
@@ -108,7 +107,7 @@ class CatalogIndexTests(unittest.TestCase):
         self.assertEqual(result["skills"][0]["commit"], "d"*40)
         self.assertFalse(result["install_authorized"])
         self.assertEqual(result["local_state"], "NOT_VERIFIED")
-        self.assertEqual(c.resolve(api.__getitem__, "0.0.99")["api_calls"], result["api_calls"]-1)
+        self.assertEqual(c.resolve(api.__getitem__, "0.0.99")["api_calls"], result["api_calls"]-2)
 
     def test_ref_annotation_and_direct_target_required(self):
         for path, replacement in (
@@ -149,3 +148,19 @@ class CatalogIndexTests(unittest.TestCase):
         with self.assertRaisesRegex(c.CatalogError, "API_FAILED"):
             c.resolve(get)
         self.assertEqual(calls, ["git/matching-refs/tags/v", "git/ref/tags/v0.1.0"])
+
+    def test_persistent_ref_move_and_new_catalog_tag_blocked(self):
+        for target in ("git/ref/tags/alpha/v0.0.1", "git/matching-refs/tags/v"):
+            api = self.fixture()
+            hits = 0
+            def get(path):
+                nonlocal hits
+                if path == target:
+                    hits += 1
+                    if hits == 2:
+                        if target.endswith("/v"):
+                            return [*api[path], {"ref": "refs/tags/v0.1.0"}]
+                        return {**api[path], "object": {"type": "tag", "sha": "9"*40}}
+                return api[path]
+            with self.subTest(target=target), self.assertRaisesRegex(c.CatalogError, "CHANGED"):
+                c.resolve(get)
