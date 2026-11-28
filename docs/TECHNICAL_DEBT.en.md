@@ -199,3 +199,9 @@ Added rollback of an already installed update: the previous skill is restored to
 PR #111 passed CI 46128158068 and was merged. Main verification and tag pending.
 
 Added cancellation of a first install and an unfinished update without deleting files. The previous version is restored from backup and the new version retained in staging. Cancellation uses a separate journal. Nine temporary-directory tests; CI pending. An already installed update requires separate rollback. Production CLI, concurrent-access protection and power-loss durability remain open.
+
+## Added resumption of interrupted updates (0.0.106)
+
+PR #112 passed CI 46133430573 and was merged. Main verification and tag pending.
+
+Integrated single-skill install/update with explicit resumption of interrupted operations. Checks expected versions, fingerprints, journal, backup and result. Cancellation or rollback blocks forward resumption of the same operation. Ten disposable-directory tests, including mismatched content and corrupt reverse journal. Library for trusted exclusive roots, not a production installer; authorization, provenance, concurrency protection, batch operations, power-loss durability and production CLI remain open. ZIP unchanged.
