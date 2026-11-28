@@ -36,7 +36,7 @@ def journal(raw):
     name = obj["id"]
     require(isinstance(name, str) and len(name) <= 64 and NAME.fullmatch(name)
             and obj["operation"] in ("install", "update", "rollback", "cancel-install", "cancel-update")
-            and obj["phase"] in PHASES, "RECOVERY_JOURNAL")
+            and isinstance(obj["phase"], str) and obj["phase"] in PHASES, "RECOVERY_JOURNAL")
     version(obj["new_version"])
     digest(obj["new_sha256"])
     if obj["operation"].startswith("cancel-"):
@@ -78,11 +78,11 @@ def classify_layout(operation, phase, layout):
     return state if phase in allowed else "AMBIGUOUS"
 
 
-def inspect(profile, stage, backup, raw):
+def inspect(profile, stage, backup, raw, *, budget=None):
     record = journal(raw)
     roots = [ordinary_root(p) for p in (profile, stage, backup)]
     disjoint(roots)
-    budget = Budget()
+    budget = Budget() if budget is None else budget
     identities = [identity(metadata(p)) for p in roots]
     require(len({metadata(p).st_dev for p in roots}) == 1, "RECOVERY_CROSS_DEVICE")
     name = record["id"]
