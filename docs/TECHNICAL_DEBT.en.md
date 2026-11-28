@@ -175,3 +175,9 @@ UP02.03: append-only single-skill phase journal, separate canonical JSON records
 PR #107 passed CI 46119327281 and was merged. Main verification and tag are pending.
 
 Added a verified-directory no-overwrite move library: Windows rename and Linux renameat2(RENAME_NOREPLACE). Unsupported platforms or missing support fail closed; no unsafe fallback. Checks expected fingerprint, disjoint same-device roots, absent destination and identity after move. Nine disposable-directory tests. This is a primitive for trusted exclusive roots, not an installer: ACLs, ancestor races, power-loss durability, journal integration and rollback remain open. CI does not touch real profiles; not yet in the ZIP.
+
+## Test the complete update cycle (0.0.102)
+
+PR #108 passed CI 46120392984 and was merged. Main verification and tag pending.
+
+Journal, move and recovery observation are integrated into one isolated fixture cycle. Install and update use automatically created temporary directories, including eight simulated interruption scenarios. Old tree remains in backup, neighboring skill unchanged. Six test methods. Not actual process termination, power-loss proof or a production updater. No arbitrary profile path or automatic rollback; ZIP unchanged.

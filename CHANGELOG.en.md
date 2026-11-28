@@ -4,6 +4,11 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.102 — Test the complete update cycle
+
+- PR #108 passed CI 46120392984 and was merged. Main verification and tag pending.
+- Journal, move and recovery observation are integrated into one isolated fixture cycle. Install and update use automatically created temporary directories, including eight simulated interruption scenarios. Old tree remains in backup, neighboring skill unchanged. Six test methods. Not actual process termination, power-loss proof or a production updater. No arbitrary profile path or automatic rollback; ZIP unchanged.
+
 ## 0.0.101 — Move skills without overwriting
 
 - PR #107 passed CI 46119327281 and was merged. Main verification and tag are pending.
