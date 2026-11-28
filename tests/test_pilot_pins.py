@@ -1,4 +1,5 @@
 """Keep the executable four-skill pilot consistent with reviewed published pins."""
+import json
 import pathlib
 import re
 import unittest
@@ -24,6 +25,24 @@ class PilotPinsTests(unittest.TestCase):
         for skill, (pin, _, _) in mapping.items():
             self.assertTrue(pin.startswith("refs/tags/" + skill + "/v"))
         return mapping
+
+    def test_current_pins_match_catalog_and_skill_versions(self):
+        catalog = json.loads((ROOT / "CATALOG.json").read_text(encoding="utf-8"))
+        expected = {row["id"]: row["ref"] for row in catalog["skills"]}
+        self.assertEqual(set(expected), SKILLS)
+        for row in catalog["skills"]:
+            self.assertEqual((ROOT / row["path"] / "VERSION").read_text(encoding="utf-8").strip(),
+                             row["version"])
+        for name in ("AGENT_PILOT.md", "AGENT_PILOT.en.md"):
+            self.assertEqual({skill: row[0] for skill, row in self.mapping(self.read(name)).items()},
+                             expected)
+
+    def test_remote_install_requires_separate_home(self):
+        for name in ("AGENT_PILOT.md", "AGENT_PILOT.en.md"):
+            current = self.read(name).split("\n## ", 2)[1]
+            self.assertIn("lockfile.RecordInstall", current)
+            self.assertIn("os.UserHomeDir()", current)
+            self.assertIn("LOCAL_COPY", current)
 
     def test_bilingual_table_is_identical(self):
         self.assertEqual(self.mapping(self.read("AGENT_PILOT.md")),

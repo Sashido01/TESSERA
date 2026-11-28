@@ -6,23 +6,25 @@
 
 ## Quick start: not a repository audit
 
+**Isolation requirement for gh 2.105.0:** even an explicit `--dir` does not isolate the install lockfile. The upstream installer calls `lockfile.RecordInstall`, and the lockfile path is based on `os.UserHomeDir()`. Run the remote install example only in a dedicated test OS account or a VM with a separate user home and separately authorized credentials. A fresh project directory alone is insufficient. Do not change the normal Codex process environment to imitate isolation. For the first read-only TD17 diagnostic in the normal Codex session, no skill installation is necessary: use the reviewed scripts from the synchronized checkout. For a discovery-only pilot without gh writes, copy complete reviewed skill trees into a fresh project's skill directory and record LOCAL_COPY, not a remote pin.
+
 Four verified pins below; UP01 allows one, several or all skills via [UPDATE](../UPDATE.en.md), pending acceptance. Separate PC01–PC06 acceptance.
 
-Verified catalog snapshot: `v0.0.93`, commit `168ccae683e92ed13fba141c6654201765cb2e3a`, main CI 46033970329 SUCCESS (6/6). Four independent annotated pins. A GitHub Release is not required for tag-pinned installation; a missing releases/latest does not imply missing skills.
+Verified catalog snapshot: `v0.0.110`, commit `35266b30e9fd26e5f151b43c2849a222e2b8557d`, main CI 46151637015 SUCCESS. Four independent annotated pins. A GitHub Release is not required for tag-pinned installation; a missing releases/latest does not imply missing skills.
 
 | Skill | Pin | Commit | Skill tree |
 | --- | --- | --- | --- |
 | microversion-release | `refs/tags/microversion-release/v0.0.7` | `168ccae683e92ed13fba141c6654201765cb2e3a` | `c668493d2c117e7d336adb4555ec51348b36296d` |
 | project-audit | `refs/tags/project-audit/v0.0.6` | `0b207f09bb9fca7cf5525d6b35a1919e1d316515` | `50d3f3dee94f1ceff9df343ef34689caf99ca184` |
 | repository-workflow | `refs/tags/repository-workflow/v0.0.3` | `85bd362067b5a2c8dc94ab0a550990281b80d1ee` | `747474aff7e872c31285c1053f59eabd652fe9be` |
-| project-cleanup | `refs/tags/project-cleanup/v0.0.2` | `7ace18df60412f98cc84835a6ad81d4c36414683` | `cb41049a3ff565ae3f2fb7e5582837cc620c1477` |
+| project-cleanup | `refs/tags/project-cleanup/v0.0.3` | `b179d71f091083916a88067a895c85c6539bc480` | `9b4f682a69c03444b22ad26ef6ef835c2616663a` |
 
 1. First inspect only the four target installed directories in the active profile and their versions. If they match verified trees (accounting for gh install metadata), do not reinstall.
 2. If installation is needed, use a fresh empty project and the four exact pins below; if the API is unavailable, a verified local checkout of the exact tag and native --from-local installation into an empty directory are acceptable. A local copy is not a remote pin. Do not audit all history or use latest/main, --all, --unpin or --force against the user profile.
 3. Open a fresh session after installation and explicitly invoke each skill: Codex via $name (e.g. $microversion-release), Harness via native /name or the skill tool. Run P01–P05 as separate short prompts. For P06 use a fresh session without naming the skill; a correct answer alone does not establish loading. Negative control: an unrelated task with no expected invocation.
 4. Bound network retries to two attempts per operation; record BLOCKED on refusal and continue independent local read-only checks. Do not change permissions or scrub the production environment. P07/P08 and Stop-hook are separate authorized trials, not prerequisites for starting P01–P06.
 
-**Separate short PC01/PC06 test:** if needed install only Project Cleanup into a fresh empty project using the exact pin: `gh skill install Sashido01/TESSERA skills/project-cleanup --pin refs/tags/project-cleanup/v0.0.2 --dir <empty-project>/.agents/skills` (for Harness use `.dsh/skills` if required). Explicitly invoke `$project-cleanup`/`/project-cleanup` on a synthetic fixture with build/cache, data and a link; run metadata inventory only, confirm scope/sum/no deletion. No full repository audit, broad updates or actual cleanup. Separate fresh implicit trial; a correct answer does not prove loading.
+**Separate short PC01/PC06 test:** if needed install only Project Cleanup into a fresh empty project using the exact pin: `gh skill install Sashido01/TESSERA skills/project-cleanup --pin refs/tags/project-cleanup/v0.0.3 --dir <empty-project>/.agents/skills` (for Harness use `.dsh/skills` if required). Explicitly invoke `$project-cleanup`/`/project-cleanup` on a synthetic fixture with build/cache, data and a link; run metadata inventory only, confirm scope/sum/no deletion. No full repository audit, broad updates or actual cleanup. Separate fresh implicit trial; a correct answer does not prove loading.
 
 ## Entry conditions
 
@@ -51,7 +53,7 @@ foreach ($skill in @('microversion-release','project-audit','repository-workflow
         'microversion-release' { 'refs/tags/microversion-release/v0.0.7' }
         'project-audit' { 'refs/tags/project-audit/v0.0.6' }
         'repository-workflow' { 'refs/tags/repository-workflow/v0.0.3' }
-        'project-cleanup' { 'refs/tags/project-cleanup/v0.0.2' }
+        'project-cleanup' { 'refs/tags/project-cleanup/v0.0.3' }
     }
     gh skill install Sashido01/TESSERA "skills/$skill" --pin $pin --dir $dest
     if ($LASTEXITCODE -ne 0) { throw "Installation failed: $skill" }
@@ -67,7 +69,7 @@ Verify listing, pin, GitHub path, versions and files; stop the pilot on mismatch
 
 | ID | Action | Required observation |
 | --- | --- | --- |
-| P01 | Open new project, show skill list | All three visible from the project root; record path/version, not merely gh skill list |
+| P01 | Open new project, show skill list | All four visible from the project root; record path/version, not merely gh skill list |
 | P02 | Explicitly select Microversion Release; ask for the next working version after 0.0.99, task unfinished | 0.0.100, no writes |
 | P03 | Explicitly select Microversion Release; claim successful 0.1.0 without a tag in a test Git repo | BLOCKED/RELEASE_NOT_TAGGED; no unauthorized tag creation |
 | P04 | Explicitly select Project Audit; supply a README promising an unimplemented feature in a new project | Find an evidenced gap; no writes or invented tests |

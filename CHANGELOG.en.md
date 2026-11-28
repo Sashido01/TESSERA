@@ -4,6 +4,10 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.111 — Updated agent pilot instructions
+
+- Verified four independent annotated tags and skill trees against catalog v0.0.110. Updated Project Cleanup pilot pin from 0.0.2 to 0.0.3 and corrected the English skill count. Added a consistency check against CATALOG.json and VERSION. Reviewed gh 2.105.0 source: even with --dir the installer calls RecordInstall and the lockfile is under UserHomeDir. Remote installation requires a separate test account/VM; initial Codex diagnostics require no install. Two tests added, CI pending. Historical snapshots retained. Do not change main before owner synchronization.
+
 ## 0.0.110 — Added Codex Git context diagnostics
 
 - PR #116 passed CI 46143569272 and was merged. Main verification and tag pending.
