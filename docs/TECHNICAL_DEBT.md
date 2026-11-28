@@ -157,3 +157,9 @@ main 0.0.95 b179d71f091083916a88067a895c85c6539bc480, CI 46053357417 6/6 PASS, a
 0.0.97 main 4f0e5ec0175e42bf67afceef3360497d1261d140, CI 46062411446 SUCCESS, annotated tag object 726389b4f834b243413ab84ef36d9379bbd1684d.
 
 UP02.02: read-only gh_stage связывает независимо предоставленный raw Git tree с установленным деревом и проверяет точный набор пяти github-* metadata, исходные поля frontmatter, body, bytes остальных файлов, modes и stage fingerprint. Ограниченный subset YAML (plain/simple quoted scalar и >- без сложных конструкций); неподдерживаемые формы BLOCKED. Реальная сериализация gh, lockfile, live refs, авторизация apply, атомарность и rollback NOT_VERIFIED. С 0.0.98 инструмент обязателен в ZIP; 0.0.97 остаётся совместимой. 10 новых fixture tests и package gate; native/full CI pending.
+
+## Классификация восстановления без записи (0.0.99)
+
+PR #105 CI 46065687896 PASS, squash b94fd6855f2a32179f6804cd8e562f7f5ca1f2f4; main CI/tag pending.
+
+UP02.03: read-only классификатор восстановления одного навыка. Сопоставляет строго ограниченный journal с фактическими fingerprint profile/stage/backup, проверяет disjoint ordinary same-volume roots и повторно наблюдает identity. Различает NOT_STARTED, OLD_IN_BACKUP, NEW_PRESENT, NEW_PRESENT_OLD_RETAINED; неоднозначность и несовпадение фаз BLOCKED. 10 disposable fixture tests, включая прерывания между rename и записью фазы, local edit и отсутствие stage. Не создаёт journal, не выполняет rename/delete, не разрешает apply и не доказывает durability. Следующий этап — отдельный writer с no-clobber primitives и crash recovery, сначала в fixtures. Не включать диагностический кандидат в runtime ZIP до приёмки.

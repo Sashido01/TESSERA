@@ -4,6 +4,11 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.99 — Read-only recovery classification
+
+- PR #105 CI 46065687896 PASS, squash b94fd6855f2a32179f6804cd8e562f7f5ca1f2f4; main CI/tag pending.
+- UP02.03: read-only single-skill recovery classifier. Compares a bounded strict journal with actual profile/stage/backup fingerprints, requires disjoint ordinary same-volume roots and rechecks observed identities. Distinguishes NOT_STARTED, OLD_IN_BACKUP, NEW_PRESENT, NEW_PRESENT_OLD_RETAINED; ambiguity and phase mismatch BLOCKED. Ten disposable fixture tests cover interruption between rename and phase record, local edit and missing stage. Does not create journals, rename/delete, authorize apply or prove durability. Next: separate writer with no-clobber primitives and crash recovery, fixtures first. Diagnostic candidate not included in runtime ZIP before acceptance.
+
 ## 0.0.98 — Verify gh staging metadata (0.0.98 candidate)
 
 - 0.0.97 main 4f0e5ec0175e42bf67afceef3360497d1261d140, CI 46062411446 SUCCESS, annotated tag object 726389b4f834b243413ab84ef36d9379bbd1684d.
