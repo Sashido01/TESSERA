@@ -18,7 +18,7 @@ def git_oid(kind, data):
     return hashlib.sha1(f"{kind} {len(data)}\0".encode("ascii") + data).hexdigest()
 
 
-def snapshot_raw(root, budget):
+def snapshot_raw(root, budget, *, capture=None):
     """One read per file; derive both Git tree and profile snapshot identifiers."""
     ordinary_root(root)
     rows = inventory(root, budget)
@@ -43,6 +43,8 @@ def snapshot_raw(root, budget):
         require(stat.S_ISREG(info.st_mode) and not (mode & 0o111), "TREE_MODE")
         recheck_ancestors(root, root / name, rows)
         data = read_file(root / name, info, budget)
+        if capture is not None:
+            capture[name] = data
         if name == "VERSION":
             actual_version = data.decode("utf-8").strip()
             version(actual_version)
