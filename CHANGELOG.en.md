@@ -4,6 +4,11 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.108 — Added sequential skill updates
+
+- PR #114 passed CI 46138842130 and was merged. Main verification and tag pending.
+- Added sequential application of selected skills. All selected items are checked before writes; a separate write-once receipt binds the initial plan and journals. Errors stop the operation; verified skills are not applied again. Ten disposable-directory tests. Batch is not atomic: partial completion remains for explicit resumption. Source trust, exclusive access, power-loss durability, lockfile, production CLI and live acceptance remain open.
+
 ## 0.0.107 — Added batch update preflight
 
 - PR #113 passed CI 46136393123 and was merged. Main verification and tag pending.

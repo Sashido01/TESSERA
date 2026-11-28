@@ -178,3 +178,9 @@ Integrated single-skill install/update with explicit resumption of interrupted o
 PR #113 passed CI 46136393123 and was merged. Main verification and tag pending.
 
 Integrated preflight for one, multiple or all selected skills. New and independently prepared previous version fingerprints are checked against the plan and exact Git trees. One blocked skill prevents returning any transaction records; matching versions are skipped. The gh comparison now uses the same raw bytes included in the Git tree without rereading. Twelve disposable-directory tests. Read-only step: resolution authenticity, live refs, lockfile, exclusive access and batch execution remain unverified. ZIP unchanged.
+
+## Added sequential skill updates (0.0.108)
+
+PR #114 passed CI 46138842130 and was merged. Main verification and tag pending.
+
+Added sequential application of selected skills. All selected items are checked before writes; a separate write-once receipt binds the initial plan and journals. Errors stop the operation; verified skills are not applied again. Ten disposable-directory tests. Batch is not atomic: partial completion remains for explicit resumption. Source trust, exclusive access, power-loss durability, lockfile, production CLI and live acceptance remain open.
