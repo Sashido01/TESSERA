@@ -73,3 +73,9 @@ Added cancellation of a first install and an unfinished update without deleting 
 PR #112 passed CI 46133430573 and was merged. Main verification and tag pending.
 
 Integrated single-skill install/update with explicit resumption of interrupted operations. Checks expected versions, fingerprints, journal, backup and result. Cancellation or rollback blocks forward resumption of the same operation. Ten disposable-directory tests, including mismatched content and corrupt reverse journal. Library for trusted exclusive roots, not a production installer; authorization, provenance, concurrency protection, batch operations, power-loss durability and production CLI remain open. ZIP unchanged.
+
+## Added batch update preflight (0.0.107)
+
+PR #113 passed CI 46136393123 and was merged. Main verification and tag pending.
+
+Integrated preflight for one, multiple or all selected skills. New and independently prepared previous version fingerprints are checked against the plan and exact Git trees. One blocked skill prevents returning any transaction records; matching versions are skipped. The gh comparison now uses the same raw bytes included in the Git tree without rereading. Twelve disposable-directory tests. Read-only step: resolution authenticity, live refs, lockfile, exclusive access and batch execution remain unverified. ZIP unchanged.

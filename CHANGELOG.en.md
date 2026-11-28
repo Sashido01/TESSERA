@@ -4,6 +4,11 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.107 — Added batch update preflight
+
+- PR #113 passed CI 46136393123 and was merged. Main verification and tag pending.
+- Integrated preflight for one, multiple or all selected skills. New and independently prepared previous version fingerprints are checked against the plan and exact Git trees. One blocked skill prevents returning any transaction records; matching versions are skipped. The gh comparison now uses the same raw bytes included in the Git tree without rereading. Twelve disposable-directory tests. Read-only step: resolution authenticity, live refs, lockfile, exclusive access and batch execution remain unverified. ZIP unchanged.
+
 ## 0.0.106 — Added resumption of interrupted updates
 
 - PR #112 passed CI 46133430573 and was merged. Main verification and tag pending.

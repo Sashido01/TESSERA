@@ -125,7 +125,8 @@ def verify(raw_root, stage, raw_resolution):
     observed, proofs = [], []
     for row in resolution["skills"]:
         original, installed = (p / row["id"] for p in roots)
-        version, tree, raw_digest, raw_rows = snapshot_raw(original, budget)
+        captured = {}
+        version, tree, raw_digest, raw_rows = snapshot_raw(original, budget, capture=captured)
         require(version == row["version"] and tree == row["tree"], "GH_RAW_TREE_MISMATCH")
         stage_rows = inventory(installed, budget)
         require(set(raw_rows) == set(stage_rows), "GH_INVENTORY_MISMATCH")
@@ -142,7 +143,7 @@ def verify(raw_root, stage, raw_resolution):
                 continue
             recheck_ancestors(original, original / name, raw_rows)
             recheck_ancestors(installed, installed / name, stage_rows)
-            before = read_file(original / name, old, budget)
+            before = captured[name]
             after = read_file(installed / name, info, budget)
             if name == "SKILL.md":
                 compare_header(before, after, row)
