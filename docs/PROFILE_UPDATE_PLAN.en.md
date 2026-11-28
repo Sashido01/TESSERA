@@ -31,3 +31,9 @@ UP02.02: read-only gh_stage binds supplied raw Git tree to installed staging and
 PR #105 CI 46065687896 PASS, squash b94fd6855f2a32179f6804cd8e562f7f5ca1f2f4; main CI/tag pending.
 
 UP02.03: read-only single-skill recovery classifier. Compares a bounded strict journal with actual profile/stage/backup fingerprints, requires disjoint ordinary same-volume roots and rechecks observed identities. Distinguishes NOT_STARTED, OLD_IN_BACKUP, NEW_PRESENT, NEW_PRESENT_OLD_RETAINED; ambiguity and phase mismatch BLOCKED. Ten disposable fixture tests cover interruption between rename and phase record, local edit and missing stage. Does not create journals, rename/delete, authorize apply or prove durability. Next: separate writer with no-clobber primitives and crash recovery, fixtures first. Diagnostic candidate not included in runtime ZIP before acceptance.
+
+## Append-only transaction phase journal (0.0.100)
+
+0.0.99 main 67ad5669abb80819b0183ed4cc9234b377f27802, CI 46118526414 SUCCESS, annotated tag object 4501f60a678567e4efdacdd78e4a52c9005a871b.
+
+UP02.03: append-only single-skill phase journal, separate canonical JSON records, strict phase sequence and immutable fields, O_CREAT|O_EXCL, file flush/fsync and postcheck. Partial records and unknown files block progress, existing records never overwritten. Nine fixture tests include collision and fsync failure. Library only for trusted exclusive directory: parent directory durability, ACL/races, actual crash, moves and rollback NOT_VERIFIED. No profile writes; not yet included in runtime ZIP.

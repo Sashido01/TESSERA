@@ -4,6 +4,11 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.100 — Append-only transaction phase journal
+
+- 0.0.99 main 67ad5669abb80819b0183ed4cc9234b377f27802, CI 46118526414 SUCCESS, annotated tag object 4501f60a678567e4efdacdd78e4a52c9005a871b.
+- UP02.03: append-only single-skill phase journal, separate canonical JSON records, strict phase sequence and immutable fields, O_CREAT|O_EXCL, file flush/fsync and postcheck. Partial records and unknown files block progress, existing records never overwritten. Nine fixture tests include collision and fsync failure. Library only for trusted exclusive directory: parent directory durability, ACL/races, actual crash, moves and rollback NOT_VERIFIED. No profile writes; not yet included in runtime ZIP.
+
 ## 0.0.99 — Read-only recovery classification
 
 - PR #105 CI 46065687896 PASS, squash b94fd6855f2a32179f6804cd8e562f7f5ca1f2f4; main CI/tag pending.

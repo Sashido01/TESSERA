@@ -130,3 +130,9 @@ UP02.02: read-only gh_stage связывает независимо предос
 PR #105 CI 46065687896 PASS, squash b94fd6855f2a32179f6804cd8e562f7f5ca1f2f4; main CI/tag pending.
 
 UP02.03: read-only классификатор восстановления одного навыка. Сопоставляет строго ограниченный journal с фактическими fingerprint profile/stage/backup, проверяет disjoint ordinary same-volume roots и повторно наблюдает identity. Различает NOT_STARTED, OLD_IN_BACKUP, NEW_PRESENT, NEW_PRESENT_OLD_RETAINED; неоднозначность и несовпадение фаз BLOCKED. 10 disposable fixture tests, включая прерывания между rename и записью фазы, local edit и отсутствие stage. Не создаёт journal, не выполняет rename/delete, не разрешает apply и не доказывает durability. Следующий этап — отдельный writer с no-clobber primitives и crash recovery, сначала в fixtures. Не включать диагностический кандидат в runtime ZIP до приёмки.
+
+## Журнал фаз транзакции без перезаписи (0.0.100)
+
+0.0.99 main 67ad5669abb80819b0183ed4cc9234b377f27802, CI 46118526414 SUCCESS, annotated tag object 4501f60a678567e4efdacdd78e4a52c9005a871b.
+
+UP02.03: append-only журнал фаз одного навыка, отдельные канонические JSON-записи, строгая последовательность и неизменность полей, O_CREAT|O_EXCL, file flush/fsync и повторная сверка. Частичная запись и неизвестные файлы блокируют продолжение, существующие записи не перезаписываются. Девять fixture tests, включая collision и отказ fsync. Только библиотека для доверенного эксклюзивного каталога: durability родительского каталога, ACL/гонки, реальный crash, перемещение и rollback NOT_VERIFIED. В рабочий профиль не пишет; в runtime ZIP пока не включается.
