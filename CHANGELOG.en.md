@@ -4,6 +4,11 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.106 — Added resumption of interrupted updates
+
+- PR #112 passed CI 46133430573 and was merged. Main verification and tag pending.
+- Integrated single-skill install/update with explicit resumption of interrupted operations. Checks expected versions, fingerprints, journal, backup and result. Cancellation or rollback blocks forward resumption of the same operation. Ten disposable-directory tests, including mismatched content and corrupt reverse journal. Library for trusted exclusive roots, not a production installer; authorization, provenance, concurrency protection, batch operations, power-loss durability and production CLI remain open. ZIP unchanged.
+
 ## 0.0.105 — Added cancellation of unfinished updates
 
 - PR #111 passed CI 46128158068 and was merged. Main verification and tag pending.
