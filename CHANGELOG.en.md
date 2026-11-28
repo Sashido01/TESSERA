@@ -4,6 +4,11 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.104 — Added rollback of an installed update
+
+- PR #110 passed CI 46124170657 and was merged. Main verification and tag pending.
+- Added rollback of an already installed update: the previous skill is restored to the profile, the newer copy retained in staging. A separate rollback journal leaves forward history intact. Explicit retry resumes a consistent phase; mismatched content or journal blocks writes. Nine temporary-directory tests include two interrupted reverse moves. Library for trusted exclusive roots, not a production installer. Recovery before new installation, first-install rollback, real rollback process termination and power loss remain open.
+
 ## 0.0.103 — Added crash interruption tests
 
 - PR #109 passed CI 46122145983 and was merged. Main verification and tag pending.
