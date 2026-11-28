@@ -4,6 +4,11 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.105 — Added cancellation of unfinished updates
+
+- PR #111 passed CI 46128158068 and was merged. Main verification and tag pending.
+- Added cancellation of a first install and an unfinished update without deleting files. The previous version is restored from backup and the new version retained in staging. Cancellation uses a separate journal. Nine temporary-directory tests; CI pending. An already installed update requires separate rollback. Production CLI, concurrent-access protection and power-loss durability remain open.
+
 ## 0.0.104 — Added rollback of an installed update
 
 - PR #110 passed CI 46124170657 and was merged. Main verification and tag pending.

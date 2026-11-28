@@ -35,11 +35,13 @@ def journal(raw):
         and obj["repository"] == REPO, "RECOVERY_JOURNAL")
     name = obj["id"]
     require(isinstance(name, str) and len(name) <= 64 and NAME.fullmatch(name)
-            and obj["operation"] in ("install", "update", "rollback")
+            and obj["operation"] in ("install", "update", "rollback", "cancel-install", "cancel-update")
             and obj["phase"] in PHASES, "RECOVERY_JOURNAL")
     version(obj["new_version"])
     digest(obj["new_sha256"])
-    if obj["operation"] == "install":
+    if obj["operation"].startswith("cancel-"):
+        require(obj["phase"] in ("PREPARED", "VERIFIED"), "RECOVERY_JOURNAL")
+    if obj["operation"] in ("install", "cancel-install"):
         require(obj["old_version"] is None and obj["old_sha256"] is None
                 and obj["phase"] != "OLD_MOVED", "RECOVERY_JOURNAL")
     else:
@@ -51,7 +53,17 @@ def journal(raw):
 
 def classify_layout(operation, phase, layout):
     # Journal may lag a completed rename by one step, never by two.
-    if operation == "install":
+    if operation == "cancel-install":
+        rules = {
+            ("NEW", "ABSENT", "ABSENT"): ({"PREPARED"}, "CANCEL_READY"),
+            ("ABSENT", "NEW", "ABSENT"): ({"PREPARED", "VERIFIED"}, "CANCELLED"),
+        }
+    elif operation == "cancel-update":
+        rules = {
+            ("ABSENT", "NEW", "OLD"): ({"PREPARED"}, "CANCEL_READY"),
+            ("OLD", "NEW", "ABSENT"): ({"PREPARED", "VERIFIED"}, "CANCELLED"),
+        }
+    elif operation == "install":
         rules = {
             ("ABSENT", "NEW", "ABSENT"): ({"PREPARED"}, "NOT_STARTED"),
             ("NEW", "ABSENT", "ABSENT"): ({"PREPARED", "NEW_MOVED", "VERIFIED"}, "NEW_PRESENT"),

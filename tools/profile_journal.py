@@ -26,6 +26,8 @@ def encode(record):
 
 
 def sequence(operation):
+    if operation in ("cancel-install", "cancel-update"):
+        return (0, 3)
     return (0, 2, 3) if operation == "install" else (0, 1, 2, 3)
 
 
