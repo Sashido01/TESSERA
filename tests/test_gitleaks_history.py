@@ -16,6 +16,14 @@ class HistoryTests(unittest.TestCase):
     def test_blob_and_commit(self):
         self.assertEqual(h.blob_metadata(f"{A} blob 5\n{B} commit 10\n".encode(), {A, B}), {A: 5})
 
+    def test_inventory_blob_cap_exact_and_overflow(self):
+        ids = [f"{i:040x}" for i in range(h.MAX_BLOBS + 1)]
+        def raw(rows):
+            return "".join(f"{oid} blob 1\n" for oid in rows).encode()
+        self.assertEqual(len(h.blob_metadata(raw(ids[:-1]), set(ids[:-1]))), h.MAX_BLOBS)
+        with self.assertRaisesRegex(h.InstallCheckError, "LIMIT"):
+            h.blob_metadata(raw(ids), set(ids))
+
     def test_empty_blob(self):
         self.assertEqual(h.blob_metadata(f"{A} blob 0\n".encode(), {A}), {A: 0})
 

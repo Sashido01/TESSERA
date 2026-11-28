@@ -20,7 +20,7 @@ from check_nvidia_tier1 import require
 from check_official_local_install import InstallCheckError, fixture_env
 
 MAX_OBJECTS = 20000
-MAX_BLOBS = 2048
+MAX_BLOBS = 2560
 MAX_TOTAL = 128 * 1024 * 1024
 HOST_BATCH_COUNT = 32
 HOST_BATCH_BYTES = 4 * 1024 * 1024
@@ -226,7 +226,7 @@ def accept(repo, cli):
         temp = pathlib.Path(folder)
         env = fixture_env(temp)
         env.update({"PATH": str(cli.parent) + os.pathsep + env["PATH"],
-                    "GIT_NO_LAZY_FETCH": "1", "CI": "true"})
+                    "GIT_NO_LAZY_FETCH": "1", "CI": "true", "GOMAXPROCS": "1"})
         version = subprocess.run([str(cli), "version"], cwd=temp, env=env,
                                  stdin=subprocess.DEVNULL, capture_output=True,
                                  timeout=10, check=False)

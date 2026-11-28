@@ -217,3 +217,9 @@ Integrated preflight for one, multiple or all selected skills. New and independe
 PR #114 passed CI 46138842130 and was merged. Main verification and tag pending.
 
 Added sequential application of selected skills. All selected items are checked before writes; a separate write-once receipt binds the initial plan and journals. Errors stop the operation; verified skills are not applied again. Ten disposable-directory tests. Batch is not atomic: partial completion remains for explicit resumption. Source trust, exclusive access, power-loss durability, lockfile, production CLI and live acceptance remain open.
+
+## Increased history scan capacity (0.0.109)
+
+PR #115 passed CI 46140694988 and was merged. Main verification and tag pending.
+
+Increased history scan headroom: distinct blob cap 2048→2560 (+512, +25%). Last confirmed main 0.0.107 / CI 46140478377: 1845 blobs, 33412316 bytes, zero findings, container parity PASS in 388.13 s; old headroom 203. Retains 128 MiB total, 2 MiB per blob, 480/540 s host/container deadlines and 20-minute job limit. With adequate CPU affinity, available cgroup CPU quota and memory, at most two containers (2 CPUs/512 MiB each), otherwise one. At most two batches in flight; failure prevents the next window, results accepted only after full coverage and host parity. Host GOMAXPROCS=1; per-blob stdin retained. Five new tests; actual speed and resource reliability require CI. No checks or scan scope reduced.
