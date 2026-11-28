@@ -37,3 +37,9 @@ UP02.03: read-only single-skill recovery classifier. Compares a bounded strict j
 0.0.99 main 67ad5669abb80819b0183ed4cc9234b377f27802, CI 46118526414 SUCCESS, annotated tag object 4501f60a678567e4efdacdd78e4a52c9005a871b.
 
 UP02.03: append-only single-skill phase journal, separate canonical JSON records, strict phase sequence and immutable fields, O_CREAT|O_EXCL, file flush/fsync and postcheck. Partial records and unknown files block progress, existing records never overwritten. Nine fixture tests include collision and fsync failure. Library only for trusted exclusive directory: parent directory durability, ACL/races, actual crash, moves and rollback NOT_VERIFIED. No profile writes; not yet included in runtime ZIP.
+
+## Move skills without overwriting (0.0.101)
+
+PR #107 passed CI 46119327281 and was merged. Main verification and tag are pending.
+
+Added a verified-directory no-overwrite move library: Windows rename and Linux renameat2(RENAME_NOREPLACE). Unsupported platforms or missing support fail closed; no unsafe fallback. Checks expected fingerprint, disjoint same-device roots, absent destination and identity after move. Nine disposable-directory tests. This is a primitive for trusted exclusive roots, not an installer: ACLs, ancestor races, power-loss durability, journal integration and rollback remain open. CI does not touch real profiles; not yet in the ZIP.
