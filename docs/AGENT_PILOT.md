@@ -6,23 +6,25 @@
 
 ## Быстрый старт: не аудит репозитория
 
+**Изоляция gh 2.105.0:** явный `--dir` не изолирует lockfile установки. В upstream установщик вызывает `lockfile.RecordInstall`, а путь lockfile определяется через `os.UserHomeDir()`. Выполнять пример удалённой установки только в отдельной тестовой учётной записи ОС или ВМ с отдельным домашним каталогом и отдельно разрешёнными учётными данными. Одного нового проекта недостаточно. Не менять окружение обычного процесса Codex ради имитации изоляции. Для первой read-only диагностики TD17 в штатном Codex установка не нужна: использовать проверенные скрипты синхронизированного checkout. Для испытания обнаружения без записи gh скопировать целые проверенные деревья навыков в новый проект и отметить LOCAL_COPY, а не remote pin.
+
 Ниже четыре подтверждённых pin; UP01 предусматривает один, несколько или все навыки через [UPDATE](../UPDATE.md), приёмка открыта. Отдельная приёмка PC01–PC06.
 
-Проверенный снимок каталога: `v0.0.93`, commit `168ccae683e92ed13fba141c6654201765cb2e3a`, main CI 46033970329 SUCCESS (6/6). Четыре независимых аннотированных pin. GitHub Release не требуется для установки по тегу; отсутствие releases/latest не означает отсутствие навыков.
+Проверенный снимок каталога: `v0.0.110`, commit `35266b30e9fd26e5f151b43c2849a222e2b8557d`, main CI 46151637015 SUCCESS. Четыре независимых аннотированных pin. GitHub Release не требуется для установки по тегу; отсутствие releases/latest не означает отсутствие навыков.
 
 | Навык | Pin | Commit | Дерево навыка |
 | --- | --- | --- | --- |
 | microversion-release | `refs/tags/microversion-release/v0.0.7` | `168ccae683e92ed13fba141c6654201765cb2e3a` | `c668493d2c117e7d336adb4555ec51348b36296d` |
 | project-audit | `refs/tags/project-audit/v0.0.6` | `0b207f09bb9fca7cf5525d6b35a1919e1d316515` | `50d3f3dee94f1ceff9df343ef34689caf99ca184` |
 | repository-workflow | `refs/tags/repository-workflow/v0.0.3` | `85bd362067b5a2c8dc94ab0a550990281b80d1ee` | `747474aff7e872c31285c1053f59eabd652fe9be` |
-| project-cleanup | `refs/tags/project-cleanup/v0.0.2` | `7ace18df60412f98cc84835a6ad81d4c36414683` | `cb41049a3ff565ae3f2fb7e5582837cc620c1477` |
+| project-cleanup | `refs/tags/project-cleanup/v0.0.3` | `b179d71f091083916a88067a895c85c6539bc480` | `9b4f682a69c03444b22ad26ef6ef835c2616663a` |
 
 1. Сначала проверить только четыре целевые установленные папки в активном профиле и версии. Если они совпадают с проверенными деревьями (с учётом метаданных установки gh), не переустанавливать.
 2. Если установка нужна, использовать новый пустой проект и четыре точных pin ниже; при недоступности API допустим проверенный локальный checkout точного тега и штатная установка --from-local в пустой каталог. Локальная копия не является remote pin. Не исследовать всю историю, не использовать latest/main, --all, --unpin или --force для пользовательского профиля.
 3. Открыть новый сеанс после установки и отдельно вызвать каждый навык: Codex через $имя (например, $microversion-release), Harness через штатный /name или skill tool. Проверить P01–P05 отдельными короткими запросами. Для P06 новый сеанс без названия; правильный ответ сам по себе не подтверждает загрузку. Отрицательный контроль — нерелевантная задача без ожидаемого вызова.
 4. Ограничить сетевые повторы двумя попытками на операцию; при отказе зафиксировать BLOCKED и продолжить независимые локальные read-only проверки. Не изменять разрешения и не чистить производственное окружение. P07/P08 и Stop-hook — отдельные испытания с разрешением, не условие начала P01–P06.
 
-**Отдельная короткая PC01/PC06-проверка:** при необходимости установить только Project Cleanup в новый пустой проект по точному pin: `gh skill install Sashido01/TESSERA skills/project-cleanup --pin refs/tags/project-cleanup/v0.0.2 --dir <empty-project>/.agents/skills` (для Harness при необходимости `.dsh/skills`). Затем явно вызвать `$project-cleanup`/`/project-cleanup` на синтетической fixture с build/cache, данными и ссылкой; выполнить только metadata inventory и проверить scope/сумму/отсутствие удаления. Без аудита всего репозитория, массовых обновлений и реальной очистки. Отдельный fresh implicit trial; верный ответ не доказывает вызов.
+**Отдельная короткая PC01/PC06-проверка:** при необходимости установить только Project Cleanup в новый пустой проект по точному pin: `gh skill install Sashido01/TESSERA skills/project-cleanup --pin refs/tags/project-cleanup/v0.0.3 --dir <empty-project>/.agents/skills` (для Harness при необходимости `.dsh/skills`). Затем явно вызвать `$project-cleanup`/`/project-cleanup` на синтетической fixture с build/cache, данными и ссылкой; выполнить только metadata inventory и проверить scope/сумму/отсутствие удаления. Без аудита всего репозитория, массовых обновлений и реальной очистки. Отдельный fresh implicit trial; верный ответ не доказывает вызов.
 
 ## Входные условия
 
@@ -51,7 +53,7 @@ foreach ($skill in @('microversion-release','project-audit','repository-workflow
         'microversion-release' { 'refs/tags/microversion-release/v0.0.7' }
         'project-audit' { 'refs/tags/project-audit/v0.0.6' }
         'repository-workflow' { 'refs/tags/repository-workflow/v0.0.3' }
-        'project-cleanup' { 'refs/tags/project-cleanup/v0.0.2' }
+        'project-cleanup' { 'refs/tags/project-cleanup/v0.0.3' }
     }
     gh skill install Sashido01/TESSERA "skills/$skill" --pin $pin --dir $dest
     if ($LASTEXITCODE -ne 0) { throw "Installation failed: $skill" }

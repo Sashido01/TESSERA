@@ -410,3 +410,7 @@ Increased history scan headroom: distinct blob cap 2048→2560 (+512, +25%). Las
 PR #116 passed CI 46143569272 and was merged. Main verification and tag pending.
 
 Added indexed Git configuration diagnostics for real Codex (#81). python -B tools/codex_context_probe.py runs no Git, writes no files and never reads GIT_CONFIG_VALUE_n. Reports only fixed known labels from KEY_n or OTHER; unknown names and paths are not emitted. Checks pair shape and completeness. Six tests; CI pending. WELL_FORMED is not a trusted context or release authorization. Run in the original Codex session with release_tag.py context from Microversion Release 0.0.7; return only JSON, exit codes and versions. Changed policy or cleaned environment does not count. Positive adapter, provenance and actual tagging remain open.
+
+## Updated agent pilot instructions (0.0.111)
+
+Verified four independent annotated tags and skill trees against catalog v0.0.110. Updated Project Cleanup pilot pin from 0.0.2 to 0.0.3 and corrected the English skill count. Added a consistency check against CATALOG.json and VERSION. Reviewed gh 2.105.0 source: even with --dir the installer calls RecordInstall and the lockfile is under UserHomeDir. Remote installation requires a separate test account/VM; initial Codex diagnostics require no install. Two tests added, CI pending. Historical snapshots retained. Do not change main before owner synchronization.
