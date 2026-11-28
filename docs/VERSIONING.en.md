@@ -44,7 +44,7 @@ Consuming projects can run `scripts/release_tag.py verify`; CI and Git hooks can
 
 ## Human-readable messages
 
-A commit title describes *what changed*, not which tool was run. Example in the canonical Russian style: «Добавлена проверка корректности навыка перед публикацией». A Git tag has a machine-readable name, while the tag annotation explains the change in ordinary language. Release notes contain verified facts and limitations.
+Commit titles, tag annotations and PR descriptions use short, natural, result-oriented language, not instructions or robotic process labels. Example: «Устранена рассинхронизация журнала». State only completed work; do not imply unverified acceptance. Example in the canonical Russian style: «Добавлена проверка корректности навыка перед публикацией». A Git tag has a machine-readable name, while the tag annotation explains the change in ordinary language. Release notes contain verified facts and limitations.
 
 ## Limitation
 
