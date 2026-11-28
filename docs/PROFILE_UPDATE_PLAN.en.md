@@ -61,3 +61,7 @@ Added tests that forcibly terminate a child process at eight install/update boun
 PR #110 passed CI 46124170657 and was merged. Main verification and tag pending.
 
 Added rollback of an already installed update: the previous skill is restored to the profile, the newer copy retained in staging. A separate rollback journal leaves forward history intact. Explicit retry resumes a consistent phase; mismatched content or journal blocks writes. Nine temporary-directory tests include two interrupted reverse moves. Library for trusted exclusive roots, not a production installer. Recovery before new installation, first-install rollback, real rollback process termination and power loss remain open.
+
+## Cancellation candidate
+
+Added cancellation of a first install and an unfinished update. Restores the previous version from backup while retaining the new version in staging. Separate cancellation journal retains forward history; explicit retry resumes a consistent phase. Nine temporary-directory tests. An already installed update requires separate rollback. No production CLI, concurrent-access guarantee or power-loss proof.
