@@ -190,3 +190,9 @@ Added sequential application of selected skills. All selected items are checked 
 PR #115 passed CI 46140694988 and was merged. Main verification and tag pending.
 
 Increased history scan headroom: distinct blob cap 2048→2560 (+512, +25%). Last confirmed main 0.0.107 / CI 46140478377: 1845 blobs, 33412316 bytes, zero findings, container parity PASS in 388.13 s; old headroom 203. Retains 128 MiB total, 2 MiB per blob, 480/540 s host/container deadlines and 20-minute job limit. With adequate CPU affinity, available cgroup CPU quota and memory, at most two containers (2 CPUs/512 MiB each), otherwise one. At most two batches in flight; failure prevents the next window, results accepted only after full coverage and host parity. Host GOMAXPROCS=1; per-blob stdin retained. Five new tests; actual speed and resource reliability require CI. No checks or scan scope reduced.
+
+## Added Codex Git context diagnostics (0.0.110)
+
+PR #116 passed CI 46143569272 and was merged. Main verification and tag pending.
+
+Added indexed Git configuration diagnostics for real Codex (#81). python -B tools/codex_context_probe.py runs no Git, writes no files and never reads GIT_CONFIG_VALUE_n. Reports only fixed known labels from KEY_n or OTHER; unknown names and paths are not emitted. Checks pair shape and completeness. Six tests; CI pending. WELL_FORMED is not a trusted context or release authorization. Run in the original Codex session with release_tag.py context from Microversion Release 0.0.7; return only JSON, exit codes and versions. Changed policy or cleaned environment does not count. Positive adapter, provenance and actual tagging remain open.
