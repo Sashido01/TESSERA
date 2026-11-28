@@ -4,6 +4,11 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.103 — Added crash interruption tests
+
+- PR #109 passed CI 46122145983 and was merged. Main verification and tag pending.
+- Added tests that forcibly terminate a child process at eight install/update boundaries. A fresh process reads the journal and inspects actual directories. Backup and neighboring skill preservation are checked. Three test methods; CI pending. Temporary fixtures only, no automatic recovery or power-loss proof.
+
 ## 0.0.102 — Test the complete update cycle
 
 - PR #108 passed CI 46120392984 and was merged. Main verification and tag pending.

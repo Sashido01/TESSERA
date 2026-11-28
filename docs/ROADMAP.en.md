@@ -362,3 +362,9 @@ Added a verified-directory no-overwrite move library: Windows rename and Linux r
 PR #108 passed CI 46120392984 and was merged. Main verification and tag pending.
 
 Journal, move and recovery observation are integrated into one isolated fixture cycle. Install and update use automatically created temporary directories, including eight simulated interruption scenarios. Old tree remains in backup, neighboring skill unchanged. Six test methods. Not actual process termination, power-loss proof or a production updater. No arbitrary profile path or automatic rollback; ZIP unchanged.
+
+## Added crash interruption tests (0.0.103)
+
+PR #109 passed CI 46122145983 and was merged. Main verification and tag pending.
+
+Added tests that forcibly terminate a child process at eight install/update boundaries. A fresh process reads the journal and inspects actual directories. Backup and neighboring skill preservation are checked. Three test methods; CI pending. Temporary fixtures only, no automatic recovery or power-loss proof.
