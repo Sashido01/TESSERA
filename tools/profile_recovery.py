@@ -35,7 +35,7 @@ def journal(raw):
         and obj["repository"] == REPO, "RECOVERY_JOURNAL")
     name = obj["id"]
     require(isinstance(name, str) and len(name) <= 64 and NAME.fullmatch(name)
-            and obj["operation"] in ("install", "update")
+            and obj["operation"] in ("install", "update", "rollback")
             and obj["phase"] in PHASES, "RECOVERY_JOURNAL")
     version(obj["new_version"])
     digest(obj["new_sha256"])
@@ -43,7 +43,8 @@ def journal(raw):
         require(obj["old_version"] is None and obj["old_sha256"] is None
                 and obj["phase"] != "OLD_MOVED", "RECOVERY_JOURNAL")
     else:
-        require(version(obj["old_version"]) < version(obj["new_version"])
+        old, new = version(obj["old_version"]), version(obj["new_version"])
+        require((old > new if obj["operation"] == "rollback" else old < new)
                 and digest(obj["old_sha256"]) != obj["new_sha256"], "RECOVERY_JOURNAL")
     return obj
 

@@ -368,3 +368,9 @@ Journal, move and recovery observation are integrated into one isolated fixture 
 PR #109 passed CI 46122145983 and was merged. Main verification and tag pending.
 
 Added tests that forcibly terminate a child process at eight install/update boundaries. A fresh process reads the journal and inspects actual directories. Backup and neighboring skill preservation are checked. Three test methods; CI pending. Temporary fixtures only, no automatic recovery or power-loss proof.
+
+## Added rollback of an installed update (0.0.104)
+
+PR #110 passed CI 46124170657 and was merged. Main verification and tag pending.
+
+Added rollback of an already installed update: the previous skill is restored to the profile, the newer copy retained in staging. A separate rollback journal leaves forward history intact. Explicit retry resumes a consistent phase; mismatched content or journal blocks writes. Nine temporary-directory tests include two interrupted reverse moves. Library for trusted exclusive roots, not a production installer. Recovery before new installation, first-install rollback, real rollback process termination and power loss remain open.
