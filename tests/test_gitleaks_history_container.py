@@ -1,4 +1,6 @@
 import hashlib
+import io
+import threading
 import pathlib
 import sys
 import tempfile
@@ -105,6 +107,57 @@ class HistoryContainerTests(unittest.TestCase):
                        {"by_rule": self.report()["by_rule"] * 2}):
             with self.subTest(change=change), self.assertRaises(RuntimeError):
                 c.validate_batch({**self.report(), **change}, [(0, b"x"), (0, b"")], "d")
+
+    def test_worker_selection_requires_cpu_quota_and_memory(self):
+        for quota, memory, cpus, expected in (
+                ("max 100000", 3000000, 4, 2),
+                ("400000 100000", 3000000, 4, 2),
+                ("200000 100000", 3000000, 4, 1),
+                ("max 100000", 1000000, 4, 1),
+                ("max 100000", 3000000, 2, 1),
+                ("bad", 3000000, 4, 1)):
+            def opened(path, *args, **kwargs):
+                return io.StringIO(quota if path.name == "cpu.max" else f"MemAvailable: {memory} kB\n")
+            with self.subTest(quota=quota, memory=memory, cpus=cpus), \
+                    mock.patch.object(c.os, "sched_getaffinity", create=True, return_value=set(range(cpus))), \
+                    mock.patch.object(c.pathlib.Path, "open", opened):
+                self.assertEqual(c.container_workers(), expected)
+
+    def test_parallel_windows_keep_order_and_cover_all_batches(self):
+        blobs = {f"{i:040x}": 1 for i in range(5)}
+        barrier = threading.Barrier(2)
+        def read(repo, env, batch, deadline):
+            return [(0, bytes([int(batch[0][0], 16)]))]
+        def execute(records):
+            index = records[0][1][0]
+            if index < 4:
+                barrier.wait(timeout=5)
+            return {"test": index}
+        with mock.patch.object(c, "BATCH_COUNT", 1), \
+                mock.patch.object(c, "records_for_batch", side_effect=read):
+            got = list(c.scan_batches(None, {}, blobs, time.monotonic()+15, execute, 2))
+        self.assertEqual([b[0][0] for b, _ in got], sorted(blobs))
+        self.assertEqual([r["test"] for _, r in got], list(range(5)))
+
+    def test_failed_window_never_reads_or_submits_next(self):
+        blobs = {f"{i:040x}": 1 for i in range(5)}
+        called = []
+        def read(repo, env, batch, deadline):
+            called.append(batch[0][0])
+            return [(0, b"x")]
+        with mock.patch.object(c, "BATCH_COUNT", 1), \
+                mock.patch.object(c, "records_for_batch", side_effect=read):
+            with self.assertRaisesRegex(RuntimeError, "fixture"):
+                list(c.scan_batches(None, {}, blobs, time.monotonic()+10,
+                                    mock.Mock(side_effect=RuntimeError("fixture")), 2))
+        self.assertEqual(called, sorted(blobs)[:2])
+
+    def test_expired_deadline_and_bad_workers_do_not_read(self):
+        for deadline, workers in ((0, 2), (time.monotonic()+10, 3)):
+            with mock.patch.object(c, "records_for_batch") as read:
+                with self.assertRaises(RuntimeError):
+                    list(c.scan_batches(None, {}, {"a"*40: 1}, deadline, None, workers))
+                read.assert_not_called()
 
     def test_snapshot_order_independent(self):
         self.assertEqual(h.history_snapshot({"a": 1, "b": 2}), h.history_snapshot({"b": 2, "a": 1}))
