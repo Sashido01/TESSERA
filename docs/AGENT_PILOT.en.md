@@ -169,3 +169,9 @@ UP01 — mandatory separate 0.1.0 acceptance: one short link-only request, no hi
 ## 2026-11-27 — restore release gate after 0.0.94
 
 PR #101 exact 23311503daf73bdee2430a14127a0167bcb60171 CI 46038347655 5/5 PASS; squash 346a28001263dffe09920f96821a2170de68a4be. Main CI 46042052275 Windows job 140651970098 FAIL: Project Cleanup test_git_marker_changed_during_plan, 49 executions = 46 PASS + 1 FAIL + 2 FIFO SKIP. 0.0.94 not accepted; never create a retrospective tag. Stable verified baseline v0.0.93. UP01 code in main but latest tagged index still absent. Candidate 0.0.95 / Cleanup 0.0.3: actual marker substitution without clock assumption, separate mtime injection, disappeared marker, zero inode/hardlink refusal, repeated ordinary-root check. No skipped Windows test or removed safety checks. TD04 batch reads exact source 4cfe6f756f79daa90082f288d63a3cfca1c36cde and tests 760ae6ce2b4eea1824964f23cec5c2923e1e81e5; unchanged caps, digest, host/container parity. Linux/Windows/full history CI pending. UP02 profile-plan separate unpublished branch. G09/#81/UP01/PC03–PC06 remain open; 0.1.0 BLOCKED.
+
+## Added Codex Git context diagnostics (0.0.110)
+
+PR #116 passed CI 46143569272 and was merged. Main verification and tag pending.
+
+Added indexed Git configuration diagnostics for real Codex (#81). python -B tools/codex_context_probe.py runs no Git, writes no files and never reads GIT_CONFIG_VALUE_n. Reports only fixed known labels from KEY_n or OTHER; unknown names and paths are not emitted. Checks pair shape and completeness. Six tests; CI pending. WELL_FORMED is not a trusted context or release authorization. Run in the original Codex session with release_tag.py context from Microversion Release 0.0.7; return only JSON, exit codes and versions. Changed policy or cleaned environment does not count. Positive adapter, provenance and actual tagging remain open.

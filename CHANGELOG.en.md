@@ -4,6 +4,11 @@
 
 This file tracks changes to the **shared catalog**. Individual skills may maintain their own version histories.
 
+## 0.0.110 — Added Codex Git context diagnostics
+
+- PR #116 passed CI 46143569272 and was merged. Main verification and tag pending.
+- Added indexed Git configuration diagnostics for real Codex (#81). python -B tools/codex_context_probe.py runs no Git, writes no files and never reads GIT_CONFIG_VALUE_n. Reports only fixed known labels from KEY_n or OTHER; unknown names and paths are not emitted. Checks pair shape and completeness. Six tests; CI pending. WELL_FORMED is not a trusted context or release authorization. Run in the original Codex session with release_tag.py context from Microversion Release 0.0.7; return only JSON, exit codes and versions. Changed policy or cleaned environment does not count. Positive adapter, provenance and actual tagging remain open.
+
 ## 0.0.109 — Increased history scan capacity
 
 - PR #115 passed CI 46140694988 and was merged. Main verification and tag pending.
